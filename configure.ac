@@ -53,11 +53,15 @@ if test x$DOCBOOK2HTML = xno ; then
 fi
 AM_CONDITIONAL(HAVE_DOCBOOK2HTML, [test "x$DOCBOOK2HTML" != xno])
 
+pcmciadir="\${sysconfdir}/pcmcia"
+AC_SUBST(pcmciadir)
 
 AC_CONFIG_FILES(
 Makefile
 comedi_calibrate/Makefile
 comedi_config/Makefile
+etc/Makefile
+etc/pcmcia/Makefile
 doc/Makefile
 doc/html/Makefile
 doc/man/Makefile
