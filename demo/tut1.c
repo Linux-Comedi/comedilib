@@ -1,3 +1,13 @@
+/*
+ * Tutorial example #1
+ * Part of Comedilib
+ *
+ * Copyright (c) 1999,2000 David A. Schleef <ds@schleef.org>
+ *
+ * This file may be freely modified, distributed, and combined with
+ * other software, as long as proper attribution is given in the
+ * source code.
+ */
 
 #include <stdio.h>	/* for printf() */
 #include <comedilib.h>

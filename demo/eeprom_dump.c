@@ -11,13 +11,7 @@
 #include <getopt.h>
 #include <ctype.h>
 #include <stdlib.h>
-
-extern int verbose_flag;
-extern int subdevice;
-extern int range;
-extern int channel;
-extern int aref;
-extern char *filename;
+#include "examples.h"
 
 comedi_t *device;
 
@@ -27,8 +21,6 @@ void dump_eeprom(unsigned int *eeprom,int len);
 
 int main(int argc, char *argv[])
 {
-	lsampl_t data;
-	int ret;
 	int len;
 	unsigned int *eeprom;
 

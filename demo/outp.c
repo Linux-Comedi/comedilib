@@ -1,5 +1,15 @@
 /*
-   A little output demo
+ * A little output demo
+ * Part of Comedilib
+ *
+ * Copyright (c) 1999,2000 David A. Schleef <ds@schleef.org>
+ *
+ * This file may be freely modified, distributed, and combined with
+ * other software, as long as proper attribution is given in the
+ * source code.
+ */
+/*
+ * A little output demo
  */
 
 #include <stdio.h>
@@ -10,14 +20,7 @@
 #include <errno.h>
 #include <getopt.h>
 #include <ctype.h>
-
-extern int verbose_flag;
-extern int subdevice;
-extern int range;
-extern int channel;
-extern int aref;
-extern int value;
-extern char *filename;
+#include "examples.h"
 
 comedi_t *device;
 

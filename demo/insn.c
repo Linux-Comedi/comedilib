@@ -1,4 +1,14 @@
 /*
+ * Instruction example
+ * Part of Comedilib
+ *
+ * Copyright (c) 1999,2000 David A. Schleef <ds@schleef.org>
+ *
+ * This file may be freely modified, distributed, and combined with
+ * other software, as long as proper attribution is given in the
+ * source code.
+ */
+/*
    This example shows how to use instructions, i.e., comedi_insns.  
 
    Using instructions directly, as in this example, is not recommended
@@ -17,13 +27,7 @@
 #include <errno.h>
 #include <sys/time.h>
 #include <unistd.h>
-
-extern int verbose_flag;
-extern int subdevice;
-extern int range;
-extern int channel;
-extern int aref;
-extern char *filename;
+#include "examples.h"
 
 comedi_t *device;
 

@@ -3,13 +3,12 @@ Examples
 
 
 ao_waveform:
-
 	You need a device (and driver) capable of streaming analog output,
 	which currently is some of the members of the NI AT-MIO and PCI-MIO
 	E series.  Creates a sine wave on an analog output channel.
 
 cmd:
-	Example of how to use the new 0.8 command structure.
+	Asynchronous input.
 
 eeprom_dump:
 	Dumps the EEPROM of a card, if it has one.  Useful for debugging
@@ -28,19 +27,6 @@ inpn:
 
 insn:
 	Example showing how to use instructions directly.
-
-mode1:
-	Doesn't work.
-
-mode2:
-	Demo for streaming analog input.  Only works for boards/drivers
-	with that capability.
-
-mode3:
-	Doesn't work.
-
-mode4:
-	Same as mode2, except using an external trigger.
 
 sv:
 	Similar to inp, but measures the input using the comedi_sv_*()

@@ -1,4 +1,6 @@
 /*
+ * This is a little helper function to parse options that
+ * are common to most of the examples.
  */
 
 #include <stdio.h>
@@ -10,6 +12,7 @@
 #include <getopt.h>
 #include <ctype.h>
 #include <malloc.h>
+#include "examples.h"
 
 
 char *filename="/dev/comedi0";

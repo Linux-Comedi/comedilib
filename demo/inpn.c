@@ -1,4 +1,14 @@
 /*
+ * Multi-channel, multi-range one-shot input demo
+ * Part of Comedilib
+ *
+ * Copyright (c) 1999,2000 David A. Schleef <ds@schleef.org>
+ *
+ * This file may be freely modified, distributed, and combined with
+ * other software, as long as proper attribution is given in the
+ * source code.
+ */
+/*
    This demo opens /dev/comedi0 and looks for an analog input
    subdevice.  If it finds one, it measures one sample on each
    channel for each input range.  The value NaN indicates that
@@ -13,20 +23,13 @@
 #include <errno.h>
 #include <getopt.h>
 #include <ctype.h>
-
-extern int verbose_flag;
-extern int subdevice;
-extern int range;
-extern int channel;
-extern int aref;
-extern char *filename;
+#include "examples.h"
 
 comedi_t *device;
 
 
 int main(int argc, char *argv[])
 {
-	int n_subdevs;
 	int n_chans,chan;
 	int n_ranges;
 	int range;

@@ -1,7 +1,18 @@
 /*
-   An example for directly using Comedi commands.  Comedi commands
-   are used for asynchronous acquisition, with the timing controlled
-   by on-board timers or external events.
+ * Example of using commands - asynchronous input
+ * Part of Comedilib
+ *
+ * Copyright (c) 1999,2000 David A. Schleef <ds@schleef.org>
+ *
+ * This file may be freely modified, distributed, and combined with
+ * other software, as long as proper attribution is given in the
+ * source code.
+ */
+
+/*
+ * An example for directly using Comedi commands.  Comedi commands
+ * are used for asynchronous acquisition, with the timing controlled
+ * by on-board timers or external events.
  */
 
 #include <stdio.h>
@@ -12,6 +23,8 @@
 #include <errno.h>
 #include <getopt.h>
 #include <ctype.h>
+#include <string.h>
+#include "examples.h"
 
 #define N_SCANS		10
 #define N_CHANS		16
@@ -26,9 +39,9 @@ double freq = 1000;
 char buf[BUFSZ];
 
 
-static void do_cmd_1(comedi_t *dev);
-static void do_cmd_2(comedi_t *dev);
-static void do_cmd(comedi_t *dev,comedi_cmd *cmd);
+void do_cmd_1(comedi_t *dev);
+void do_cmd_2(comedi_t *dev);
+void do_cmd(comedi_t *dev,comedi_cmd *cmd);
 void dump_cmd(comedi_cmd *cmd);
 
 int main(int argc, char *argv[])
@@ -51,7 +64,7 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-static void do_cmd(comedi_t *dev,comedi_cmd *cmd)
+void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 {
 	unsigned int *chanlist;
 	int n_chans;
@@ -124,13 +137,10 @@ static void do_cmd(comedi_t *dev,comedi_cmd *cmd)
  * of scans measured is 10.  This is analogous to the old mode2
  * acquisition.
  */
-static void do_cmd_1(comedi_t *dev)
+void do_cmd_1(comedi_t *dev)
 {
 	comedi_cmd cmd;
 	unsigned int chanlist[4];
-	int total=0;
-	int ret;
-	int go;
 
 	memset(&cmd,0,sizeof(cmd));
 
@@ -204,13 +214,10 @@ static void do_cmd_1(comedi_t *dev)
 	do_cmd(dev,&cmd);
 }
 
-static void do_cmd_2(comedi_t *dev)
+void do_cmd_2(comedi_t *dev)
 {
 	comedi_cmd cmd;
 	unsigned int chanlist[4];
-	int total=0;
-	int ret;
-	int go;
 
 	memset(&cmd,0,sizeof(cmd));
 

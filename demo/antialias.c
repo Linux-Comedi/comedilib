@@ -1,5 +1,32 @@
 /*
-   A little output demo
+ * Antialiasing Analog Output Demo
+ * Part of Comedilib
+ *
+ * Copyright (c) 1999,2000 David A. Schleef <ds@schleef.org>
+ *
+ * This file may be freely modified, distributed, and combined with
+ * other software, as long as proper attribution is given in the
+ * source code.
+ */
+
+/* Not functional */
+
+/*
+ * Requirements: an analog output subdevice that is capable
+ *     of ansynchronous output.
+ *
+ * Normally, the resolution of analog output channels is limited by
+ * the resolution of the D/A converter.  However, if you limit the
+ * bandwith of the D/A converter by using a low-pass filter, you
+ * can trade some of the bandwidth for additional resolution.  This
+ * is done by changing the output rapidly between two adjacent
+ * values: a signal of an alternating 0,1,0,1,0,1 sequence will
+ * look like 0.5 after an appropriate low-pass filter.
+ *
+ * The disadvantage, of course, is that you lose bandwidth.  Worse,
+ * the simple technique demonstrated here will cause predictable
+ * noise in the stop band.  More complicated techniques will allow
+ * you to tune the spectrum of the noise in the stop band.
  */
 
 #include <stdio.h>
@@ -10,14 +37,7 @@
 #include <errno.h>
 #include <getopt.h>
 #include <ctype.h>
-
-extern int verbose_flag;
-extern int subdevice;
-extern int range;
-extern int channel;
-extern int aref;
-extern int value;
-extern char *filename;
+#include "examples.h"
 
 comedi_t *device;
 
@@ -28,7 +48,6 @@ int main(int argc, char *argv[])
 	lsampl_t data;
 	int ret;
 
-#if 0
 	parse_options(argc,argv);
 
 	device=comedi_open(filename);
@@ -50,7 +69,6 @@ int main(int argc, char *argv[])
 	}
 
 	printf("%d\n",data);
-#endif
 
 	ao_antialias((1000<<16)+1000);
 

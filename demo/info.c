@@ -9,6 +9,8 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <errno.h>
+#include <string.h>
+#include "examples.h"
 
 void get_command_stuff(comedi_t *it,int s);
 
@@ -179,7 +181,7 @@ int comedi_get_cmd_fast_1chan(comedi_t *it,unsigned int s,comedi_cmd *cmd)
 		}
 	}else{
 		printf("can't do timed?!?\n");
-		return;
+		return -1;
 	}
 	if(cmd->stop_src&TRIG_COUNT){
 		cmd->stop_src=TRIG_COUNT;
@@ -189,7 +191,7 @@ int comedi_get_cmd_fast_1chan(comedi_t *it,unsigned int s,comedi_cmd *cmd)
 		cmd->stop_arg=0;
 	}else{
 		printf("can't find a good stop_src\n");
-		return;
+		return -1;
 	}
 
 	ret=comedi_command_test(it,cmd);
