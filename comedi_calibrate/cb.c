@@ -1004,7 +1004,7 @@ int actual_source_voltage( comedi_t *dev, unsigned int subdevice, unsigned int e
 		*voltage = eeprom8_to_source( byte );
 	}else
 	{
-		perror( "actual_source_voltage(), maxdata invalid" );
+		fprintf( stderr, "actual_source_voltage(), maxdata = 0x%x invalid", max_data );
 		return -1;
 	}
 
