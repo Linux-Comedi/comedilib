@@ -3,7 +3,7 @@ pyexec_LTLIBRARIES = _comedi.la
 
 _comedi_la_SOURCES = comedi_wrap.c
 _comedi_la_CFLAGS = $(COMEDILIB_CFLAGS) $(PYTHON_INCLUDES) \
-	-fno-strict-aliasing -Wno-unused-function
+	-fno-strict-aliasing -Wno-unused
 _comedi_la_LDFLAGS = -module -avoid-version $(COMEDILIB_LIBS)
 
 pyexec_SCRIPTS = comedi.py
