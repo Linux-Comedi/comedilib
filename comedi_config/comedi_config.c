@@ -38,6 +38,13 @@
 
 #include <comedi.h>
 
+#ifdef I18N
+#include <libintl.h>
+#define _(a) gettext(a)
+#else
+#define _(a) (a)
+#endif
+
 int quiet=0,verbose=0;
 
 int read_buf_size=0;
@@ -61,20 +68,20 @@ struct option options[] = {
 
 void do_help(int i)
 {
+	fputs("comedi_config version " CC_VERSION "\n",stderr);
 	fputs(
-"comedi_config version " CC_VERSION "\n"
-"usage:  comedi_config [OPTIONS] <device file> [<driver> <opt1>,<opt2>,...]\n"
+_("usage:  comedi_config [OPTIONS] <device file> [<driver> <opt1>,<opt2>,...]\n"
 "\n"
 "OPTIONS:\n"
-"  -v --verbose\n"
+"  -v, --verbose\n"
 "      verbose output\n"
-"  -q --quiet\n"
+"  -q, --quiet\n"
 "      quiet output\n"
-"  -V --version\n"
+"  -V, --version\n"
 "      print program version\n"
-"  -i --init-data <filename>\n"
+"  -i, --init-data <filename>\n"
 "      Use file for driver initialization data, typically firmware code.\n"
-"  -r --remove\n"
+"  -r, --remove\n"
 "      remove previously configured driver\n"
 "  --read-buffer <size>\n"
 "      set buffer size in kilobytes used for reading\n"
@@ -86,7 +93,7 @@ void do_help(int i)
 "  indices of the board.  If not specified, a board will automatically\n"
 "  be chosen.  For non-PCI boards, <opt1> specifies the I/O port base\n"
 "  address and, if applicable, <opt2> specifies the IRQ.  Additional\n"
-"  options may be useful, see the Comedi documentation for details.\n"
+"  options may be useful, see the Comedi documentation for details.\n")
 		,stderr);
 	exit(i);
 }
@@ -105,8 +112,12 @@ int main(int argc,char *argv[])
 	int remove=0;
 	int index;
 
+	setlocale(LC_ALL, "");
+	bindtextdomain("comedilib", "/home/ds/cvs/comedilib/doc");
+	textdomain("comedilib");
+
 	if(geteuid() != 0)
-		fprintf(stderr,"comedi_config should be run as root.  Attempting to continue anyway.\n");
+		fprintf(stderr,_("comedi_config should be run as root.  Attempting to continue anyway.\n"));
 
 	while(1){
 		c=getopt_long(argc, argv, "rvVqi:", options, &index);
@@ -132,7 +143,7 @@ int main(int argc,char *argv[])
 			read_buf_size = strtol(optarg, NULL, 0);
 			if(read_buf_size < 0)
 			{
-				fprintf(stderr, "invalid buffer size\n");
+				fprintf(stderr, _("invalid buffer size\n"));
 				exit(-1);
 			}
 			break;
@@ -140,7 +151,7 @@ int main(int argc,char *argv[])
 			write_buf_size = strtol(optarg, NULL, 0);
 			if(write_buf_size < 0)
 			{
-				fprintf(stderr, "invalid buffer size\n");
+				fprintf(stderr, _("invalid buffer size\n"));
 				exit(-1);
 			}
 			break;
@@ -160,13 +171,13 @@ int main(int argc,char *argv[])
 	if(fd<0){
 		switch(errno){
 		case ENODEV:
-			fprintf(stderr,"comedi.o not loaded\n");
+			fprintf(stderr,_("comedi.o not loaded\n"));
 			break;
 		case ENXIO:
-			fprintf(stderr,"device not configured\n");
+			fprintf(stderr,_("device not configured\n"));
 			break;
 		case EPERM:
-			fprintf(stderr,"modprobe problem\n");
+			fprintf(stderr,_("modprobe problem\n"));
 			break;
 		default:
 			perror(fn);
@@ -234,13 +245,13 @@ int main(int argc,char *argv[])
 			init_size = buf.st_size;
 			init_data = malloc(init_size);
 			if(init_data==NULL){
-				perror("allocating initialization data\n");
+				perror(_("allocating initialization data\n"));
 				exit(1);
 			}
 
 			ret = read(init_fd,init_data,init_size);
 			if(ret<0){
-				perror("reading initialization data\n");
+				perror(_("reading initialization data\n"));
 				exit(1);
 			}
 
@@ -251,33 +262,33 @@ int main(int argc,char *argv[])
 	/* add: sanity check for device */
 
 		if(verbose){
-			printf("configuring driver=%s ",it.board_name);
+			printf(_("configuring driver=%s "),it.board_name);
 			for(i=0;i<COMEDI_NDEVCONFOPTS;i++)printf("%d,",it.options[i]);
 			printf("\n");
 		}
 		if(ioctl(fd,COMEDI_DEVCONFIG,remove?NULL:&it)<0){
 			int err=errno;
-			perror("Configure failed!");
-			fprintf(stderr,"Check kernel log for more information\n");
-			fprintf(stderr,"Possible reasons for failure:\n");
+			perror(_("Configure failed!"));
+			fprintf(stderr,_("Check kernel log for more information\n"));
+			fprintf(stderr,_("Possible reasons for failure:\n"));
 			switch(err){
 			case EINVAL:
 				fprintf(stderr,"  \n");
 				break;
 			case EBUSY:
-				fprintf(stderr,"  Already configured\n");
+				fprintf(stderr,_("  Already configured\n"));
 				break;
 			case EIO:
-				fprintf(stderr,"  Driver not found\n");
+				fprintf(stderr,_("  Driver not found\n"));
 				break;
 			case EPERM:
-				fprintf(stderr,"  Not root\n");
+				fprintf(stderr,_("  Not root\n"));
 				break;
 			case EFAULT:
-				fprintf(stderr,"  Comedi bug\n");
+				fprintf(stderr,_("  Comedi bug\n"));
 				break;
 			default:
-				fprintf(stderr,"  Unknown\n");
+				fprintf(stderr,_("  Unknown\n"));
 				break;
 			}
 
@@ -295,7 +306,7 @@ int main(int argc,char *argv[])
 				exit(1);
 			}
 			if(devinfo.version_code < ((7<<8) | (57))){
-				fprintf(stderr,"Buffer resizing requires Comedi version >= 0.7.57\n");
+				fprintf(stderr,_("Buffer resizing requires Comedi version >= 0.7.57\n"));
 				exit(1);
 			}
 		}
@@ -304,7 +315,7 @@ int main(int argc,char *argv[])
 		if(read_buf_size)
 		{
 			if(devinfo.read_subdevice){
-				fprintf(stderr,"warning: no read subdevice, resize ignored\n");
+				fprintf(stderr,_("warning: no read subdevice, resize ignored\n"));
 			}else{
 				memset(&bc, 0, sizeof(bc));
 				bc.subdevice = devinfo.read_subdevice;
@@ -312,12 +323,12 @@ int main(int argc,char *argv[])
 				bc.size = read_buf_size * 1024;
 				if(ioctl(fd, COMEDI_BUFCONFIG, &bc) < 0)
 				{
-					perror("buffer resize error");
+					perror(_("buffer resize error"));
 					exit(1);
 				}
 				if(verbose)
 				{
-					printf("%s read buffer resized to %i kilobytes\n",
+					printf(_("%s read buffer resized to %i kilobytes\n"),
 						fn, bc.size / 1024);
 				}
 			}
@@ -325,7 +336,7 @@ int main(int argc,char *argv[])
 		if(write_buf_size)
 		{
 			if(devinfo.write_subdevice){
-				fprintf(stderr,"warning: no write subdevice, resize ignored\n");
+				fprintf(stderr,_("warning: no write subdevice, resize ignored\n"));
 			}else{
 				memset(&bc, 0, sizeof(bc));
 				bc.subdevice = devinfo.write_subdevice;
@@ -333,12 +344,12 @@ int main(int argc,char *argv[])
 				bc.size = write_buf_size * 1024;
 				if(ioctl(fd, COMEDI_BUFCONFIG, &bc) < 0)
 				{
-					perror("buffer resize error");
+					perror(_("buffer resize error"));
 					exit(1);
 				}
 				if(verbose)
 				{
-					printf("%s write buffer resized to %i kilobytes\n",
+					printf(_("%s write buffer resized to %i kilobytes\n"),
 						fn, bc.size / 1024);
 				}
 			}
