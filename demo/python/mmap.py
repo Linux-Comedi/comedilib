@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 ## A test-application to demonstrate using the Comedilib API
 ##  and streaming acquisition in particular, from Python. 
 
