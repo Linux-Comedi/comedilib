@@ -49,7 +49,6 @@ int comedi_dio_config(comedi_t *it,unsigned int subdev,unsigned int chan,unsigne
 	if(io!=COMEDI_INPUT && io!=COMEDI_OUTPUT)
 		return -1;
 
-#if 0
 	if(s->has_insn){
 		comedi_insn insn;
 		lsampl_t data;
@@ -64,7 +63,6 @@ int comedi_dio_config(comedi_t *it,unsigned int subdev,unsigned int chan,unsigne
 
 		return comedi_do_insn(it,&insn);
 	}else
-#endif
 	{
 		comedi_trig trig;
 		lsampl_t data=io;
