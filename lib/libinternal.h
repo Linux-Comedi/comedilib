@@ -55,8 +55,6 @@
 
 #define COMEDILIB_DEBUG(level,format,args...) do{if(__comedi_loglevel>=(level))fprintf(stderr,"%s: " format, __FUNCTION__ , ##args);}while(0)
 
-#define COMEDI_VERSION_CODE(a,b,c) (((a)<<16) | ((b)<<8) | (c))
-
 #define COMEDILIB_MAGIC 0xc001dafe
 
 /* handle versioning */

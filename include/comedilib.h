@@ -80,6 +80,7 @@ enum comedi_oor_behavior comedi_set_global_oor_behavior(enum comedi_oor_behavior
 
 /* device queries */
 int comedi_get_n_subdevices(comedi_t *it);
+#define COMEDI_VERSION_CODE(a,b,c) (((a)<<16) | ((b)<<8) | (c))
 int comedi_get_version_code(comedi_t *it);
 char *comedi_get_driver_name(comedi_t *it);
 char *comedi_get_board_name(comedi_t *it);

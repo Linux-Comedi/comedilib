@@ -100,7 +100,7 @@ static struct board_struct boards[]={
 	{ "pci-6110", STATUS_DONE, cal_ni_pci_611x, ni_setup_observables_611x, 0x1d4, 0x1d5 },
 	{ "pci-6111", STATUS_DONE, cal_ni_pci_611x, ni_setup_observables_611x, 0x1d4, 0x1d5 },
 	{ "DAQCard-6062E", STATUS_DONE, cal_ni_daqcard_6062e, ni_setup_observables, 0x1a9, 0x1aa },
-	{ "DAQCard-6024E", STATUS_UNKNOWN, cal_ni_daqcard_6024e, ni_setup_observables, -1, -1 },
+	{ "DAQCard-6024E", STATUS_SOME, cal_ni_daqcard_6024e, ni_setup_observables, -1, -1 },
 	{ "at-mio-16de-10", STATUS_UNKNOWN, NULL, ni_setup_observables, 0x1a7, 0x1a8 },
 	{ "at-mio-16xe-10", STATUS_UNKNOWN, NULL, ni_setup_observables, 0x1b7, 0x1b8 },
 	{ "at-ai-16xe-10", STATUS_UNKNOWN, NULL, ni_setup_observables, 0x1b7, 0x1b8 },
@@ -775,44 +775,47 @@ static int cal_ni_pci_6071e(calibration_setup_t *setup)
 {
 	ni_caldac_layout_t layout;
 
+	if( comedi_get_version_code( setup->dev ) <= COMEDI_VERSION_CODE( 0, 7, 66 ) )
+	{
+		DPRINT(0, "WARNING: you need comedi driver version 0.7.67 or later\n"
+		 "for this calibration to work properly\n" );
+	}
+
 	init_ni_caldac_layout( &layout );
-#if 1
-	/* this is as good as can be done with driver set to mb88341 caldac */
 	layout.adc_pregain_offset = 0;
-	layout.adc_postgain_offset = 1;
-	layout.adc_gain = 3;
-	layout.dac_offset[ 0 ] = 5;
-	/* layout.dac_gain[ 0 ] = ; */
-	layout.dac_linearity[ 0 ] = 4;
-	layout.dac_offset[ 1 ] = 8;
-	/* layout.dac_gain[ 1 ] = ; */
-	layout.dac_linearity[ 1 ] = 7;
-#else
-	/* converted working caldacs to ad8804 addressing */
-	layout.adc_pregain_offset = 0; /* guess due to similarity to 6035 */
-	layout.adc_pregain_offset_fine = 8; /* corresponds to pregain_offset for mb88341 style above*/
+	layout.adc_pregain_offset_fine = 8;
 	layout.adc_postgain_offset = 4;
 	layout.adc_gain = 2;
 	layout.dac_offset[ 0 ] = 6;
-	layout.dac_gain[ 0 ] = 11; /* guess due to similarity to 6035 */
+	layout.dac_gain[ 0 ] = 11;
 	layout.dac_linearity[ 0 ] = 10;
 	layout.dac_offset[ 1 ] = 9;
-	layout.dac_gain[ 1 ] = 5;  /* guess due to similarity to 6035 */
+	layout.dac_gain[ 1 ] = 5;
 	layout.dac_linearity[ 1 ] = 1;
-#endif
 	return cal_ni_generic( setup, &layout );
 }
 
 static int cal_ni_pxi_6071e(calibration_setup_t *setup)
 {
-	// 6071e (old)
 	ni_caldac_layout_t layout;
+
+	if( comedi_get_version_code( setup->dev ) <= COMEDI_VERSION_CODE( 0, 7, 66 ) )
+	{
+		DPRINT(0, "WARNING: you need comedi driver version 0.7.67 or later\n"
+		 "for this calibration to work properly\n" );
+	}
 
 	init_ni_caldac_layout( &layout );
 	layout.adc_pregain_offset = 0;
-	layout.adc_postgain_offset = 1;
-	layout.adc_gain = 3;
-
+	layout.adc_pregain_offset_fine = 8;
+	layout.adc_postgain_offset = 4;
+	layout.adc_gain = 2;
+	layout.dac_offset[ 0 ] = 6;
+	layout.dac_gain[ 0 ] = 11;
+	layout.dac_linearity[ 0 ] = 10;
+	layout.dac_offset[ 1 ] = 9;
+	layout.dac_gain[ 1 ] = 5;
+	layout.dac_linearity[ 1 ] = 1;
 	return cal_ni_generic( setup, &layout );
 }
 
@@ -1049,6 +1052,11 @@ static int cal_ni_daqcard_6062e( calibration_setup_t *setup )
 {
 	ni_caldac_layout_t layout;
 
+	if( comedi_get_version_code( setup->dev ) <= COMEDI_VERSION_CODE( 0, 7, 66 ) )
+	{
+		DPRINT(0, "WARNING: you need comedi driver version 0.7.67 or later\n"
+		 "for this calibration to work properly\n" );
+	}
 	init_ni_caldac_layout( &layout );
 	layout.adc_pregain_offset = 8;
 	layout.adc_postgain_offset = 4;
