@@ -4,7 +4,7 @@ SGML = drivers.sgml funcref.sgml glossary.sgml \
 	driverwriting.sgml comedilib.sgml
 
 EXTRA_DIST = $(SGML) funcref mkref drivers.txt mkdr FAQ \
-	comedilib.pdf acq-seq.gif html man
+	comedilib.pdf acq-seq.gif doc_html man
 
 BUILT_SOURCES = funcref.sgml drivers.sgml
 
@@ -15,7 +15,7 @@ pkgdata_DATA =
 endif
 
 if HAVE_DOCBOOK2HTML
-all_html = html
+all_html = doc_html
 install_html = install_html
 uninstall_html = uninstall_html
 else
@@ -40,16 +40,18 @@ install-data-local: $(install_html) $(install_man)
 
 uninstall-local: $(uninstall_html) $(uninstall_man)
 
-html: $(SGML)
-	{ $(DOCBOOK2HTML) -o html $(srcdir)/comedilib.sgml && touch html; } || { $(RM) -r html; exit 1; }
+#named this doc_html to avoid phony html target that is automatically generated
+#(at least by automake1.8)
+doc_html: $(SGML)
+	{ $(DOCBOOK2HTML) -o doc_html $(srcdir)/comedilib.sgml && touch doc_html; } || { $(RM) -r doc_html; exit 1; }
 
 install_html:
 	$(INSTALL) -d $(pkgdatadir)/html
-	for each in $(srcdir)/html/*.html $(srcdir)/*.gif ; do \
+	for each in $(srcdir)/doc_html/*.html $(srcdir)/*.gif ; do \
 		$(INSTALL_DATA) $$each $(pkgdatadir)/html ; done
 
 uninstall_html:
-	for each in $(srcdir)/html/*.html $(srcdir)/*.gif ; do \
+	for each in $(srcdir)/doc_html/*.html $(srcdir)/*.gif ; do \
 		$(RM) $(pkgdatadir)/html/`basename $$each` ; done
 
 man: $(SGML)
@@ -72,7 +74,7 @@ drivers.sgml: drivers.txt mkdr
 	$(srcdir)/mkdr drivers.txt >drivers.sgml
 
 maintainer-clean-local:
-	$(RM) -r html man
+	$(RM) -r doc_html man
 	$(RM) comedilib.pdf
 
 locales = de
