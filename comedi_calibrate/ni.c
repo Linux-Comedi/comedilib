@@ -117,7 +117,7 @@ static struct board_struct boards[]={
 };
 #define n_boards (sizeof(boards)/sizeof(boards[0]))
 
-static const int ni_num_observables = 18;
+static const int ni_num_observables = 20;
 enum observables{
 	ni_zero_offset_low = 0,
 	ni_zero_offset_high,
