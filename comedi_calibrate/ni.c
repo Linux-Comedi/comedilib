@@ -79,9 +79,9 @@ static double ni_get_reference( calibration_setup_t *setup, int lsb_loc,int msb_
 static struct board_struct boards[]={
 	{ "at-ai-16xe-10", STATUS_UNKNOWN, NULL, ni_setup_observables, 0x1b7, 0x1b8 },
 	{ "at-mio-16de-10", STATUS_UNKNOWN, NULL, ni_setup_observables, 0x1a7, 0x1a8 },
-	{ "at-mio-16e-1", STATUS_SOME, cal_ni_at_mio_16e_1, ni_setup_observables, 0x1a9, 0x1aa },
+	{ "at-mio-16e-1", STATUS_DONE, cal_ni_at_mio_16e_1, ni_setup_observables, 0x1a9, 0x1aa },
 	{ "at-mio-16e-2", STATUS_DONE, cal_ni_at_mio_16e_2, ni_setup_observables, 0x1a9, 0x1aa },
-	{ "at-mio-16e-10", STATUS_GUESS, cal_ni_at_mio_16e_10, ni_setup_observables, 0x1a7, 0x1a8 },
+	{ "at-mio-16e-10", STATUS_SOME, cal_ni_at_mio_16e_10, ni_setup_observables, 0x1a7, 0x1a8 },
 	{ "at-mio-16xe-10", STATUS_UNKNOWN, NULL, ni_setup_observables, 0x1b7, 0x1b8 },
 	{ "at-mio-16xe-50", STATUS_SOME, cal_ni_at_mio_16xe_50, ni_setup_observables, 0x1b5, 0x1b6 },
 	{ "DAQCard-ai-16e-4", STATUS_DONE, cal_ni_daqcard_ai_16e_4, ni_setup_observables, 0x1b5, 0x1b6 },
@@ -862,20 +862,25 @@ static int cal_ni_pxi_6071e(calibration_setup_t *setup)
 
 static int cal_ni_at_mio_16e_10(calibration_setup_t *setup)
 {
-	// 16e-10 (old)
 	ni_caldac_layout_t layout;
 
+	if(comedi_get_version_code(setup->dev) <= COMEDI_VERSION_CODE(0, 7, 68))
+	{
+		DPRINT(0, "WARNING: you need comedi driver version 0.7.69 or later\n"
+		 "for this calibration to work properly\n" );
+	}
 	init_ni_caldac_layout( &layout );
-	layout.adc_pregain_offset = 10;
-	layout.adc_pregain_offset_fine = 0;
-	layout.adc_postgain_offset = 1;
-	layout.adc_gain = 3;
-	layout.adc_unip_offset = 2;
-	layout.dac_offset[ 0 ] = 5; /* guess */
-	layout.dac_gain[ 0 ] = 6; /* guess */
-	layout.dac_offset[ 1 ] = 8; /* guess */
-	layout.dac_gain[ 1 ] = 9; /* guess */
-
+//	layout.adc_pregain_offset = ;
+	layout.adc_pregain_offset_fine = 8;
+	layout.adc_postgain_offset = 4;
+	layout.adc_gain = 2;
+//	layout.adc_unip_offset = ;
+	layout.dac_offset[ 0 ] = 6;
+//	layout.dac_gain[ 0 ] = ; 
+	layout.dac_linearity[ 0 ] = 10;
+	layout.dac_offset[ 1 ] = 9;
+	layout.dac_gain[ 1 ] = 5;
+	layout.dac_linearity[1] = 1;
 	return cal_ni_generic( setup, &layout );
 }
 
