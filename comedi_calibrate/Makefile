@@ -6,8 +6,8 @@ CFLAGS += -I../include
 LDFLAGS += -L../lib/ -lcomedi -lm
 
 
-BINS=comedi_calibrate
-objs = comedi_calibrate.o ni.o
+BINS = comedi_calibrate
+objs = comedi_calibrate.o ni.o cb.o
 
 all: $(BINS)
 

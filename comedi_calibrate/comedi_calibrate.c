@@ -61,13 +61,14 @@ int verbose = 0;
 struct board_struct{
 	char *name;
 	char *id;
-	int (*setup)(void);
+	int (*setup)( calibration_setup *setup, const char *device_name );
 };
 
 struct board_struct drivers[] = {
 	{ "ni_pcimio",	ni_id,	ni_setup },
 	{ "ni_atmio",	ni_id,	ni_setup },
 	{ "ni_mio_cs",	ni_id,	ni_setup },
+	{ "cb_pcidas64",	cb_id,	cb_setup },
 };
 #define n_drivers (sizeof(drivers)/sizeof(drivers[0]))
 
@@ -104,7 +105,7 @@ int main(int argc, char *argv[])
 	struct board_struct *this_board;
 	int index;
 	int device_status = STATUS_UNKNOWN;
-
+	calibration_setup setup;
 
 	fn = "/dev/comedi0";
 	while (1) {
@@ -160,7 +161,9 @@ int main(int argc, char *argv[])
 	return 1;
 
 ok:
-	device_status = this_board->setup();
+	memset( &setup, 0, sizeof( setup ) );
+	this_board->setup( &setup, devicename );
+	device_status = setup.status;
 
 	if(device_status<STATUS_DONE){
 		printf("Warning: device not fully calibrated due to insufficient information\n");
@@ -198,10 +201,10 @@ ok:
 			(comedi_get_version_code(dev))&0xff);
 	}
 
-	if(do_reset)reset_caldacs();
-	if(do_dump)observe();
-	if(do_calibrate && do_cal)do_cal();
-	if(do_results)observe();
+	if(do_reset)reset_caldacs( &setup );
+	if(do_dump) observe();
+	if(do_calibrate && do_cal) setup.do_cal( &setup );
+	if(do_results) observe();
 
 	return 0;
 }
@@ -318,7 +321,7 @@ void postgain_cal(int obs1, int obs2, int dac)
 	a=caldacs[dac].current-a;
 
 	caldacs[dac].current=rint(a);
-	update_caldac(dac);
+	update_caldac( caldacs[dac] );
 	usleep(100000);
 
 	DPRINT(0,"caldac[%d] set to %g (%g)\n",dac,rint(a),a);
@@ -342,7 +345,7 @@ void cal1(int obs, int dac)
 	a=linear_fit_func_x(&l,observables[obs].target);
 
 	caldacs[dac].current=rint(a);
-	update_caldac(dac);
+	update_caldac( caldacs[dac] );
 	usleep(100000);
 
 	DPRINT(0,"caldac[%d] set to %g (%g)\n",dac,rint(a),a);
@@ -362,7 +365,7 @@ void cal1_fine(int obs, int dac)
 	a=linear_fit_func_x(&l,observables[obs].target);
 
 	caldacs[dac].current=rint(a);
-	update_caldac(dac);
+	update_caldac( caldacs[dac] );
 	usleep(100000);
 
 	DPRINT(0,"caldac[%d] set to %g (%g)\n",dac,rint(a),a);
@@ -441,34 +444,34 @@ void setup_caldacs(void)
 	n_caldacs=n_chan;
 }
 
-void reset_caldacs(void)
+void reset_caldacs( const calibration_setup *setup )
 {
 	int i;
 
-	for(i=0;i<n_caldacs;i++){
-		caldacs[i].current=caldacs[i].maxdata/2;
-		update_caldac(i);
+	for( i = 0; i < setup->n_caldacs; i++){
+		setup->caldacs[i].current = setup->caldacs[i].maxdata / 2;
+		update_caldac( setup->caldacs[i] );
 	}
 }
 
-void update_caldac(int i)
+void update_caldac( caldac dac )
 {
 	int ret;
-	
-	DPRINT(4,"update %d %d %d\n",caldacs[i].subdev,caldacs[i].chan,caldacs[i].current);
-	if(caldacs[i].current<0){
-		DPRINT(1,"caldac set out of range (%d<0)\n",caldacs[i].current);
-		caldacs[i].current=0;
+
+	DPRINT(4,"update %d %d %d\n", dac.subdev, dac.chan, dac.current);
+	if( dac.current < 0 ){
+		DPRINT(1,"caldac set out of range (%d<0)\n", dac.current);
+		dac.current = 0;
 	}
-	if(caldacs[i].current>caldacs[i].maxdata){
+	if( dac.current > dac.maxdata ){
 		DPRINT(1,"caldac set out of range (%d>%d)\n",
-			caldacs[i].current,caldacs[i].maxdata);
-		caldacs[i].current=caldacs[i].maxdata;
+			dac.current, dac.maxdata);
+		dac.current = dac.maxdata;
 	}
 
-	ret = comedi_data_write(dev,caldacs[i].subdev,caldacs[i].chan,0,0,
-		caldacs[i].current);
-	if(ret<0)perror("update_caldac()");
+	ret = comedi_data_write(dev, dac.subdev, dac.chan, 0, 0,
+		dac.current);
+	if(ret < 0) perror("update_caldac()");
 }
 
 #if 0
@@ -525,7 +528,7 @@ double check_gain_chan_x(linear_fit_t *l,unsigned int ad_chanspec,int cdac)
 	sv.cr_flags = CR_ALT_FILTER | CR_ALT_SOURCE;
 
 	caldacs[cdac].current=0;
-	update_caldac(cdac);
+	update_caldac( caldacs[cdac] );
 	usleep(100000);
 
 	new_sv_measure(&sv);
@@ -533,7 +536,7 @@ double check_gain_chan_x(linear_fit_t *l,unsigned int ad_chanspec,int cdac)
 	sum_err=0;
 	for(i=0;i*step<n;i++){
 		caldacs[cdac].current=i*step;
-		update_caldac(cdac);
+		update_caldac( caldacs[cdac] );
 		//usleep(100000);
 
 		new_sv_measure(&sv);
@@ -547,7 +550,7 @@ double check_gain_chan_x(linear_fit_t *l,unsigned int ad_chanspec,int cdac)
 	}
 
 	caldacs[cdac].current=orig;
-	update_caldac(cdac);
+	update_caldac( caldacs[cdac] );
 
 	l->yerr=sum_err/sum_err_count;
 	l->dx=step;
@@ -603,7 +606,7 @@ double check_gain_chan_fine(linear_fit_t *l,unsigned int ad_chanspec,int cdac)
 	sv.cr_flags = CR_ALT_FILTER | CR_ALT_SOURCE;
 
 	caldacs[cdac].current=0;
-	update_caldac(cdac);
+	update_caldac( caldacs[cdac] );
 	usleep(100000);
 
 	new_sv_measure(&sv);
@@ -611,7 +614,7 @@ double check_gain_chan_fine(linear_fit_t *l,unsigned int ad_chanspec,int cdac)
 	sum_err=0;
 	for(i=0;i<n;i++){
 		caldacs[cdac].current=i+orig-fine_size;
-		update_caldac(cdac);
+		update_caldac( caldacs[cdac] );
 		usleep(100000);
 
 		new_sv_measure(&sv);
@@ -625,7 +628,7 @@ double check_gain_chan_fine(linear_fit_t *l,unsigned int ad_chanspec,int cdac)
 	}
 
 	caldacs[cdac].current=orig;
-	update_caldac(cdac);
+	update_caldac( caldacs[cdac] );
 
 	l->yerr=sum_err/sum_err_count;
 	l->dx=1;

@@ -45,6 +45,16 @@ typedef struct{
 	double target;
 }observable;
 
+typedef struct calibration_setup_struct calibration_setup;
+struct calibration_setup_struct {
+	int status;
+	observable *observables;
+	unsigned int n_observables;
+	caldac *caldacs;
+	unsigned int n_caldacs;
+	int (*do_cal) ( calibration_setup *setup );
+};
+
 extern caldac caldacs[N_CALDACS];
 extern int n_caldacs;
 
@@ -79,18 +89,20 @@ void observe(void);
 void preobserve(int obs);
 void observable_dependence(int obs);
 void measure_observable(int obs);
-void reset_caldacs(void);
+void reset_caldacs( const calibration_setup *setup);
 
 /* drivers */
 
 extern char ni_id[];
+extern char cb_id[];
 
-int ni_setup(void);
+int ni_setup( calibration_setup*, const char *device_name );
+int cb_setup( calibration_setup*, const char *device_name );
 
 /* low level */
 
 void set_target(int obs,double target);
-void update_caldac(int i);
+void update_caldac( caldac );
 void setup_caldacs(void);
 void postgain_cal(int obs1, int obs2, int dac);
 void cal1(int obs, int dac);

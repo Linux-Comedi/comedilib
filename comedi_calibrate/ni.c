@@ -41,29 +41,29 @@ char ni_id[] = "$Id$";
 struct board_struct{
 	char *name;
 	int status;
-	void (*cal)(void);
+	int (*cal)( calibration_setup *setup);
 };
 
-int ni_setup_board(void);
+int ni_setup_board( calibration_setup *setup , const char *device_name );
 void ni_setup_observables(void);
 
-void cal_ni_at_mio_16e_2(void);
-void cal_ni_daqcard_ai_16xe_50(void);
-void cal_ni_at_mio_16e_1(void);
-void cal_ni_pci_mio_16e_1(void);
-void cal_ni_pci_6025e(void);
-void cal_ni_pci_6035e(void);
-void cal_ni_pci_6071e(void);
-void cal_ni_pxi_6071e(void);
-void cal_ni_at_mio_16e_10(void);
-void cal_ni_pci_mio_16xe_50(void);
-void cal_ni_pci_6023e(void);
-void cal_ni_pci_6024e(void);
-void cal_ni_at_mio_16xe_50(void);
-void cal_ni_pci_mio_16xe_10(void);
-void cal_ni_pci_6052e(void);
+int cal_ni_at_mio_16e_2(calibration_setup *setup);
+int cal_ni_daqcard_ai_16xe_50(calibration_setup *setup);
+int cal_ni_at_mio_16e_1(calibration_setup *setup);
+int cal_ni_pci_mio_16e_1(calibration_setup *setup);
+int cal_ni_pci_6025e(calibration_setup *setup);
+int cal_ni_pci_6035e(calibration_setup *setup);
+int cal_ni_pci_6071e(calibration_setup *setup);
+int cal_ni_pxi_6071e(calibration_setup *setup);
+int cal_ni_at_mio_16e_10(calibration_setup *setup);
+int cal_ni_pci_mio_16xe_50(calibration_setup *setup);
+int cal_ni_pci_6023e(calibration_setup *setup);
+int cal_ni_pci_6024e(calibration_setup *setup);
+int cal_ni_at_mio_16xe_50(calibration_setup *setup);
+int cal_ni_pci_mio_16xe_10(calibration_setup *setup);
+int cal_ni_pci_6052e(calibration_setup *setup);
 
-struct board_struct boards[]={
+static struct board_struct boards[]={
 	{ "at-mio-16e-2",	STATUS_DONE,	cal_ni_at_mio_16e_2 },
 	{ "DAQCard-ai-16xe-50",	STATUS_DONE,	cal_ni_daqcard_ai_16xe_50 },
 	{ "at-mio-16xe-50",	STATUS_SOME,	cal_ni_at_mio_16xe_50 },
@@ -117,31 +117,31 @@ enum {
 	ni_ao1_reference,
 };
 
-int ni_setup(void)
+int ni_setup( calibration_setup *setup , const char *device_name )
 {
-	int status;
-	
-	status = ni_setup_board();
+	ni_setup_board( setup, device_name );
+	setup->observables = observables;
+	setup->n_observables = n_observables;
+	setup->caldacs = caldacs;
+	setup->n_caldacs = n_caldacs;
 	ni_setup_observables();
 	setup_caldacs();
 
-	return status;
+	return 0;
 }
 
-int ni_setup_board(void)
+int ni_setup_board( calibration_setup *setup, const char *device_name )
 {
 	int i;
-	int device_status = STATUS_UNKNOWN;
 
-	for(i=0;i<n_boards;i++){
-		if(!strcmp(devicename,boards[i].name)){
-			device_status = boards[i].status;
-			do_cal = boards[i].cal;
+	for(i = 0; i < n_boards; i++ ){
+		if(!strcmp( device_name, boards[i].name )){
+			setup->status = boards[i].status;
+			setup->do_cal = boards[i].cal;
 			break;
 		}
 	}
-	//do_cal = cal_ni_unknown;
-	return device_status;
+	return 0;
 }
 
 void ni_setup_observables(void)
@@ -267,7 +267,7 @@ void ni_setup_observables(void)
 	}
 }
 
-void cal_ni_at_mio_16e_2(void)
+int cal_ni_at_mio_16e_2(calibration_setup *setup)
 {
 	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
 	cal1(ni_zero_offset_high,0);
@@ -279,6 +279,7 @@ void cal_ni_at_mio_16e_2(void)
 		cal1(ni_ao1_zero_offset,8);
 		cal1(ni_ao1_reference,9);
 	}
+	return 0;
 }
 
 /*
@@ -307,32 +308,34 @@ void cal_ni_at_mio_16e_2(void)
  * caldac[2] gain=7.8670(11)e-5 V/bit S_min=903.291 dof=254
  * caldac[8] gain=2.7732(74)e-7 V/bit S_min=415.399 dof=254
  */
-void cal_ni_daqcard_ai_16xe_50(void)
+int cal_ni_daqcard_ai_16xe_50(calibration_setup *setup)
 {
 	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,2);
 	cal1(ni_zero_offset_high,8);
 	cal1(ni_reference_low,0);
 	cal1_fine(ni_reference_low,0);
 	cal1(ni_reference_low,1);
+	return 0;
 }
 
-void cal_ni_at_mio_16xe_50(void)
+int cal_ni_at_mio_16xe_50(calibration_setup *setup)
 {
 	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,2);
 	cal1(ni_zero_offset_high,8);
 	cal1(ni_reference_low,0);
 	cal1_fine(ni_reference_low,0);
 	cal1(ni_reference_low,1);
-	
+
 	if(do_output){
 		cal1(ni_ao0_zero_offset,6);
 		cal1(ni_ao0_reference,4);
 		cal1(ni_ao1_zero_offset,7);
 		cal1(ni_ao1_reference,5);
 	}
+	return 0;
 }
 
-void cal_ni_pci_mio_16xe_10(void)
+int cal_ni_pci_mio_16xe_10(calibration_setup *setup)
 {
 	postgain_cal(ni_zero_offset_low, ni_zero_offset_high, 2);
 	postgain_cal(ni_zero_offset_low, ni_zero_offset_high, 3);
@@ -346,14 +349,15 @@ void cal_ni_pci_mio_16xe_10(void)
 		cal1(ni_ao1_zero_offset,7);
 		cal1(ni_ao1_reference,5);
 	}
+	return 0;
 }
 
-void cal_ni_at_mio_16e_1(void)
+int cal_ni_at_mio_16e_1(calibration_setup *setup)
 {
-	cal_ni_at_mio_16e_2();
+	return cal_ni_at_mio_16e_2( setup );
 }
 
-void cal_ni_pci_mio_16e_1(void)
+int cal_ni_pci_mio_16e_1(calibration_setup *setup)
 {
 	//cal_ni_at_mio_16e_2();
 
@@ -369,9 +373,10 @@ void cal_ni_pci_mio_16e_1(void)
 		//cal1(ni_ao1_zero_offset,7); /* linearity? */
 		cal1(ni_ao1_reference,9);
 	}
+	return 0;
 }
 
-void cal_ni_pci_6035e(void)
+int cal_ni_pci_6035e(calibration_setup *setup)
 {
 	// 6035e (old)
 	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
@@ -380,9 +385,10 @@ void cal_ni_pci_6035e(void)
 	if(do_output){
 		// unknown
 	}
+	return 0;
 }
 
-void cal_ni_pci_6071e(void)
+int cal_ni_pci_6071e(calibration_setup *setup)
 {
 	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
 	cal1(ni_zero_offset_high,0);
@@ -396,9 +402,10 @@ void cal_ni_pci_6071e(void)
 		//cal1(ni_ao1_zero_offset,7); /* linearity? */
 		cal1(ni_ao1_reference,9);
 	}
+	return 0;
 }
 
-void cal_ni_pxi_6071e(void)
+int cal_ni_pxi_6071e(calibration_setup *setup)
 {
 	// 6071e (old)
 	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
@@ -407,9 +414,10 @@ void cal_ni_pxi_6071e(void)
 	if(do_output){
 		// unknown
 	}
+	return 0;
 }
 
-void cal_ni_at_mio_16e_10(void)
+int cal_ni_at_mio_16e_10(calibration_setup *setup)
 {
 	// 16e-10 (old)
 	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
@@ -423,25 +431,27 @@ void cal_ni_at_mio_16e_10(void)
 		cal1(ni_ao1_zero_offset,8); // guess
 		cal1(ni_ao1_reference,9); // guess
 	}
+	return 0;
 }
 
-void cal_ni_pci_mio_16xe_50(void)
+int cal_ni_pci_mio_16xe_50(calibration_setup *setup)
 {
 	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,2);
 	cal1(ni_zero_offset_high,8);
 	cal1(ni_reference_low,0);
 	cal1_fine(ni_reference_low,0);
 	cal1(ni_reference_low,1);
-	
+
 	if(do_output){
 		cal1(ni_ao0_zero_offset,6);
 		cal1(ni_ao0_reference,4);
 		cal1(ni_ao1_zero_offset,7);
 		cal1(ni_ao1_reference,5);
 	}
+	return 0;
 }
 
-void cal_ni_pci_6023e(void)
+int cal_ni_pci_6023e(calibration_setup *setup)
 {
 	/* There seems to be a bug in the driver that doesn't allow
 	 * access to caldac 10, and possibly others. */
@@ -449,9 +459,10 @@ void cal_ni_pci_6023e(void)
 	//cal1(ni_zero_offset_high,10);
 	//cal1(ni_zero_offset_high,0);
 	cal1(ni_reference_low,3);
+	return 0;
 }
 
-void cal_ni_pci_6024e(void)
+int cal_ni_pci_6024e(calibration_setup *setup)
 {
 	/* There seems to be a bug in the driver that doesn't allow
 	 * access to caldac 10, and possibly others. */
@@ -467,9 +478,10 @@ void cal_ni_pci_6024e(void)
 		//cal1(ni_ao1_zero_offset,7); // nonlinearity?
 		//cal1(ni_ao1_reference,9);
 	}
+	return 0;
 }
 
-void cal_ni_pci_6025e(void)
+int cal_ni_pci_6025e(calibration_setup *setup)
 {
 	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,4); // was 1
 	//cal1(ni_zero_offset_high,XXX); // was 10
@@ -483,9 +495,10 @@ void cal_ni_pci_6025e(void)
 		//cal1(ni_ao1_zero_offset,1); // nonlinearity was 7
 		cal1(ni_ao1_reference,5); // was 9
 	}
+	return 0;
 }
 
-void cal_ni_pci_6052e(void)
+int cal_ni_pci_6052e(calibration_setup *setup)
 {
 	/*
 	 * This board has noisy caldacs
@@ -539,6 +552,7 @@ void cal_ni_pci_6052e(void)
 		cal1(ni_ao1_reference,12+9);
 		cal1(ni_ao1_reference,12+5);
 	}
+	return 0;
 }
 
 double ni_get_reference(int lsb_loc,int msb_loc)
