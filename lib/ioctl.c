@@ -38,13 +38,22 @@
 
 /* ioctl wrappers */
 
+int _comedi_ioctl( int fd, int request, unsigned long arg )
+{
+	int ret;
+
+	ret = ioctl( fd, request, arg );
+	if( ret < 0 )
+		libc_error();
+	return ret;
+}
 
 int _comedi_ioctl_debug(int fd, int request, unsigned long arg)
 {
 	int ret;
 
 	fprintf(stderr,"ioctl(%d,0x%08x,0x%08lx) = ",fd,request,arg);
-	ret = ioctl(fd,request,arg);
+	ret = _comedi_ioctl(fd,request,arg);
 	fprintf(stderr,"%d\n",ret);
 
 	return ret;

@@ -126,10 +126,10 @@ struct subdevice_struct{
 	comedi_cmd *cmd_timed;
 };
 
-
-#define comedi_ioctl ioctl
+#define comedi_ioctl _comedi_ioctl
 //#define comedi_ioctl _comedi_ioctl_debug
 
+int _comedi_ioctl( int fd, int request, unsigned long arg );
 int _comedi_ioctl_debug(int,int,unsigned long);
 
 /* filler routines */
