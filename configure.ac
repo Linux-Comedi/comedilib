@@ -57,12 +57,25 @@ AM_CONDITIONAL(HAVE_DOCBOOK2HTML, [test "x$DOCBOOK2HTML" != xno])
 pcmciadir="\${sysconfdir}/pcmcia"
 AC_SUBST(pcmciadir)
 
+#see: http://linux-hotplug.sourceforge.net/
+#the hotplug expects the device dependent scripts here:
+usbhotplugdir="/etc/hotplug/usb"
+AC_SUBST(usbhotplugdir)
+ 
+#firmware for the hotplug script
+#see: http://linux-hotplug.sourceforge.net/
+usbfirmwaredir="/usr/share/usb"
+AC_SUBST(usbfirmwaredir)
+
 AC_CONFIG_FILES(
 Makefile
 comedi_calibrate/Makefile
 comedi_config/Makefile
 etc/Makefile
 etc/pcmcia/Makefile
+etc/hotplug/Makefile
+etc/hotplug/usb/Makefile
+etc/hotplug/usb/usbdux/Makefile
 doc/Makefile
 doc/html/Makefile
 doc/man/Makefile
