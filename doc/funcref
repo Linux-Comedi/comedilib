@@ -464,21 +464,76 @@ Description:
  For the A/D conversion (if appropriate),
  the device is configured to use range specification
  range and (if appropriate) analog reference type
- aref.  Analog reference types that are not supported
+ aref. Analog reference types that are not supported
  by the device are silently ignored.
 
  The function comedi_data_read() reads one data value from
  the specified channel and places the data value in the
  location pointed to by data.
 
+ WARNING: comedi_data_read() does not do any pausing to
+ allow multiplexed analog inputs to settle before
+ performing an analog to digital conversion.  If you are
+ switching between different channels and need to allow
+ your analog input to settle for an accurate reading,
+ use comedi_data_read_delayed(), or set the
+ input channel at an earlier time with
+ comedi_data_read_hint().
+
  On sucess, comedi_data_read() returns 0.  If there is an
  error, -1 is returned.
- 
+
  Data values returned by this function are unsigned integers
  less than or equal to the maximum sample value of the channel,
  which can be determined using the function comedi_get_maxdata().
  Conversion of data values to physical units can be performed
  by the function comedi_to_phys().
+
+Function: comedi_data_read_delayed -- read single sample from channel after delaying for specified settling time
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int channel
+Param: unsigned int range
+Param: unsigned int aref
+Param: lsampl_t * data
+Param: unsigned int nanosec
+Description:
+ Similar to comedi_data_read() except it will wait for the
+ specified number of nanoseconds between setting the input
+ channel and taking a sample.  For analog inputs, most
+ boards have a single
+ analog to digital converter which is multiplexed to be
+ able to read multiple channels.  If the input is not allowed
+ to settle after the multiplexer switches channels, the
+ reading will be inaccurate.  This function is useful
+ for allowing a multiplexed analog input to settle
+ when switching channels.
+
+ Although the settling time is specified in nanoseconds, the
+ actual settling time will be rounded up to the nearest
+ microsecond.
+
+Function: comedi_data_read_hint -- tell driver which channel/range/aref you are going to read from next
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int channel
+Param: unsigned int range
+Param: unsigned int aref
+Description:
+ Used to prepare an analog input for a subsequent call to
+ comedi_data_read().  It is not necessary to use this
+ function, but it can be useful for eliminating inaccuaracies
+ caused by insufficient settling times when switching the
+ channel
+ or gain on an analog input.  This function sets an analog input
+ to the channel, range, and aref specified but does not
+ perform an actual analog to digital conversion.
+
+ Alternatively, one can simply use comedi_data_read_delayed(),
+ which sets up the
+ input, pauses to allow settling, then performs a conversion.
 
 Function: comedi_data_write -- write single sample to channel
 Retval: int
