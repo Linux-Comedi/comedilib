@@ -54,6 +54,10 @@ int main(int argc, char *argv[])
 
 	map=mmap(NULL,size,PROT_READ,MAP_SHARED,comedi_fileno(dev),0);
 	fprintf(stderr,"map=%p\n",map);
+	if( map == MAP_FAILED ){
+		perror( "mmap" );
+		exit(1);
+	}
 
 	for(i=0;i<n_chan;i++){
 		chanlist[i]=CR_PACK(channel+i,range,aref);
