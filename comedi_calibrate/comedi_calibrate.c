@@ -318,7 +318,7 @@ void measure_observable( calibration_setup_t *setup, int obs)
 	n = new_sv_measure(setup->dev, &sv);
 
 	sci_sprint_alt(s,sv.average,sv.error);
-	DPRINT(0,"offset %s, target %g\n",s, setup->observables[obs].target);
+	DPRINT(0,"reading %s, target %g\n",s, setup->observables[obs].target);
 }
 
 void observable_dependence(calibration_setup_t *setup, int obs)
