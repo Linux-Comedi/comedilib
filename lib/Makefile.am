@@ -1,8 +1,4 @@
 
-## hack
-FLEX_PATH=flex
-BISON_PATH=bison
-
 lib_LTLIBRARIES = libcomedi.la
 
 noinst_HEADERS = calib_yacc.h comedi_errno.h libinternal.h
@@ -21,8 +17,8 @@ libcomedi_la_CFLAGS = $(COMEDILIB_CFLAGS) -D_REENTRANT
 libcomedi_la_LDFLAGS = -Wl,--version-script=$(srcdir)/version_script
 
 calib_yacc.c: $(srcdir)/calib_yacc.y
-	$(BISON_PATH) -d -y -p calib_yy -o $@ $<
+	$(YACC) -d -p calib_yy -o $@ $<
 
 calib_lex.c: $(srcdir)/calib_lex.l
-	$(FLEX_PATH) -Pcalib_yy -o$@ $<
+	$(LEX) -Pcalib_yy -o$@ $<
 
