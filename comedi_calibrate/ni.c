@@ -487,19 +487,17 @@ int cal_ni_pci_6023e(calibration_setup_t *setup)
 
 int cal_ni_pci_6024e(calibration_setup_t *setup)
 {
-	/* There seems to be a bug in the driver that doesn't allow
-	 * access to caldac 10, and possibly others. */
-	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,1);
-	//cal1( setup, ni_zero_offset_high,10);
-	//cal1( setup, ni_zero_offset_high,0);
-	cal1( setup, ni_reference_low,3);
+	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,4);
+	cal1( setup, ni_zero_offset_high,0);
+	cal1( setup, ni_zero_offset_high,8);
+	cal1( setup, ni_reference_low,2);
 	if(do_output){
-		cal1( setup, ni_ao0_zero_offset,5);
-		//cal1( setup, ni_ao0_zero_offset,4); // nonlinearity?
-		//cal1( setup, ni_ao0_reference,6);
-		cal1( setup, ni_ao1_zero_offset,8);
-		//cal1( setup, ni_ao1_zero_offset,7); // nonlinearity?
-		//cal1( setup, ni_ao1_reference,9);
+		cal1( setup, ni_ao0_zero_offset,6);
+		//cal1( setup, ni_ao0_zero_offset,10); // nonlinearity?
+		cal1( setup, ni_ao0_reference,11);
+		cal1( setup, ni_ao1_zero_offset,9);
+		//cal1( setup, ni_ao1_zero_offset,1); // nonlinearity?
+		cal1( setup, ni_ao1_reference,5);
 	}
 	return 0;
 }
