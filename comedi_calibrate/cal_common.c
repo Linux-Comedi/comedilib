@@ -423,13 +423,13 @@ static int dummy_observable( const calibration_setup_t *setup,
 void init_generic_layout( generic_layout_t *layout )
 {
 	layout->adc_offset = dummy_caldac;
-	layout->adc_gain = dummy_caldac;
 	layout->adc_offset_fine = dummy_caldac;
+	layout->adc_gain = dummy_caldac;
 	layout->adc_gain_fine = dummy_caldac;
-	layout->dac_offset = dummy_caldac;
 	layout->adc_postgain_offset = dummy_caldac;
-	layout->dac_gain = dummy_caldac;
+	layout->dac_offset = dummy_caldac;
 	layout->dac_offset_fine = dummy_caldac;
+	layout->dac_gain = dummy_caldac;
 	layout->dac_gain_fine = dummy_caldac;
 	layout->adc_high_observable = dummy_observable;
 	layout->adc_ground_observable = dummy_observable;
