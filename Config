@@ -19,6 +19,10 @@ CFLAGS += -DI18N # This enables gettextization
 #CFLAGS += -g
 
 
+# soname suffix.  This can be used to differentiate between a
+# library compiled against glibc versus uClibc
+#SONAME_SUFFIX = -uClibc0
+
 # Python wrapper:
 # If you want to build the python wrapper, change this to yes.
 with_python = no
