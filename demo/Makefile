@@ -8,7 +8,8 @@ LIBS += ../lib/libcomedi.a -lm
 
 BINS=tut1 tut2 # sv
 MBINS=inp inpn eeprom_dump info outp insn antialias ao_waveform \
-	dio mmap ledclock receiver sigio select sender cmd poll
+	dio mmap ledclock receiver sigio select sender cmd poll \
+	apply_cal
 
 all: $(BINS) $(MBINS)
 
