@@ -1,3 +1,9 @@
+comedilib (0.7.18-cvs20020912) unstable; urgency=low
+
+  * snapshot
+
+ -- David Schleef <ds@schleef.org>  Thu, 12 Sep 2002 16:43:08 -0700
+
 comedilib (0.7.18) unstable; urgency=low
 
   * New upstream version

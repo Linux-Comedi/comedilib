@@ -6,17 +6,19 @@
 #export DH_VERBOSE=1
 
 # This is the debhelper compatability version to use.
-export DH_COMPAT=1
+export DH_COMPAT=3
 
-# shared library versions, option 1
-include version
-major=0
 
 build: build-stamp
 build-stamp:
 	dh_testdir
 
-	./configure --prefix=/usr
+	./configure --prefix=/usr \
+		--mandir=\$${prefix}/share/man \
+		--datadir=\$${prefix}/share/doc/ \
+		--sysconfdir=/etc \
+		--disable-dependency-tracking
+
 	$(MAKE)
 
 	touch build-stamp
@@ -36,14 +38,11 @@ install: build
 	dh_clean -k
 	dh_installdirs
 
-	$(MAKE) install prefix=`pwd`/debian/tmp/usr
+	$(MAKE) install prefix=`pwd`/debian/tmp/usr \
+		pkgdatadir=`pwd`/debian/tmp/usr/share/doc/libcomedi-dev
 
-
-# Build architecture-independent files here.
 binary-indep: build install
-# We have nothing to do by default.
 
-# Build architecture-dependent files here.
 binary-arch: build install
 #	dh_testversion
 	dh_testdir
@@ -51,12 +50,7 @@ binary-arch: build install
 	#
 	# build libcomedi${major} package by moving files from comedilib-dev
 	#
-	dh_movefiles -plibcomedi$(major)		\
-		usr/lib/libcomedi.so.$(version)		\
-		usr/lib/libcomedi.so.$(major)		\
-		usr/sbin/comedi_config			\
-		usr/bin/comedi_calibrate		\
-		etc
+	dh_movefiles
 
 #	dh_installdebconf	
 	dh_installdocs
@@ -66,9 +60,6 @@ binary-arch: build install
 #	dh_installpam
 #	dh_installinit
 	dh_installcron
-	dh_installmanpages -plibcomedi0
-
-	(cd debian/tmp/usr/share && rm -rf man)
 
 	dh_installinfo
 #	dh_undocumented
