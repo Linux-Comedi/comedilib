@@ -573,6 +573,6 @@ int cb_actual_source_voltage( comedi_t *dev, unsigned int subdevice, unsigned in
 		return -1;
 	}
 
-	DPRINT(0, "eeprom ch 0x%x gives calibration source of %gV\n", eeprom_channel, *voltage);
+	DPRINT(1, "eeprom ch 0x%x gives calibration source of %gV\n", eeprom_channel, *voltage);
 	return 0;
 }

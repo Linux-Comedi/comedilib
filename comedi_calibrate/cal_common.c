@@ -71,6 +71,7 @@ void generic_prep_adc_caldacs( calibration_setup_t *setup,
 		reset_caldac( setup, layout->adc_gain( channel ) );
 		reset_caldac( setup, layout->adc_offset_fine( channel ) );
 		reset_caldac( setup, layout->adc_gain_fine( channel ) );
+		reset_caldac( setup, layout->adc_postgain_offset( channel ) );
 	}else
 	{
 		retval = comedi_apply_parsed_calibration( setup->dev, setup->ad_subdev,
@@ -82,6 +83,7 @@ void generic_prep_adc_caldacs( calibration_setup_t *setup,
 			reset_caldac( setup, layout->adc_gain( channel ) );
 			reset_caldac( setup, layout->adc_offset_fine( channel ) );
 			reset_caldac( setup, layout->adc_gain_fine( channel ) );
+			reset_caldac( setup, layout->adc_postgain_offset( channel ) );
 		}
 	}
 }
@@ -174,25 +176,27 @@ static void generic_do_adc_postgain_offset( calibration_setup_t *setup, const ge
 	comedi_calibration_setting_t *current_cal, unsigned int channel, int unipolar )
 {
 	int lowgain, highgain;
+	int bip_lowgain;
 
+	bip_lowgain = get_bipolar_lowgain( setup->dev, setup->ad_subdev );
 	if( unipolar )
 	{
 		lowgain = get_unipolar_lowgain( setup->dev, setup->ad_subdev );
 		highgain = get_unipolar_highgain( setup->dev, setup->ad_subdev );
 	}else
 	{
-		lowgain = get_bipolar_lowgain( setup->dev, setup->ad_subdev );
+		lowgain = bip_lowgain;
 		highgain = get_bipolar_highgain( setup->dev, setup->ad_subdev );
 	}
 	generic_prep_adc_caldacs( setup, layout, channel, highgain );
 	if( unipolar )
 	{
-		reset_caldac( setup, layout->adc_postgain_offset( channel ) );
-		/* need to make sure we aren't stuck on zero for unipolar,
-		 * by setting pregain offset to maximum */
-		generic_peg( setup, layout->adc_ground_observable( setup, channel, lowgain ),
+		/* Need to make sure we aren't stuck on zero for unipolar,
+		 * by setting pregain offset to maximum.  Use bipolar lowgain
+		 * for pegs to make sure we aren't out-of-range. */
+		generic_peg( setup, layout->adc_ground_observable( setup, channel, bip_lowgain ),
 			layout->adc_offset( channel ), 1 );
-		generic_peg( setup, layout->adc_ground_observable( setup, channel, lowgain ),
+		generic_peg( setup, layout->adc_ground_observable( setup, channel, bip_lowgain ),
 			layout->adc_offset_fine( channel ), 1 );
 	}
 	generic_do_relative( setup, current_cal, layout->adc_ground_observable( setup, channel, lowgain ),
