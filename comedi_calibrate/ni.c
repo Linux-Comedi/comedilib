@@ -354,7 +354,18 @@ int cal_ni_pci_mio_16xe_10(calibration_setup *setup)
 
 int cal_ni_at_mio_16e_1(calibration_setup *setup)
 {
-	return cal_ni_at_mio_16e_2( setup );
+	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
+	cal1(ni_zero_offset_high,0);
+	cal1(ni_reference_low,3);
+	cal1(ni_unip_offset_low,2);
+	if(do_output){
+		cal1(ni_ao0_zero_offset,4);
+		//cal1(ni_ao0_zero_offset,5); /* nonlinearity? */
+		cal1(ni_ao0_reference,6);
+		cal1(ni_ao1_zero_offset,7);
+		//cal1(ni_ao0_zero_offset,8); /* nonlinearity? */
+		cal1(ni_ao1_reference,9);
+	}
 }
 
 int cal_ni_pci_mio_16e_1(calibration_setup *setup)
