@@ -77,8 +77,6 @@ etc/hotplug/Makefile
 etc/hotplug/usb/Makefile
 etc/hotplug/usb/usbdux/Makefile
 doc/Makefile
-doc/html/Makefile
-doc/man/Makefile
 demo/Makefile
 include/Makefile
 lib/Makefile
