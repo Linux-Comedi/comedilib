@@ -12,46 +12,122 @@ gains and offsets using programmable DACs.  On these devices,
 \fBcomedi_calibrate\fR adjusts the programmable calibration
 DACs so that the measured value of reference voltages fall
 within acceptable limits.  The calibration settings are
-saved to a file which can be fed to the comedi_apply_calibration()
-function.
+saved to a file which can be fed to comedi_apply_calibration()
+and related functions.
 
-\fBComedi_calibrate\fR prints a lot of debugging information
+\fBcomedi_calibrate\fR prints a lot of debugging information
 as it runs.
 
 .SH LIMITATIONS
 
-\fBComedi_calibrate\fR only works on boards that it understands.
+\fBcomedi_calibrate\fR only works on boards that it understands.
 For boards that are known to have autocalibration ability,
 but are not currently supported, \fBcomedi_calibrate\fR will
 output basic debugging information that is useful for
 the author to add support for your device.  Please send this
 output to him.
 
+.SH EXAMPLES
+
+.TP
+.BI comedi_calibrate\ \-\-file\  /dev/comediN
+If no default calibration for \fI/dev/comediN\fR already exists,
+perform a calibration
+and save results to default location.
+
+.TP
+.BI comedi_calibrate\ \-\-calibrate
+Perform a calibration, using existing calibration (if it exists) as
+starting point.
+
+.TP
+.BI comedi_calibrate\ \-\-reset\ \-\-calibrate
+Perform a fresh calibration and save results to default location.
+
+.TP
+.BI comedi_calibrate\ \-\-no\-calibrate\ \-\-subdevice\  subd\  \-\-range\  range\  \-\-save\-file\  cal_file
+Apply calibration for subdevice \fIsubd\fR, range \fIrange\fR, using
+the settings in the calibration file \fIcal_file\fR.
+
 
 .SH OPTIONS
 
-\fBcomedi_calibrate\fR	recognizes the following options:
+\fBcomedi_calibrate\fR recognizes the following options:
 
-\fB--[no-]calibrate\fR	Perform calibration (or not).
+.TP
+.BI \-a\  aref ,\ \-\-aref\  aref
+Along with \fB--channel\fR, \fB--range\fR
+and \fB--subdevice\fR, this specifies which calibration you want comedi_calibrate
+leave applied to the board.
 
-\fB-f, --file /dev/comediN\fR	perform calibration on device \fB/dev/comediN\fR
+.TP
+.B \-\-[no\-]calibrate
+Force calibration to be performed (or not).
+By default, comedi_calibrate will only perform a new calibration if
+no existing calibration file is found (see \fB--save-file\fR).
 
-\fB--help\fR	print help for options then exit
+.TP
+.BI \-c\  channel, \-\-channel\  channel
+Along with \fB--subdevice\fR, \fB--range\fR
+and \fB--aref\fR, this specifies which calibration you want comedi_calibrate
+to leave applied to the board.
 
-\fB-q, --quiet\fR	don't generate output to stdout
+.TP
+.B \-\-[no\-]dump
+Perform (or not) dump of various information about
+state of calibration prior to performing new calibration.
 
-\fB--[no-]reset\fR	Reset (or don't reset) calibration subdevice to
+.TP
+.BI \-f\  /dev/comediN, \-\-file\  /dev/comediN
+Perform calibration on device \fB/dev/comediN\fR.
+
+.TP
+.B \-\-help\
+Print help for options then exit.
+
+.TP
+.B \-q, \-\-quiet
+Don't generate output to stdout.
+
+.TP
+.BI \-r\  range ,\ \-\-range\  range
+Along with \fB--channel\fR, \fB--subdevice\fR
+and \fB--aref\fR, this specifies which calibration you want comedi_calibrate
+to leave applied to the board.
+
+.TP
+.B \-\-[no\-]reset
+Reset (or don't reset) calibration subdevice to
 a reasonable starting point before
-performing calibration.  The default is \fB--reset\fR.  The
-\fB--no-reset\fR option is useful if
+performing calibration.  The default is \fB--no-reset\fR.  If
+\fB--no-reset\fR is used, the calibration routine will try to use
+an existing calibration (see \fB--save-file\fR) as a starting point.
+This is useful if
 a single calibration
 pass is not sufficient, and you wish to perform another calibration
 pass starting from the results of the previous pass.
 
-\fB-S, --save-file <file path>\fR	save calibration information to specified file,
-instead of default location
+.TP
+.B \-\-[no\-]results
+Perform (or not) dump of various information about
+state of calibration after performing new calibration.
 
-\fB-v, --verbose\fR	generate more verbose output to stdout, can be specified multiple times
+.TP
+.BI \-S\  file ,\ \-\-save-file\  file
+Save calibration information to specified file,
+instead of default location.  If the file already exists, comedi_calibrate
+will also use its contents as a starting point for the calibration pass (see
+\fB--no-reset\fR).
+
+.TP
+.BI \-s\  subdevice ,\ \-\-subdevice\  subdevice
+Along with \fB--channel\fR, \fB--range\fR
+and \fB--aref\fR, this specifies which calibration you want comedi_calibrate
+to leave applied to the board.
+
+.TP
+.B \-v, \-\-verbose
+Generate more verbose output to stdout, can be specified multiple times
 
 
 .SH SEE ALSO
@@ -66,3 +142,4 @@ instead of default location
 
 David Schleef, <ds@schleef.org>
 
+Frank Mori Hess, <fmhess@users.sourceforge.net>
