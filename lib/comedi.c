@@ -89,11 +89,34 @@ __asm__(".symver comedi_open_0,comedi_open@");
 
 void comedi_close(comedi_t *it)
 {
+	subdevice *s;
+	int i;
+
 	it->magic=0;
 
-	/* XXX should free all memory */
+	for(i=0;i<it->n_subdevices;i++){
+		s=it->subdevices+i;
+		if(s->type==COMEDI_SUBD_UNUSED)
+			continue;
 
+		if(s->subd_flags&SDF_FLAGS){
+			free(s->flags_list);
+		}
+		if(s->subd_flags&SDF_MAXDATA){
+			free(s->maxdata_list);
+		}
+		if(s->subd_flags&SDF_RANGETYPE){
+			free(s->range_type_list);
+			free(s->rangeinfo_list);
+		}else{
+			free(s->rangeinfo);
+		}
+	}
+	if(it->subdevices){
+		free(it->subdevices);
+	}
 	close(it->fd);
+	free(it);
 }
 
 int comedi_cancel(comedi_t *it,unsigned int subdevice)
