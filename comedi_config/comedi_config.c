@@ -192,19 +192,19 @@ int main(int argc,char *argv[])
 		fprintf(stderr,"Check kernel log for more information\n");
 		fprintf(stderr,"Possible reasons for failure:\n");
 		switch(err){
-		case -EINVAL:
+		case EINVAL:
 			fprintf(stderr,"  \n");
 			break;
-		case -EBUSY:
+		case EBUSY:
 			fprintf(stderr,"  Already configured\n");
 			break;
-		case -EIO:
+		case EIO:
 			fprintf(stderr,"  Driver not found\n");
 			break;
-		case -EPERM:
+		case EPERM:
 			fprintf(stderr,"  Not root\n");
 			break;
-		case -EFAULT:
+		case EFAULT:
 			fprintf(stderr,"  Comedi bug\n");
 			break;
 		default:
