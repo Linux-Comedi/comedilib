@@ -798,10 +798,10 @@ int cal_ni_pci_611x( calibration_setup_t *setup )
 	}
 
 	if(do_output){
-		cal1( setup, ni_ao0_zero_offset_611x, 10 );
-		cal1( setup, ni_ao0_reference_611x, 9 );
-		cal1( setup, ni_ao1_zero_offset_611x, 12 );
-		cal1( setup, ni_ao1_reference_611x, 11 );
+		cal1( setup, ni_ao0_zero_offset_611x, 18 );
+		cal1( setup, ni_ao0_reference_611x, 17 );
+		cal1( setup, ni_ao1_zero_offset_611x, 20 );
+		cal1( setup, ni_ao1_reference_611x, 19 );
 	}
 
 	return 0;
