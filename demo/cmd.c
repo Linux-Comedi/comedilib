@@ -26,6 +26,7 @@ char buf[BUFSZ];
 
 
 static void do_cmd(comedi_t *dev);
+void dump_cmd(comedi_cmd *cmd);
 
 int main(int argc, char *argv[])
 {
@@ -62,10 +63,10 @@ static void do_cmd(comedi_t *dev)
 	cmd.start_arg =		0;
 
 	cmd.scan_begin_src =	TRIG_TIMER;
-	cmd.scan_begin_arg =	1000000;	/* in ns */
+	cmd.scan_begin_arg =	1;	/* in ns */
 
 	cmd.convert_src =	TRIG_TIMER;
-	cmd.convert_arg =	100000;		/* in ns */
+	cmd.convert_arg =	1;		/* in ns */
 
 	cmd.scan_end_src =	TRIG_COUNT;
 	cmd.scan_end_arg =	4;		/* number of channels */
@@ -89,14 +90,95 @@ static void do_cmd(comedi_t *dev)
 	cmd.data = NULL;
 	cmd.data_len = 0;
 
+	ret=ioctl(comedi_fileno(dev),COMEDI_CMDTEST,&cmd);
+
+	printf("test ret=%d\n",ret);
+	if(ret<0){
+		printf("errno=%d\n",errno);
+		comedi_perror("ioctl");
+		return;
+	}
+
+	dump_cmd(&cmd);
+
+	cmd.chanlist =		chanlist;
+	cmd.chanlist_len =	4;
+
+	ret=ioctl(comedi_fileno(dev),COMEDI_CMDTEST,&cmd);
+
+	printf("test ret=%d\n",ret);
+	if(ret<0){
+		printf("errno=%d\n",errno);
+		comedi_perror("ioctl");
+		return;
+	}
+
+	dump_cmd(&cmd);
+
+	cmd.chanlist =		chanlist;
+	cmd.chanlist_len =	4;
+
 	ret=ioctl(comedi_fileno(dev),COMEDI_CMD,&cmd);
 
-	printf("ioctl returned %d\n",ret);
+	printf("ret=%d\n",ret);
+	if(ret<0){
+		printf("errno=%d\n",errno);
+		comedi_perror("ioctl");
+		return;
+	}
 
 	do{
 		ret=read(comedi_fileno(dev),buf,BUFSZ);
 		printf("read %d\n",ret);
-	}while(ret>=0);
+	}while(ret>0);
 	printf("errno=%d\n",errno);
+}
+
+char *cmd_src(int src)
+{
+	switch(src){
+	case TRIG_NONE:
+		return "none";
+	case TRIG_NOW:
+		return "now";
+	case TRIG_FOLLOW:
+		return "follow";
+	case TRIG_TIME:
+		return "time";
+	case TRIG_TIMER:
+		return "timer";
+	case TRIG_COUNT:
+		return "count";
+	case TRIG_EXT:
+		return "ext";
+	case TRIG_INT:
+		return "int";
+	default:
+		return "unknown";
+	}
+}
+
+
+void dump_cmd(comedi_cmd *cmd)
+{
+	printf("start: %s %d\n",
+		cmd_src(cmd->start_src),
+		cmd->start_arg);
+
+	printf("scan_begin: %s %d\n",
+		cmd_src(cmd->scan_begin_src),
+		cmd->scan_begin_arg);
+
+	printf("convert: %s %d\n",
+		cmd_src(cmd->convert_src),
+		cmd->convert_arg);
+
+	printf("scan_end: %s %d\n",
+		cmd_src(cmd->scan_end_src),
+		cmd->scan_end_arg);
+
+	printf("stop: %s %d\n",
+		cmd_src(cmd->stop_src),
+		cmd->stop_arg);
 }
 
