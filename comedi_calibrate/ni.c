@@ -69,7 +69,7 @@ struct board_struct boards[]={
 	{ "at-mio-16xe-50",	STATUS_SOME,	cal_ni_at_mio_16xe_50 },
 	{ "at-mio-16e-1",	STATUS_SOME,	cal_ni_at_mio_16e_1 },
 	{ "pci-mio-16e-1",	STATUS_DONE,	cal_ni_pci_mio_16e_1 },
-	{ "pci-6025e",		STATUS_GUESS,	cal_ni_pci_6025e },
+	{ "pci-6025e",		STATUS_SOME,	cal_ni_pci_6025e },
 	{ "pci-6035e",		STATUS_GUESS,	cal_ni_pci_6035e },
 	{ "pci-6071e",		STATUS_SOME,	cal_ni_pci_6071e },
 	{ "pxi-6071e",		STATUS_GUESS,	cal_ni_pxi_6071e },
@@ -466,14 +466,17 @@ void cal_ni_pci_6024e(void)
 
 void cal_ni_pci_6025e(void)
 {
-	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
-	cal1(ni_zero_offset_high,0);
-	cal1(ni_reference_low,3);
+	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,4); // was 1
+	cal1(ni_zero_offset_high,XXX); // was 10
+	cal1(ni_zero_offset_high,8); // was 0
+	cal1(ni_reference_low,2); // was 3
 	if(do_output){
-		cal1(ni_ao0_zero_offset,4); // guess
-		cal1(ni_ao0_reference,5); // guess
-		cal1(ni_ao1_zero_offset,8); // guess
-		cal1(ni_ao1_reference,9); // guess
+		cal1(ni_ao0_zero_offset,6); // was 5
+		//cal1(ni_ao0_zero_offset,10); // nonlinearity was 4
+		//cal1(ni_ao0_reference,XXX); // was 6
+		cal1(ni_ao1_zero_offset,9); // was 8
+		//cal1(ni_ao1_zero_offset,1); // nonlinearity was 7
+		cal1(ni_ao1_reference,5); // was 9
 	}
 }
 
