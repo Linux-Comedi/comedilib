@@ -66,6 +66,9 @@ struct comedi_t_struct{
 	comedi_devinfo devinfo;
 
 	subdevice *subdevices;
+
+	unsigned int has_insnlist_ioctl;
+	unsigned int has_insn_ioctl;
 };
 
 struct subdevice_struct{
@@ -86,7 +89,6 @@ struct subdevice_struct{
 	comedi_range **rangeinfo_list;
 
 	unsigned int has_cmd;
-	unsigned int has_insn;
 	unsigned int has_insn_bits;
 };
 
@@ -121,25 +123,6 @@ enum{
 	COMEDILIB_BADSUBD,
 	COMEDILIB_BADCHAN,
 };
-
-
-/* comedi version compatibility */
-
-#ifndef TRIG_WRITE
-#define TRIG_WRITE	0x0040
-#endif
-
-#ifdef COMEDI_CMD
-#define HAVE_COMEDI_CMD
-#endif
-
-#ifdef COMEDI_INSNLIST
-#define HAVE_COMEDI_INSN
-#endif
-
-#ifdef COMEDI_POLL
-#define HAVE_COMEDI_POLL
-#endif
 
 
 #endif

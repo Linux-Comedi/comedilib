@@ -126,11 +126,7 @@ int comedi_cancel(comedi_t *it,unsigned int subdevice)
 
 int comedi_poll(comedi_t *it,unsigned int subdevice)
 {
-#ifdef HAVE_COMEDI_POLL
 	return ioctl(it->fd,COMEDI_POLL,subdevice);
-#else
-	return -1;
-#endif
 }
 
 int comedi_fileno(comedi_t *it)
@@ -166,12 +162,20 @@ int comedi_do_insnlist(comedi_t *it,comedi_insnlist *il)
 
 int comedi_do_insn(comedi_t *it,comedi_insn *insn)
 {
-	comedi_insnlist il;
+	if(it->has_insn_ioctl){
+		return ioctl(it->fd,COMEDI_INSN,insn);
+	}else{
+		comedi_insnlist il;
+		int ret;
 
-	il.n_insns = 1;
-	il.insns = insn;
+		il.n_insns = 1;
+		il.insns = insn;
 
-	return ioctl(it->fd,COMEDI_INSNLIST,&il);
+		ret = ioctl(it->fd,COMEDI_INSNLIST,&il);
+
+		if(ret<0)return ret;
+		return insn->n;
+	}
 }
 
 int comedi_lock(comedi_t *it,unsigned int subdevice)

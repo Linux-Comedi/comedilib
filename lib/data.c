@@ -47,7 +47,7 @@ int comedi_data_write(comedi_t *it,unsigned int subdev,unsigned int chan,unsigne
 
 	s=it->subdevices+subdev;
 	
-	if(s->has_insn){
+	if(it->has_insnlist_ioctl){
 		comedi_insn insn;
 
 		memset(&insn,0,sizeof(insn));
@@ -86,6 +86,36 @@ int comedi_data_write(comedi_t *it,unsigned int subdev,unsigned int chan,unsigne
 }
 
 
+int comedi_data_read_n(comedi_t *it,unsigned int subdev,unsigned int chan,
+		unsigned int range, unsigned int aref,lsampl_t *data,
+		unsigned int n)
+{
+	subdevice *s;
+	comedi_insn insn;
+
+	if(!valid_chan(it,subdev,chan))
+		return -1;
+
+	s=it->subdevices+subdev;
+
+	if(it->has_insnlist_ioctl){
+
+		memset(&insn,0,sizeof(insn));
+
+		insn.insn = INSN_READ;
+		insn.n = 1;
+		insn.data = data;
+		insn.subdev = subdev;
+		insn.chanspec = CR_PACK(chan,range,aref);
+
+		return comedi_do_insn(it,&insn);
+	}else{
+		/* There's no need to be fast for a case that is
+		 * obsolete. */
+		return comedi_data_read(it,subdev,chan,range,aref,data);
+	}
+}
+
 int comedi_data_read(comedi_t *it,unsigned int subdev,unsigned int chan,unsigned int range,
 		unsigned int aref,lsampl_t *data)
 {
@@ -96,7 +126,7 @@ int comedi_data_read(comedi_t *it,unsigned int subdev,unsigned int chan,unsigned
 
 	s=it->subdevices+subdev;
 
-	if(s->has_insn){
+	if(it->has_insnlist_ioctl){
 		comedi_insn insn;
 
 		memset(&insn,0,sizeof(insn));
@@ -142,51 +172,4 @@ int comedi_data_read(comedi_t *it,unsigned int subdev,unsigned int chan,unsigned
 		return 0;
 	}
 }
-
-#if 1
-/*
-   I don't like this function, which is why it is marked out.
-   The problem is the sampl_t/lsampl_t fiasco, which is beginning
-   to be a PITA.
- */
-int comedi_data_read_n(comedi_t *it,unsigned int subdev,unsigned int chan,unsigned int range,
-		unsigned int aref,unsigned int n,lsampl_t *data)
-{
-	comedi_trig cmd;
-	unsigned int i;
-	int ret;
-
-	if(!valid_chan(it,subdev,chan))
-		return -1;
-	
-	if(n==0)
-		return 0;
-
-	chan=CR_PACK(chan,range,aref);
-	
-	memset(&cmd,0,sizeof(cmd));
-	cmd.mode=0;
-	cmd.n_chan=1;
-	cmd.subdev=subdev;
-	cmd.chanlist=&chan;
-
-	i=0;
-	while(i<n){
-		cmd.data=(void *)(data+i);
-		cmd.n=n-i;
-
-		ret=ioctl_trigger(it->fd,&cmd);
-		if(ret<0)
-			goto out;
-
-		i+=ret;
-	}
-out:
-	if(i==0)return -1;
-
-	return (int)i;
-}
-#endif
-
-
 

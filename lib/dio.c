@@ -49,7 +49,7 @@ int comedi_dio_config(comedi_t *it,unsigned int subdev,unsigned int chan,unsigne
 	if(io!=COMEDI_INPUT && io!=COMEDI_OUTPUT)
 		return -1;
 
-	if(s->has_insn){
+	if(it->has_insnlist_ioctl){
 		comedi_insn insn;
 		lsampl_t data;
 		
@@ -94,7 +94,7 @@ int comedi_dio_read(comedi_t *it,unsigned int subdev,unsigned int chan,
 	   s->type!=COMEDI_SUBD_DI)
 		return -1;
 
-	if(s->has_insn){
+	if(it->has_insnlist_ioctl){
 		comedi_insn insn;
 		lsampl_t data;
 		
@@ -142,7 +142,7 @@ int comedi_dio_write(comedi_t *it,unsigned int subdev,unsigned int chan,
 	   s->type!=COMEDI_SUBD_DO)
 		return -1;
 
-	if(s->has_insn){
+	if(it->has_insnlist_ioctl){
 		comedi_insn insn;
 		lsampl_t data;
 		

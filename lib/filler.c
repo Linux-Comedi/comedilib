@@ -39,7 +39,8 @@
 /* these functions download information from the comedi module. */
 
 static int do_test_for_cmd(comedi_t *dev,unsigned int subdevice);
-static int do_test_for_insn(comedi_t *dev,unsigned int subdevice);
+static int do_test_for_insn(comedi_t *dev);
+static int do_test_for_insnlist(comedi_t *dev);
 static int do_test_for_insn_bits(comedi_t *dev,unsigned int subdevice);
 
 
@@ -59,6 +60,8 @@ int get_subdevices(comedi_t *it)
 	debug_ptr(r);
 	memset(r,0,sizeof(subdevice)*it->n_subdevices);
 
+	it->has_insnlist_ioctl = do_test_for_insnlist(it);
+	it->has_insn_ioctl = do_test_for_insn(it);
 	for(i=0;i<it->n_subdevices;i++){
 		r[i].type	= s[i].type;
 		if(r[i].type==COMEDI_SUBD_UNUSED)continue;
@@ -96,8 +99,7 @@ int get_subdevices(comedi_t *it)
 		}
 
 		r[i].has_cmd = do_test_for_cmd(it,i);
-		r[i].has_insn = do_test_for_insn(it,i);
-		if(r[i].has_insn){
+		if(it->has_insnlist_ioctl){
 			r[i].has_insn_bits = do_test_for_insn_bits(it,i);
 		}else{
 			r[i].has_insn_bits = 0;
@@ -163,7 +165,7 @@ static int do_test_for_cmd(comedi_t *dev,unsigned int subdevice)
 	return 1;
 }
 
-static int do_test_for_insn(comedi_t *dev,unsigned int subdevice)
+static int do_test_for_insnlist(comedi_t *dev)
 {
 	comedi_insn insn;
 	comedi_insnlist il;
@@ -178,19 +180,43 @@ static int do_test_for_insn(comedi_t *dev,unsigned int subdevice)
 	insn.insn = INSN_GTOD;
 	insn.n = 2;
 	insn.data = data;
-	insn.subdev = subdevice;
 
-	ret = comedi_do_insnlist(dev,&il);
+	ret = ioctl(dev->fd,COMEDI_INSNLIST,&il);
 
-	if(ret<0 && errno==EIO){
-		return 0;
-	}
-#if 0
 	if(ret<0){
-		fprintf(stderr,"BUG in do_test_for_insn()\n");
+		if(errno!=EIO){
+			fprintf(stderr,"BUG in do_test_for_insn()\n");
+		}
 		return 0;
 	}
-#endif
+	return 1;
+}
+
+/* the COMEID_INSN ioctl was introduced in comedi-0.7.60 */
+static int do_test_for_insn(comedi_t *dev)
+{
+	comedi_insn insn;
+	comedi_insnlist il;
+	lsampl_t data[2];
+	int ret;
+
+	memset(&insn,0,sizeof(insn));
+
+	il.n_insns = 1;
+	il.insns = &insn;
+
+	insn.insn = INSN_GTOD;
+	insn.n = 2;
+	insn.data = data;
+
+	ret = ioctl(dev->fd,COMEDI_INSN,&insn);
+
+	if(ret<0){
+		if(errno!=EIO){
+			fprintf(stderr,"BUG in do_test_for_insn()\n");
+		}
+		return 0;
+	}
 	return 1;
 }
 
@@ -219,12 +245,10 @@ static int do_test_for_insn_bits(comedi_t *dev,unsigned int subdevice)
 	if(ret<0 && (errno==EINVAL || errno==EIO)){
 		return 0;
 	}
-#if 0
 	if(ret<0){
 		fprintf(stderr,"BUG in do_test_for_insn_bits()\n");
 		return 0;
 	}
-#endif
 	return 1;
 }
 
