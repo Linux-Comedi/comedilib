@@ -27,76 +27,50 @@ the <command>comedi_config</command> command. (As root of course.)
 Here is an example of how to use the command (perhaps you should read
 its <command>man</command> page now):
 <screen>
-/usr/sbin/comedi_config /dev/comedi0 ni_atmio 0x260,3
+PATH=/sbin:/usr/sbin:/usr/local/sbin:$PATH
+comedi_config /dev/comedi0 labpc-1200 0x260,3
 </screen>
 This command says that the &ldquo;file&rdquo;
 <filename>/dev/comedi0</filename> can be used to access the &comedi;
-device that uses the <parameter>ni_atmio</parameter> driver, and that
+device that uses the <parameter>labpc-1200</parameter> board, and that
 you give it two run-time parameters (<literal>0x260</literal> and
 <literal>3</literal>). More parameters are possible, for example to
 discriminate between two or more identical cards in your system.
 </para>
 <para>
 If you want to have the board configured in this way every time you
-boot, put the line above into a start-up script file of your Linux
+boot, put the lines above into a start-up script file of your Linux
 system (for example, the
-<filename>/etc/rc.d/rc.local</filename> file), or in the system-wide
-&comedi; configuration file <filename>/etc/comedi.conf</filename>.
-You can, of course, also run this command at a command prompt.
+<filename>/etc/rc.d/rc.local</filename> file), or for PCMCIA
+boards the appropriate place is the /etc/pcmcia/comedi script.
+For non-PCMCIA boards, you can also arrange to have your driver
+loaded and comedi_config run with by adding a few lines
+to /etc/modules.conf (see the INSTALL file for the comedi
+kernel modules). You can, of course, also run comedi_config
+at a command prompt.
 </para>
 
 <para>
 This tutorial goes through the process of configuring &comedi;
 for two devices, a
-<literal>National Instruments AT-MIO-16E-10</literal> (which has the
-driver mentioned above), and a
+<literal>National Instruments AT-MIO-16E-10</literal>, and a
 <literal>Data Translation DT2821-F-8DI</literal>.
 </para>
 
 <para>
-The NI board is plug-and-play, and the <command>man</command> page
-tells you that you need to configure the PnP part of the board with
-<command>isapnptools</command>.  The <command>isapnptools</command>
-package is a little cryptic, but the concepts are simple.  Once you've
-learned how to use it, you can settle on a
-<filename>/etc/isapnp.conf</filename> file such as this:
-</para>
-
+The NI board is plug-and-play.  The current ni_atmio driver
+has kernel-level ISAPNP support, which is used by default
+if you do not specify a base address.  So you could simply
+run comedi_config as
 <screen>
-# ANSI string --&gt;National Instruments, AT-MIO-16E-10&lt;--
-(CONFIGURE NIC2400/10725401 (LD 0
-	(IO 0 (BASE 0x0260))
-	(INT 0 (IRQ 3 (MODE +E)))
-#	(DMA 0 (CHANNEL 5))
-#	(DMA 1 (CHANNEL 6))
-	(ACT Y)
-))
+comedi_config /dev/comedi0 ni_atmio
 </screen>
-
 <para>
-(This file also contains a few lines about overall configuration and
-about the sound card that happens to be in the same computer.) 
-Currently, the driver doesn't use DMA, but it may in the future, so
-the DMA lines are commented out.  It has been reported that the
-National Instruments board does not always work with interrupts other
-than IRQ 3, and that the device ignores the IRQ and DMA information
-given here. However, keep the information here to remind yourself that
-the numbers aren't arbitrary.
-</para>
 
-<para>
-The <command>man</command> page
-explains that the option list is supposed to be 
-&ldquo;<literal>(I/O base),(IRQ)</literal>&rdquo;, so use the same
-numbers as in <filename>/etc/isapnp.conf</filename>, i.e.,
-<literal>0x260,3</literal>.
-</para>
-
-<para>
 For the <literal>Data Translation</literal> board, you need to have a
 list of the jumper settings; these are given in the &comedi; manual
 section about this card. (Check first to see whether they are still
-correct!)  
+correct!)
 The card discussed her is a <literal>DT2821-f-8di</literal>.  The
 <command>man</command> page of <command>comedi_config</command> tells
 you that you need to know the I/O base, IRQ, DMA 1, DMA 2.  However,
@@ -131,7 +105,7 @@ So, the appropriate options list is:
 </screen>
 and the full configuration command is:
 <screen>
-/usr/sbin/comedi_config /dev/comedi1 dt2821-f-8di 0x200,4,,1,1,1
+comedi_config /dev/comedi1 dt2821-f-8di 0x200,4,,1,1,1
 </screen>
 The differential/single-ended number is left blank, since the
 driver already knowns (from the board name), that it is
