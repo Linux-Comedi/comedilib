@@ -69,6 +69,8 @@ install_doc:
 	install -m 755 etc/dt282x.conf $(INSTALLDIR_DOC)/etc/
 	install -d $(INSTALLDIR_DOC)/examples/
 	install -m 644 demo/README demo/*.c $(INSTALLDIR_DOC)/examples/
+	install -d $(DESTDIR)/usr/share/locale/de/LC_MESSAGES/
+	install -m 644 doc/locale/de/LC_MESSAGES/comedilib.mo $(DESTDIR)/usr/share/locale/de/LC_MESSAGES/
 
 install_distro: install install_perl install_python
 	install -d $(DESTDIR)/etc/pcmcia/
