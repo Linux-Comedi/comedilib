@@ -522,7 +522,7 @@ static void reference_target_611x( calibration_setup_t *setup,
 	assert( range_ptr != NULL );
 	if( range_ptr->max > 19.0 ) reference = 10 * master_reference;
 	else reference = master_reference;
-	target = range_ptr->max * 0.9;
+	target = range_ptr->max * 0.8;
 
 	cal_gain_reg_bits = cal_gain_register_bits_611x( reference, &target );
 
