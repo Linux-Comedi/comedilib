@@ -37,11 +37,6 @@
 
 /* global variables */
 
-int ad_subdev;
-int da_subdev;
-int eeprom_subdev;
-int caldac_subdev;
-
 char *drivername = NULL;
 char *devicename = NULL;
 
@@ -99,6 +94,10 @@ int main(int argc, char *argv[])
 	int device_status = STATUS_UNKNOWN;
 	calibration_setup_t setup;
 	comedi_t *dev;
+	int ad_subdev;
+	int da_subdev;
+	int eeprom_subdev;
+	int caldac_subdev;
 
 	fn = "/dev/comedi0";
 	while (1) {
@@ -155,7 +154,13 @@ int main(int argc, char *argv[])
 
 ok:
 	memset( &setup, 0, sizeof( setup ) );
+
 	setup.dev = dev;
+	setup.ad_subdev = ad_subdev;
+	setup.da_subdev = da_subdev;
+	setup.eeprom_subdev = eeprom_subdev;
+	setup.caldac_subdev = caldac_subdev;
+
 	this_board->init_setup( &setup, devicename );
 	device_status = setup.status;
 
@@ -725,9 +730,15 @@ int get_unipolar_lowgain(comedi_t *dev,int subdev)
 
 int read_eeprom( calibration_setup_t *setup, int addr)
 {
-	unsigned int data=0;
+	lsampl_t data = 0;
+	int retval;
 
-	comedi_data_read( setup->dev, eeprom_subdev, addr,0,0,&data);
+	retval = comedi_data_read( setup->dev, setup->eeprom_subdev, addr,0,0,&data);
+	if( retval < 0 )
+	{
+		perror( "read_eeprom()" );
+		return retval;
+	}
 
 	return data;
 }

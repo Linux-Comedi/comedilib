@@ -121,7 +121,7 @@ int ni_setup( calibration_setup_t *setup , const char *device_name )
 {
 	ni_setup_board( setup, device_name );
 	ni_setup_observables( setup );
-	setup_caldacs( setup, caldac_subdev );
+	setup_caldacs( setup, setup->caldac_subdev );
 
 	return 0;
 }
@@ -150,21 +150,21 @@ void ni_setup_observables( calibration_setup_t *setup )
 	double voltage_reference;
 	observable *o;
 
-	bipolar_lowgain = get_bipolar_lowgain( setup->dev, ad_subdev);
-	bipolar_highgain = get_bipolar_highgain( setup->dev, ad_subdev);
-	unipolar_lowgain = get_unipolar_lowgain( setup->dev, ad_subdev);
+	bipolar_lowgain = get_bipolar_lowgain( setup->dev, setup->ad_subdev);
+	bipolar_highgain = get_bipolar_highgain( setup->dev, setup->ad_subdev);
+	unipolar_lowgain = get_unipolar_lowgain( setup->dev, setup->ad_subdev);
 
 	voltage_reference = 5.000;
 
 	memset(&tmpl,0,sizeof(tmpl));
 	tmpl.insn = INSN_READ;
 	tmpl.n = 1;
-	tmpl.subdev = ad_subdev;
+	tmpl.subdev = setup->ad_subdev;
 
 	memset(&po_tmpl2,0,sizeof(tmpl));
 	po_tmpl2.insn = INSN_CONFIG;
 	po_tmpl2.n = 2;
-	po_tmpl2.subdev = ad_subdev;
+	po_tmpl2.subdev = setup->ad_subdev;
 
 	/* 0 offset, low gain */
 	o = setup->observables + ni_zero_offset_low;
@@ -215,13 +215,13 @@ void ni_setup_observables( calibration_setup_t *setup )
 		setup->n_observables = ni_unip_offset_low + 1;
 	}
 
-	if(da_subdev>=0){
+	if(setup->da_subdev>=0){
 		comedi_insn po_tmpl;
 
 		memset(&po_tmpl,0,sizeof(po_tmpl));
 		po_tmpl.insn = INSN_WRITE;
 		po_tmpl.n = 1;
-		po_tmpl.subdev = da_subdev;
+		po_tmpl.subdev = setup->da_subdev;
 
 		/* ao 0, zero offset */
 		o = setup->observables + ni_ao0_zero_offset;
@@ -589,24 +589,24 @@ void cal_ni_results(void)
 	//int have_ao;
 	char s[32];
 
-	bipolar_lowgain = get_bipolar_lowgain(dev,ad_subdev);
-	bipolar_highgain = get_bipolar_highgain(dev,ad_subdev);
-	unipolar_lowgain = get_unipolar_lowgain(dev,ad_subdev);
+	bipolar_lowgain = get_bipolar_lowgain(dev,setup->ad_subdev);
+	bipolar_highgain = get_bipolar_highgain(dev,setup->ad_subdev);
+	unipolar_lowgain = get_unipolar_lowgain(dev,setup->ad_subdev);
 
 	/* 0 offset, low gain */
-	range = comedi_get_range(dev,ad_subdev,0,bipolar_lowgain);
+	range = comedi_get_range(dev,setup->ad_subdev,0,bipolar_lowgain);
 	read_chan2(s,0,bipolar_lowgain);
 	DPRINT(0,"bipolar zero offset, low gain [%g,%g]: %s\n",
 		range->min,range->max,s);
 
 	/* 0 offset, high gain */
-	range = comedi_get_range(dev,ad_subdev,0,bipolar_highgain);
+	range = comedi_get_range(dev,setup->ad_subdev,0,bipolar_highgain);
 	read_chan2(s,0,bipolar_highgain);
 	DPRINT(0,"bipolar zero offset, high gain [%g,%g]: %s\n",
 		range->min,range->max,s);
 
 	/* unip/bip offset */
-	range = comedi_get_range(dev,ad_subdev,0,unipolar_lowgain);
+	range = comedi_get_range(dev,setup->ad_subdev,0,unipolar_lowgain);
 	read_chan2(s,0,unipolar_lowgain);
 	DPRINT(0,"unipolar zero offset, low gain [%g,%g]: %s\n",
 		range->min,range->max,s);

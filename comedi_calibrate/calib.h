@@ -49,6 +49,10 @@ typedef struct{
 typedef struct calibration_setup_struct calibration_setup_t;
 struct calibration_setup_struct {
 	comedi_t *dev;
+	int ad_subdev;
+	int da_subdev;
+	int eeprom_subdev;
+	int caldac_subdev;
 	int status;
 	observable observables[ N_OBSERVABLES ];
 	unsigned int n_observables;
@@ -56,11 +60,6 @@ struct calibration_setup_struct {
 	unsigned int n_caldacs;
 	int (*do_cal) ( calibration_setup_t *setup );
 };
-
-extern int ad_subdev;
-extern int da_subdev;
-extern int eeprom_subdev;
-extern int caldac_subdev;
 
 extern char *devicename;
 extern char *drivername;
