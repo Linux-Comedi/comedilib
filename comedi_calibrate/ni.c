@@ -64,6 +64,7 @@ int cal_ni_pci_mio_16xe_10(calibration_setup_t *setup);
 int cal_ni_pci_6052e(calibration_setup_t *setup);
 int cal_ni_pci_mio_16e_4(calibration_setup_t *setup);
 int cal_ni_pci_6032e(calibration_setup_t *setup);
+int cal_ni_daqcard_ai_16e_4(calibration_setup_t *setup);
 
 static struct board_struct boards[]={
 	{ "at-mio-16e-2",	STATUS_DONE,	cal_ni_at_mio_16e_2 },
@@ -83,6 +84,7 @@ static struct board_struct boards[]={
 	{ "pci-6024e",		STATUS_SOME,	cal_ni_pci_6024e },
 	{ "pci-mio-16e-4",	STATUS_SOME,    cal_ni_pci_mio_16e_4 },
 	{ "pci-6032e",		STATUS_DONE,	cal_ni_pci_6032e },
+	{ "DAQCard-ai-16e-4",	STATUS_SOME,	cal_ni_daqcard_ai_16e_4 },
 #if 0
 //	{ "at-mio-16de-10",	cal_ni_unknown },
 	{ "at-mio-64e-3",	cal_ni_16e_1 },
@@ -101,7 +103,6 @@ static struct board_struct boards[]={
 //	{ "pci-6713",		cal_ni_unknown },
 //	{ "pxi-6070e",		cal_ni_unknown },
 //	{ "pxi-6052e",		cal_ni_unknown },
-//	{ "DAQCard-ai-16e-4",	cal_ni_unknown },
 //	{ "DAQCard-6062e",	cal_ni_unknown },
 //	{ "DAQCard-6024e",	cal_ni_unknown },
 #endif
@@ -491,12 +492,14 @@ int cal_ni_pci_mio_16xe_50(calibration_setup_t *setup)
 
 int cal_ni_pci_6023e(calibration_setup_t *setup)
 {
-	/* There seems to be a bug in the driver that doesn't allow
-	 * access to caldac 10, and possibly others. */
-	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,1);
-	//cal1( setup, ni_zero_offset_high,10);
-	//cal1( setup, ni_zero_offset_high,0);
-	cal1( setup, ni_reference_low,3);
+	/* for comedi-0.7.65 */
+
+	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,4);
+	//postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,8);
+
+	cal1( setup, ni_zero_offset_high,0);
+	cal1( setup, ni_reference_low,2);
+
 	return 0;
 }
 
@@ -618,6 +621,22 @@ int cal_ni_pci_mio_16e_4(calibration_setup_t *setup)
 		cal_binary( setup, ni_ao1_reference,5);
 		cal1_fine( setup, ni_ao1_reference,5);
 	}
+	return 0;
+}
+
+int cal_ni_daqcard_ai_16e_4(calibration_setup_t *setup)
+{
+	cal_postgain_binary(setup, ni_zero_offset_low, ni_zero_offset_high, 1);
+	//cal_postgain_fine(setup, ni_zero_offset_low, ni_zero_offset_high, 1);
+
+	cal_binary( setup, ni_zero_offset_high,0);
+	cal1_fine( setup, ni_zero_offset_high,0);
+
+	cal_binary( setup, ni_reference_low,3);
+	cal1_fine( setup, ni_reference_low,3);
+
+	cal1( setup, ni_unip_offset_low,2);
+
 	return 0;
 }
 
