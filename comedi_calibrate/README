@@ -170,8 +170,22 @@ dof indicates that linear fitting should not be used.
 
 The functions cal_binary() and cal_postgain_binary() are used when
 the caldac dependence is highly non-linear.  It does a binary search
-in the range of the caldac to find a decent value.  Once a decent
-value is found, cal_fine() should be used, since the caldac dependence
-should be relatively linear in a small range around that value.
+in the range of the caldac to find a decent value.
 
+Notes by fmhess******************************************************
+I would use cal_binary() always, as opposed to cal1() or cal1_fine(),
+since it is the best algorithm.
 
+cal_relative_binary() is the same as cal_postgain_binary().  I prefer
+the more general name because the function is useful for more than
+just postgain offsets.  It adjusts a caldac so the difference between
+two observables is correct (although their absolute values may still
+be offset), which works for postgain offsets, but
+is also good for gain calibrations when the gain adjustment
+couples with the offset.
+
+cal_linearity_binary() was added for convenient calibration of
+analog output linearity on NI boards.  It should be fed 3
+observables that are well separated from each other.  It adjusts
+a caldac so that the ratio (obs3 - obs2)/(obs2 - obs1) is
+correct.
