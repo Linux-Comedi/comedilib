@@ -214,7 +214,7 @@ static int do_test_for_insn_bits(comedi_t *dev,unsigned int subdevice)
 
 	ret = comedi_do_insnlist(dev,&il);
 
-	if(ret<0 && errno==EINVAL){
+	if(ret<0 && (errno==EINVAL || errno==EIO)){
 		return 0;
 	}
 	if(ret<0){

@@ -38,82 +38,155 @@
 
 int comedi_dio_config(comedi_t *it,unsigned int subdev,unsigned int chan,unsigned int io)
 {
-	comedi_trig trig;
-	lsampl_t data=io;
+	subdevice *s;
 
 	if(!valid_chan(it,subdev,chan))
 		return -1;
 	
-	if(it->subdevices[subdev].type!=COMEDI_SUBD_DIO)
+	s=it->subdevices+subdev;
+	if(s->type!=COMEDI_SUBD_DIO)
 		return -1;
 
 	if(io!=COMEDI_INPUT && io!=COMEDI_OUTPUT)
 		return -1;
 
-	memset(&trig,0,sizeof(trig));
-	trig.flags=TRIG_CONFIG|TRIG_WRITE;
-	trig.n_chan=1;
-	trig.n=1;
-	trig.subdev=subdev;
-	trig.chanlist=&chan;
-	trig.data=(sampl_t *)&data;
+#if 0
+	if(s->has_insn){
+		comedi_insn insn;
+		comedi_insnlist il;
+		lsampl_t data;
+		
+		il.n_insns = 1;
+		il.insns = &insn;
 
-	return ioctl_trigger(it->fd,&trig);
+		memset(&insn,0,sizeof(insn));
+		insn.insn = INSN_CONFIG;
+		insn.n = 1;
+		insn.data = &data;
+		insn.subdev = subdev;
+		insn.chanspec = CR_PACK(chan,0,0);
+		data=io;
+
+		return ioctl(it->fd,COMEDI_INSN,&il);
+	}else
+#endif
+	{
+		comedi_trig trig;
+		lsampl_t data=io;
+
+		memset(&trig,0,sizeof(trig));
+		trig.flags=TRIG_CONFIG|TRIG_WRITE;
+		trig.n_chan=1;
+		trig.n=1;
+		trig.subdev=subdev;
+		trig.chanlist=&chan;
+		trig.data=(sampl_t *)&data;
+
+		return ioctl_trigger(it->fd,&trig);
+	}
 }
 
 int comedi_dio_read(comedi_t *it,unsigned int subdev,unsigned int chan,
 	unsigned int *val)
 {
-	comedi_trig trig;
-	lsampl_t data;
+	subdevice *s;
 	int ret;
 
 	if(!valid_chan(it,subdev,chan))
 		return -1;
 
-	if(it->subdevices[subdev].type!=COMEDI_SUBD_DIO &&
-	   it->subdevices[subdev].type!=COMEDI_SUBD_DO &&
-	   it->subdevices[subdev].type!=COMEDI_SUBD_DI)
+	s = it->subdevices+subdev;
+	if(s->type!=COMEDI_SUBD_DIO &&
+	   s->type!=COMEDI_SUBD_DO &&
+	   s->type!=COMEDI_SUBD_DI)
 		return -1;
 
-	memset(&trig,0,sizeof(trig));
-	trig.n_chan=1;
-	trig.n=1;
-	trig.subdev=subdev;
-	trig.chanlist=&chan;
-	trig.data=(sampl_t *)&data;
+	if(s->has_insn){
+		comedi_insn insn;
+		comedi_insnlist il;
+		lsampl_t data;
+		
+		il.n_insns = 1;
+		il.insns = &insn;
 
-	ret=ioctl_trigger(it->fd,&trig);
+		memset(&insn,0,sizeof(insn));
+		insn.insn = INSN_READ;
+		insn.n = 1;
+		insn.data = &data;
+		insn.subdev = subdev;
+		insn.chanspec = CR_PACK(chan,0,0);
 
-	if(ret>=0 && val)*val=data;
+		ret = ioctl(it->fd,COMEDI_INSN,&il);
 
-	return ret;
+		*val = data;
+
+		return ret;
+	}else{
+		comedi_trig trig;
+		lsampl_t data;
+
+		memset(&trig,0,sizeof(trig));
+		trig.n_chan=1;
+		trig.n=1;
+		trig.subdev=subdev;
+		trig.chanlist=&chan;
+		trig.data=(sampl_t *)&data;
+
+		ret=ioctl_trigger(it->fd,&trig);
+
+		if(ret>=0 && val)*val=data;
+
+		return ret;
+	}
 }
 
 int comedi_dio_write(comedi_t *it,unsigned int subdev,unsigned int chan,
 	unsigned int val)
 {
-	comedi_trig trig;
-	lsampl_t data;
+	subdevice *s;
 
 	if(!valid_chan(it,subdev,chan))
 		return -1;
 	
-	if(it->subdevices[subdev].type!=COMEDI_SUBD_DIO &&
-	   it->subdevices[subdev].type!=COMEDI_SUBD_DO)
+	s = it->subdevices+subdev;
+	if(s->type!=COMEDI_SUBD_DIO &&
+	   s->type!=COMEDI_SUBD_DO)
 		return -1;
 
-	data=val;
+	if(s->has_insn){
+		comedi_insn insn;
+		comedi_insnlist il;
+		lsampl_t data;
+		
+		il.n_insns = 1;
+		il.insns = &insn;
 
-	memset(&trig,0,sizeof(trig));
-	trig.n_chan=1;
-	trig.n=1;
-	trig.flags=TRIG_WRITE;
-	trig.subdev=subdev;
-	trig.chanlist=&chan;
-	trig.data=(sampl_t *)&data;
+		memset(&insn,0,sizeof(insn));
+		insn.insn = INSN_WRITE;
+		insn.n = 1;
+		insn.data = &data;
+		insn.subdev = subdev;
+		insn.chanspec = CR_PACK(chan,0,0);
 
-	return ioctl_trigger(it->fd,&trig);
+		data = val;
+
+		return ioctl(it->fd,COMEDI_INSN,&il);
+	}else{
+		comedi_trig trig;
+		lsampl_t data;
+
+		data=val;
+
+		memset(&trig,0,sizeof(trig));
+		trig.n_chan=1;
+		trig.n=1;
+		trig.flags=TRIG_WRITE;
+		trig.subdev=subdev;
+		trig.chanlist=&chan;
+		trig.data=(sampl_t *)&data;
+
+		return ioctl_trigger(it->fd,&trig);
+	}
 }
 
 int comedi_dio_bitfield(comedi_t *it,unsigned int subdev,unsigned int mask,unsigned int *bits)
@@ -133,12 +206,9 @@ int comedi_dio_bitfield(comedi_t *it,unsigned int subdev,unsigned int mask,unsig
 
 	if(s->has_insn_bits){
 		comedi_insn insn;
-		comedi_insnlist il;
 		lsampl_t data[2];
 		
 		memset(&insn,0,sizeof(insn));
-		il.n_insns = 1;
-		il.insns = &insn;
 
 		insn.insn = INSN_BITS;
 		insn.n = 2;
@@ -148,7 +218,7 @@ int comedi_dio_bitfield(comedi_t *it,unsigned int subdev,unsigned int mask,unsig
 		data[0]=mask;
 		data[1]=*bits;
 
-		ret = ioctl(it->fd,COMEDI_INSN,&il);
+		ret = ioctl(it->fd,COMEDI_INSN,&insn);
 
 		if(ret<0)return ret;
 
