@@ -112,9 +112,11 @@ int main(int argc,char *argv[])
 	int remove=0;
 	int index;
 
+#ifdef CONFIG_I18N
 	setlocale(LC_ALL, "");
 	bindtextdomain("comedilib", "/home/ds/cvs/comedilib/doc");
 	textdomain("comedilib");
+#endif
 
 	if(geteuid() != 0)
 		fprintf(stderr,_("comedi_config should be run as root.  Attempting to continue anyway.\n"));
