@@ -656,7 +656,7 @@ structure should point to an array whose number of elements is specificed by <tt
 The chanlist specifies the sequence of channels and gains (and analog references)
 that should be stepped through for each scan.  The elements of the chanlist array
 should be initialized by packing the channel, range and reference information
-together with the <ref id="CR_PACK" name="CR_PACK(channel, range, aref)"> macro.
+together with the <ref id="CR_PACK" name="CR_PACK()"> macro.
 
 The <tt/data/ and <tt/data_len/ members can be safely ignored when issueing commands
 from a user-space program.  They only have meaning when a command is sent from a kernel
@@ -704,11 +704,40 @@ to do??
 <sect1>Constants and Macros
 <p>
 
-<sect2>CR_PACK(channel, range, aref)
+<sect2>CR_PACK()
 <label id="CR_PACK">
 <p>
 
-undocumented
+<tt/CR_PACK(channel, range, aref)/
+
+<tt/CR_PACK/ is used to initialize the elements of the <tt/chanlist array/ in the
+<ref id="comedi_cmd" name="comedi_cmd"> structure, and the <tt/chanspec/ member
+of the <ref id="comedi_insn" name="comedi_insn"> structure.
+
+The <tt/channel/ argument is the channel you wish to use, with the channel numbering
+starting at zero.
+
+The <tt/range/ is an index, starting at zero, whose meaning
+is device dependent.  The
+<ref id="comedi_get_n_ranges" name="comedi_get_n_ranges()"> and
+<ref id ="comedi_get_range" name = "comedi_get_range()"> functions
+are useful in discovering information about the available ranges.
+
+The <tt/aref/ argument indicates what reference you want the device to use.  It
+can be any of the following:
+<itemize>
+<item>AREF_GROUND	is for inputs/outputs referenced to ground
+<item>AREF_COMMON	is for a `common' reference (the low inputs of all the channels are tied
+together, but are isolated from ground)
+<item>AREF_DIFF	is for differential inputs/outputs
+<item>AREF_OTHER	is for any reference that does not fit into the above categories
+</itemize>
+Particular drivers may or may not use the AREF flags.  If they are not supported, they
+are silently ignored.
+
+<p>
+Source: <tt>/include/comedi.h</tt>
+
 
 <sect2>RANGE_LENGTH() <it/(deprecated)/
 <p>
@@ -1265,6 +1294,7 @@ Source: <tt>/lib/get.c</tt>
 
 <p>
 <sect2>comedi_get_n_ranges()
+<label id="comedi_get_n_ranges">
 <p>
 
 <tt>int comedi_get_n_ranges(comedi_t *it,unsigned int subdevice, unsigned int
@@ -1292,6 +1322,7 @@ Source: <tt>/lib/get.c</tt>
 
 <p>
 <sect2>comedi_get_range()
+<label id="comedi_get_range">
 <p>
 
 <tt>comedi_range * comedi_get_range(comedi_t *it,unsigned int subdevice,unsigned int chan,unsigned int
