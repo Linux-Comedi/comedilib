@@ -240,6 +240,7 @@ int test_cmd_logic_bug(void)
 {
 	comedi_cmd cmd;
 	int ret;
+	int ok=0;
 
 	if(!(comedi_get_subdevice_flags(device,subdevice)&SDF_CMD)){
 		printf("not applicable\n");
@@ -254,11 +255,16 @@ int test_cmd_logic_bug(void)
 		return 0;
 	}
 
-	if(count_bits(cmd.start_src)>1)cmd.start_src=0;
-	if(count_bits(cmd.scan_begin_src)>1)cmd.scan_begin_src=0;
-	if(count_bits(cmd.convert_src)>1)cmd.convert_src=0;
-	if(count_bits(cmd.scan_end_src)>1)cmd.scan_end_src=0;
-	if(count_bits(cmd.stop_src)>1)cmd.stop_src=0;
+	if(count_bits(cmd.start_src)>1){ cmd.start_src=0; ok=1; }
+	if(count_bits(cmd.scan_begin_src)>1){ cmd.scan_begin_src=0; ok=1; }
+	if(count_bits(cmd.convert_src)>1){ cmd.convert_src=0; ok=1; }
+	if(count_bits(cmd.scan_end_src)>1){ cmd.scan_end_src=0; ok=1; }
+	if(count_bits(cmd.stop_src)>1){ cmd.stop_src=0; ok=1; }
+
+	if(ok==0){
+		printf("not applicable (no source choices)\n");
+		return 0;
+	}
 
 	ret = comedi_command_test(device,&cmd);
 	if(ret!=1){
@@ -266,8 +272,6 @@ int test_cmd_logic_bug(void)
 	}else{
 		printf("command_test returned %d, good\n",ret);
 	}
-
-
 
 	return 0;
 }
