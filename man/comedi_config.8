@@ -60,6 +60,23 @@ set write buffer size to
 .I num
 kilobytes.  The default size is 16k.
 
+.TP
+.BI "-i, --init-data, --init-data0 " "file"
+upload initialization data (typically firmware) from 
+.I file
+to board.
+
+.TP
+.BI "--init-data1 " "file"
+.TP
+.BI "--init-data2 " "file"
+.TP
+.BI "--init-data3 " "file"
+Some drivers require more than one file for initialization 
+data.  Use these
+options to specify additional initialization data files.  
+See the driver-specific documentation for further details.
+
 
 .SH CONFIGURATION FILE
 
