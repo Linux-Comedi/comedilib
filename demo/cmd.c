@@ -118,6 +118,12 @@ static void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 	}
 }
 
+/*
+ * This part of the demo measures channels 1, 2, 3, 4 at a rate of
+ * 10 khz, with the inter-sample time at 10 us (100 khz).  The number
+ * of scans measured is 10.  This is analogous to the old mode2
+ * acquisition.
+ */
 static void do_cmd_1(comedi_t *dev)
 {
 	comedi_cmd cmd;
@@ -153,14 +159,14 @@ static void do_cmd_1(comedi_t *dev)
 	 * events occur periodically at a rate of scan_begin_arg
 	 * nanoseconds between scans. */
 	cmd.scan_begin_src =	TRIG_TIMER;
-	cmd.scan_begin_arg =	1000000;	/* in ns */
+	cmd.scan_begin_arg =	100000;	/* in ns */
 
 	/* The timing between each sample in a scan is controlled
 	 * by convert.  Like above, TRIG_TIMER specifies that
 	 * convert events occur periodically at a rate of convert_arg
 	 * nanoseconds between scans. */
 	cmd.convert_src =	TRIG_TIMER;
-	cmd.convert_arg =	100000;		/* in ns */
+	cmd.convert_arg =	10000;		/* in ns */
 
 	/* The end of each scan is almost always specified using
 	 * TRIG_COUNT, with the argument being the same as the
