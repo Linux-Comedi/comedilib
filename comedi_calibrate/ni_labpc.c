@@ -161,6 +161,8 @@ static void labpc_grab_ai_calibration( calibration_setup_t *setup, unsigned int 
 	sc_push_channel( current_cal, SC_ALL_CHANNELS );
 	sc_push_range( current_cal, range );
 	sc_push_aref( current_cal, SC_ALL_AREFS );
+
+	DPRINT( 0, "loaded adc range %i calibration from eeprom\n", range );
 }
 
 static int ao_offset_index( unsigned int channel )
@@ -216,6 +218,9 @@ static void labpc_grab_ao_calibration( calibration_setup_t *setup,
 	sc_push_channel( current_cal, channel );
 	sc_push_range( current_cal, range );
 	sc_push_aref( current_cal, SC_ALL_AREFS );
+
+	DPRINT( 0, "loaded dac channel %i range %i calibration from eeprom\n",
+		channel, range );
 }
 
 
