@@ -112,6 +112,10 @@ Data Types and Structures
 comedi_t
 </title>
 
+<programlisting>
+typedef struct comedi_t_struct comedi_t;
+</programlisting>
+
 <para>
 The data type comedi_t is used to represent an open Comedi
 device.  A valid comedi_t pointer is returned by a successful
@@ -129,6 +133,9 @@ should not be dereferenced by the application.
 sampl_t
 </title>
 
+<programlisting>
+typedef unsigned short sampl_t;
+</programlisting>
 
 <para>
 The data type sampl_t is one of the generic types used to represent
@@ -151,6 +158,10 @@ lsampl_t.
 lsampl_t
 </title>
 
+<programlisting>
+typedef unsigned int lsampl_t;
+</programlisting>
+
 <para>
 The data type lsampl_t is the data type typically used to represent
 data values in libcomedi.  On most architectures, lsampl_t is
@@ -165,6 +176,8 @@ comedi_trig (deprecated)
 </title>
 
 <programlisting>
+typedef struct comedi_trig_struct comedi_trig;
+
 struct comedi_trig_struct{
 	unsigned int subdev;		/* subdevice */
 	unsigned int mode;		/* mode */
@@ -178,7 +191,7 @@ struct comedi_trig_struct{
 	unsigned int trigvar1;
 	unsigned int data_len;
 	unsigned int unused[3];
-}
+};
 </programlisting>
 
 <para>
@@ -195,6 +208,8 @@ comedi_sv_t
 </title>
 
 <programlisting>
+typedef struct comedi_sv_struct comedi_sv_t;
+
 struct comedi_sv_struct{
 	comedi_t *dev;
 	unsigned int subdevice;
@@ -208,7 +223,7 @@ struct comedi_sv_struct{
 	int n;
 
 	lsampl_t maxdata;
-}
+};
 </programlisting>
 
 <para>
@@ -376,7 +391,9 @@ comedi_range
 </title>
 
 <programlisting>
-typedef struct{
+typedef struct comedi_range_struct comedi_range;
+
+struct comedi_range_struct{
 	double min;
 	double max;
 	unsigned int unit;
@@ -400,6 +417,8 @@ comedi_krange
 </title>
 
 <programlisting>
+typedef struct comedi_krange_struct comedi_krange;
+
 struct comedi_krange_struct{
 	int min;
 	int max;
@@ -415,6 +434,33 @@ comedi_range structure, except the fields min and max
 are integers, multiplied by a factor of 1000000 compared to the
 counterparts in comedi_range.
 </para>
+
+<para>
+In addition, kcomedilib uses the comedi_krange structure in place
+of the comedi_range structure.
+</para>
+
+</section>
+
+<section id="ref-type-comedi-insnlist">
+<title>
+comedi_insnlist
+</title>
+
+<programlisting>
+typedef struct comedi_insnlist_struct comedi_insnlist;
+
+struct comedi_insnlist_struct{
+	unsigned int n_insns;
+	comedi_insn *insns;
+};
+</programlisting>
+
+<para>
+An instruction list (insnlist) structure is used to communicate
+a list of instructions.
+</para>
+
 </section>
 
 </section>

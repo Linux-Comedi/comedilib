@@ -2,6 +2,8 @@
 	"docbook/dtd/3.1/docbook.dtd" [
 <!ENTITY intro SYSTEM "intro.sgml">
 <!ENTITY install SYSTEM "install.sgml">
+<!ENTITY tutorial SYSTEM "tutorial.sgml">
+<!ENTITY other SYSTEM "other.sgml">
 <!ENTITY drivers SYSTEM "drivers.sgml">
 <!ENTITY reference SYSTEM "reference.sgml">
 <!ENTITY funcref SYSTEM "funcref.sgml">
@@ -37,14 +39,9 @@
 
 &install
 
-<section>
-<title>
-Writing programs that use Comedi
-</title>
-<para>
-Empty.
-</para>
-</section>
+&tutorial
+
+&other
 
 &drivers
 

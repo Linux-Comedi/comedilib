@@ -1,7 +1,7 @@
 
 all: drivers.sgml funcref.sgml
-	-mkdir html
-	-mkdir man
+	-mkdir -p html
+	-mkdir -p man
 	-docbook2html -o html comedilib.sgml
 	-docbook2man -o man comedilib.sgml
 

@@ -3,63 +3,189 @@ Retval: int
 Param: comedi * device
 Description:
  Close a device previously opened by comedi_open().
+Returns:
+ If sucessful, comedi_close returns 0.  On failure, -1 is returned.
 
 Function: comedi_open -- open a Comedi device
 Retval: comedi_t
 Param: const char * filename
 Description:
- Open a Comedi device represented by the file filename.
+ Open a Comedi device specified by the file filename.
+Returns:
+ If sucessful, comedi_open returns a pointer to a valid comedi_t
+ structure.  This structure is transparent; the pointer should not
+ be dereferenced by the application.  NULL is returned on failure.
 
 Function: comedi_loglevel -- change Comedilib logging properties
 Retval: int
 Param: int loglevel
 Description:
+ This function affects the output of debugging and error messages
+ from Comedilib.  By increasing the loglevel, additional debugging
+ information will be printed.  Error and debugging messages are
+ printed to the stream stderr.
+
+ The default loglevel can be set by using the environment variable
+ COMEDI_LOGLEVEL.  The default loglevel is 1.
+
+ In order to conserve resources, some debugging information is
+ disabled by default when Comedilib is compiled.
+
+ The meaning of the loglevels is as follows:
+
+ COMEDI_LOGLEVEL=0  Comedilib prints nothing.
+
+ COMEDI_LOGLEVEL=1  (default) Comedilib prints error messages when
+ there is a self-consistency error (i.e., an internal bug.)
+
+ COMEDI_LOGLEVEL=2  Comedilib prints an error message when an invalid
+ parameter is passed.
+
+ COMEDI_LOGLEVEL=3  Comedilib prints an error message whenever an
+ error is generated in the Comedilib library or in the C library,
+ when called by Comedilib.
+
+ COMEDI_LOGLEVEL=4  Comedilib prints a lot of junk.
+Returns:
+ This function returns the previous loglevel.
 
 Function: comedi_perror -- print a Comedilib error message
 Retval: void
 Param: const char * s
 Description:
+ When a Comedilib function fails, it usually returns -1 or
+ NULL, depending on the return type.  An internal library
+ variable stores an error number, which can be retrieved with
+ comedi_errno().  This error number can be converted to a
+ human-readable form by the functions comedi_perror()
+ and comedi_strerror().
+
+ These functions are intended to mimic the behavior of the
+ standard C library functions perror(), strerror(), and errno.
+ In particular, Comedilib functions sometimes return an error
+ that is generated inside the C library; the comedi error
+ message in this case is the same as the C library.
+
+ The function comedi_perror() prints an error message to stderr.
+ The error message consists of the argument string, a colon, a
+ space, a description of the error condition, and a new line.
 
 Function: comedi_strerror -- return string describing Comedilib error code
 Retval: char *
 Param: int errnum
 Description:
+ When a Comedilib function fails, it usually returns -1 or
+ NULL, depending on the return type.  An internal library
+ variable stores an error number, which can be retrieved with
+ comedi_errno().  This error number can be converted to a
+ human-readable form by the functions comedi_perror()
+ and comedi_strerror().
+
+ These functions are intended to mimic the behavior of the
+ standard C library functions perror(), strerror(), and errno.
+ In particular, Comedilib functions sometimes return an error
+ that is generated inside the C library; the comedi error
+ message in this case is the same as the C library.
+
+ The function comedi_strerror() returns a pointer to a
+ character string
+ describing the Comedilib error errnum.  The persistence
+ of the returned pointer is undefined, and should not be trusted
+ after the next Comedilib call.  An unrecognized error number will
+ return a pointer to the string "undefined error", or similar.
 
 Function: comedi_errno -- number of last Comedilib error
 Retval: int
 Param: void
 Description:
+ When a Comedilib function fails, it usually returns -1 or
+ NULL, depending on the return type.  An internal library
+ variable stores an error number, which can be retrieved with
+ comedi_errno().  This error number can be converted to a
+ human-readable form by the functions comedi_perror()
+ and comedi_strerror().
+
+ These functions are intended to mimic the behavior of the
+ standard C library functions perror(), strerror(), and errno.
+ In particular, Comedilib functions sometimes return an error
+ that is generated inside the C library; the comedi error
+ message in this case is the same as the C library.
+
+ The function comedi_errno() returns an integer describing
+ the most recent comedilib error.  This integer may be used
+ as the errnum parameter for comedi_strerror().
+
+ Note that comedi_errno() is deliberately different than the
+ variable errno.  This is to overcome difficulties in making
+ errno thread-safe.
 
 Function: comedi_fileno -- integer descriptor of Comedilib device
 Retval: int
 Param: comedi_t * device
 Description:
+ The function comedi_fileno returns the integer descriptor for
+ the device dev.  This descriptor can then be used as the
+ file descriptor parameter of read(), write(), etc.
+ This function is intended to mimic the standard C library
+ function fileno().  If dev is an invalid comedi_t
+ pointer, the function returns -1 and sets the appropriate
+ Comedilib error value.
 
 Function: comedi_get_n_subdevices -- number of subdevices 
 Retval: int
 Param: comedi_t * device
 Description:
+ Returns the number of subdevices belonging to the Comedi
+ device referenced by the parameter device.
 
 Function: comedi_get_version_code -- Comedi version code
 Retval: int
 Param: comedi_t * device
 Description:
+ Returns the Comedi kernel module version code.  A valid Comedi
+ device referenced by the parameter device is necessary to
+ communicate with the kernel module.  On error, -1 is returned.
+
+ The version code is encoded as a bitfield of three 8-bit
+ numbers.  For example, 0x00073d is the version code for
+ version 0.7.61.
+
+ This function is of limited usefulness.  A typical
+ mis-application of this function is to use it to determine
+ if a certain feature is supported.  If the application needs
+ to know of the existence of a particular feature, an existence
+ test function should be written and put in the Comedilib source.
 
 Function: comedi_get_driver_name -- Comedi driver name
 Retval: char *
 Param: comedi_t * device
 Description:
+ The function comedi_get_driver_name returns a pointer
+ to a string containing the name of the driver being used by comedi
+ for the comedi device represented by device.  This pointer is
+ valid until the device is closed.  This function returns NULL
+ if there is an error.
 
 Function: comedi_get_board_name -- Comedi device name
 Retval: char *
 Param: comedi_t * device
 Description:
+ The function comedi_get_board_name returns a pointer
+ to a string containing the name of the device.  This pointer is
+ valid until the comedi descriptor it is closed.  This
+ function returns NULL if there is an error.
 
 Function: comedi_get_subdevice_type -- type of subdevice
 Retval: int
 Param: comedi_t * device
 Param: unsigned int subdevice
 Description:
+ The function comedi_get_subdevice_type() returns an
+ integer describing the type of subdevice that belongs to the comedi
+ device device and has the index subdevice.  The
+ function returns -1 if there is an error.
+ 
+ XXX Subdevice type table
 
 Function: comedi_find_subdevice_by_type -- search for subdevice type
 Retval: int
@@ -67,30 +193,53 @@ Param: comedi_t * device
 Param: int type
 Param: unsigned int start_subdevice
 Description:
+ The function comedi_find_subdevice_by_type() tries to
+ locate a subdevice belonging to comedi device device,
+ having type type, starting with the subdevice
+ start_subdevice.  If it finds a subdevice with the requested
+ type, it returns its index.  If it does not locate the requested
+ subdevice, it returns -1 and sets the Comedilib error number to
+ XXX "subdevice not found".  If there is an error, the function
+ returns -1 and sets the appropriate error.
 
 Function: comedi_get_subdevice_flags -- properties of subdevice
 Retval: int
 Param: comedi_t * device
 Param: unsigned int subdevice
 Description:
+ This function returns a bitfield describing the capabilities of
+ the specified subdevice.  If there is an error, -1 is returned,
+ and the Comedilib error value is set.
+
+ XXX table.
 
 Function: comedi_get_n_channels -- number of subdevice channels
 Retval: int
 Param: comedi_t * device
 Param: unsigned int subdevice
 Description:
+ The function comedi_get_n_channels() returns the number
+ of channels of the subdevice belonging to the comedi device device
+ and having index subdevice.  This function returns -1 on error and
+ the Comedilib error value is set.
 
 Function: comedi_range_is_chan_specific -- range information depends on channel
 Retval: int
 Param: comedi_t * device
 Param: unsigned int subdevice
 Description:
+ If each channel of the specified subdevice has different range
+ information, this function returns 1.  Otherwise, this function
+ returns 0.  On error, this function returns -1.
 
 Function: comedi_maxdata_is_chan_specific -- maximum sample depends on channel
 Retval: int
 Param: comedi_t * device
 Param: unsigned int subdevice
 Description:
+ If each channel of the specified subdevice has different maximum
+ sample values, this function returns 1.  Otherwise, this function
+ returns 0.  On error, this function returns -1.
 
 Function: comedi_get_maxdata -- maximum sample of channel
 Retval: lsampl_t
@@ -98,6 +247,10 @@ Param: comedi_t * device
 Param: unsigned int subdevice
 Param: unsigned int channel
 Description:
+ The function comedi_get_maxdata() returns the maximum
+ valid data value for channel chan of subdevice
+ subdevice belonging to the comedi device device
+ This function returns 0 on error.
 
 Function: comedi_get_n_ranges -- number of ranges of channel
 Retval: int
@@ -105,6 +258,9 @@ Param: comedi_t * device
 Param: unsigned int subdevice
 Param: unsigned int channel
 Description:
+ The function comedi_get_n_ranges() returns the number
+ of ranges of the channel chan belonging to the subdevice
+ of the comedi device device.  This function returns -1 on error.
 
 Function: comedi_get_range -- range information of channel
 Retval: comedi_range *
@@ -113,6 +269,11 @@ Param: unsigned int subdevice
 Param: unsigned int channel
 Param: unsigned int range
 Description:
+ The function comedi_get_range() returns a pointer to a
+ comedi_range structure that contains information that can be used to
+ convert sample values to or from physical units.  The pointer is valid
+ until the Comedi device device is closed.  If there is an
+ error, NULL is returned.
 
 Function: comedi_find_range -- search for range
 Retval: int
@@ -123,18 +284,32 @@ Param: unsigned int unit
 Param: double min
 Param: double max
 Description:
+ The function comedi_find_range() tries to
+ locate the optimal (smallest) range for the channel chan
+ belonging to a subdevice of the comedi device device,
+ that includes both min and max in units.
+ If a matching range is found, the index of the matching range is
+ returned.  If no matching range is available, the function returns
+ -1.
 
 Function: comedi_get_buffer_size -- streaming buffer size of subdevice
 Retval: int
 Param: comedi_t * device
 Param: unsigned int subdevice
 Description:
+ The function comedi_get_buffer_size() returns the size (in bytes)
+ of the streaming buffer for the subdevice specified by device and
+ subdevice.  On error, -1 is returned.
 
 Function: comedi_get_max_buffer_size -- maximum streaming buffer size
 Retval: int
 Param: comedi_t * device
 Param: unsigned int subdevice
 Description:
+ The function comedi_get_max_buffer_size() returns the maximum
+ allowable size (in bytes) of the streaming buffer for the subdevice
+ specified by device and subdevice.  Changing the maximum buffer
+ size requires appropriate privileges.  On error, -1 is returned.
 
 Function: comedi_set_buffer_size -- streaming buffer size of subdevice
 Retval: int
@@ -142,37 +317,84 @@ Param: comedi_t * device
 Param: unsigned int subdevice
 Param: unsigned int size
 Description:
+ The function comedi_set_buffer_size() changes the size of the
+ streaming buffer for the subdevice specified by device and subdevice.
+ The parameter size must be a multiple of the virtual memory page
+ size.
+
+ The virtual memory page size can be determined using
+ sysconf(_SC_PAGE_SIZE).
 
 Function: comedi_trigger -- perform streaming input/output (deprecated)
 Retval: int
 Param: comedi_t * device
 Param: comedi_trig * trig
-Description:
 Status: deprecated
+Description:
+ The function comedi_trigger() instructs Comedi to
+ perform the command specified by the trigger structure trig.
+ The return value depends on
+ the particular trig being issued.  If there is an
+ error, -1 is returned.
 
 Function: comedi_do_insnlist -- perform multiple instructions
 Retval: int
 Param: comedi_t * device
 Param: comedi_insnlist * list
 Description:
+ The function comedi_do_insnlist() performs multiple Comedi
+ instructions as part of one system call.  In addition, Comedi
+ attempts to perform the instructions atomically, that is, on
+ standard Linux kernels, no process preemption should occur
+ during the instructions.  However, the process may be preempted
+ before or after the group of instructions.
+
+ This function can be used to avoid the overhead of multiple
+ system calls, or to ensure that multiple instructions occur
+ without significant delay between them.
+ 
+ Preemption may occur if any of the instructions or the data
+ arrays of any of the instructions exist in non-resident or
+ copy-on-write pages.
+Returns:
+ The function comedi_do_insnlist() returns the number of
+ sucessfully completed instructions.  Error information for
+ the unsucessful instruction is not available.  If there is
+ an error before the first instruction can be executed, -1
+ is returned.
 
 Function: comedi_do_insn -- perform instruction
 Retval: int
 Param: comedi_t * device
 Param: comedi_insn * instruction
 Description:
+ The function comedi_do_insn() performs a single instruction.
+ If sucessful, comedi_do_insn() returns the number of samples
+ measured, which may be less than the number of requested
+ samples.  Comedi limits the number of requested samples in
+ order to enforce fairness among processes.  If there is an
+ error, -1 is returned.
 
 Function: comedi_lock -- subdevice reservation
 Retval: int
 Param: comedi_t * device
 Param: unsigned int subdevice
 Description:
+ The function comedi_lock() reserves a subdevice for use by the
+ current process.  While the lock is held, no other process is
+ allowed to read, write, or configure that subdevice, although
+ other processes can read information about the subdevice.  The
+ lock is released when comedi_unlock() is called, or the device
+ is closed.  If sucessful, 0 is returned.  If there is an error,
+ -1 is returned.
 
 Function: comedi_unlock -- subdevice reservation
 Retval: int
 Param: comedi_t * device
 Param: unsigned int subdevice
 Description:
+ The function comedi_unlock() released a subdevice lock acquired
+ by comedi_lock().  If sucessful, 0 is returned, otherwise -1.
 
 Function: comedi_to_phys -- convert sample to physical units
 Retval: double
@@ -180,6 +402,20 @@ Param: lsampl_t data
 Param: comedi_range * range
 Param: lsampl_t maxdata
 Description:
+ Converts data given in sample values (lsampl_t, between 0 and
+ maxdata) into physical units (double).  The parameter range
+ represents the conversion information to use, and the parameter
+ maxdata represents the maximum possible data value for the
+ channel that the data was read.
+
+ Conversion of endpoint sample values, that is, sample values
+ equal to 0 or maxdata, is affected by the Comedilib out-of-range
+ behavior.  If the out-of-range behavior is set to COMEDI_OOR_NAN, 
+ endpoint values are converted to NAN.  If the out-of-range
+ behavior is set to COMEDI_OOR_NUMBER, the endpoint values are
+ converted similarly to other values.
+
+ If there is an error, NAN is returned.
 
 Function: comedi_from_phys -- convert physical units to sample
 Retval: lsampl_t
@@ -187,6 +423,14 @@ Param: double data
 Param: comedi_range * range
 Param: lsampl_t maxdata
 Description:
+ Converts data given in physical units (data) into sample values
+ (lsampl_t, between 0 and maxdata).  The parameter rng
+ represents the conversion information to use, and the parameter
+ maxdata represents the maximum possible data value for the
+ channel that the data will be written to.
+
+ Conversion is not affected by out-of-range behavior.  Out-of-range
+ data parameters are silently truncated to the range 0 to maxdata.
 
 Function: comedi_data_read -- read single sample from channel
 Retval: int
@@ -197,6 +441,26 @@ Param: unsigned int range
 Param: unsigned int aref
 Param: lsampl_t * data
 Description:
+ Reads a single sample on the channel specified by the Comedi
+ device device, the subdevice subdevice, and the channel channel.
+ For the A/D conversion (if appropriate),
+ the device is configured to use range specification
+ range and (if appropriate) analog reference type
+ aref.  Analog reference types that are not supported
+ by the device are silently ignored.
+
+ The function comedi_data_read() reads one data value from
+ the specified channel and places the data value in the
+ location pointed to by data.
+
+ On sucess, comedi_data_read() returns 0.  If there is an
+ error, -1 is returned.
+ 
+ Data values returned by this function are unsigned integers
+ less than or equal to the maximum sample value of the channel,
+ which can be determined using the function comedi_get_maxdata().
+ Conversion of data values to physical units can be performed
+ by the function comedi_to_phys().
 
 Function: comedi_data_write -- write single sample to channel
 Retval: int
@@ -207,6 +471,18 @@ Param: unsigned int range
 Param: unsigned int aref
 Param: lsampl_t data
 Description:
+ Writes a single sample on the channel that is specified by the
+ Comedi device device, the subdevice subdevice, and the channel
+ channel.  If appropriate, the device is configured to use range
+ specification range and analog reference type aref.  Analog
+ reference types that are not supported by the device are
+ silently ignored.
+
+ The function comedi_data_write() writes the data value specified
+ by the parameter data to the specified channel.
+
+ On sucess, comedi_data_write() returns 0.  If there is an error, -1 is
+ returned.
 
 Function: comedi_dio_config -- change input/output properties of channel
 Retval: int
@@ -215,6 +491,17 @@ Param: unsigned int subdevice
 Param: unsigned int channel
 Param: unsigned int direction
 Description:
+ The function comedi_dio_config() configures individual channels
+ in a digital I/O subdevice to be either input or output, depending
+ on the value of parameter direction.  Valid directions are
+ COMEDI_INPUT or COMEDI_OUTPUT.
+
+ Depending on the capabilities of the hardware device, multiple
+ channels may be grouped together to determine direction.  In this
+ case, a single call to comedi_dio_config() for any channel in the
+ group will affect the entire group.
+
+ If sucessful, 0 is returned, otherwise -1.
 
 Function: comedi_dio_read -- read single bit from digital channel
 Retval: int
@@ -223,6 +510,14 @@ Param: unsigned int subdevice
 Param: unsigned int channel
 Param: unsigned int * bit
 Description:
+ The function reads the channel channel belonging to the
+ subdevice subdevice of device device.  The data value that is
+ read is stored in the location pointed to by bit.  This function
+ is equivalent to comedi_data_read(device,subdevice,channel,0,0,bit).
+ This function does not require a digital subdevice or a subdevice
+ with a maximum data value of 1 to work properly.
+
+ Return values and errors are the same as comedi_data_read().
 
 Function: comedi_dio_write -- write single bit to digital channel
 Retval: int
@@ -231,6 +526,13 @@ Param: unsigned int subdevice
 Param: unsigned int channel
 Param: unsigned int bit
 Description:
+ The function writes the value bit to the channel channel belonging
+ to the subdevice subdevice of device device.  This function
+ is equivalent to comedi_data_write(device,subdevice,channel,0,0,bit).
+ This function does not require a digital subdevice or a subdevice
+ with a maximum data value of 1 to work properly.
+
+ Return values and errors are the same as comedi_data_write().
 
 Function: comedi_dio_bitfield -- read/write multiple digital channels
 Retval: int
@@ -239,6 +541,17 @@ Param: unsigned int subdevice
 Param: unsigned int write_mask
 Param: unsigned int * bits
 Description:
+ The function comedi_dio_bitfield() allows multiple channels to
+ be read simultaneously from a digital input or digital I/O device.
+ The parameter write_mask and the value pointed to by bits
+ are interpreted as bit fields, with the least significant bit
+ representing channel 0.  For each bit in write_mask that is
+ set to 1, the cooresponding bit in *bits is written to the digital
+ output channel.  After writing all the output channels, each
+ channel is read, and the result placed in the approprate bits in
+ *bits.  The result of reading an output channel is undefined.
+ It is not possible to access channels greater than 31 using this
+ function.
 
 Function: comedi_sv_init -- slowly-varying inputs
 Retval: int
@@ -247,17 +560,31 @@ Param: comedi_t * device
 Param: unsigned int subdevice
 Param: unsigned int channel
 Description:
+ The function comedi_sv_init() initializes the slow varying Comedi
+ structure sv to use the device device, the analog input subdevice
+ subdevice, and the channel channel.  The slow varying Comedi
+ structure is used by comedi_sv_measure() to accurately measure
+ an analog input by averaging over many samples.  The default
+ number of samples is 100.  This function returns 0 on success,
+ -1 on error.
 
 Function: comedi_sv_update -- slowly-varying inputs
 Retval: int
 Param: comedi_sv_t * sv
 Description:
+ The function comedi_sv_update() updates internal parameters of
+ the slowly varying Comedi structure sv.
 
 Function: comedi_sv_measure -- slowly-varying inputs
 Retval: int
 Param: comedi_sv_t * sv
 Param: double * data
 Description:
+ The function comedi_sv_measure() uses the slowly varying Comedi
+ structure sv to measure a slowly varying signal.  If sucessful,
+ the result (in physical units) is stored in the location pointed
+ to by data, and the number of samples is returned.  On error, -1
+ is returned.
 
 Function: comedi_get_cmd_src_mask -- streaming input/output capabilities
 Retval: int
@@ -265,6 +592,12 @@ Param: comedi_t * device
 Param: unsigned int subdevice
 Param: comedi_cmd * command
 Description:
+ The command capabilities of the subdevice indicated by the parameters
+ device and subdevice are probed, and the results placed in the
+ command structure pointed to by the parameter command.  The trigger
+ source elements of the command structure are set to the logical OR
+ value of possible trigger sources.  Other elements in the structure
+ are undefined.  If sucessful, 0 is returned, otherwise -1.
 
 Function: comedi_get_cmd_generic_timed -- streaming input/output capabilities
 Retval: int
@@ -273,30 +606,66 @@ Param: unsigned int subdevice
 Param: comedi_cmd * command
 Param: unsigned int period_ns
 Description:
+ The command capabilities of the subdevice indicated by the parameters
+ device and subdevice are probed, and the results placed in the
+ command structure pointed to by the parameter command.  The command
+ structure pointed to by the parameter command is modified to be a
+ valid command that can be used as a parameter to comedi_command().
+ The command measures samples at a rate that corresponds to the
+ period period_ns.  The rate is adjusted to a rate that the device
+ can handle.  If sucessful, 0 is returned, otherwise -1.
 
 Function: comedi_cancel -- stop streaming input/outpu in progress
 Retval: int
 Param: comedi_t * device
 Param: unsigned int subdevice
 Description:
+ The function comedi_cancel() can be used to stop a Comedi command
+ previously started by comedi_command() that is still in progress
+ on the subdevice indicated by the parameters device and subdevice.
+ This may not return the subdevice to a ready state, since there may
+ be samples in the buffer that need to be read.
+
+ If sucessful, 0 is returned, otherwise -1.
 
 Function: comedi_command -- start streaming input/output
 Retval: int
 Param: comedi_t * device
 Param: comedi_cmd * command
 Description:
+ The function comedi_command() starts streaming input or output.  The
+ command structure pointed to by the parameter command specifies the
+ acquisition.  For input subdevices, sample values are read using the
+ function read().  For output subdevices, sample vlaues are written
+ using the function write().
+
+ If sucessful, 0 is returned, otherwise -1.
 
 Function: comedi_command_test -- test streaming input/output configuration
 Retval: int
 Param: comedi_t * device
 Param: comedi_cmd * command
 Description:
+ The function comedi_command_test() tests the command structure pointed
+ to by the parameter command and returns an integer describing the
+ testing stages that were sucessfully passed.  In addition, if elements
+ of the command structure are invalid, they may be modified.  Source
+ elements are modified to remove invalid source triggers.  Argument
+ elements are adjusted or rounded to the nearest valid value.
+
+ XXX return values.
 
 Function: comedi_poll -- force updating of streaming buffer
 Retval: int
 Param: comedi_t * device
 Param: unsigned int subdevice
 Description:
+ The function comedi_poll() is used on a subdevice that has a
+ Comedi command in progress in order to update the streaming buffer.
+ If supported by the driver, all available samples are copied to
+ the streaming buffer.  These samples may be pending in DMA buffers
+ or device FIFOs.  If sucessful, the number of additional bytes
+ available is returned.  If there is an error, -1 is returned.
 
 Function: comedi_set_max_buffer_size -- streaming buffer size of subdevice
 Retval: int
@@ -304,12 +673,21 @@ Param: comedi_t * device
 Param: unsigned int subdevice
 Param: unsigned int max_size
 Description:
+ The function comedi_set_max_buffer_size() changes the maximum
+ allowable size (in bytes) of the streaming buffer for the subdevice
+ specified by device and subdevice.  Changing the maximum buffer
+ size requires appropriate privileges.  If sucessful, the old buffer
+ size is returned.  On error, -1 is returned.
 
 Function: comedi_get_buffer_contents -- streaming buffer status
 Retval: int
 Param: comedi_t * device
 Param: unsigned int subdevice
 Description:
+ The function comedi_get_buffer_contents() is used on a subdevice
+ that has a Comedi command in progress.  The number of bytes that
+ are available in the streaming buffer is returned.  If there is
+ an error, -1 is returned.
 
 Function: comedi_mark_buffer_read -- streaming buffer status
 Retval: int
@@ -317,12 +695,22 @@ Param: comedi_t * device
 Param: unsigned int subdevice
 Param: unsigned int num_bytes
 Description:
+ The function comedi_mark_buffer_read() is used on a subdevice
+ that has a Comedi command in progress.  This function can be
+ used to indicate that the next num_bytes bytes in the buffer
+ are no longer needed and may be discarded.
+ If there is an error, -1 is returned.
 
 Function: comedi_get_buffer_offset -- streaming buffer status
 Retval: int
 Param: comedi_t * device
 Param: unsigned int subdevice
 Description:
+ The function comedi_mark_buffer_read() is used on a subdevice
+ that has a Comedi command in progress.  This function returns
+ the offset of the read pointer in the streaming buffer.  This
+ offset is only useful for memory mapped buffers.
+ If there is an error, -1 is returned.
 
 Function: comedi_get_timer -- timer information (deprecated)
 Retval: int
@@ -333,6 +721,13 @@ Param: unsigned int * trigvar
 Param: double * actual_frequency
 Description:
 Status: deprecated
+ The function comedi_get_timer converts the frequency frequency
+ to a number suitable to send to the driver in a comedi_trig
+ structure.  This function remains for compatibility with very
+ old versions of Comedi, that converted sampling rates to timer
+ values in the libary.  This conversion is now done in the kernel,
+ and every device has the timer type nanosec_timer, indicating
+ that timer values are simply a time specified in nanoseconds.
 
 Function: comedi_timed_1chan -- streaming input (deprecated)
 Retval: int
@@ -346,10 +741,20 @@ Param: unsigned int num_samples
 Param: double * data
 Description:
 Status: deprecated
+ Not documented.
 
 Function: comedi_set_global_oor_behavior -- out-of-range behavior
 Retval: int
 Param: enum comedi_oor_behavior behavior
 Description:
 Status: alpha
+ This function changes the Comedilib out-of-range behavior.
+ This currently affects the behavior of comedi_to_phys() when
+ converting endpoint sample values, that is, sample values
+ equal to 0 or maxdata.  If the out-of-range behavior is set to
+ COMEDI_OOR_NAN, endpoint values are converted to NAN.  If the
+ out-of-range behavior is set to COMEDI_OOR_NUMBER, the endpoint
+ values are converted similarly to other values.
+
+ The previous out-of-range behavior is returned.
 

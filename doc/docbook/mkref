@@ -16,13 +16,7 @@ print
 
 while($s = <>){
 	chomp $s;
-	if($s eq ""){
-		print $end;
-		print
-"</refentry>
-";
-		$end = "";
-	}elsif($s =~ m/^Function: (.*)/){
+	if($s =~ m/^Function: (.*)/){
 		$funcname = $1;
 		$refpurpose = "";
 		if($s =~ m/^Function: (.*) -- (.*)/){
@@ -79,6 +73,19 @@ while($s = <>){
 "    </para>
   </refsect1>
 ";
+	}elsif($s =~ m/^Returns:/){
+		print $end;
+		print
+"  <refsect1>
+    <title>
+      Return value
+    </title>
+    <para>
+";
+		$end =
+"    </para>
+  </refsect1>
+";
 	}elsif($s =~ m/^Status: (.*)/){
 		print $end;
 		print
@@ -93,11 +100,17 @@ while($s = <>){
 "    </para>
   </refsect1>
 ";
+	}elsif($s eq ""){
+		print "</para><para>\n";
 	}elsif($s =~ m/^ (.*)/){
 		print "$1\n";
 	}
 }
 
+print $end;
+print
+"</refentry>
+";
 print
 "</section>
 ";
