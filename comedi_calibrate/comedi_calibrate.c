@@ -753,7 +753,7 @@ void cal_linearity_binary( calibration_setup_t *setup, int obs1, int obs2, int o
 	unsigned int chanspec3 = setup->observables[obs3].observe_insn.chanspec;
 	unsigned int bit;
 
-	DPRINT(0,"postgain linearity: %s,\n%s,\n%s\n", setup->observables[obs1].name,
+	DPRINT(0,"linearity binary: %s,\n%s,\n%s\n", setup->observables[obs1].name,
 		setup->observables[obs2].name,setup->observables[obs3].name);
 
 	comedi_set_global_oor_behavior( COMEDI_OOR_NUMBER );
