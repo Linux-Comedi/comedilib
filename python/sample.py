@@ -16,7 +16,7 @@ from string import *
 
 comedi.open(0,"/dev/comedi0",1)
 
-val = comedi.read_data((0,0,0));
+val = comedi.data_read((0,0,0));
 print val
 
 comedi.close(0)

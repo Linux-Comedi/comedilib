@@ -53,7 +53,7 @@ compy_open(self, args)
 }
 
 static PyObject *
-compy_read_data(PyObject *self, PyObject *args)
+compy_data_read(PyObject *self, PyObject *args)
 {
 	int subd, chan;
 	int card;
