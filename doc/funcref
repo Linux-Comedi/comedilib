@@ -795,16 +795,36 @@ Description:
  are available in the streaming buffer is returned.  If there is
  an error, -1 is returned.
 
-Function: comedi_mark_buffer_read -- streaming buffer status
+Function: comedi_mark_buffer_read -- streaming buffer control
 Retval: int
 Param: comedi_t * device
 Param: unsigned int subdevice
 Param: unsigned int num_bytes
 Description:
  The function comedi_mark_buffer_read() is used on a subdevice
- that has a Comedi command in progress.  This function can be
+ that has a Comedi input command in progress.  It should only be used
+ if you are using a mmap() (as opposed 
+ to calling read() on the device file) to read data from Comedi's buffer, 
+ since Comedi will automatically keep track of how many bytes have been
+ transferred via read() calls.  This function is
  used to indicate that the next num_bytes bytes in the buffer
  are no longer needed and may be discarded.
+ If there is an error, -1 is returned.
+
+Function: comedi_mark_buffer_written -- streaming buffer control
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int num_bytes
+Description:
+ The function comedi_mark_buffer_written() is used on a subdevice
+ that has a Comedi output command in progress.  It should only be used
+ if you are using a mmap() (as opposed to calling write() on the device 
+ file) to write data to Comedi's buffer, since Comedi
+ will automatically keep track of how many bytes have been 
+ transferred via write() calls.  This function is
+ used to indicate that the next num_bytes bytes in the buffer
+ are valid and may be sent to the device.
  If there is an error, -1 is returned.
 
 Function: comedi_get_buffer_offset -- streaming buffer status

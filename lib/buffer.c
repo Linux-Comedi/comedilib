@@ -84,7 +84,21 @@ int _comedi_mark_buffer_read(comedi_t *it, unsigned int subdev, unsigned int byt
 	bi.bytes_read = bytes;
 	ret = comedi_ioctl(it->fd, COMEDI_BUFINFO, (unsigned long)&bi);
 	__comedi_errno = errno;
-	if(__comedi_errno == EINVAL)__comedi_errno = EBUF_OVR;
+	if(__comedi_errno == EPIPE)__comedi_errno = EBUF_OVR;
+	return bi.buf_int_count - bi.buf_user_count;
+}
+
+EXPORT_ALIAS_DEFAULT(_comedi_mark_buffer_written,comedi_mark_buffer_written,0.7.23);
+int _comedi_mark_buffer_written(comedi_t *it, unsigned int subdev, unsigned int bytes)
+{
+	int ret;
+	comedi_bufinfo bi;
+
+	memset(&bi, 0, sizeof(bi));
+	bi.bytes_written = bytes;
+	ret = comedi_ioctl(it->fd, COMEDI_BUFINFO, (unsigned long)&bi);
+	__comedi_errno = errno;
+	if(__comedi_errno == EPIPE)__comedi_errno = EBUF_UNDR;
 	return bi.buf_int_count - bi.buf_user_count;
 }
 
