@@ -27,6 +27,9 @@
 #include <string.h>
 #include "libinternal.h"
 
+static int set_calibration( comedi_t *dev, struct calibration_file_contents *parsed_file,
+	unsigned int cal_index );
+
 static int check_cal_file( comedi_t *dev, struct calibration_file_contents *parsed_file )
 {
 	if( strcmp( comedi_get_driver_name( dev ), parsed_file->driver_name ) )
@@ -94,10 +97,11 @@ static inline int valid_aref( struct calibration_file_contents *parsed_file,
 	return 0;
 }
 
-static int find_calibration( struct calibration_file_contents *parsed_file,
+static int apply_calibration( comedi_t *dev, struct calibration_file_contents *parsed_file,
 	unsigned int subdev, unsigned int channel, unsigned int range, unsigned int aref )
 {
-	int num_cals, i;
+	int num_cals, i, retval;
+	int found_cal = 0;
 
 	num_cals = parsed_file->num_calibrations;
 
@@ -107,15 +111,18 @@ static int find_calibration( struct calibration_file_contents *parsed_file,
 		if( valid_range( parsed_file, i, range ) == 0 ) continue;
 		if( valid_channel( parsed_file, i, channel ) == 0 ) continue;
 		if( valid_aref( parsed_file, i, aref ) == 0 ) continue;
-		break;
+
+		retval = set_calibration( dev, parsed_file, i );
+		if( retval < 0 ) return retval;
+		found_cal = 1;
 	}
-	if( i == num_cals )
+	if( found_cal == 0 )
 	{
 		COMEDILIB_DEBUG( 3, "failed to find matching calibration\n" );
 		return -1;
 	}
 
-	return i;
+	return 0;
 }
 
 static int set_calibration( comedi_t *dev, struct calibration_file_contents *parsed_file,
@@ -148,7 +155,6 @@ int comedi_apply_calibration( comedi_t *dev, unsigned int subdev, unsigned int c
 	struct stat file_stats;
 	char file_path[ 1024 ];
 	int retval;
-	int cal_index;
 	FILE *cal_file;
 	struct calibration_file_contents *parsed_file;
 
@@ -191,19 +197,10 @@ int comedi_apply_calibration( comedi_t *dev, unsigned int subdev, unsigned int c
 		return retval;
 	}
 
-	cal_index = find_calibration( parsed_file, subdev, channel, range, aref );
-	if( cal_index < 0 )
-	{
-		cleanup_calibration_parse( parsed_file );
-		return cal_index;
-	}
+	retval = apply_calibration( dev, parsed_file, subdev, channel, range, aref );
+	if( retval < 0 ) return retval;
 
-	retval = set_calibration( dev, parsed_file, cal_index );
-	if( retval < 0 )
-	{
-		cleanup_calibration_parse( parsed_file );
-		return retval;
-	}
+	cleanup_calibration_parse( parsed_file );
 
 	return 0;
 }
