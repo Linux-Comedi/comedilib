@@ -58,6 +58,7 @@ void cal_ni_pci_mio_16xe_50(void);
 void cal_ni_pci_6023e(void);
 void cal_ni_at_mio_16xe_50(void);
 void cal_ni_pci_mio_16xe_10(void);
+void cal_ni_pci_6052e(void);
 
 struct board_struct boards[]={
 	{ "at-mio-16e-2",	STATUS_DONE,	cal_ni_at_mio_16e_2 },
@@ -73,6 +74,7 @@ struct board_struct boards[]={
 	{ "pci-mio-16xe-50",	STATUS_GUESS,	cal_ni_pci_mio_16xe_50 },
 	{ "pci-6023e",		STATUS_GUESS,	cal_ni_pci_6023e },
 	{ "pci-mio-16xe-10",	STATUS_SOME,	cal_ni_pci_mio_16xe_10 },
+	{ "pci-6052e",		STATUS_SOME,	cal_ni_pci_6052e },
 #if 0
 //	{ "at-mio-16de-10",	cal_ni_unknown },
 	{ "at-mio-64e-3",	cal_ni_16e_1 },
@@ -88,7 +90,6 @@ struct board_struct boards[]={
 	{ "pci-6024e",		cal_ni_6023e }, // guess
 	{ "pxi-6025e",		cal_ni_6023e }, // guess
 	{ "pci-6034e",		cal_ni_6023e }, // guess
-//	{ "pci-6052e",		cal_ni_unknown },
 //	{ "pci-6110e",		cal_ni_unknown },
 //	{ "pci-6111e",		cal_ni_unknown },
 //	{ "pci-6711",		cal_ni_unknown },
@@ -441,6 +442,24 @@ void cal_ni_pci_6025e(void)
 		cal1(ni_ao0_reference,5); // guess
 		cal1(ni_ao1_zero_offset,8); // guess
 		cal1(ni_ao1_reference,9); // guess
+	}
+}
+
+void cal_ni_pci_6052e(void)
+{
+	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,3);
+	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,11);
+	cal1(ni_zero_offset_high,7);
+	cal1(ni_reference_low,1);
+	cal1_fine(ni_reference_low,1);
+	//cal1(ni_reference_low,9);  // also (guess)
+	cal1(ni_unip_offset_low,5);
+	//cal1(ni_unip_offset_low,0); // also (guess )
+	if(do_output){
+		cal1(ni_ao0_zero_offset,23);
+		cal1(ni_ao0_reference,19);
+		cal1(ni_ao1_zero_offset,13);
+		cal1(ni_ao1_reference,21);
 	}
 }
 

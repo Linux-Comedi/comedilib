@@ -1,0 +1,85 @@
+Warning: device not fully calibrated due to insufficient information
+Please send this output to <ds@schleef.org>
+Id: comedi_calibrate.c,v 1.24 2002/01/22 09:32:28 ds Exp 
+Driver name: ni_pcimio
+Device name: pci-6052e
+Comedi version: 0.7.62
+ai, bipolar zero offset, low gain
+offset -4.530(22)e-3, target 0
+caldac[1] gain=-5.79(20)e-7 V/bit S_min=304.235 dof=254
+caldac[3] gain=1.505390(24)e-3 V/bit S_min=14102.4 dof=254
+caldac[7] gain=1.84(20)e-7 V/bit S_min=267.874 dof=254
+caldac[11] gain=2.9777(21)e-5 V/bit S_min=314.839 dof=254
+caldac[14] gain=9.2(20)e-8 V/bit S_min=272.742 dof=254
+caldac[18] gain=1.04(20)e-7 V/bit S_min=299.696 dof=254
+ai, bipolar zero offset, high gain
+offset 3.9921(61)e-4, target 0
+caldac[1] gain=2.897(49)e-8 V/bit S_min=316.014 dof=254
+caldac[3] gain=7.52885(50)e-6 V/bit S_min=794.12 dof=254
+caldac[7] gain=1.7861(49)e-7 V/bit S_min=226.574 dof=254
+caldac[11] gain=1.4827(50)e-7 V/bit S_min=265.86 dof=254
+ai, bipolar voltage reference, low gain
+offset 4.985616(25), target 5
+caldac[1] gain=3.87296(21)e-4 V/bit S_min=7730.09 dof=254
+caldac[3] gain=1.506140(24)e-3 V/bit S_min=12094.5 dof=254
+caldac[7] gain=2.30(20)e-7 V/bit S_min=283.086 dof=254
+caldac[9] gain=7.839(20)e-6 V/bit S_min=333.048 dof=254
+caldac[11] gain=2.9746(20)e-5 V/bit S_min=347.684 dof=254
+caldac[18] gain=-8.4(20)e-8 V/bit S_min=304.846 dof=254
+caldac[24] gain=6.2(13)e-9 V/bit S_min=314.678 dof=254
+ai, unipolar zero offset, low gain
+offset 0.026241(25), target 0
+caldac[0] gain=-1.26(21)e-7 V/bit S_min=235.33 dof=254
+caldac[1] gain=-7.69757(48)e-4 V/bit S_min=2136.35 dof=159
+caldac[3] gain=1.503958(57)e-3 V/bit S_min=2884.24 dof=143
+caldac[5] gain=-3.86392(33)e-4 V/bit S_min=458.787 dof=191
+caldac[7] gain=2.79(21)e-7 V/bit S_min=367.648 dof=254
+caldac[9] gain=-1.5284(21)e-5 V/bit S_min=448.355 dof=254
+caldac[11] gain=2.9673(21)e-5 V/bit S_min=416.842 dof=254
+caldac[12] gain=1.51(21)e-7 V/bit S_min=342.529 dof=254
+caldac[17] gain=-1.13(21)e-7 V/bit S_min=335.463 dof=254
+caldac[18] gain=-8.4(21)e-8 V/bit S_min=430.14 dof=254
+caldac[20] gain=-1.06(21)e-7 V/bit S_min=269.993 dof=254
+ao 0, zero offset, low gain
+offset -0.012231(26), target 0.00015259
+caldac[1] gain=-1.125(21)e-6 V/bit S_min=281.693 dof=254
+caldac[3] gain=1.505453(25)e-3 V/bit S_min=13503.1 dof=254
+caldac[7] gain=2.79(21)e-7 V/bit S_min=352.153 dof=254
+caldac[11] gain=2.9927(21)e-5 V/bit S_min=416.402 dof=254
+caldac[23] gain=-4.6718(21)e-5 V/bit S_min=345.006 dof=254
+ao 0, reference voltage, low gain
+offset -0.011676(28), target -7.62951e-05
+caldac[1] gain=-1.216(21)e-6 V/bit S_min=264.084 dof=254
+caldac[3] gain=1.505446(24)e-3 V/bit S_min=13480.3 dof=254
+caldac[6] gain=1.21(21)e-7 V/bit S_min=275.832 dof=254
+caldac[7] gain=1.34(21)e-7 V/bit S_min=267.327 dof=254
+caldac[11] gain=2.9904(21)e-5 V/bit S_min=356.3 dof=254
+caldac[13] gain=-1.68(21)e-7 V/bit S_min=307.176 dof=254
+caldac[15] gain=-7.828(21)e-6 V/bit S_min=279.222 dof=254
+caldac[19] gain=-1.94662(21)e-4 V/bit S_min=498.558 dof=254
+caldac[21] gain=-1.40(21)e-7 V/bit S_min=292.53 dof=254
+caldac[23] gain=-4.7824(21)e-5 V/bit S_min=430.381 dof=254
+caldac[25] gain=-7.1(13)e-9 V/bit S_min=260.626 dof=254
+ao 1, zero offset, low gain
+offset 1.397(23)e-3, target 0.00015259
+caldac[3] gain=1.505415(24)e-3 V/bit S_min=12888.6 dof=254
+caldac[5] gain=1.80(21)e-7 V/bit S_min=279.619 dof=254
+caldac[6] gain=-1.04(21)e-7 V/bit S_min=316.232 dof=254
+caldac[7] gain=2.50(20)e-7 V/bit S_min=307.126 dof=254
+caldac[11] gain=2.9427(20)e-5 V/bit S_min=493.295 dof=254
+caldac[13] gain=5.9773(21)e-5 V/bit S_min=468.864 dof=254
+caldac[20] gain=9.8(21)e-8 V/bit S_min=279.618 dof=254
+ao 1, reference voltage, low gain
+offset 3.476(26)e-3, target -7.62951e-05
+caldac[3] gain=1.505353(24)e-3 V/bit S_min=12848.4 dof=254
+caldac[4] gain=-1.06(21)e-7 V/bit S_min=280.347 dof=254
+caldac[7] gain=1.58(21)e-7 V/bit S_min=246.656 dof=254
+caldac[11] gain=2.9525(21)e-5 V/bit S_min=558.096 dof=254
+caldac[13] gain=7.1207(21)e-5 V/bit S_min=633.54 dof=254
+caldac[15] gain=-1.08(21)e-7 V/bit S_min=278.012 dof=254
+caldac[17] gain=-7.629(21)e-6 V/bit S_min=232.292 dof=254
+caldac[21] gain=-1.94184(21)e-4 V/bit S_min=909.78 dof=254
+caldac[23] gain=-9.1(21)e-8 V/bit S_min=283.446 dof=254
+caldac[25] gain=-5.9(13)e-9 V/bit S_min=264.834 dof=254
+
+
