@@ -48,7 +48,7 @@ AC_ARG_ENABLE([ruby-binding],[  --disable-ruby-binding	Disable building of Ruby 
 	[ENABLE_RUBY=$enableval],[ENABLE_RUBY="yes"])
 AC_PATH_PROG(RUBY, ruby, no)
 if test "$RUBY" != "no" ; then
-	RUBY_INC_DIR=`$RUBY -e 'require \'rbconfig\'; c = ::Config:CONFIG; print c[[\'archdir\']];'`
+	RUBY_INC_DIR=`$RUBY -e "require 'rbconfig'; c = ::Config::CONFIG; print c[['archdir']];"`
 	AC_CHECK_HEADER([$RUBY_INC_DIR/ruby.h],[],[ENABLE_RUBY="no";AC_MSG_WARN([ruby.h not found, disabling Ruby binding])])
 else
 	AC_MSG_WARN([ruby not found, disabling ruby binding])
