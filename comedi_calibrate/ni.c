@@ -170,6 +170,7 @@ void ni_setup_observables( calibration_setup_t *setup )
 	/* 0 offset, low gain */
 	o = setup->observables + ni_zero_offset_low;
 	o->name = "ai, bipolar zero offset, low gain";
+#if 0
 	o->preobserve_insn = po_tmpl2;
 	o->preobserve_insn.data = o->preobserve_data;
 	o->preobserve_insn.data[0] = INSN_CONFIG_ALT_SOURCE;
@@ -177,6 +178,11 @@ void ni_setup_observables( calibration_setup_t *setup )
 	o->observe_insn = tmpl;
 	o->observe_insn.chanspec = CR_ALT_SOURCE;
 	o->target = 0;
+#else
+	o->observe_insn = tmpl;
+	o->observe_insn.chanspec = CR_PACK(0,bipolar_lowgain,AREF_OTHER);
+	o->target = 0;
+#endif
 
 	/* 0 offset, high gain */
 	o = setup->observables + ni_zero_offset_high;
