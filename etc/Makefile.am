@@ -1,5 +1,5 @@
 
-SUBDIRS = pcmcia
+SUBDIRS = pcmcia hotplug
 
 pkgdata_DATA = das1600.conf dt282x.conf modules.conf
 
