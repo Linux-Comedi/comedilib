@@ -1,8 +1,9 @@
-comedilib (0.7.17-2) unstable; urgency=low
+comedilib (0.7.18) unstable; urgency=low
 
+  * New upstream version
   * Fix spelling error. (Closes: #124919)
 
- -- David Schleef <ds@schleef.org>  Sat, 17 Nov 2001 18:58:16 -0800
+ -- David Schleef <ds@schleef.org>  Tue, 22 Jan 2002 02:00:04 -0800
 
 comedilib (0.7.17-1) unstable; urgency=low
 
