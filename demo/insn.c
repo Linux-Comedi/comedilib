@@ -35,7 +35,7 @@
  * analog input, and the another gettimeofday() call.
  */
 
-#define N_SAMPLES 1
+#define N_SAMPLES 10
 
 comedi_t *device;
 
