@@ -139,6 +139,7 @@ etc/pcmcia/Makefile
 etc/hotplug/Makefile
 etc/hotplug/usb/Makefile
 etc/hotplug/usb/usbdux/Makefile
+etc/hotplug/usb/usbduxfast/Makefile
 doc/Makefile
 demo/Makefile
 include/Makefile
