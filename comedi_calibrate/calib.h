@@ -85,7 +85,7 @@ void reset_caldacs(void);
 
 extern char ni_id[];
 
-void ni_setup(void);
+int ni_setup(void);
 
 /* low level */
 
