@@ -130,6 +130,9 @@ ep2isoerr_isr:
 ep4isoerr_isr:	
 ep6isoerr_isr:	
 ep8isoerr_isr:
+ep6_isr:
+ep2_isr:
+
 
 	push	dps
 	push	dpl
@@ -160,18 +163,26 @@ ep8isoerr_isr:
 ;;; then engages in an endless loop
 main:
 	mov	DPTR,#CPUCS	; CPU control register
-	mov	a,#000100100b	; 48MHz clock
+	mov	a,#00010000b	; 48Mhz
 	movx	@DPTR,a		; do it
+	lcall	syncdelay
 
 	mov	dptr,#INTSETUP	; IRQ setup register
 	mov	a,#08h		; enable autovector
 	movx	@DPTR,a		; do it
+	lcall	syncdelay
 
 	lcall	initAD		; init the ports to the converters
 
-	lcall	inieplo		; init the isochronous data-transfer
+	lcall	initeps		; init the isochronous data-transfer
 
 mloop2:	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
 
 	sjmp	mloop2		; do nothing. The rest is done by the IRQs
 
@@ -198,14 +209,14 @@ readAD:				; mask the control byte
 	clr	IOA.1		; set /CS to zero
 	;; send the control byte to the AD-converter
 	mov 	R2,#8		; bit-counter
-S1:     jnb     ACC.7,bitzero	; jump if Bit7 = 0?
+bitlp:	jnb     ACC.7,bitzero	; jump if Bit7 = 0?
 	setb	IOA.2		; set the DIN bit
 	sjmp	clock		; continue with the clock
 bitzero:clr	IOA.2		; clear the DIN bit
 clock:	setb	IOA.0		; SCLK = 1
 	clr	IOA.0		; SCLK = 0
         rl      a               ; next Bit
-        djnz    R2,S1
+        djnz    R2,bitlp
 
 	;; continue the aquisition (already started)
 	clr	IOA.2		; clear the DIN bit
@@ -334,9 +345,9 @@ convlo:	;;
 
 
 
-;;; initilise the transfer for full speed
+;;; initilise the transfer
 ;;; It is assumed that the USB interface is in alternate setting 3
-inieplo:
+initeps:
 	mov	dptr,#FIFORESET
 	mov	a,#0fh		
 	movx	@dptr,a		; reset all fifos
@@ -354,8 +365,11 @@ inieplo:
 	mov	dptr,#EP2BCL	; "arm" it
 	mov	a,#80h
 	movx	@DPTR,a		; can receive data
+	lcall	syncdelay	; wait to sync
 	movx	@DPTR,a		; can receive data
+	lcall	syncdelay	; wait to sync
 	movx	@DPTR,a		; can receive data
+	lcall	syncdelay	; wait to sync
 	
 	mov	DPTR,#EP4CFG
 	mov	a,#10100000b	; valid
@@ -368,7 +382,9 @@ inieplo:
 	mov	dptr,#EP4BCL	; "arm" it
 	mov	a,#80h
 	movx	@DPTR,a		; can receive data
+	lcall	syncdelay	; wait until we can write again
 	movx	@dptr,a		; make shure its really empty
+	lcall	syncdelay	; wait
 
 	mov	DPTR,#EP6CFG	; ISO data from here to the host
 	mov	a,#11010010b	; Valid
@@ -427,10 +443,12 @@ sof_isr:
 	mov	DPTR,#EP6BCH	; byte count H
 	mov	a,#0		; is zero
 	movx	@DPTR,a
+	lcall	syncdelay	; wait until we can write again
 	
 	mov	DPTR,#EP6BCL	; byte count L
 	mov	a,#10H		; is 8x word = 16 bytes
 	movx	@DPTR,a
+	lcall	syncdelay	; wait until we can write again
 	
 epfull:
 	;; do the D/A conversion
@@ -444,7 +462,9 @@ epfull:
 	mov	dptr,#EP2BCL	; "arm" it
 	mov	a,#80h
 	movx	@DPTR,a		; can receive data
-	movx	@dptr,a
+	lcall	syncdelay	; wait for the rec to sync
+	movx	@dptr,a		; just to make sure that it's empty
+	lcall	syncdelay	; wait for the rec to sync
 
 epempty:	
 	;; clear INT2
@@ -563,8 +583,11 @@ over_da:
 	mov	dptr,#EP4BCL
 	mov	a,#80h
 	movx	@DPTR,a		; arm it
+	lcall	syncdelay	; wait
 	movx	@DPTR,a		; arm it
+	lcall	syncdelay	; wait
 	movx	@DPTR,a		; arm it
+	lcall	syncdelay	; wait
 
 	;; clear INT2
 	mov	a,EXIF		; FIRST clear the USB (INT2) interrupt request
@@ -660,71 +683,16 @@ ep6_arm:
 	mov	DPTR,#EP6BCH	; byte count H
 	mov	a,#0		; is zero
 	movx	@DPTR,a
+	lcall	syncdelay	; wait until the length has arrived
 	
 	mov	DPTR,#EP6BCL	; byte count L
 	mov	a,#10H		; is one
 	movx	@DPTR,a
+	lcall	syncdelay	; wait until the length has been proc
 	ret
 	
 
-	
-;;; get all 8 channels in the high speed mode
-;;; not used just now
-ep6_isr:	
-	push	dps
-	push	dpl
-	push	dph
-	push	dpl1
-	push	dph1
-	push	acc
-	push	psw
-	push	00h		; R0
-	push	01h		; R1
-	push	02h		; R2
-	push	03h		; R3
-	push	04h		; R4
-	push	05h		; R5
-	push	06h		; R6
-	push	07h		; R7
-		
-	lcall	convlo		; conversion
 
-	mov	DPTR,#EP6BCH	; byte count H
-	mov	a,#0		; is zero
-	movx	@DPTR,a
-	
-	mov	DPTR,#EP6BCL	; byte count L
-	mov	a,#10H		; is 8x word = 16 bytes
-	movx	@DPTR,a
-	
-	;; clear INT2
-	mov	a,EXIF		; FIRST clear the USB (INT2) interrupt request
-	clr	acc.4
-	mov	EXIF,a		; Note: EXIF reg is not 8051 bit-addressable
-
-	mov	DPTR,#EPIRQ	; 
-	mov	a,#01000000b	; clear the ep6irq
-	movx	@DPTR,a
-
-	pop	07h
-	pop	06h
-	pop	05h
-	pop	04h		; R4
-	pop	03h		; R3
-	pop	02h		; R2
-	pop	01h		; R1
-	pop	00h		; R0
-	pop	psw
-	pop	acc 
-	pop	dph1 
-	pop	dpl1
-	pop	dph 
-	pop	dpl 
-	pop	dps
-	reti
-
-
-	
 ;;; converts one analog/digital channel and stores it in EP8
 ;;; also gets the content of the digital ports B and D
 ep8_adc:
@@ -831,69 +799,15 @@ ep8_isr:
 	reti
 
 
+;; need to delay every time the byte counters
+;; for the EPs have been changed.
 
-
-
-
-;;; high speed mode, IRQ mode. Asynchronous transmission.
-;;; not used just now
-ep2_isr:
-	push	dps
-	push	dpl
-	push	dph
-	push	dpl1
-	push	dph1
-	push	acc
-	push	psw
-	push	00h		; R0
-	push	01h		; R1
-	push	02h		; R2
-	push	03h		; R3
-	push	04h		; R4
-	push	05h		; R5
-	push	06h		; R6
-	push	07h		; R7
-		
-	mov	dptr,#0F000H	; EP2 fifo buffer
-	lcall	dalo		; conversion
-
-	mov	dptr,#EP2BCL	; "arm" it
-	mov	a,#80h
-	movx	@DPTR,a		; can receive data
-	movx	@dptr,a	
-
-	;; clear INT2
-	mov	a,EXIF		; FIRST clear the USB (INT2) interrupt request
-	clr	acc.4
-	mov	EXIF,a		; Note: EXIF reg is not 8051 bit-addressable
-	
-	mov	DPTR,#EPIRQ	; points to the usbirq
-	mov	a,#00010000b	; clear the usbirq of ep 2
-	movx	@DPTR,a
-
-	pop	07h
-	pop	06h
-	pop	05h
-	pop	04h		; R4
-	pop	03h		; R3
-	pop	02h		; R2
-	pop	01h		; R1
-	pop	00h		; R0
-	pop	psw
-	pop	acc 
-	pop	dph1 
-	pop	dpl1
-	pop	dph 
-	pop	dpl 
-	pop	dps
-	reti
-
-
-
-
-
-
-
+syncdelay:
+	nop
+	nop
+	nop
+	nop
+	ret
 
 
 .End
