@@ -84,12 +84,12 @@ int comedi_data_write(comedi_t *it,unsigned int subdev,unsigned int chan,unsigne
 	}
 }
 
-static inline int comedi_internal_data_read_n(comedi_t *it,
+static int comedi_internal_data_read_n(comedi_t *it,
 	unsigned int subdev, unsigned int chanspec, lsampl_t *data,
 	unsigned int n)
 {
 	subdevice *s;
-	
+
 	if(!valid_subd(it,subdev))
 		return -1;
 
