@@ -7,7 +7,7 @@ pycomedi_la_LDFLAGS = -module -avoid-version $(COMEDILIB_LIBS)
 
 pyexec_SCRIPTS = comedi.py
 
-EXTRA_DIST = comedi.i
+EXTRA_DIST = comedi.i README.txt comedi.py setup.py test_comedi.py
 
 install-exec-local:
 

@@ -11,8 +11,8 @@
 ***********************************************************/
 %module comedi
 %{
-#include "../comedilib-0.7.19/include/comedi.h"
-#include "../comedilib-0.7.19/include/comedilib.h"
+#include "../include/comedi.h"
+#include "../include/comedilib.h"
 %}
 %include "carrays.i"
 
@@ -36,5 +36,5 @@ static unsigned int cr_aref(unsigned int a){
 
 %array_class(unsigned int, chanlist);
 
-%include "../comedilib-0.7.19/include/comedi.h"
-%include "../comedilib-0.7.19/include/comedilib.h"
+%include "../include/comedi.h"
+%include "../include/comedilib.h"

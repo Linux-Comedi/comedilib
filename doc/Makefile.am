@@ -3,13 +3,19 @@ DOC=comedilib
 SGML= drivers.sgml funcref.sgml glossary.sgml \
 	install.sgml intro.sgml other.sgml reference.sgml tutorial.sgml
 
-EXTRA_DIST=$(SGML) funcref mkref drivers.txt mkdr
+EXTRA_DIST=$(SGML) comedilib.sgml funcref mkref drivers.txt mkdr
 
 all-local: html $(DOC).pdf man
 
 clean-local:
 	rm -rf comedilib.pdf drivers.sgml funcref.sgml
 	rm -rf html man
+
+install-data-local:
+	$(INSTALL) -d $(mandir)/man3
+	$(INSTALL) man/*.3 $(mandir)/man3
+	$(INSTALL) -d $(pkgdatadir)/html
+	$(INSTALL) html/* $(pkgdatadir)/html
 
 locales = de
 

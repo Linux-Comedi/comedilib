@@ -679,8 +679,8 @@ static swig_type_info *swig_types[27];
 
 #define SWIG_name    "_comedi"
 
-#include "../comedilib-0.7.19/include/comedi.h"
-#include "../comedilib-0.7.19/include/comedilib.h"
+#include "../include/comedi.h"
+#include "../include/comedilib.h"
 
 
 static unsigned int cr_pack(unsigned int chan, unsigned int rng, unsigned int aref){

@@ -3,8 +3,8 @@ from distutils.core import setup, Extension
 module1 = Extension('_comedi',
 			define_macros = [('MAJOR_VERSION','0'),
 					('MINOR_VERSION','1')],
-			include_dirs = ['../comedilib-0.7.19/include'],
-			library_dirs = ['../comedilib-0.7.19/lib'],
+			include_dirs = ['../include'],
+			library_dirs = ['../lib'],
 			libraries = ['comedi'],
 			sources = ['comedi_wrap.c'])
 			
