@@ -26,7 +26,7 @@ install:	dummy
 	install -d ${INSTALLDIR}/include
 	(cd include;install -m 644 comedilib.h ${INSTALLDIR}/include)
 	(cd include;install -m 644 comedi.h ${INSTALLDIR}/include)
-	install lib/libcomedi.so.${MAJOR} ${INSTALLDIR_LIB}
+	install lib/libcomedi.so.${version} ${INSTALLDIR_LIB}
 	(cd $(INSTALLDIR_LIB);ln -s libcomedi.so.${version} libcomedi.so.${MAJOR})
 	(cd $(INSTALLDIR_LIB);ln -s libcomedi.so.${version} libcomedi.so)
 	install -m 644 lib/libcomedi.a ${INSTALLDIR_LIB}
