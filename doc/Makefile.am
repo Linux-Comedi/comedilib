@@ -33,7 +33,7 @@ html: $(DOC).sgml $(SGML)
 
 man: $(DOC).sgml $(SGML)
 	mkdir -p man
-	$(JW_PATH) -f docbook -b man -o man $(DOC).sgml && touch man
+	-$(JW_PATH) -f docbook -b man -o man $(DOC).sgml && touch man
 
 funcref.sgml: funcref mkref
 	./mkref funcref >funcref.sgml
