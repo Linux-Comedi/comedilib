@@ -764,7 +764,7 @@ static int cal_ni_pci_6035e(calibration_setup_t *setup)
 	layout.dac_offset[ 0 ] = 6;
 	layout.dac_gain[ 0 ] = 11;
 	layout.dac_linearity[ 0 ] = 10;
-	layout.dac_offset[ 1 ] = 0;
+	layout.dac_offset[ 1 ] = 9;
 	layout.dac_gain[ 1 ] = 5;
 	layout.dac_linearity[ 1 ] = 1;
 
@@ -776,18 +776,30 @@ static int cal_ni_pci_6071e(calibration_setup_t *setup)
 	ni_caldac_layout_t layout;
 
 	init_ni_caldac_layout( &layout );
+#if 1
+	/* this is as good as can be done with driver set to mb88341 caldac */
 	layout.adc_pregain_offset = 0;
 	layout.adc_postgain_offset = 1;
 	layout.adc_gain = 3;
 	layout.dac_offset[ 0 ] = 5;
-	/* caldac 6 should most likely be AO0 reference, but it
-	 * isn't. */
-	/* layout.dac_gain[ 0 ] = 6; */
+	/* layout.dac_gain[ 0 ] = ; */
 	layout.dac_linearity[ 0 ] = 4;
 	layout.dac_offset[ 1 ] = 8;
-	layout.dac_gain[ 1 ] = 9;
+	/* layout.dac_gain[ 1 ] = ; */
 	layout.dac_linearity[ 1 ] = 7;
-
+#else
+	/* converted working caldacs to ad8804 addressing */
+	layout.adc_pregain_offset = 0; /* guess due to similarity to 6035 */
+	layout.adc_pregain_offset_fine = 8; /* corresponds to pregain_offset for mb88341 style above*/
+	layout.adc_postgain_offset = 4;
+	layout.adc_gain = 2;
+	layout.dac_offset[ 0 ] = 6;
+	layout.dac_gain[ 0 ] = 11; /* guess due to similarity to 6035 */
+	layout.dac_linearity[ 0 ] = 10;
+	layout.dac_offset[ 1 ] = 9;
+	layout.dac_gain[ 1 ] = 5;  /* guess due to similarity to 6035 */
+	layout.dac_linearity[ 1 ] = 1;
+#endif
 	return cal_ni_generic( setup, &layout );
 }
 
