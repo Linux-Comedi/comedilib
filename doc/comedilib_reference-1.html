@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 <HTML>
 <HEAD>
- <META NAME="GENERATOR" CONTENT="SGML-Tools 1.0.9">
+ <META NAME="GENERATOR" CONTENT="LinuxDoc-Tools 0.9.7.4">
  <TITLE>Comedi Documentation: Libcomedi Reference</TITLE>
 
  <LINK HREF="comedilib_reference.html#toc1" REL=contents>
@@ -11,39 +11,40 @@ Next
 Previous
 <A HREF="comedilib_reference.html#toc1">Contents</A>
 <HR>
-<H2><A NAME="s1">1. Libcomedi Reference</A></H2>
+<H2><A NAME="s1">1.</A> <A HREF="comedilib_reference.html#toc1">Libcomedi Reference</A></H2>
 
-<P>
-<P>
+
+
 <H2><A NAME="ss1.1">1.1 Constants and Macros</A>
 </H2>
 
-<P>
-<P>
-<P>
+
+
+
 <H3>RANGE_LENGTH() <I>(deprecated)</I></H3>
 
 <P>
-<A NAME="RANGE_LENGTH"></A> <P><CODE>RANGE_LENGTH(rangetype)</CODE>
-<P>
+<A NAME="RANGE_LENGTH"></A> </P>
+<P><CODE>RANGE_LENGTH(rangetype)</CODE></P>
+
 <P>Rangetype values are library-internal tokens that represent an
 array of range information structures.  These numbers are primarily
-used for communication between the kernel and library.
-<P>
+used for communication between the kernel and library.</P>
+
 <P>The RANGE_LENGTH() macro returns the length of the array that is
-specified by the rangetype token.
-<P>
+specified by the rangetype token.</P>
+
 <P>The RANGE_LENGTH() macro is deprecated, and should not be used in
 new applications.  It is scheduled to be removed from the header
 file at version 1.0.  Binary compatibility may be broken for version
-1.1.
-<P>
-<P>
-<P>
+1.1.</P>
+
+
+
 <H2><A NAME="ss1.2">1.2 Data Types and Structures</A>
 </H2>
 
-<P>
+
 <H3><A NAME="comedi_t"></A> comedi_t</H3>
 
 <P>The data type <CODE>comedi_t</CODE> is used to represent an open Comedi
@@ -51,31 +52,31 @@ device.  A valid <CODE>comedi_t</CODE> pointer is returned by a successful
 call to <CODE>comedi_open()</CODE>, and should be used for subsequent
 access to the device.
 It is a transparent type, and pointers to type <CODE>comedi_t</CODE>
-should not be dereferenced.  
-<P>
-<P>
-<P>
+should not be dereferenced by the application.</P>
+
+
+
 <H3><A NAME="sampl_t"></A> sampl_t</H3>
 
 <P>The data type <CODE>sampl_t</CODE> is one of the generic types used to represent
 data values in libcomedi.  It is used in a few places where a shorter
-data type is useful, but is limited to 16 bits on the i386 architecture.
-<P>
-<P>
-<P>
+data type is useful, but is limited to 16 bits on the i386 architecture.</P>
+
+
+
 <H3><A NAME="lsampl_t"></A> lsampl_t</H3>
 
 <P>The data type <CODE>lsampl_t</CODE> is one of the generic types used to represent
-data values in libcomedi.  It is currently defined to be <CODE>unsigned int</CODE>.
-<P>
-<P>
-<P>
-<P>
-<P>
+data values in libcomedi.  It is currently defined to be <CODE>unsigned int</CODE>.</P>
+
+
+
+
+
 <H3><A NAME="comedi_trig_struct"></A> comedi_trig_struct <I>(deprecated)</I></H3>
 
-<P>
-<P>The <CODE>comedi_trig</CODE> structure
+
+<P>The <CODE>comedi_trig</CODE> structure</P>
 <P>
 <BLOCKQUOTE><CODE>
 <PRE>
@@ -95,16 +96,18 @@ struct comedi_trig_struct{
 }
 </PRE>
 </CODE></BLOCKQUOTE>
+</P>
 <P>The <CODE>comedi_trig</CODE> structure is a control structure used by the
 COMEDI_TRIG ioctl, an older method of communicating
-instructions to the driver and hardware.  Use of Comedi triggers is
-deprecated, and should not be used in new applications.
-<P>
-<P>
-<P>
+instructions to the driver and hardware.  Use of comedi_trig is
+deprecated, and should not be used in new applications.</P>
+
+<P>This structure is defined as part of the Comedi kernel interface.</P>
+
+
 <H3><A NAME="comedi_sv_t"></A> comedi_sv_t</H3>
 
-<P>
+
 <P>
 <BLOCKQUOTE><CODE>
 <PRE>
@@ -124,37 +127,66 @@ struct comedi_sv_struct{
 }
 </PRE>
 </CODE></BLOCKQUOTE>
+</P>
 <P>The <CODE>comedi_sv_t</CODE> structure is used by the <CODE>comedi_sv_*()</CODE>
 functions to provide a simple method of accurately measuring
 slowly varying inputs.  See the relevant section for more
-details.
-<P>
-<P>
-<P>
+details.</P>
+
+
+
+<H3><A NAME="comedi_cmd"></A> comedi_cmd</H3>
+
+
+<P>undocumented</P>
+
+<P>Related functions are described in section XXX.</P>
+
+<P>This structure is defined as part of the Comedi kernel interface.</P>
+
+
+<H3><A NAME="comedi_insn"></A> comedi_insn</H3>
+
+
+<P>undocumented</P>
+
+<P>Related functions are described in section XXX.</P>
+
+<P>This structure is defined as part of the Comedi kernel interface.</P>
+
+
+
+<H3><A NAME="comedi_range"></A> comedi_range</H3>
+
+
+<P>undocumented</P>
+
+
+
 <H2><A NAME="ss1.3">1.3 Functions</A>
 </H2>
 
-<P>
-<P>
+
+
 <H3><A NAME="comedi_close"></A> comedi_close()</H3>
 
-<P>
-<P><CODE>void comedi_close(comedi_t *it);</CODE>
-<P>
-<P>Closes a device previously opened by comedi_open().
-<P>
+
+<P><CODE>void comedi_close(comedi_t *it);</CODE></P>
+
+<P>Closes a device previously opened by comedi_open().</P>
+
 <P>The return type of this function will change to <CODE>int</CODE>, in
-order to match <CODE>fclose</CODE>.
-<P>
-<P>Source: <CODE>/lib/comedi.c</CODE>
-<P>
-<P>
+order to match <CODE>fclose</CODE>.</P>
+
+<P>Source: <CODE>/lib/comedi.c</CODE></P>
+
+
 <H3><A NAME="comedi_data_read"></A> comedi_data_read()</H3>
 
-<P>
+
 <P><CODE>int comedi_data_read(comedi_t *it,unsigned int subd,unsigned int chan,
-unsigned int range,unsigned int aref,lsampl_t *data);</CODE>
-<P>
+unsigned int range,unsigned int aref,lsampl_t *data);</CODE></P>
+
 <P>Reads a single sample on the channel that
 is specified by the comedi device <CODE>it</CODE>, the
 subdevice <CODE>subd</CODE>, and the channel <CODE>chan</CODE>.
@@ -162,17 +194,17 @@ For the A/D conversion (if appropriate),
 the device is configured to use range specification
 <CODE>range</CODE> and (if appropriate) analog reference type
 <CODE>aref</CODE>.  Analog reference types that are not supported
-by the device are silently ignored.
-<P>
+by the device are silently ignored.</P>
+
 <P><CODE>comedi_data_read()</CODE> reads one data value from
 the specified channel and places the 
 data value that is read in the location pointed to by
-<CODE>data</CODE>.
-<P>
+<CODE>data</CODE>.</P>
+
 <P>On sucess, <CODE>comedi_data_read()</CODE> returns 0.  If there is an
-error, -1 is returned.
-<P>
-<P>Valid analog reference numbers are:
+error, -1 is returned.</P>
+
+<P>Valid analog reference numbers are:</P>
 <P>
 <UL>
 <LI>AREF_GROUND Reference to analog ground</LI>
@@ -180,20 +212,21 @@ error, -1 is returned.
 <LI>AREF_DIFF           Differential reference</LI>
 <LI>AREF_OTHER  Board-specific meaning</LI>
 </UL>
+</P>
 <P>Valid data values returned by these function is an unsigned integer
 less than or equal to <CODE>maxdata</CODE>, which is channel-dependent.
 Conversion of these data value to physical units can be performed
 by <CODE>
-<A HREF="#comedi_to_phys">comedi_to_phys()</A></CODE>.
-<P>Source: <CODE>/lib/data.c</CODE>
-<P>
-<P>
+<A HREF="#comedi_to_phys">comedi_to_phys()</A></CODE>.</P>
+<P>Source: <CODE>/lib/data.c</CODE></P>
+
+
 <H3>comedi_data_write()</H3>
 
-<P>
+
 <P><CODE>int comedi_data_write(comedi_t *it,unsigned int subd,unsigned int chan,
-unsigned int range,unsigned int aref,lsampl_t data);</CODE>
-<P>
+unsigned int range,unsigned int aref,lsampl_t data);</CODE></P>
+
 <P>Writes a single sample on the channel that
 is specified by the comedi device <CODE>it</CODE>, the
 subdevice <CODE>subd</CODE>, and the channel <CODE>chan</CODE>.
@@ -201,13 +234,13 @@ For the D/A conversion (if appropriate), the device is
 configured to use range specification
 <CODE>range</CODE> and (if appropriate) analog reference type
 <CODE>aref</CODE>.  Analog reference types that are not supported
-by the device are silently ignored.
+by the device are silently ignored.</P>
 <P><CODE>comedi_data_write()</CODE> writes the data value
 specified by the argument <CODE>data</CODE> to
-the specified channel.
+the specified channel.</P>
 <P>On sucess, <CODE>comedi_data_write()</CODE> returns 0.  If there is an error, -1 is
-returned.
-<P>Valid analog reference numbers are:
+returned.</P>
+<P>Valid analog reference numbers are:</P>
 <P>
 <UL>
 <LI>AREF_GROUND Reference to analog ground</LI>
@@ -215,20 +248,21 @@ returned.
 <LI>AREF_DIFF           Differential reference</LI>
 <LI>AREF_OTHER  Board-specific meaning</LI>
 </UL>
+</P>
 <P>Valid data values used by these functions is an unsigned integer
 less than or equal to <CODE>maxdata</CODE>, which is channel-dependent.
 Conversion of physical units to these data value can be performed
 by <CODE>
-<A HREF="#comedi_from_phys">comedi_from_phys()</A></CODE>.
-<P>Source: <CODE>/lib/data.c</CODE>
-<P>
-<P>
-<P>
+<A HREF="#comedi_from_phys">comedi_from_phys()</A></CODE>.</P>
+<P>Source: <CODE>/lib/data.c</CODE></P>
+
+
+
 <H3>comedi_dio_bitfield();</H3>
 
 <P><CODE>int comedi_dio_bitfield(comedi_t *it,unsigned int subd,unsigned
-int write_mask,unsigned int *bits);</CODE>
-<P>
+int write_mask,unsigned int *bits);</CODE></P>
+
 <P>The function <CODE>comedi_dio_bitfield()</CODE> allows multiple channels to
 be read simultaneously from a digital input or digital I/O device.
 The parameter <CODE>write_mask</CODE> and the value pointed to by <CODE>bits</CODE>
@@ -236,112 +270,114 @@ are interpreted as bit fields, with the least significant bit
 representing channel 0.  For each bit in <CODE>write_mask</CODE> that is
 set, the cooresponding bit in <CODE>*bits</CODE> is written to the digital
 output channel.  Each digital input channel is read, and the result
-placed in the approprate bits in <CODE>*bits</CODE>.
-<P>
+placed in the approprate bits in <CODE>*bits</CODE>.</P>
+
 <P>The current implementation reads and writes bits using separate
 system calls, which is not ideal.  When the kernel driver supports
-simultaneous reading/writing, this will be fixed in the library.
-<P>
+simultaneous reading/writing, this will be fixed in the library.</P>
+
 <P>It should be noted that it is not possible to access channels
-greater than 31 using this function.
-<P>
-<P>Source: <CODE>/lib/dio.c</CODE>
-<P>
-<P>
-<P>
+greater than 31 using this function.</P>
+
+<P>Source: <CODE>/lib/dio.c</CODE></P>
+
+
+
 <H3>comedi_dio_config()</H3>
 
 <P><CODE>int comedi_dio_config(comedi_t *it,unsigned int subd,unsigned
-int chan,unsigned int dir);</CODE>
-<P>
+int chan,unsigned int dir);</CODE></P>
+
 <P>The function <CODE>comedi_dio_config</CODE> configures individual channels
 in a digital I/O subdevice to be either input or output, depending
 on the value of parameter <CODE>dir</CODE>.  Depending on the capabilities
 of the hardware device, multiple channels may be affected by
-a single call to <CODE>comedi_dio_config</CODE>.
-<P>
+a single call to <CODE>comedi_dio_config</CODE>.</P>
+
 <P>Valid directions are:
 <UL>
 <LI> COMEDI_INPUT</LI>
 <LI> COMEDI_OUTPUT</LI>
 </UL>
-<P>Source: <CODE>/lib/dio.c</CODE>
-<P>
-<P>
-<P>
+</P>
+<P>Source: <CODE>/lib/dio.c</CODE></P>
+
+
+
 <H3>comedi_dio_read()</H3>
 
 <P><CODE>int comedi_dio_read(comedi_t *it,unsigned int subd,unsigned int
-chan,unsigned int *bit);</CODE>
-<P>
+chan,unsigned int *bit);</CODE></P>
+
 <P>The function reads the status of channel <CODE>chan</CODE> belonging to the digital
 input subdevice <CODE>subd</CODE> of device <CODE>it</CODE>. The result, 0 or 1, is stored
-in bit. Returns -1 on failure.
-<P>
-<P>This function is equivalent to <CODE>comedi_data_read(it,subd,chan,0,0,bit)</CODE>.
-<P>
-<P>Source: <CODE>/lib/dio.c</CODE>
-<P>
-<P>
+in bit. Returns -1 on failure.</P>
+
+<P>This function is equivalent to <CODE>comedi_data_read(it,subd,chan,0,0,bit)</CODE>.</P>
+
+<P>Source: <CODE>/lib/dio.c</CODE></P>
+
+
 <H3>comedi_dio_write()</H3>
 
 <P><CODE>int comedi_dio_write(comedi_t *it,unsigned int subd,unsigned
-int chan,unsigned int bit);</CODE>
-<P>
+int chan,unsigned int bit);</CODE></P>
+
 <P>The function writes the value of <CODE>bit</CODE>, 0 or 1, to channel <CODE>chan</CODE>,
 belonging to the digital output device <CODE>subd</CODE> of device <CODE>it</CODE>. Returns
--1 on failure.
-<P>
-<P>Source: <CODE>/lib/dio.c</CODE>
-<P>
-<P>
+-1 on failure.</P>
+
+<P>Source: <CODE>/lib/dio.c</CODE></P>
+
+
 <H3>comedi_fileno()</H3>
 
-<P>
-<P><CODE>int comedi_fileno(comedi_t *it);</CODE>
-<P>
+
+<P><CODE>int comedi_fileno(comedi_t *it);</CODE></P>
+
 <P>The function <CODE>comedi_fileno</CODE>
 returns the integer descriptor for the handle <CODE>it</CODE>.  It
 is equivalent to the standard function <CODE>fileno</CODE>.  If
 <CODE>it</CODE> is an invalid <CODE>comedi_t</CODE> pointer, the function
-returns -1 and sets the appropriate libcomedi error value.
-<P>Source: <CODE>/lib/comedi.c</CODE>
-<P>
-<P>
-<P>
+returns -1 and sets the appropriate libcomedi error value.</P>
+<P>Source: <CODE>/lib/comedi.c</CODE></P>
+
+
+
 <H3>comedi_find_range()</H3>
 
-<P>
+
 <P><CODE>int comedi_find_range(comedi_t *it, unsigned int subdevice, unsigned
-int chan, unsigned int unit, double min, double max);</CODE>
-<P>
+int chan, unsigned int unit, double min, double max);</CODE></P>
+
 <P>The function <CODE>comedi_find_range</CODE> tries to
 locate the optimal (smallest) range for the channel <CODE>chan</CODE>
 belonging to a <CODE>subdevice</CODE> of the comedi device <CODE>it</CODE>,
 that includes both <CODE>min</CODE> and <CODE>max</CODE> in <CODE>units</CODE>.
 If it finds a matching range, it returns its index.  If no
-matching range is available, it returns -1.
-<P>
-<P>Valid units are:
+matching range is available, it returns -1.</P>
+
+<P>Valid units are:</P>
 <P>
 <UL>
 <LI>UNIT_volt           </LI>
 <LI>UNIT_mA</LI>
 <LI>UNIT_none</LI>
 </UL>
-<P>Source: <CODE>/lib/range.c</CODE>
-<P>
-<P>
-<P>
+</P>
+<P>Source: <CODE>/lib/range.c</CODE></P>
+
+
+
 <H3><A NAME="comedi_errno"></A> comedi_errno()</H3>
 
-<P><CODE>int comedi_errno(void);</CODE>
-<P>
+<P><CODE>int comedi_errno(void);</CODE></P>
+
 <P>The function <CODE>comedi_errno()</CODE>
 returns an integer describing the most recent comedilib error.  This
 integer may be used as the <CODE>errnum</CODE> parameter for
 <CODE>
-<A HREF="#comedi_strerror">comedi_strerror()</A></CODE>.
+<A HREF="#comedi_strerror">comedi_strerror()</A></CODE>.</P>
 <P>When a libcomedi function fails, it usually returns -1 or
 NULL, depending on the return type.  An internal library
 variable stores an error number, which can be retrieved with
@@ -350,23 +386,23 @@ converted to a human-readable form by the functions
 <CODE>
 <A HREF="#comedi_perror">comedi_perror()</A></CODE>
 and <CODE>
-<A HREF="#comedi_strerror">comedi_strerror()</A></CODE>.
+<A HREF="#comedi_strerror">comedi_strerror()</A></CODE>.</P>
 <P>These functions are intended to mimic the behavior of the
 standard C library functions <CODE>perror()</CODE>,
 <CODE>strerror</CODE>, and <CODE>errno()</CODE>.  In particular,
 libcomedi functions sometimes return an error that is generated
 by the C library; the Comedi error message in this case
-is the same as the C library.
-<P>Source: <CODE>/lib/error.c</CODE>
-<P>
-<P>
-<P>
+is the same as the C library.</P>
+<P>Source: <CODE>/lib/error.c</CODE></P>
+
+
+
 <H3>comedi_find_subdevice_by_type()</H3>
 
-<P>
+
 <P><CODE>int comedi_find_subdevice_by_type(comedi_t *it,int type,unsigned int
-start_subdevice);</CODE>
-<P>
+start_subdevice);</CODE></P>
+
 <P>The function <CODE>comedi_find_subdevice_by_type</CODE> tries to
 locate a subdevice belonging to comedi device <CODE>it</CODE>,
 having type <CODE>type</CODE>, starting with the subdevice
@@ -374,141 +410,143 @@ having type <CODE>type</CODE>, starting with the subdevice
 it returns its index.  If it does not locate the requested
 subdevice, it returns -1 and sets the comedi error number to
 "subdevice not found".  If there is an error, the function
-returns -1 and sets the appropriate error.
-<P>
+returns -1 and sets the appropriate error.</P>
+
 <P>For subdevice types, see the manual page for the function
 <CODE>
-<A HREF="#comedi_get_subdevice_type">comedi_get_subdevice_type()</A></CODE>.
-<P>Source: <CODE>/lib/get.c</CODE>
-<P>
-<P>
-<P>
+<A HREF="#comedi_get_subdevice_type">comedi_get_subdevice_type()</A></CODE>.</P>
+<P>Source: <CODE>/lib/get.c</CODE></P>
+
+
+
 <H3><A NAME="comedi_from_phys"></A> comedi_from_phys()</H3>
 
-<P>
+
 <P><CODE>lsampl_t comedi_from_phys(double data, comedi_range *rng,
-lsampl_t maxdata);</CODE>
+lsampl_t maxdata);</CODE></P>
 <P>Converts data given in physical units (<CODE>data</CODE>) into sample values
 (lsampl_t, between 0 and maxdata).  The parameter <CODE>rng</CODE>
 represents the conversion information to use, and the parameter
 <CODE>maxdata</CODE> represents the maximum possible data value for the
-channel that the data will be written to.
-<P>
-<P>Source: <CODE>/lib/range.c</CODE>
-<P>
-<P>
-<P>
+channel that the data will be written to.</P>
+
+<P>Source: <CODE>/lib/range.c</CODE></P>
+
+
+
 <H3>comedi_get_board_name()</H3>
 
-<P>
-<P><CODE>char *comedi_get_board_name(comedi_t *it);</CODE>
+
+<P><CODE>char *comedi_get_board_name(comedi_t *it);</CODE></P>
 <P>The function <CODE>comedi_get_board_name</CODE> returns a pointer
 to a string containing the name of the device.  This pointer is
 valid until the comedi descriptor <CODE>it</CODE> is closed.  This
-function returns <CODE>NULL</CODE> if there is an error.
-<P>Source: <CODE>/lib/get.c</CODE>
-<P>
-<P>
-<P>
+function returns <CODE>NULL</CODE> if there is an error.</P>
+<P>Source: <CODE>/lib/get.c</CODE></P>
+
+
+
 <H3>comedi_get_driver_name()</H3>
 
-<P>
-<P><CODE>char *comedi_get_driver_name(comedi_t *it);</CODE>
+
+<P><CODE>char *comedi_get_driver_name(comedi_t *it);</CODE></P>
 <P>The function <CODE>comedi_get_driver_name</CODE> returns a pointer
 to a string containing the name of the driver being used by comedi
 for the comedi device represented by <CODE>it</CODE>.  This pointer is
 valid until the comedi descriptor <CODE>it</CODE> is closed.  This
-function returns <CODE>NULL</CODE> if there is an error.
-<P>Source: <CODE>/lib/get.c</CODE>
-<P>
-<P>
-<P>
+function returns <CODE>NULL</CODE> if there is an error.</P>
+<P>Source: <CODE>/lib/get.c</CODE></P>
+
+
+
 <H3>comedi_get_maxdata()</H3>
 
-<P>
+
 <P><CODE>lsampl_t comedi_get_maxdata(comedi_t *it,unsigned int
-subdevice,unsigned int chan);</CODE>
-<P>
+subdevice,unsigned int chan);</CODE></P>
+
 <P>The function <CODE>comedi_get_maxdata()</CODE> returns the maximum
 valid data value for channel <CODE>chan</CODE> of subdevice
 <CODE>subdevice</CODE> belonging to the comedi device <CODE>it</CODE>
-This function returns 0 on error.
-<P>Source: <CODE>/lib/get.c</CODE>
-<P>
-<P>
-<P>
+This function returns 0 on error.</P>
+<P>Source: <CODE>/lib/get.c</CODE></P>
+
+
+
 <H3>comedi_get_n_channels()</H3>
 
-<P>
-<P><CODE>int comedi_get_n_channels(comedi_t *it,unsigned int subdevice);</CODE>
+
+<P><CODE>int comedi_get_n_channels(comedi_t *it,unsigned int subdevice);</CODE></P>
 <P>The function <CODE>comedi_get_n_channels()</CODE> returns the number
 of channels of the subdevice belonging to the comedi device <CODE>it</CODE>
-and having index <CODE>subdevice</CODE>.  This function returns -1 on error.
-<P>Source: <CODE>/lib/get.c</CODE>
-<P>
-<P>
-<P>
+and having index <CODE>subdevice</CODE>.  This function returns -1 on error.</P>
+<P>Source: <CODE>/lib/get.c</CODE></P>
+
+
+
 <H3>comedi_get_n_ranges()</H3>
 
-<P>
+
 <P><CODE>int comedi_get_n_ranges(comedi_t *it,unsigned int subdevice, unsigned int
-chan);</CODE>
+chan);</CODE></P>
 <P>The function <CODE>comedi_get_n_ranges()</CODE> returns the number
 of ranges of the channel <CODE>chan</CODE> belonging to the <CODE>subdevice</CODE>
-of the comedi device <CODE>it</CODE>.  This function returns -1 on error.
-<P>Source: <CODE>/lib/range.c</CODE>
-<P>
-<P>
-<P>
+of the comedi device <CODE>it</CODE>.  This function returns -1 on error.</P>
+<P>Source: <CODE>/lib/range.c</CODE></P>
+
+
+
 <H3>comedi_get_n_subdevices()</H3>
 
-<P>
-<P><CODE>int comedi_get_n_subdevices(comedi_t *it);</CODE>
+
+<P><CODE>int comedi_get_n_subdevices(comedi_t *it);</CODE></P>
 <P>The function <CODE>comedi_get_n_subdevices</CODE> returns the
 number of subdevices associated with the comedi descriptor
-<CODE>it</CODE>, or -1 if there is an error.
-<P>Source: <CODE>/lib/get.c</CODE>
-<P>
-<P>
-<P>
+<CODE>it</CODE>, or -1 if there is an error.</P>
+<P>Source: <CODE>/lib/get.c</CODE></P>
+
+
+
 <H3>comedi_get_range()</H3>
 
-<P>
+
 <P><CODE>comedi_range * comedi_get_range(comedi_t *it,unsigned int subdevice,unsigned int chan,unsigned int
-range);</CODE>
+range);</CODE></P>
 <P>The function <CODE>comedi_get_range</CODE> returns a pointer to a
 comedi_range structure that contains information that can be used to
 convert sample values to or from physical units.  The pointer is valid
 until the comedi device <CODE>it</CODE> is closed.  If there is an
-error, NULL is returned.
-<P>Source: <CODE>/lib/get.c</CODE>
-<P>
-<P>
-<H3>comedi_get_rangetype()</H3>
+error, NULL is returned.</P>
+<P>Source: <CODE>/lib/get.c</CODE></P>
 
-<P>
+
+<H3>comedi_get_rangetype()  <I>deprecated</I></H3>
+
+
 <P><CODE>int comedi_get_rangetype(comedi_t *it,unsigned int subdevice,unsigned int
-chan);</CODE>
+chan);</CODE></P>
 <P>The function <CODE>comedi_get_rangetype()</CODE> returns an integer
 that represents the number of range specifications available for a
 particular channel <CODE>chan</CODE> of the subdevice <CODE>subdevice</CODE>, as well as a conversion table to convert sample
-values to/from physical units. 
+values to/from physical units. </P>
 <P>The macro
 <CODE>RANGE_LENGTH(rangetype)</CODE>
 can be used to determine the number of range specifications for a given
-range type.
-<P>Source: <CODE>/lib/get.c</CODE>
-<P>
-<P>
+range type.</P>
+
+<P>This function is deprecated and should not be used in new code.</P>
+<P>Source: <CODE>/lib/get.c</CODE></P>
+
+
 <H3><A NAME="comedi_get_subdevice_type"></A> comedi_get_subdevice_type()</H3>
 
-<P>
-<P><CODE>int comedi_get_subdevice_type(comedi_t *it,unsigned int subdevice);</CODE>
+
+<P><CODE>int comedi_get_subdevice_type(comedi_t *it,unsigned int subdevice);</CODE></P>
 <P>The function <CODE>comedi_get_subdevice_type()</CODE> returns an
 integer describing the type of subdevice that belongs to the comedi
 device <CODE>it</CODE> and has the index <CODE>subdevice</CODE>.  The
-function returns -1 is there is an error.
-<P>Valid subdevice types are:
+function returns -1 is there is an error.</P>
+<P>Valid subdevice types are:</P>
 <P>
 <UL>
 <LI><CODE>COMEDI_SUBD_UNUSED</CODE>
@@ -529,62 +567,63 @@ Calibration DACs</LI>
 <LI><CODE>COMEDI_SUBD_PROC</CODE>
 Processor or DSP</LI>
 </UL>
-<P>Source: <CODE>/lib/get.c</CODE>
-<P>
-<P>
+</P>
+<P>Source: <CODE>/lib/get.c</CODE></P>
+
+
 <H3>comedi_get_timer() <I>(deprecated)</I></H3>
 
-<P>
+
 <P><CODE>int comedi_get_timer(comedi_t *it,unsigned int subdev, double
-freq,unsigned int *trigvar, double *actual_freq);</CODE>
-<P>
+freq,unsigned int *trigvar, double *actual_freq);</CODE></P>
+
 <P>The function <CODE>comedi_get_timer</CODE> converts the frequency <CODE>freq</CODE>
 to a number suitable to send to the driver in a <CODE>comedi_trig</CODE>
 structure.  This function remains for compatibility with very
 old versions of Comedi, that converted sampling rates to timer
 values in the libary.  This conversion is now done in the kernel,
 and every device has the timer type <CODE>nanosec_timer</CODE>, indicating
-that timer values are simply a time specified in nanoseconds.
-<P>
-<P>This function is deprecated and should not be used in new applications.
-<P>
-<P>Source: <CODE>/lib/timer.c</CODE>
-<P>
-<P>
+that timer values are simply a time specified in nanoseconds.</P>
+
+<P>This function is deprecated and should not be used in new applications.</P>
+
+<P>Source: <CODE>/lib/timer.c</CODE></P>
+
+
 <H3>comedi_get_version_code()</H3>
 
-<P>
-<P><CODE>int comedi_get_version_code(comedi_t *it);</CODE>
-<P>
+
+<P><CODE>int comedi_get_version_code(comedi_t *it);</CODE></P>
+
 <P>The function <CODE>comedi_get_version_code()</CODE> returns the
 version code of the currently running comedi module.  The version
 code is of the form 0x01072b, which is the version code for
-version 1.7.43.
-<P>
+version 1.7.43.</P>
+
 <P>This function is of limited usefulness.  A typical mis-application
 of this function is to use it to determine if a certain feature is
 supported.  If the application needs
 to know of the existence of a particular feature, an existence
-test function should be written and put in the libcomedi source.
-<P>Source: <CODE>/lib/get.c</CODE>
-<P>
-<P>
+test function should be written and put in the libcomedi source.</P>
+<P>Source: <CODE>/lib/get.c</CODE></P>
+
+
 <H3>comedi_loglevel()</H3>
 
-<P>
-<P><CODE>int comedi_loglevel(int loglevel);</CODE>
-<P>
+
+<P><CODE>int comedi_loglevel(int loglevel);</CODE></P>
+
 <P>This function affects the output of debugging and error messages
 from libcomedi.  By increasing the loglevel, additional debugging
 information will be printed.  This function returns the previous
 loglevel.  Error messages and debugging are printed to the
 stream <CODE>stderr</CODE>.  The loglevel can also be affected by the
-environment variable COMEDI_LOGLEVEL.
-<P>
+environment variable COMEDI_LOGLEVEL.</P>
+
 <P>In order to conserve resources, some debugging information is
-disabled when libcomedi is compiled.
-<P>
-<P>The meaning of the loglevels is as follows:
+disabled when libcomedi is compiled.</P>
+
+<P>The meaning of the loglevels is as follows:</P>
 <P>
 <UL>
 <LI><CODE>COMEDILIB_LOGLEVEL=0</CODE>
@@ -612,29 +651,30 @@ called by comedilib.
 Comedilib prints a lot of debugging messages.
 </LI>
 </UL>
-<P>Bugs: Libcomedi doesn't currently have much debugging information.
-<P>Source: <CODE>/lib/error.c</CODE>
-<P>
-<P>
+</P>
+<P>Bugs: Libcomedi doesn't currently have much debugging information.</P>
+<P>Source: <CODE>/lib/error.c</CODE></P>
+
+
 <H3>comedi_open()</H3>
 
-<P>
-<P><CODE>comedi_t *comedi_open(char *filename);</CODE>
+
+<P><CODE>comedi_t *comedi_open(char *filename);</CODE></P>
 <P>Opens a comedi device specified by the filename <CODE>filename</CODE>.
 Returns NULL on error.  On sucess, it returns a handle that is
-given as a parameter to other libcomedi functions.
-<P>
+given as a parameter to other libcomedi functions.</P>
+
 <P>You are not supposed to have access to the internals of the
-<CODE>comedi_t</CODE> structure.
-<P>Bugs: Not strictly identical to <CODE>fopen</CODE>
-<P>Source: <CODE>/lib/comedi.c</CODE>
-<P>
-<P>
-<P>
+<CODE>comedi_t</CODE> structure.</P>
+<P>Bugs: Not strictly identical to <CODE>fopen</CODE></P>
+<P>Source: <CODE>/lib/comedi.c</CODE></P>
+
+
+
 <H3><A NAME="comedi_perror"></A> comedi_perror()</H3>
 
-<P>
-<P><CODE>void comedi_perror(const char *s);</CODE>
+
+<P><CODE>void comedi_perror(const char *s);</CODE></P>
 <P>When a comedilib function fails, it usually returns -1 or
 NULL, depending on the return type.  An internal library
 variable stores an error number, which can be retrieved with 
@@ -644,26 +684,26 @@ This error number can be
 converted to a human-readable form by the functions 
 <CODE>comedi_perror()</CODE>
 and <CODE>
-<A HREF="#comedi_strerror">comedi_strerror()</A></CODE>.
+<A HREF="#comedi_strerror">comedi_strerror()</A></CODE>.</P>
 <P>These functions are intended to mimic the behavior of the
 standard C library functions <CODE>perror()</CODE>,
 <CODE>strerror</CODE>, and <CODE>errno()</CODE>.  In particular,
 comedilib functions sometimes return an error that is generated
 inside the C library; the comedi error message in this case
-is the same as the C library.
+is the same as the C library.</P>
 <P>The function <CODE>comedi_perror()</CODE> prints an error
 message to stderr.  The error message consists of the
 argument string, a colon, a space, a description of the error
-condition, and a new line.
-<P>Bugs: Does not support internationalization.
-<P>Source: <CODE>/lib/error.c</CODE>
-<P>
-<P>
-<P>
+condition, and a new line.</P>
+<P>Bugs: Does not support internationalization.</P>
+<P>Source: <CODE>/lib/error.c</CODE></P>
+
+
+
 <H3><A NAME="comedi_strerror"></A> comedi_strerror()</H3>
 
-<P>
-<P><CODE>*comedi_strerror(int errnum);</CODE>
+
+<P><CODE>*comedi_strerror(int errnum);</CODE></P>
 <P>When a comedilib function fails, it usually returns -1 or
 NULL, depending on the return type.  An internal library
 variable stores an error number, which can be retrieved with
@@ -672,118 +712,192 @@ variable stores an error number, which can be retrieved with
 converted to a human-readable form by the functions
 <CODE>
 <A HREF="#comedi_perror">comedi_perror()</A></CODE>
-and <CODE>comedi_strerror()</CODE>.
+and <CODE>comedi_strerror()</CODE>.</P>
 <P>These functions are intended to mimic the behavior of the
 standard C library functions <CODE>perror()</CODE>,
 <CODE>strerror</CODE>, and <CODE>errno()</CODE>.  In particular,
 comedilib functions sometimes return an error that is generated
 inside the C library; the comedi error message in this case
-is the same as the C library.
+is the same as the C library.</P>
 <P>The function <CODE>comedi_strerror()</CODE> returns a pointer to a
 character string
 describing the comedilib error <CODE>errnum</CODE>.  The persistence
 of the returned pointer is undefined, and should not be trusted
 after the next libcomedi call.  An unrecognized error number will
-return a pointer to the string "undefined error", or similar.
-<P>Bugs: Does not support internationalization.
-<P>Source: <CODE>/lib/error.c</CODE>
-<P>
-<P>
-<P>
+return a pointer to the string "undefined error", or similar.</P>
+<P>Bugs: Does not support internationalization.</P>
+<P>Source: <CODE>/lib/error.c</CODE></P>
+
+
+
 <H3>comedi_sv_init()</H3>
 
-<P>
+
 <P><CODE>int comedi_sv_init(comedi_sv_t *sv,comedi_t *dev,unsigned int subd,
-unsigned int chan);</CODE>
-<P>
+unsigned int chan);</CODE></P>
+
 <P><CODE>comedi_sv_init</CODE> initializes the slow varying comedi structure
 <CODE>sv</CODE> of the device <CODE>dev</CODE>, the subdevice <CODE>subd</CODE> (analog input) and
 the channel <CODE>chan</CODE>.
 The slow varying comedi structure <CODE>sv</CODE> of type <CODE>
 <A HREF="#comedi_sv_t">comedi_sv_t</A></CODE>
 specifies the signal measurement.  The default number of averaged
-samples is 100.  Returns zero on success, -1 on error.
-<P>Bugs: comedi_sv_* was very poorly designed.
-<P>Source: <CODE>/lib/sv.c</CODE>
-<P>
-<P>
-<P>
+samples is 100.  Returns zero on success, -1 on error.</P>
+<P>Bugs: comedi_sv_* was very poorly designed.</P>
+<P>Source: <CODE>/lib/sv.c</CODE></P>
+
+
+
 <H3>comedi_sv_update()</H3>
 
-<P>
-<P><CODE>int comedi_sv_update(comedi_sv_t *sv);</CODE>
+
+<P><CODE>int comedi_sv_update(comedi_sv_t *sv);</CODE></P>
 <P>The function <CODE>comedi_sv_update</CODE> updates the slow varying comedi structure
 <CODE>sv</CODE>.
-Returns zero on success, -1 on error.
-<P>Source: <CODE>/lib/sv.c</CODE>
-<P>
-<P>
-<P>
+Returns zero on success, -1 on error.</P>
+<P>Source: <CODE>/lib/sv.c</CODE></P>
+
+
+
 <H3>int comedi_sv_measure()</H3>
 
-<P>
-<P><CODE>int comedi_sv_measure(comedi_sv_t *it,double *data);</CODE>
+
+<P><CODE>int comedi_sv_measure(comedi_sv_t *it,double *data);</CODE></P>
 <P><CODE>comedi_sv_measure</CODE> measures the slow variing signal. The measurement
 is specified by the slow varying comedi structure <CODE>sv</CODE>, the result is
 stored in <CODE>data</CODE>.
-On success returns the number of samples, -1 on error.
-<P>Source: <CODE>/lib/sv.c</CODE>
-<P>
-<P>
-<P>
+On success returns the number of samples, -1 on error.</P>
+<P>Source: <CODE>/lib/sv.c</CODE></P>
+
+
+
 <H3><A NAME="comedi_to_phys"></A> comedi_to_phys()</H3>
 
-<P>
+
 <P><CODE>double comedi_to_phys(lsampl_t data, comedi_range *rng,
-lsampl_t maxdata);</CODE>
+lsampl_t maxdata);</CODE></P>
 <P>Converts data given in sample values (lsampl_t, between 0 and
 maxdata) into physical units (double).  The parameter <CODE>rng</CODE>
 represents the conversion information to use, and the parameter
 <CODE>maxdata</CODE> represents the maximum possible data value for the
-channel that the data was read.
-<P>Source: <CODE>/lib/range.c</CODE>
-<P>
-<P>
-<P>
+channel that the data was read.</P>
+<P>Source: <CODE>/lib/range.c</CODE></P>
+
+
+
 <H3>comedi_trigger() <I>(deprecated)</I></H3>
 
-<P>
-<P><CODE>int comedi_trigger(comedi_t *it,comedi_trig *trig);</CODE>
+
+<P><CODE>int comedi_trigger(comedi_t *it,comedi_trig *trig);</CODE></P>
 <P>The function <CODE>comedi_trigger</CODE> instructs comedi to
 perform the command specified by the 
 <A HREF="#comedi_trig_struct">trigger structure</A> <CODE>trig</CODE>.  Results depend on
 the particular command being issued.  If there is an
-error, -1 is returned.
-<P>Lifetime: removal at 1.0.
-<P>Source: <CODE>/lib/comedi.c</CODE>
+error, -1 is returned.</P>
+<P>Lifetime: removal at 1.0.</P>
+<P>Source: <CODE>/lib/comedi.c</CODE></P>
+
+
+
+<H3><A NAME="comedi_get_subdevice_flags"></A> comedi_get_subdevice_flags()</H3>
+
+
+<P><CODE>int comedi_get_subdevice_flags(comedi_t *dev, unsigned int subdevice);</CODE></P>
+
+<P>This function returns a bitfield describing the capabilities of the
+specified subdevice.  If there is an error, -1 is returned.</P>
+
+<P>The bits are:</P>
 <P>
-<P>
-<P>
-<P>
-<P>
-<P>
-<P>
-<P>
-<P>
-<P>
-<P>
-<P>
-<P>
-<P>
-<H3>comedi_get_timer()</H3>
+<UL>
+<LI>SDF_BUSY            subdevice is running a command</LI>
+<LI>SDF_BUSY_OWNER      subdevice is running a command started by
+the file descriptor used by <CODE>dev</CODE>.</LI>
+<LI>SDF_LOCKED  subdevice is locked</LI>
+<LI>SDF_LOCKED_OWNER    subdevice is locked by the file descriptor used
+by <CODE>dev</CODE>.</LI>
+<LI>SDF_MAXDATA maximum data values are channel dependent</LI>
+<LI>SDF_FLAGS           channel flags are channel dependent</LI>
+<LI>SDF_RANGETYPE       range types are channel dependent</LI>
+<LI>SDF_MODE0           deprecated</LI>
+<LI>SDF_MODE1           deprecated</LI>
+<LI>SDF_MODE2           deprecated</LI>
+<LI>SDF_MODE3           deprecated</LI>
+<LI>SDF_MODE4           deprecated</LI>
+<LI>SDF_CMD             subdevice supports commands</LI>
+<LI>SDF_READABLE        subdevice can be read from</LI>
+<LI>SDF_WRITEABLE       subdevice can be written to</LI>
+<LI>SDF_RT              deprecated</LI>
+<LI>SDF_GROUND  subdevice is capable of ground analog reference</LI>
+<LI>SDF_COMMON  subdevice is capable of common analog reference</LI>
+<LI>SDF_DIFF            subdevice is capable of differential analog reference</LI>
+<LI>SDF_OTHER           subdevice is capable of other analog reference</LI>
+<LI>SDF_DITHER  subdevice recognizes dither flag</LI>
+<LI>SDF_DEGLITCH        subdevice recognizes deglitch flag</LI>
+<LI>SDF_MMAP            deprecated</LI>
+<LI>SDF_RUNNING subdevice is acquiring data (i.e., command has not
+completed)</LI>
+<LI>SDF_LSAMPL  subdevice uses samples of type lsampl_t (otherwise
+sampl_t)</LI>
+<LI>SDF_PACKED  subdevice uses bitfield samples (otherwise it uses
+one sample per channel)</LI>
+</UL>
+</P>
+
+
+
+<P>The bit definitions are part of the Comedi kernel interface.</P>
+
+
+
+<H3><A NAME="comedi_range_is_chan_specific"></A> comedi_range_is_chan_specific()</H3>
+
+
+<P><CODE>int comedi_range_is_chan_specific(comedi_t *dev,unsigned int subdevice);</CODE></P>
+
+<P>If each channel of the specified subdevice has a different range
+specification, this function returns 1.  Otherwise, this function
+returns 0.  On error, this function returns -1.</P>
+
+
+
+<H3><A NAME="undocumented"></A> Undocumented functions</H3>
+
+
 
 <P>
-<P>
-<BLOCKQUOTE><CODE>
-<PRE>
-int comedi_get_timer(comedi_t *it,unsigned int subdev,double freq,unsigned int *trigvar,
-        double *actual_freq);
-</PRE>
-</CODE></BLOCKQUOTE>
-<P>
-<P>
-<P>
-<P>
+<UL>
+<LI>comedi_maxdata_is_chan_specific()</LI>
+<LI>comedi_get_buffer_size()</LI>
+<LI>comedi_get_max_buffer_size()</LI>
+<LI>comedi_set_buffer_size()</LI>
+<LI>comedi_set_max_buffer_size()</LI>
+<LI>comedi_do_insnlist()</LI>
+<LI>comedi_do_insn()</LI>
+<LI>comedi_lock()</LI>
+<LI>comedi_unlock()</LI>
+<LI>comedi_get_cmd_src_mask()</LI>
+<LI>comedi_get_cmd_generic_timed()</LI>
+<LI>comedi_cancel()</LI>
+<LI>comedi_command()</LI>
+<LI>comedi_command_test()</LI>
+<LI>comedi_poll()</LI>
+<LI>comedi_get_buffer_contents()</LI>
+<LI>comedi_mark_buffer_read()</LI>
+<LI>comedi_get_buffer_offset()</LI>
+<LI>comedi_set_global_oor_behavior()</LI>
+</UL>
+</P>
+
+
+
+
+
+
+
+
+
+
 <HR>
 Next
 Previous

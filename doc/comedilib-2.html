@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 <HTML>
 <HEAD>
- <META NAME="GENERATOR" CONTENT="SGML-Tools 1.0.9">
+ <META NAME="GENERATOR" CONTENT="LinuxDoc-Tools 0.9.7.4">
  <TITLE>Comedi Documentation: Installation and configuration</TITLE>
  <LINK HREF="comedilib-3.html" REL=next>
  <LINK HREF="comedilib-1.html" REL=previous>
@@ -12,48 +12,48 @@
 <A HREF="comedilib-1.html">Previous</A>
 <A HREF="comedilib.html#toc2">Contents</A>
 <HR>
-<H2><A NAME="s2">2. Installation and configuration</A></H2>
+<H2><A NAME="s2">2.</A> <A HREF="comedilib.html#toc2">Installation and configuration</A></H2>
 
-<P>
+
 <P>This section covers compiling, installing, and configuring
-comedi and comedlib.
-<P>
-<P>
+comedi and comedlib.</P>
+
+
 <H2><A NAME="ss2.1">2.1 Compiling and Installing</A>
 </H2>
 
-<P>
-<P>This section has not been written.
-<P>
-<P>
+
+<P>This section has not been written.</P>
+
+
 <H2><A NAME="ss2.2">2.2 Insmod'ding the kernel module</A>
 </H2>
 
-<P>
-<P>This section has not been written.
-<P>
-<P>
+
+<P>This section has not been written.</P>
+
+
 <H2><A NAME="ss2.3">2.3 Configuring comedi for your hardware</A>
 </H2>
 
-<P>
-<P>
+
+
 <P>I assume that your hardware device is in your computer, and that
 you know the relevant details about it, i.e., what kind of card
 it is, the I/O base, the IRQ, jumper settings related to input
-ranges, etc.
+ranges, etc.</P>
 <P>To tell the comedi kernel module that you have a particular device, and
 some information about it, you will be running the <CODE>comedi_config</CODE>
-command.  Perhaps you should read the man page now.
+command.  Perhaps you should read the man page now.</P>
 <P>In this tutorial, I will go through the process of configuring comedi
 for two devices, a National Instruments AT-MIO-16E-10
-and a Data Translation DT2821-F-8DI.
+and a Data Translation DT2821-F-8DI.</P>
 <P>The NI board is plug-and-play, and the man page tells me that I need
 to configure the PnP part of the board with isapnptools.  The isapnptools
 package is a little cryptic, but the concepts are simple.  Once I
 learned how to use it, I settled on a /etc/isapnp.conf file that
-contained the lines:
-<P>
+contained the lines:</P>
+
 <P>
 <BLOCKQUOTE><CODE>
 <PRE>
@@ -67,27 +67,29 @@ contained the lines:
 ))
 </PRE>
 </CODE></BLOCKQUOTE>
-<P>
+</P>
+
 <P>It also contains a few lines about overall configuration and about my
 sound card.  I found out after a bit of trial-and-error that the NI
 board does not always work with interrupts other than IRQ 3.  YMMV.
 Currently, the driver doesn't use DMA, but it may in the future, so
 I commented out the DMA lines.  It is a curious fact that the device
 ignores the IRQ and DMA information given here, however, I keep the
-information here to remind myself that the numbers aren't arbitrary.
+information here to remind myself that the numbers aren't arbitrary.</P>
 <P>When I run comedi_config (as root, of course), I provide the same
 information.  Since I want to have the board configured every time
-I boot, I put the line
+I boot, I put the line</P>
 <P>
 <BLOCKQUOTE><CODE>
 <PRE>
 /usr/sbin/comedi_config /dev/comedi0 atmio-E 0x260,3
 </PRE>
 </CODE></BLOCKQUOTE>
+</P>
 <P>into <CODE>/etc/rc.d/rc.local</CODE>.  You can, of course, run this command at
 a command prompt.  The man page tells me that the option list
 is supposed to be "(I/O base),(IRQ)", so I used the same numbers
-as I put in /etc/isapnp.conf, i.e., 0x260,3.
+as I put in /etc/isapnp.conf, i.e., 0x260,3.</P>
 <P>For the Data Translation board, I need to have a list of the
 jumper settings.  Fortunately, I wrote them all down in the
 manual -- I hope they are still correct.  However, I had to
@@ -97,7 +99,7 @@ me that I need to know the I/O base, IRQ, DMA 1, DMA 2.  However,
 since I wrote the driver, I know that it also recognizes the
 differential/single-ended and unipolar/bipolar jumpers.  As always,
 the source is the final authority, and looking in module/dt282x.c
-tells me that the options list is interpreted as:
+tells me that the options list is interpreted as:</P>
 <P>
 <UL>
 <LI>I/O base</LI>
@@ -109,14 +111,16 @@ tells me that the options list is interpreted as:
 <LI>dma1</LI>
 <LI>dma2</LI>
 </UL>
+</P>
 <P>(ai=analog input, ao=analog output.)  From this, I decide that
-the appropriate options list is
+the appropriate options list is</P>
 <P>
 <BLOCKQUOTE><CODE>
 <PRE>
 0x200,4,,1,1,1
 </PRE>
 </CODE></BLOCKQUOTE>
+</P>
 <P>I left the differential/single-ended number blank, since the
 driver already knowns (from the board name), that it is
 differential.  I  also left the DMA numbers blank, since I
@@ -125,13 +129,14 @@ with my sound card -- life is full of difficult choices.)
 Keep in mind that things commented in the source, but not in
 the documentation are about as likely to change as the weather,
 so I put good comments next to the following line when I put
-it in rc.local.
+it in rc.local.</P>
 <P>
 <BLOCKQUOTE><CODE>
 <PRE>
 /usr/sbin/comedi_config /dev/comedi1 dt2821-f-8di 0x200,4,,1,1,1
 </PRE>
 </CODE></BLOCKQUOTE>
+</P>
 <P>So now I think that I have my boards configured correctly.
 Since data acquisition boards are not typically well-engineered,
 comedi sometimes can't figure out if the board is actually there.
@@ -140,41 +145,44 @@ are well-made, so comedi will give me an error message if it
 can't find them.  The comedi kernel module, since it is a part
 of the kernel, prints messages to the kernel logs, which you
 can access through the command 'dmesg' or /var/log/messages.
-Here is a configuration failure (from dmesg):
+Here is a configuration failure (from dmesg):</P>
 <P>
 <BLOCKQUOTE><CODE>
 <PRE>
 comedi0: ni_E: 0x0200 can't find board
 </PRE>
 </CODE></BLOCKQUOTE>
-<P>When it does work, I get:
+</P>
+<P>When it does work, I get:</P>
 <P>
 <BLOCKQUOTE><CODE>
 <PRE>
 comedi0: ni_E: 0x0260 at-mio-16e-10 ( irq = 3 )
 </PRE>
 </CODE></BLOCKQUOTE>
-<P>Note that it also correctly identified my board.
-<P>
-<P>
-<P>
+</P>
+<P>Note that it also correctly identified my board.</P>
+
+
+
 <H2><A NAME="ss2.4">2.4 Getting information from comedi</A>
 </H2>
 
-<P>
-<P>
+
+
 <P>So now that we have comedi talking to the hardware, we want to
 talk to comedi.  Here's some pretty low-level information --
-it's sometimes useful for debugging:
-<P>
-<P>
+it's sometimes useful for debugging:</P>
+
+
 <P>
 <BLOCKQUOTE><CODE>
 <PRE>
 cat /proc/comedi
 </PRE>
 </CODE></BLOCKQUOTE>
-<P>Right now, on my computer, this command gives:
+</P>
+<P>Right now, on my computer, this command gives:</P>
 <P>
 <BLOCKQUOTE><CODE>
 <PRE>
@@ -184,15 +192,16 @@ format string
  1: dt282x               dt2821-f-8di            4
 </PRE>
 </CODE></BLOCKQUOTE>
+</P>
 <P>This is a feature that is not well-developed yet.  Basically, it
 currently tells you driver name, device name, and number of
-subdevices.
+subdevices.</P>
 <P>In the <CODE>demo/</CODE> directory, there is a command called
 <CODE>info</CODE>, which provides information about each subdevice on the
 board.  The output of it is rather long, since I have 7
 subdevices  (4 or fewer is common for other boards.)
 Here's part of the output of the NI board (which
-is on <CODE>/dev/comedi0</CODE>.)  ('demo/info /dev/comedi0')
+is on <CODE>/dev/comedi0</CODE>.)  ('demo/info /dev/comedi0')</P>
 <P>
 <BLOCKQUOTE><CODE>
 <PRE>
@@ -209,20 +218,21 @@ subdevice 0:
 
 ...
 </CODE></BLOCKQUOTE>
+</P>
 <P>The overall info gives information about the device -- basically
-the same information as /proc/comedi.
+the same information as /proc/comedi.</P>
 <P>This board has 7 subdevices.  Devices are separated into
 subdevices that each have a distinct purpose -- e.g., analog
 input, analog output, digital input/output.  This board also
-has an EEPROM and calibration DACs that are also subdevices.
+has an EEPROM and calibration DACs that are also subdevices.</P>
 <P>Subdevice 0 is the analog input subdevice.  You would have
 known this from the 'type: 1 (unknown)' line, if I've updated
 demo/info recently, because it would say 'type: 1 (analog input)'
 instead.  The other lines should be self-explanitory.  Comedi
 has more information about the device, but demo/info doesn't
-currently display this.
-<P>
-<P>
+currently display this.</P>
+
+
 <HR>
 <A HREF="comedilib-3.html">Next</A>
 <A HREF="comedilib-1.html">Previous</A>

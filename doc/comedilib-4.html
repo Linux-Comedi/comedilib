@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 <HTML>
 <HEAD>
- <META NAME="GENERATOR" CONTENT="SGML-Tools 1.0.9">
+ <META NAME="GENERATOR" CONTENT="LinuxDoc-Tools 0.9.7.4">
  <TITLE>Comedi Documentation: Writing programs that use comedi and comedilib</TITLE>
  <LINK HREF="comedilib-5.html" REL=next>
  <LINK HREF="comedilib-3.html" REL=previous>
@@ -12,16 +12,16 @@
 <A HREF="comedilib-3.html">Previous</A>
 <A HREF="comedilib.html#toc4">Contents</A>
 <HR>
-<H2><A NAME="s4">4. Writing programs that use comedi and comedilib</A></H2>
+<H2><A NAME="s4">4.</A> <A HREF="comedilib.html#toc4">Writing programs that use comedi and comedilib</A></H2>
 
-<P>
-<P>
+
+
 <H2><A NAME="ss4.1">4.1 Your first comedi program</A>
 </H2>
 
-<P>
+
 <P>This example requires a card that has analog or
-digital input.  Right to the source:
+digital input.  Right to the source:</P>
 <P>
 <BLOCKQUOTE><CODE>
 <PRE>
@@ -49,29 +49,31 @@ int main(int argc,char *argv[])
 }
 </PRE>
 </CODE></BLOCKQUOTE>
-<P>
+</P>
+
 <P>Should be understandable.  Open the device, get the data,
 print it out.  This is basically the guts of <CODE>demo/inp.c</CODE>,
 without error checking or fancy options.
-Compile it using 
+Compile it using </P>
 <P>
 <BLOCKQUOTE><CODE>
 <PRE>
 cc tut1.c -lcomedi -o tut1
 </PRE>
 </CODE></BLOCKQUOTE>
+</P>
 <P>A few notes:  The range variable tells comedi which gain
 to use when measuring an analog voltage.  Since we don't
 know (yet) which numbers are valid, or what each means,
 we'll use 0, because it won't cause errors.  Likewise with
-aref, which determines the analog reference used.
-<P>
-<P>
-<P>
+aref, which determines the analog reference used.</P>
+
+
+
 <H2><A NAME="ss4.2">4.2 Converting samples to voltages</A>
 </H2>
 
-<P>
+
 <P>If you selected an analog input subdevice, you should notice
 that the output of <CODE>tut1</CODE> is a number between
 0 and 4095, or 0 and 65535, depending on the number of bits
@@ -82,29 +84,29 @@ anything else the manual for your device says.  However,
 you probably prefer to have this number translated to
 a voltage.  Naturally, as a good programmer, your first
 question is: "How do I do this in a device-independent
-manner?"
+manner?"</P>
 <P>Most devices give you a choice of gain and unipolar/bipolar
 input, and Comedi allows you to select which of these to
 use.  This parameter is called the "range parameter", since
 it specifies the "input range" for analog input (or "output range"
 analog output.)  The range parameter represents both the gain
-and the unipolar/bipolar aspects.
+and the unipolar/bipolar aspects.</P>
 <P>Comedi keeps the number of available ranges and the largest
 sample value for each subdevice/channel combination.  (Some
 devices allow different input/output ranges for different
-channels in a subdevice.)
-<P>The largest sample value can be found using the function:
-<P>comedi_get_maxdata()
-<P>The number of available ranges can be found using the function:
-<P>comedi_get_n_ranges()
+channels in a subdevice.)</P>
+<P>The largest sample value can be found using the function:</P>
+<P>comedi_get_maxdata()</P>
+<P>The number of available ranges can be found using the function:</P>
+<P>comedi_get_n_ranges()</P>
 <P>For each value of the range parameter for a particular
 subdevice/channel, you can get range information using the
-function:
+function:</P>
 <P>ptr=comedi_get_range(comedi_file,subdevice,channel,
-range)
+range)</P>
 <P>which returns a pointer to a comedi_range structure.
-The comedi_range structure looks like
-<P>
+The comedi_range structure looks like</P>
+
 <P>
 <BLOCKQUOTE><CODE>
 <PRE>
@@ -115,83 +117,89 @@ typedef struct{
 }comedi_range;
 </PRE>
 </CODE></BLOCKQUOTE>
+</P>
 <P>The structure element 'min' represents
 the voltage corresponding to comedi_data_read() returning 0,
 and 'max' represents comedi_data_read() returning 'maxdata',
 (i.e., 4095 for 12 bit A/C converters, 65535 for 16 bit,
 or, 1 for digital input -- more on this in a bit.)  The
 'unit' entry tells you if min and
-max refer to voltage, current, etc.
+max refer to voltage, current, etc.</P>
 <P>"Could it get easier?", you say.  Well, yes.  Use
 the function comedi_to_phys(), which converts data
-values to physical units.  Call it using something like
+values to physical units.  Call it using something like</P>
 <P>
 <BLOCKQUOTE><CODE>
 <PRE>
 volts=comedi_to_phys(it,data,range,maxdata);
 </PRE>
 </CODE></BLOCKQUOTE>
-<P>and the opposite
+</P>
+<P>and the opposite</P>
 <P>
 <BLOCKQUOTE><CODE>
 <PRE>
 data=comedi_from_phys(it,volts,range,maxdata);
 </PRE>
 </CODE></BLOCKQUOTE>
-<P>
-<P>
-<P>
+</P>
+
+
+
 <H2><A NAME="ss4.3">4.3 Another section</A>
 </H2>
 
-<P>
-<P>
+
+
 <P>In addition to providing low level routines for data
 access, the comedi library provides higher-level access,
 much like the standard C library provides fopen(), etc.
 as a high-level (and portable) alternative to the direct
 UNIX system calls open(), etc.  Similarily to fopen(),
-we have comedi_open():
-<P>
+we have comedi_open():</P>
+
 <P>
 <BLOCKQUOTE><CODE>
 <PRE>
 file=comedi_open("/dev/comedi0");
 </PRE>
 </CODE></BLOCKQUOTE>
+</P>
 <P>where file is of type <CODE>(comedi_t *)</CODE>.  This function
 calls <CODE>open()</CODE>, like we did explicitly in a previous
 section, but also fills the <CODE>comedi_t</CODE> structure with
 lots of goodies -- information that we will need to use
-soon.  
+soon.  </P>
 <P>Specifically, we needed to know maxdata for a specific
-subdevice/channel.  How about:
+subdevice/channel.  How about:</P>
 <P>
 <BLOCKQUOTE><CODE>
 <PRE>
 maxdata=comedi_get_maxdata(file,subdevice,channel);
 </PRE>
 </CODE></BLOCKQUOTE>
-<P>Wow.  How easy.  And the range type?
+</P>
+<P>Wow.  How easy.  And the range type?</P>
 <P>
 <BLOCKQUOTE><CODE>
 <PRE>
 range_type=comedi_get_rangetype(file,subdevice,channel);
 </PRE>
 </CODE></BLOCKQUOTE>
+</P>
 <P>Cool.  Other information you need to know about a channel
-can be gotten in a similar way.
-<P>
-<P>
-<P>
+can be gotten in a similar way.</P>
+
+
+
 <H2><A NAME="ss4.4">4.4 Your second comedi program</A>
 </H2>
 
-<P>
-<P>
+
+
 <P>Actually, this is the first comedi program again, just
-that we've added what we've learned.
-<P>
+that we've added what we've learned.</P>
+
 <P>
 <BLOCKQUOTE><CODE>
 <PRE>
@@ -228,17 +236,18 @@ int main(int argc,char *argv[])
 }
 </PRE>
 </CODE></BLOCKQUOTE>
-<P>
+</P>
+
 <P>By now, the <CODE>comedi_read_data()</CODE> line looks a little archaic, using
 the UNIX file descriptor cf->fd instead of just cf.  (By the
 way, somewhere in the heart of <CODE>comedi_open()</CODE> is the line
 <CODE>cf->fd=open(filename,O_RDWR)</CODE>.)  Well, there isn't one good
 replacement, since it highly depends on your application
 what additional features you might want in a <CODE>comedi_get()</CODE>
-replacement.  But this is the topic of a different section.
-<P>
-<P>
-<P>
+replacement.  But this is the topic of a different section.</P>
+
+
+
 <HR>
 <A HREF="comedilib-5.html">Next</A>
 <A HREF="comedilib-3.html">Previous</A>
