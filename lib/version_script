@@ -84,5 +84,6 @@ v0.7.20 {
 v0.7.23 {
 	global:
 		comedi_dio_get_config;
+		comedi_get_subdevice_flags;
 		comedi_mark_buffer_written;
 } v0.7.20;

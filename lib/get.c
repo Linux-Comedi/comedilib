@@ -71,13 +71,37 @@ char* _comedi_get_board_name(comedi_t *it)
 	return it->devinfo.board_name;
 }
 
-EXPORT_ALIAS_DEFAULT(_comedi_get_subdevice_flags,comedi_get_subdevice_flags,0.7.18);
-int _comedi_get_subdevice_flags(comedi_t *it,unsigned int subd)
+EXPORT_ALIAS_VER(_comedi_get_subdevice_flags_old, comedi_get_subdevice_flags,0.7.18);
+int _comedi_get_subdevice_flags_old(comedi_t *it,unsigned int subd)
 {
 	if(!valid_dev(it))
 		return 0;
-
 	return it->subdevices[subd].subd_flags;
+}
+
+EXPORT_ALIAS_DEFAULT(_comedi_get_subdevice_flags,comedi_get_subdevice_flags,0.7.23);
+int _comedi_get_subdevice_flags(comedi_t *it,unsigned int subd)
+{
+	comedi_subdinfo *s;
+	int flags;
+	int ret;
+	if(!valid_dev(it))
+		return -1;
+	s = malloc(sizeof(comedi_subdinfo) * it->n_subdevices);
+	if(s == NULL) 
+	{
+		__comedi_errno = errno;
+		return -1;
+	}
+	ret = comedi_ioctl(it->fd, COMEDI_SUBDINFO, (unsigned long)s);
+	if(ret < 0) 
+	{
+		free(s);
+		return -1;
+	}
+	flags = s[subd].subd_flags;
+	free(s);
+	return flags;
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_get_subdevice_type,comedi_get_subdevice_type,0.7.18);
