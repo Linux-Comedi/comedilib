@@ -1,4 +1,5 @@
 
+
 # Makefile for comedi
 
 TOPDIR=`pwd`
@@ -22,61 +23,60 @@ all:	$(TARGETS)
 
 SUBDIRS= lib demo comedi_calibrate testing comedi_config
 
-DOCFILES= README `find doc -type f`
-
-INSTALLDIR=$(DESTDIR)$(PREFIX)
-INSTALLDIR_LIB=$(DESTDIR)$(PREFIX)/lib
-ifneq ($(DEB_BUILD_ARCH),)
-INSTALLDIR_DOC=$(DESTDIR)$(PREFIX)/share/doc/libcomedi
-INSTALLDIR_MAN=$(DESTDIR)$(PREFIX)/share/man
+# We follow the filesystem standard.  If you don't like it, tough.
+INSTALLDIR=$(DESTDIR)$(PREFIX)/
+INSTALLDIR_LIB=$(DESTDIR)$(PREFIX)/lib/
+INSTALLDIR_DOC=$(DESTDIR)$(PREFIX)/share/doc/libcomedi/
+INSTALLDIR_MAN=$(DESTDIR)$(PREFIX)/share/man/
 INSTALLDIR_PERL=$(DESTDIR)$(PREFIX)/lib/perl5/
-else
-INSTALLDIR_DOC=$(DESTDIR)$(PREFIX)/doc/libcomedi
-INSTALLDIR_MAN=$(DESTDIR)$(PREFIX)/man
-INSTALLDIR_PERL=$(DESTDIR)$(PREFIX)/lib/perl/
-endif
-INSTALLDIR_BIN=$(DESTDIR)$(PREFIX)/bin
-INSTALLDIR_SBIN=$(DESTDIR)$(PREFIX)/sbin
+INSTALLDIR_BIN=$(DESTDIR)$(PREFIX)/bin/
+INSTALLDIR_SBIN=$(DESTDIR)$(PREFIX)/sbin/
 
 comedilib:	subdirs
 
 config:	dummy
 
-install:	install_dev install_runtime install_doc
+install:	install_dev install_runtime install_doc install_man
 
 install_dev:	dummy
-	install -d ${INSTALLDIR}/include
-	install -m 644 include/comedilib.h ${INSTALLDIR}/include
-	install -m 644 include/comedi.h ${INSTALLDIR}/include
-	(cd $(INSTALLDIR_LIB);ln -sf libcomedi.so.${version} libcomedi.so)
-	install -m 644 lib/libcomedi.a ${INSTALLDIR_LIB}
+	install -d $(INSTALLDIR)/include
+	install -m 644 include/comedilib.h $(INSTALLDIR)/include
+	install -m 644 include/comedi.h $(INSTALLDIR)/include
+	ln -sf libcomedi.so.$(version) $(INSTALLDIR_LIB)/libcomedi.so
+	install -m 644 lib/libcomedi.a $(INSTALLDIR_LIB)
 
 install_runtime:
-	install lib/libcomedi.so.${version} ${INSTALLDIR_LIB}
-	(cd $(INSTALLDIR_LIB);ln -sf libcomedi.so.${version} libcomedi.so.${MAJOR})
-	install -s -m 755 comedi_config/comedi_config ${INSTALLDIR_SBIN}
-	install -s -m 755 comedi_calibrate/comedi_calibrate ${INSTALLDIR_BIN}
+	install lib/libcomedi.so.$(version) $(INSTALLDIR_LIB)
+	ln -sf libcomedi.so.$(version) $(INSTALLDIR_LIB)/libcomedi.so.$(MAJOR)
+	install -s -m 755 comedi_config/comedi_config $(INSTALLDIR_SBIN)
+	install -s -m 755 comedi_calibrate/comedi_calibrate $(INSTALLDIR_BIN)
+
+install_man:
+	install -d $(INSTALLDIR_MAN)/man3/
+	install -d $(INSTALLDIR_MAN)/man7/
+	install -d $(INSTALLDIR_MAN)/man8/
+	install doc/man/*.3 $(INSTALLDIR_MAN)/man3/
+	install man/*.7 $(INSTALLDIR_MAN)/man7/
+	install man/*.8 $(INSTALLDIR_MAN)/man8/
 
 install_doc:
-ifneq ($(INSTALLDIR),)
-	install -d ${INSTALLDIR_DOC}
-	install ${DOCFILES} ${INSTALLDIR_DOC}
-endif
-	install man/*.7 ${INSTALLDIR_MAN}/man7
-	install man/*.8 ${INSTALLDIR_MAN}/man8
-
-install_debian: install
-	install -d $(DESTDIR)/etc/pcmcia/
-	install -m 755 etc/pcmcia/comedi $(DESTDIR)/etc/pcmcia/
-	install -m 644 etc/pcmcia/comedi.conf $(DESTDIR)/etc/pcmcia/
-	install -m 644 etc/pcmcia/comedi.opts $(DESTDIR)/etc/pcmcia/
 	install -d $(INSTALLDIR_DOC)
-	install -m 644 $(DOCFILES) $(INSTALLDIR_DOC)
+	install README doc/FAQ doc/drivers.txt $(INSTALLDIR_DOC)
+	install -d $(INSTALLDIR_DOC)/html/
+	install doc/html/* $(INSTALLDIR_DOC)/html/
 	install -d $(INSTALLDIR_DOC)/etc/
 	install -m 755 etc/das1600.conf $(INSTALLDIR_DOC)/etc/
 	install -m 755 etc/dt282x.conf $(INSTALLDIR_DOC)/etc/
 	install -d $(INSTALLDIR_DOC)/examples/
 	install -m 644 demo/README demo/*.c $(INSTALLDIR_DOC)/examples/
+
+install_distro: install install_perl install_python
+	install -d $(DESTDIR)/etc/pcmcia/
+	install -m 755 etc/pcmcia/comedi $(DESTDIR)/etc/pcmcia/
+	install -m 644 etc/pcmcia/comedi.conf $(DESTDIR)/etc/pcmcia/
+	install -m 644 etc/pcmcia/comedi.opts $(DESTDIR)/etc/pcmcia/
+
+install_perl:
 ifeq ($(with_perl),yes)
 	install -d $(INSTALLDIR_PERL)
 	install -m 644 perl/blib/lib/Comedi.pm $(INSTALLDIR_PERL)/
@@ -90,6 +90,8 @@ ifeq ($(with_perl),yes)
 	install -m 644 perl/blib/arch/auto/Comedi/Comedi.so $(INSTALLDIR_PERL)/Comedi
 	install -m 644 perl/blib/arch/auto/Comedi/Comedi.bs $(INSTALLDIR_PERL)/Comedi
 endif
+
+install_python:
 ifeq ($(with_python),yes)
 endif
 
@@ -97,10 +99,10 @@ lpr:	dummy
 	find . -name '*.[chs]'|xargs enscript -2r -pit.ps
 
 subdirs:	dummy
-	set -e;for i in ${SUBDIRS};do ${MAKE} -C $$i ; done
+	set -e;for i in $(SUBDIRS);do $(MAKE) -C $$i ; done
 
 clean:	dummy
-	set -e;for i in $(SUBDIRS);do ${MAKE} clean -C $$i ; done
+	set -e;for i in $(SUBDIRS);do $(MAKE) clean -C $$i ; done
 	# These will fail if nothing was built, but that's not a problem
 	-$(MAKE) -C python distclean
 	-$(MAKE) -C perl distclean
@@ -114,7 +116,7 @@ python: dummy
 perl:	dummy
 	(cd perl;perl Makefile.PL)
 	$(MAKE) -C perl all
-	
+
 debian: dummy
 	chmod 755 debian/rules
 	dpkg-buildpackage -rfakeroot
