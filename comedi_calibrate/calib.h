@@ -45,23 +45,16 @@ typedef struct{
 	double target;
 }observable;
 
-typedef struct calibration_setup_struct calibration_setup;
+typedef struct calibration_setup_struct calibration_setup_t;
 struct calibration_setup_struct {
+	comedi_t *dev;
 	int status;
-	observable *observables;
+	observable observables[ N_OBSERVABLES ];
 	unsigned int n_observables;
-	caldac *caldacs;
+	caldac caldacs[ N_CALDACS ];
 	unsigned int n_caldacs;
-	int (*do_cal) ( calibration_setup *setup );
+	int (*do_cal) ( calibration_setup_t *setup );
 };
-
-extern caldac caldacs[N_CALDACS];
-extern int n_caldacs;
-
-extern observable observables[N_OBSERVABLES];
-extern int n_observables;
-
-extern comedi_t *dev;
 
 extern int ad_subdev;
 extern int da_subdev;
@@ -79,44 +72,43 @@ enum {
 	STATUS_SOME,
 	STATUS_DONE
 };
-extern int device_status;
 
 extern int do_output;
 
 /* high level */
 
-void observe(void);
-void preobserve(int obs);
-void observable_dependence(int obs);
-void measure_observable(int obs);
-void reset_caldacs( const calibration_setup *setup);
+void observe( calibration_setup_t *setup );
+void preobserve( calibration_setup_t *setup, int obs);
+void observable_dependence( calibration_setup_t *setup, int obs);
+void measure_observable( calibration_setup_t *setup, int obs);
+void reset_caldacs( calibration_setup_t *setup);
 
 /* drivers */
 
 extern char ni_id[];
 extern char cb_id[];
 
-int ni_setup( calibration_setup*, const char *device_name );
-int cb_setup( calibration_setup*, const char *device_name );
+int ni_setup( calibration_setup_t*, const char *device_name );
+int cb_setup( calibration_setup_t*, const char *device_name );
 
 /* low level */
 
-void set_target(int obs,double target);
-void update_caldac( caldac );
-void setup_caldacs(void);
-void postgain_cal(int obs1, int obs2, int dac);
-void cal1(int obs, int dac);
-void cal1_fine(int obs, int dac);
+void set_target( calibration_setup_t *setup, int obs,double target);
+void update_caldac( calibration_setup_t *setup, unsigned int caldac_index );
+void setup_caldacs( calibration_setup_t *setup, int caldac_subdev);
+void postgain_cal( calibration_setup_t *setup, int obs1, int obs2, int dac);
+void cal1( calibration_setup_t *setup, int obs, int dac);
+void cal1_fine( calibration_setup_t *setup, int obs, int dac);
 
 /* misc and temp */
 
 void channel_dependence(int adc,int range);
 void caldac_dependence(int caldac);
 void chan_cal(int adc,int caldac,int range,double target);
-int read_eeprom(int addr);
+int read_eeprom( calibration_setup_t *setup, int addr);
 
-double read_chan(int adc,int range);
-int read_chan2(char *s,int adc,int range);
+double read_chan( calibration_setup_t *setup, int adc,int range);
+int read_chan2( calibration_setup_t *setup, char *s,int adc,int range);
 void set_ao(comedi_t *dev,int subdev,int chan,int range,double value);
 void check_gain(int ad_chan,int range);
 double check_gain_chan(int ad_chan,int range,int cdac);
@@ -166,8 +158,8 @@ typedef struct {
 int linear_fit_monotonic(linear_fit_t *l);
 double linear_fit_func_y(linear_fit_t *l,double x);
 double linear_fit_func_x(linear_fit_t *l,double y);
-double check_gain_chan_x(linear_fit_t *l,unsigned int ad_chanspec,int cdac);
-double check_gain_chan_fine(linear_fit_t *l,unsigned int ad_chanspec,int cdac);
+double check_gain_chan_x( calibration_setup_t *setup, linear_fit_t *l,unsigned int ad_chanspec,int cdac);
+double check_gain_chan_fine( calibration_setup_t *setup, linear_fit_t *l,unsigned int ad_chanspec,int cdac);
 void dump_curve(linear_fit_t *l);
 
 /* slowly varying measurements */
@@ -191,7 +183,7 @@ typedef struct{
 	double error;
 }new_sv_t;
 
-int new_sv_measure(new_sv_t *sv);
+int new_sv_measure(comedi_t *dev, new_sv_t *sv);
 int new_sv_init(new_sv_t *sv,comedi_t *dev,int subdev,int chan,int range,int aref);
 
 

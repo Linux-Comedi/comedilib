@@ -41,27 +41,27 @@ char ni_id[] = "$Id$";
 struct board_struct{
 	char *name;
 	int status;
-	int (*cal)( calibration_setup *setup);
+	int (*cal)( calibration_setup_t *setup);
 };
 
-int ni_setup_board( calibration_setup *setup , const char *device_name );
-void ni_setup_observables(void);
+int ni_setup_board( calibration_setup_t *setup , const char *device_name );
+void ni_setup_observables( calibration_setup_t *setup );
 
-int cal_ni_at_mio_16e_2(calibration_setup *setup);
-int cal_ni_daqcard_ai_16xe_50(calibration_setup *setup);
-int cal_ni_at_mio_16e_1(calibration_setup *setup);
-int cal_ni_pci_mio_16e_1(calibration_setup *setup);
-int cal_ni_pci_6025e(calibration_setup *setup);
-int cal_ni_pci_6035e(calibration_setup *setup);
-int cal_ni_pci_6071e(calibration_setup *setup);
-int cal_ni_pxi_6071e(calibration_setup *setup);
-int cal_ni_at_mio_16e_10(calibration_setup *setup);
-int cal_ni_pci_mio_16xe_50(calibration_setup *setup);
-int cal_ni_pci_6023e(calibration_setup *setup);
-int cal_ni_pci_6024e(calibration_setup *setup);
-int cal_ni_at_mio_16xe_50(calibration_setup *setup);
-int cal_ni_pci_mio_16xe_10(calibration_setup *setup);
-int cal_ni_pci_6052e(calibration_setup *setup);
+int cal_ni_at_mio_16e_2(calibration_setup_t *setup);
+int cal_ni_daqcard_ai_16xe_50(calibration_setup_t *setup);
+int cal_ni_at_mio_16e_1(calibration_setup_t *setup);
+int cal_ni_pci_mio_16e_1(calibration_setup_t *setup);
+int cal_ni_pci_6025e(calibration_setup_t *setup);
+int cal_ni_pci_6035e(calibration_setup_t *setup);
+int cal_ni_pci_6071e(calibration_setup_t *setup);
+int cal_ni_pxi_6071e(calibration_setup_t *setup);
+int cal_ni_at_mio_16e_10(calibration_setup_t *setup);
+int cal_ni_pci_mio_16xe_50(calibration_setup_t *setup);
+int cal_ni_pci_6023e(calibration_setup_t *setup);
+int cal_ni_pci_6024e(calibration_setup_t *setup);
+int cal_ni_at_mio_16xe_50(calibration_setup_t *setup);
+int cal_ni_pci_mio_16xe_10(calibration_setup_t *setup);
+int cal_ni_pci_6052e(calibration_setup_t *setup);
 
 static struct board_struct boards[]={
 	{ "at-mio-16e-2",	STATUS_DONE,	cal_ni_at_mio_16e_2 },
@@ -117,20 +117,16 @@ enum {
 	ni_ao1_reference,
 };
 
-int ni_setup( calibration_setup *setup , const char *device_name )
+int ni_setup( calibration_setup_t *setup , const char *device_name )
 {
 	ni_setup_board( setup, device_name );
-	setup->observables = observables;
-	setup->n_observables = n_observables;
-	setup->caldacs = caldacs;
-	setup->n_caldacs = n_caldacs;
-	ni_setup_observables();
-	setup_caldacs();
+	ni_setup_observables( setup );
+	setup_caldacs( setup, caldac_subdev );
 
 	return 0;
 }
 
-int ni_setup_board( calibration_setup *setup, const char *device_name )
+int ni_setup_board( calibration_setup_t *setup, const char *device_name )
 {
 	int i;
 
@@ -144,7 +140,7 @@ int ni_setup_board( calibration_setup *setup, const char *device_name )
 	return 0;
 }
 
-void ni_setup_observables(void)
+void ni_setup_observables( calibration_setup_t *setup )
 {
 	comedi_insn tmpl;
 	int bipolar_lowgain;
@@ -153,9 +149,9 @@ void ni_setup_observables(void)
 	double voltage_reference;
 	observable *o;
 
-	bipolar_lowgain = get_bipolar_lowgain(dev,ad_subdev);
-	bipolar_highgain = get_bipolar_highgain(dev,ad_subdev);
-	unipolar_lowgain = get_unipolar_lowgain(dev,ad_subdev);
+	bipolar_lowgain = get_bipolar_lowgain( setup->dev, ad_subdev);
+	bipolar_highgain = get_bipolar_highgain( setup->dev, ad_subdev);
+	unipolar_lowgain = get_unipolar_lowgain( setup->dev, ad_subdev);
 
 	voltage_reference = 5.000;
 
@@ -165,31 +161,31 @@ void ni_setup_observables(void)
 	tmpl.subdev = ad_subdev;
 
 	/* 0 offset, low gain */
-	o = observables + ni_zero_offset_low;
+	o = setup->observables + ni_zero_offset_low;
 	o->name = "ai, bipolar zero offset, low gain";
 	o->observe_insn = tmpl;
 	o->observe_insn.chanspec = CR_PACK(0,bipolar_lowgain,AREF_OTHER);
 	o->target = 0;
 
 	/* 0 offset, high gain */
-	o = observables + ni_zero_offset_high;
+	o = setup->observables + ni_zero_offset_high;
 	o->name = "ai, bipolar zero offset, high gain";
 	o->observe_insn = tmpl;
 	o->observe_insn.chanspec = CR_PACK(0,bipolar_highgain,AREF_OTHER);
 	o->target = 0;
 
 	/* voltage reference */
-	o = observables + ni_reference_low;
+	o = setup->observables + ni_reference_low;
 	o->name = "ai, bipolar voltage reference, low gain";
 	o->observe_insn = tmpl;
 	o->observe_insn.chanspec = CR_PACK(5,bipolar_lowgain,AREF_OTHER);
 	o->target = voltage_reference;
 
-	n_observables = ni_reference_low + 1;
+	setup->n_observables = ni_reference_low + 1;
 
 	if(unipolar_lowgain>=0){
 		/* unip/bip offset */
-		o = observables + ni_unip_offset_low;
+		o = setup->observables + ni_unip_offset_low;
 		o->name = "ai, unipolar zero offset, low gain";
 		o->observe_insn = tmpl;
 		o->observe_insn.chanspec =
@@ -206,7 +202,7 @@ void ni_setup_observables(void)
 		o->target = voltage_reference;
 		i++;
 #endif
-		n_observables = ni_unip_offset_low + 1;
+		setup->n_observables = ni_unip_offset_low + 1;
 	}
 
 	if(da_subdev>=0){
@@ -218,7 +214,7 @@ void ni_setup_observables(void)
 		po_tmpl.subdev = da_subdev;
 
 		/* ao 0, zero offset */
-		o = observables + ni_ao0_zero_offset;
+		o = setup->observables + ni_ao0_zero_offset;
 		o->name = "ao 0, zero offset, low gain";
 		o->preobserve_insn = po_tmpl;
 		o->preobserve_insn.chanspec = CR_PACK(0,0,0);
@@ -226,10 +222,10 @@ void ni_setup_observables(void)
 		o->observe_insn = tmpl;
 		o->observe_insn.chanspec =
 			CR_PACK(2,bipolar_lowgain,AREF_OTHER);
-		set_target(ni_ao0_zero_offset,0.0);
+		set_target( setup, ni_ao0_zero_offset,0.0);
 
 		/* ao 0, gain */
-		o = observables + ni_ao0_reference;
+		o = setup->observables + ni_ao0_reference;
 		o->name = "ao 0, reference voltage, low gain";
 		o->preobserve_insn = po_tmpl;
 		o->preobserve_insn.chanspec = CR_PACK(0,0,0);
@@ -237,11 +233,11 @@ void ni_setup_observables(void)
 		o->observe_insn = tmpl;
 		o->observe_insn.chanspec =
 			CR_PACK(6,bipolar_lowgain,AREF_OTHER);
-		set_target(ni_ao0_reference,5.0);
+		set_target( setup, ni_ao0_reference,5.0);
 		o->target -= voltage_reference;
 
 		/* ao 1, zero offset */
-		o = observables + ni_ao1_zero_offset;
+		o = setup->observables + ni_ao1_zero_offset;
 		o->name = "ao 1, zero offset, low gain";
 		o->preobserve_insn = po_tmpl;
 		o->preobserve_insn.chanspec = CR_PACK(1,0,0);
@@ -249,10 +245,10 @@ void ni_setup_observables(void)
 		o->observe_insn = tmpl;
 		o->observe_insn.chanspec =
 			CR_PACK(3,bipolar_lowgain,AREF_OTHER);
-		set_target(ni_ao1_zero_offset,0.0);
+		set_target( setup, ni_ao1_zero_offset,0.0);
 
 		/* ao 1, gain */
-		o = observables + ni_ao1_reference;
+		o = setup->observables + ni_ao1_reference;
 		o->name = "ao 1, reference voltage, low gain";
 		o->preobserve_insn = po_tmpl;
 		o->preobserve_insn.chanspec = CR_PACK(1,0,0);
@@ -260,24 +256,24 @@ void ni_setup_observables(void)
 		o->observe_insn = tmpl;
 		o->observe_insn.chanspec =
 			CR_PACK(7,bipolar_lowgain,AREF_OTHER);
-		set_target(ni_ao1_reference,5.0);
+		set_target( setup, ni_ao1_reference,5.0);
 		o->target -= voltage_reference;
 
-		n_observables = ni_ao1_reference + 1;
+		setup->n_observables = ni_ao1_reference + 1;
 	}
 }
 
-int cal_ni_at_mio_16e_2(calibration_setup *setup)
+int cal_ni_at_mio_16e_2(calibration_setup_t *setup)
 {
-	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
-	cal1(ni_zero_offset_high,0);
-	cal1(ni_reference_low,3);
-	cal1(ni_unip_offset_low,2);
+	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,1);
+	cal1( setup, ni_zero_offset_high,0);
+	cal1( setup, ni_reference_low,3);
+	cal1( setup, ni_unip_offset_low,2);
 	if(do_output){
-		cal1(ni_ao0_zero_offset,5);
-		cal1(ni_ao0_reference,6);
-		cal1(ni_ao1_zero_offset,8);
-		cal1(ni_ao1_reference,9);
+		cal1( setup, ni_ao0_zero_offset,5);
+		cal1( setup, ni_ao0_reference,6);
+		cal1( setup, ni_ao1_zero_offset,8);
+		cal1( setup, ni_ao1_reference,9);
 	}
 	return 0;
 }
@@ -308,208 +304,197 @@ int cal_ni_at_mio_16e_2(calibration_setup *setup)
  * caldac[2] gain=7.8670(11)e-5 V/bit S_min=903.291 dof=254
  * caldac[8] gain=2.7732(74)e-7 V/bit S_min=415.399 dof=254
  */
-int cal_ni_daqcard_ai_16xe_50(calibration_setup *setup)
+int cal_ni_daqcard_ai_16xe_50(calibration_setup_t *setup)
 {
-	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,2);
-	cal1(ni_zero_offset_high,8);
-	cal1(ni_reference_low,0);
-	cal1_fine(ni_reference_low,0);
-	cal1(ni_reference_low,1);
+	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,2);
+	cal1( setup, ni_zero_offset_high,8);
+	cal1( setup, ni_reference_low,0);
+	cal1_fine( setup, ni_reference_low,0);
+	cal1( setup, ni_reference_low,1);
 	return 0;
 }
 
-int cal_ni_at_mio_16xe_50(calibration_setup *setup)
+int cal_ni_at_mio_16xe_50(calibration_setup_t *setup)
 {
-	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,2);
-	cal1(ni_zero_offset_high,8);
-	cal1(ni_reference_low,0);
-	cal1_fine(ni_reference_low,0);
-	cal1(ni_reference_low,1);
+	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,2);
+	cal1( setup, ni_zero_offset_high,8);
+	cal1( setup, ni_reference_low,0);
+	cal1_fine( setup, ni_reference_low,0);
+	cal1( setup, ni_reference_low,1);
 
 	if(do_output){
-		cal1(ni_ao0_zero_offset,6);
-		cal1(ni_ao0_reference,4);
-		cal1(ni_ao1_zero_offset,7);
-		cal1(ni_ao1_reference,5);
+		cal1( setup, ni_ao0_zero_offset,6);
+		cal1( setup, ni_ao0_reference,4);
+		cal1( setup, ni_ao1_zero_offset,7);
+		cal1( setup, ni_ao1_reference,5);
 	}
 	return 0;
 }
 
-int cal_ni_pci_mio_16xe_10(calibration_setup *setup)
+int cal_ni_pci_mio_16xe_10(calibration_setup_t *setup)
 {
-	postgain_cal(ni_zero_offset_low, ni_zero_offset_high, 2);
-	postgain_cal(ni_zero_offset_low, ni_zero_offset_high, 3);
-	cal1(ni_zero_offset_high, 8);
-	cal1(ni_reference_low, 0);
-	cal1(ni_reference_low, 1);
+	postgain_cal( setup, ni_zero_offset_low, ni_zero_offset_high, 2);
+	postgain_cal( setup, ni_zero_offset_low, ni_zero_offset_high, 3);
+	cal1( setup, ni_zero_offset_high, 8);
+	cal1( setup, ni_reference_low, 0);
+	cal1( setup, ni_reference_low, 1);
 
 	if(do_output){
-		cal1(ni_ao0_zero_offset,6);
-		cal1(ni_ao0_reference,4);
-		cal1(ni_ao1_zero_offset,7);
-		cal1(ni_ao1_reference,5);
+		cal1( setup, ni_ao0_zero_offset,6);
+		cal1( setup, ni_ao0_reference,4);
+		cal1( setup, ni_ao1_zero_offset,7);
+		cal1( setup, ni_ao1_reference,5);
 	}
 	return 0;
 }
 
-int cal_ni_at_mio_16e_1(calibration_setup *setup)
+int cal_ni_at_mio_16e_1(calibration_setup_t *setup)
 {
-	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
-	cal1(ni_zero_offset_high,0);
-	cal1(ni_reference_low,3);
-	cal1(ni_unip_offset_low,2);
-	if(do_output){
-		cal1(ni_ao0_zero_offset,4);
-		//cal1(ni_ao0_zero_offset,5); /* nonlinearity? */
-		cal1(ni_ao0_reference,6);
-		cal1(ni_ao1_zero_offset,7);
-		//cal1(ni_ao0_zero_offset,8); /* nonlinearity? */
-		cal1(ni_ao1_reference,9);
-	}
+	return cal_ni_at_mio_16e_2( setup );
 }
 
-int cal_ni_pci_mio_16e_1(calibration_setup *setup)
+int cal_ni_pci_mio_16e_1(calibration_setup_t *setup)
 {
 	//cal_ni_at_mio_16e_2();
 
-	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
-	cal1(ni_zero_offset_high,0);
-	cal1(ni_reference_low,3);
-	cal1(ni_unip_offset_low,2);
+	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,1);
+	cal1( setup, ni_zero_offset_high,0);
+	cal1( setup, ni_reference_low,3);
+	cal1( setup, ni_unip_offset_low,2);
 	if(do_output){
-		cal1(ni_ao0_zero_offset,5);
-		//cal1(ni_ao0_zero_offset,4); /* linearity? */
-		cal1(ni_ao0_reference,6);
-		cal1(ni_ao1_zero_offset,8);
-		//cal1(ni_ao1_zero_offset,7); /* linearity? */
-		cal1(ni_ao1_reference,9);
+		cal1( setup, ni_ao0_zero_offset,5);
+		//cal1( setup, ni_ao0_zero_offset,4); /* linearity? */
+		cal1( setup, ni_ao0_reference,6);
+		cal1( setup, ni_ao1_zero_offset,8);
+		//cal1( setup, ni_ao1_zero_offset,7); /* linearity? */
+		cal1( setup, ni_ao1_reference,9);
 	}
 	return 0;
 }
 
-int cal_ni_pci_6035e(calibration_setup *setup)
+int cal_ni_pci_6035e(calibration_setup_t *setup)
 {
 	// 6035e (old)
-	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
-	cal1(ni_zero_offset_high,0);
-	cal1(ni_reference_low,3);
+	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,1);
+	cal1( setup, ni_zero_offset_high,0);
+	cal1( setup, ni_reference_low,3);
 	if(do_output){
 		// unknown
 	}
 	return 0;
 }
 
-int cal_ni_pci_6071e(calibration_setup *setup)
+int cal_ni_pci_6071e(calibration_setup_t *setup)
 {
-	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
-	cal1(ni_zero_offset_high,0);
-	cal1(ni_reference_low,3);
-	cal1_fine(ni_reference_low,3);
+	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,1);
+	cal1( setup, ni_zero_offset_high,0);
+	cal1( setup, ni_reference_low,3);
+	cal1_fine( setup, ni_reference_low,3);
 	if(do_output){
-		cal1(ni_ao0_zero_offset,5);
-		//cal1(ni_ao0_zero_offset,4); /* linearity? */
-		cal1(ni_ao0_reference,6); /* guess.  Doesn't show up correctly in dump */
-		cal1(ni_ao1_zero_offset,8);
-		//cal1(ni_ao1_zero_offset,7); /* linearity? */
-		cal1(ni_ao1_reference,9);
+		cal1( setup, ni_ao0_zero_offset,5);
+		//cal1( setup, ni_ao0_zero_offset,4); /* linearity? */
+		cal1( setup, ni_ao0_reference,6); /* guess.  Doesn't show up correctly in dump */
+		cal1( setup, ni_ao1_zero_offset,8);
+		//cal1( setup, ni_ao1_zero_offset,7); /* linearity? */
+		cal1( setup, ni_ao1_reference,9);
 	}
 	return 0;
 }
 
-int cal_ni_pxi_6071e(calibration_setup *setup)
+int cal_ni_pxi_6071e(calibration_setup_t *setup)
 {
 	// 6071e (old)
-	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
-	cal1(ni_zero_offset_high,0);
-	cal1(ni_reference_low,3);
+	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,1);
+	cal1( setup, ni_zero_offset_high,0);
+	cal1( setup, ni_reference_low,3);
 	if(do_output){
 		// unknown
 	}
 	return 0;
 }
 
-int cal_ni_at_mio_16e_10(calibration_setup *setup)
+int cal_ni_at_mio_16e_10(calibration_setup_t *setup)
 {
 	// 16e-10 (old)
-	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
-	cal1(ni_zero_offset_high,10);
-	cal1(ni_zero_offset_high,0);
-	cal1(ni_reference_low,3);
-	cal1(ni_unip_offset_low,2);
+	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,1);
+	cal1( setup, ni_zero_offset_high,10);
+	cal1( setup, ni_zero_offset_high,0);
+	cal1( setup, ni_reference_low,3);
+	cal1( setup, ni_unip_offset_low,2);
 	if(do_output){
-		cal1(ni_ao0_zero_offset,5); // guess
-		cal1(ni_ao0_reference,6); // guess
-		cal1(ni_ao1_zero_offset,8); // guess
-		cal1(ni_ao1_reference,9); // guess
+		cal1( setup, ni_ao0_zero_offset,5); // guess
+		cal1( setup, ni_ao0_reference,6); // guess
+		cal1( setup, ni_ao1_zero_offset,8); // guess
+		cal1( setup, ni_ao1_reference,9); // guess
 	}
 	return 0;
 }
 
-int cal_ni_pci_mio_16xe_50(calibration_setup *setup)
+int cal_ni_pci_mio_16xe_50(calibration_setup_t *setup)
 {
-	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,2);
-	cal1(ni_zero_offset_high,8);
-	cal1(ni_reference_low,0);
-	cal1_fine(ni_reference_low,0);
-	cal1(ni_reference_low,1);
+	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,2);
+	cal1( setup, ni_zero_offset_high,8);
+	cal1( setup, ni_reference_low,0);
+	cal1_fine( setup, ni_reference_low,0);
+	cal1( setup, ni_reference_low,1);
 
 	if(do_output){
-		cal1(ni_ao0_zero_offset,6);
-		cal1(ni_ao0_reference,4);
-		cal1(ni_ao1_zero_offset,7);
-		cal1(ni_ao1_reference,5);
+		cal1( setup, ni_ao0_zero_offset,6);
+		cal1( setup, ni_ao0_reference,4);
+		cal1( setup, ni_ao1_zero_offset,7);
+		cal1( setup, ni_ao1_reference,5);
 	}
 	return 0;
 }
 
-int cal_ni_pci_6023e(calibration_setup *setup)
-{
-	/* There seems to be a bug in the driver that doesn't allow
-	 * access to caldac 10, and possibly others. */
-	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
-	//cal1(ni_zero_offset_high,10);
-	//cal1(ni_zero_offset_high,0);
-	cal1(ni_reference_low,3);
-	return 0;
-}
-
-int cal_ni_pci_6024e(calibration_setup *setup)
+int cal_ni_pci_6023e(calibration_setup_t *setup)
 {
 	/* There seems to be a bug in the driver that doesn't allow
 	 * access to caldac 10, and possibly others. */
-	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
-	//cal1(ni_zero_offset_high,10);
-	//cal1(ni_zero_offset_high,0);
-	cal1(ni_reference_low,3);
-	if(do_output){
-		cal1(ni_ao0_zero_offset,5);
-		//cal1(ni_ao0_zero_offset,4); // nonlinearity?
-		//cal1(ni_ao0_reference,6);
-		cal1(ni_ao1_zero_offset,8);
-		//cal1(ni_ao1_zero_offset,7); // nonlinearity?
-		//cal1(ni_ao1_reference,9);
-	}
+	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,1);
+	//cal1( setup, ni_zero_offset_high,10);
+	//cal1( setup, ni_zero_offset_high,0);
+	cal1( setup, ni_reference_low,3);
 	return 0;
 }
 
-int cal_ni_pci_6025e(calibration_setup *setup)
+int cal_ni_pci_6024e(calibration_setup_t *setup)
 {
-	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,4); // was 1
-	//cal1(ni_zero_offset_high,XXX); // was 10
-	cal1(ni_zero_offset_high,8); // was 0
-	cal1(ni_reference_low,2); // was 3
+	/* There seems to be a bug in the driver that doesn't allow
+	 * access to caldac 10, and possibly others. */
+	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,1);
+	//cal1( setup, ni_zero_offset_high,10);
+	//cal1( setup, ni_zero_offset_high,0);
+	cal1( setup, ni_reference_low,3);
 	if(do_output){
-		cal1(ni_ao0_zero_offset,6); // was 5
-		//cal1(ni_ao0_zero_offset,10); // nonlinearity was 4
-		//cal1(ni_ao0_reference,XXX); // was 6
-		cal1(ni_ao1_zero_offset,9); // was 8
-		//cal1(ni_ao1_zero_offset,1); // nonlinearity was 7
-		cal1(ni_ao1_reference,5); // was 9
+		cal1( setup, ni_ao0_zero_offset,5);
+		//cal1( setup, ni_ao0_zero_offset,4); // nonlinearity?
+		//cal1( setup, ni_ao0_reference,6);
+		cal1( setup, ni_ao1_zero_offset,8);
+		//cal1( setup, ni_ao1_zero_offset,7); // nonlinearity?
+		//cal1( setup, ni_ao1_reference,9);
 	}
 	return 0;
 }
 
-int cal_ni_pci_6052e(calibration_setup *setup)
+int cal_ni_pci_6025e(calibration_setup_t *setup)
+{
+	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,4); // was 1
+	//cal1( setup, ni_zero_offset_high,XXX); // was 10
+	cal1( setup, ni_zero_offset_high,8); // was 0
+	cal1( setup, ni_reference_low,2); // was 3
+	if(do_output){
+		cal1( setup, ni_ao0_zero_offset,6); // was 5
+		//cal1( setup, ni_ao0_zero_offset,10); // nonlinearity was 4
+		//cal1( setup, ni_ao0_reference,XXX); // was 6
+		cal1( setup, ni_ao1_zero_offset,9); // was 8
+		//cal1( setup, ni_ao1_zero_offset,1); // nonlinearity was 7
+		cal1( setup, ni_ao1_reference,5); // was 9
+	}
+	return 0;
+}
+
+int cal_ni_pci_6052e(calibration_setup_t *setup)
 {
 	/*
 	 * This board has noisy caldacs
@@ -545,36 +530,36 @@ int cal_ni_pci_6052e(calibration_setup *setup)
 	 *
 	 */
 
-	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,2);
-	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,3);
-	cal1(ni_zero_offset_high,0);
-	cal1(ni_zero_offset_high,1);
-	cal1(ni_reference_low,4);
-	cal1_fine(ni_reference_low,4);
-	cal1(ni_reference_low,5);
-	cal1(ni_unip_offset_low,6);
-	cal1_fine(ni_unip_offset_low,6);
-	//cal1(ni_unip_offset_low,7);
+	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,2);
+	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,3);
+	cal1( setup, ni_zero_offset_high,0);
+	cal1( setup, ni_zero_offset_high,1);
+	cal1( setup, ni_reference_low,4);
+	cal1_fine( setup, ni_reference_low,4);
+	cal1( setup, ni_reference_low,5);
+	cal1( setup, ni_unip_offset_low,6);
+	cal1_fine( setup, ni_unip_offset_low,6);
+	//cal1( setup, ni_unip_offset_low,7);
 	if(do_output){
-		cal1(ni_ao0_zero_offset,12+11);
-		cal1(ni_ao0_reference,12+7);
-		cal1(ni_ao0_reference,12+3);
-		cal1(ni_ao1_zero_offset,12+1);
-		cal1(ni_ao1_reference,12+9);
-		cal1(ni_ao1_reference,12+5);
+		cal1( setup, ni_ao0_zero_offset,12+11);
+		cal1( setup, ni_ao0_reference,12+7);
+		cal1( setup, ni_ao0_reference,12+3);
+		cal1( setup, ni_ao1_zero_offset,12+1);
+		cal1( setup, ni_ao1_reference,12+9);
+		cal1( setup, ni_ao1_reference,12+5);
 	}
 	return 0;
 }
 
-double ni_get_reference(int lsb_loc,int msb_loc)
+double ni_get_reference( calibration_setup_t *setup, int lsb_loc,int msb_loc)
 {
 	int lsb,msb;
 	int uv;
 	double ref;
 
-	lsb=read_eeprom(lsb_loc);
-	msb=read_eeprom(msb_loc);
-	printf("lsb=%d msb=%d\n",read_eeprom(425),read_eeprom(426));
+	lsb=read_eeprom( setup, lsb_loc);
+	msb=read_eeprom( setup, msb_loc);
+	printf("lsb=%d msb=%d\n",read_eeprom( setup, 425),read_eeprom( setup, 426));
 
 	uv=lsb | (msb<<8);
 	if(uv>=0x8000)uv-=0x10000;

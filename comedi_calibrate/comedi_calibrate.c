@@ -37,14 +37,6 @@
 
 /* global variables */
 
-caldac caldacs[N_CALDACS];
-int n_caldacs;
-
-observable observables[N_OBSERVABLES];
-int n_observables;
-
-comedi_t *dev;
-
 int ad_subdev;
 int da_subdev;
 int eeprom_subdev;
@@ -61,7 +53,7 @@ int verbose = 0;
 struct board_struct{
 	char *name;
 	char *id;
-	int (*setup)( calibration_setup *setup, const char *device_name );
+	int (*init_setup)( calibration_setup_t *setup, const char *device_name );
 };
 
 struct board_struct drivers[] = {
@@ -105,7 +97,8 @@ int main(int argc, char *argv[])
 	struct board_struct *this_board;
 	int index;
 	int device_status = STATUS_UNKNOWN;
-	calibration_setup setup;
+	calibration_setup_t setup;
+	comedi_t *dev;
 
 	fn = "/dev/comedi0";
 	while (1) {
@@ -162,7 +155,8 @@ int main(int argc, char *argv[])
 
 ok:
 	memset( &setup, 0, sizeof( setup ) );
-	this_board->setup( &setup, devicename );
+	setup.dev = dev;
+	this_board->init_setup( &setup, devicename );
 	device_status = setup.status;
 
 	if(device_status<STATUS_DONE){
@@ -202,86 +196,86 @@ ok:
 	}
 
 	if(do_reset)reset_caldacs( &setup );
-	if(do_dump) observe();
+	if(do_dump) observe( &setup );
 	if(do_calibrate && do_cal) setup.do_cal( &setup );
-	if(do_results) observe();
+	if(do_results) observe( &setup );
 
 	return 0;
 }
 
-void set_target(int obs,double target)
+void set_target( calibration_setup_t *setup, int obs,double target)
 {
 	comedi_range *range;
 	lsampl_t maxdata, data;
 
-	range = comedi_get_range(dev,observables[obs].preobserve_insn.subdev,
-		CR_CHAN(observables[obs].preobserve_insn.chanspec),
-		CR_RANGE(observables[obs].preobserve_insn.chanspec));
-	maxdata = comedi_get_maxdata(dev,observables[obs].preobserve_insn.subdev,
-		CR_CHAN(observables[obs].preobserve_insn.chanspec));
+	range = comedi_get_range(setup->dev, setup->observables[obs].preobserve_insn.subdev,
+		CR_CHAN( setup->observables[obs].preobserve_insn.chanspec ),
+		CR_RANGE( setup->observables[obs].preobserve_insn.chanspec ));
+	maxdata = comedi_get_maxdata( setup->dev, setup->observables[obs].preobserve_insn.subdev,
+		CR_CHAN(setup->observables[obs].preobserve_insn.chanspec));
 
 	data = comedi_from_phys(target,range,maxdata);
 
-	observables[obs].preobserve_data = data;
-	observables[obs].target = comedi_to_phys(data,range,maxdata);
+	setup->observables[obs].preobserve_data = data;
+	setup->observables[obs].target = comedi_to_phys(data,range,maxdata);
 }
 
-void observe(void)
+void observe( calibration_setup_t *setup )
 {
 	int i;
 
-	for(i=0;i<n_observables;i++){
-		preobserve(i);
-		DPRINT(0,"%s\n",observables[i].name);
-		measure_observable(i);
+	for( i = 0; i < setup->n_observables; i++){
+		preobserve( setup, i);
+		DPRINT(0,"%s\n", setup->observables[i].name);
+		measure_observable( setup, i);
 		if(verbose>=1){
-			observable_dependence(i);
+			observable_dependence( setup, i);
 		}
 	}
 
 }
 
-void preobserve(int obs)
+void preobserve( calibration_setup_t *setup, int obs)
 {
-	if(observables[obs].preobserve_insn.n!=0){
-		comedi_do_insn(dev,&observables[obs].preobserve_insn);
+	if( setup->observables[obs].preobserve_insn.n != 0){
+		comedi_do_insn( setup->dev, &setup->observables[obs].preobserve_insn);
 	}
 }
 
-void measure_observable(int obs)
+void measure_observable( calibration_setup_t *setup, int obs)
 {
 	char s[32];
 	int n;
 	new_sv_t sv;
 
-	new_sv_init(&sv,dev,
-		observables[obs].observe_insn.subdev,
-		CR_CHAN(observables[obs].observe_insn.chanspec),
-		CR_RANGE(observables[obs].observe_insn.chanspec),
-		CR_AREF(observables[obs].observe_insn.chanspec));
+	new_sv_init(&sv, setup->dev,
+		setup->observables[obs].observe_insn.subdev,
+		CR_CHAN( setup->observables[obs].observe_insn.chanspec),
+		CR_RANGE( setup->observables[obs].observe_insn.chanspec),
+		CR_AREF( setup->observables[obs].observe_insn.chanspec));
 	sv.order=7;
 	// read internal calibration source and turn on dithering
 	sv.cr_flags = CR_ALT_FILTER | CR_ALT_SOURCE;
-	n = new_sv_measure(&sv);
+	n = new_sv_measure(setup->dev, &sv);
 
 	sci_sprint_alt(s,sv.average,sv.error);
-	DPRINT(0,"offset %s, target %g\n",s,observables[obs].target);
+	DPRINT(0,"offset %s, target %g\n",s, setup->observables[obs].target);
 }
 
-void observable_dependence(int obs)
+void observable_dependence(calibration_setup_t *setup, int obs)
 {
 	int i;
 	linear_fit_t l;
 
-	for(i=0;i<n_caldacs;i++){
-		check_gain_chan_x(&l,
-			observables[obs].observe_insn.chanspec,i);
+	for( i = 0; i < setup->n_caldacs; i++){
+		check_gain_chan_x( setup, &l,
+			setup->observables[obs].observe_insn.chanspec, i);
 	}
 
 }
 
 
-void postgain_cal(int obs1, int obs2, int dac)
+void postgain_cal( calibration_setup_t *setup, int obs1, int obs2, int dac)
 {
 	double offset1,offset2;
 	linear_fit_t l;
@@ -290,24 +284,24 @@ void postgain_cal(int obs1, int obs2, int dac)
 	double gain;
 	comedi_range *range1,*range2;
 
-	DPRINT(0,"postgain: %s; %s\n",observables[obs1].name,
-		observables[obs2].name);
-	preobserve(obs1);
-	check_gain_chan_x(&l,observables[obs1].observe_insn.chanspec,dac);
-	offset1=linear_fit_func_y(&l,caldacs[dac].current);
+	DPRINT(0,"postgain: %s; %s\n", setup->observables[obs1].name,
+		setup->observables[obs2].name);
+	preobserve(setup, obs1);
+	check_gain_chan_x( setup, &l, setup->observables[obs1].observe_insn.chanspec, dac);
+	offset1=linear_fit_func_y(&l, setup->caldacs[dac].current);
 	DPRINT(2,"obs1: [%d] offset %g\n",obs1,offset1);
-	range1 = comedi_get_range(dev,observables[obs1].observe_insn.subdev,
-		CR_CHAN(observables[obs1].observe_insn.chanspec),
-		CR_RANGE(observables[obs1].observe_insn.chanspec));
+	range1 = comedi_get_range(setup->dev, setup->observables[obs1].observe_insn.subdev,
+		CR_CHAN( setup->observables[obs1].observe_insn.chanspec),
+		CR_RANGE( setup->observables[obs1].observe_insn.chanspec));
 	slope1=l.slope;
 
-	preobserve(obs2);
-	check_gain_chan_x(&l,observables[obs2].observe_insn.chanspec,dac);
-	offset2=linear_fit_func_y(&l,caldacs[dac].current);
+	preobserve( setup, obs2);
+	check_gain_chan_x( setup, &l, setup->observables[obs2].observe_insn.chanspec,dac);
+	offset2=linear_fit_func_y(&l, setup->caldacs[dac].current);
 	DPRINT(2,"obs2: [%d] offset %g\n",obs2,offset2);
-	range2 = comedi_get_range(dev,observables[obs2].observe_insn.subdev,
-		CR_CHAN(observables[obs2].observe_insn.chanspec),
-		CR_RANGE(observables[obs2].observe_insn.chanspec));
+	range2 = comedi_get_range(setup->dev, setup->observables[obs2].observe_insn.subdev,
+		CR_CHAN( setup->observables[obs2].observe_insn.chanspec),
+		CR_RANGE( setup->observables[obs2].observe_insn.chanspec));
 	slope2=l.slope;
 
 	gain = (range1->max-range1->min)/(range2->max-range2->min);
@@ -318,59 +312,59 @@ void postgain_cal(int obs1, int obs2, int dac)
 	DPRINT(3,"difference: %g\n",offset2-offset1);
 
 	a = (offset1-offset2)/(slope1-slope2);
-	a=caldacs[dac].current-a;
+	a=setup->caldacs[dac].current-a;
 
-	caldacs[dac].current=rint(a);
-	update_caldac( caldacs[dac] );
+	setup->caldacs[dac].current=rint(a);
+	update_caldac( setup, dac );
 	usleep(100000);
 
 	DPRINT(0,"caldac[%d] set to %g (%g)\n",dac,rint(a),a);
 
 	if(verbose>=2){
-		preobserve(obs1);
-		measure_observable(obs1);
-		preobserve(obs2);
-		measure_observable(obs2);
+		preobserve( setup, obs1);
+		measure_observable( setup, obs1);
+		preobserve( setup, obs2);
+		measure_observable( setup, obs2);
 	}
 }
 
-void cal1(int obs, int dac)
+void cal1( calibration_setup_t *setup, int obs, int dac)
 {
 	linear_fit_t l;
 	double a;
 
-	DPRINT(0,"linear: %s\n",observables[obs].name);
-	preobserve(obs);
-	check_gain_chan_x(&l,observables[obs].observe_insn.chanspec,dac);
-	a=linear_fit_func_x(&l,observables[obs].target);
+	DPRINT(0,"linear: %s\n", setup->observables[obs].name);
+	preobserve( setup, obs);
+	check_gain_chan_x( setup, &l, setup->observables[obs].observe_insn.chanspec,dac);
+	a=linear_fit_func_x(&l, setup->observables[obs].target);
 
-	caldacs[dac].current=rint(a);
-	update_caldac( caldacs[dac] );
+	setup->caldacs[dac].current=rint(a);
+	update_caldac( setup, dac );
 	usleep(100000);
 
 	DPRINT(0,"caldac[%d] set to %g (%g)\n",dac,rint(a),a);
 	if(verbose>=3){
-		measure_observable(obs);
+		measure_observable( setup, obs);
 	}
 }
 
-void cal1_fine(int obs, int dac)
+void cal1_fine( calibration_setup_t *setup, int obs, int dac )
 {
 	linear_fit_t l;
 	double a;
 
-	DPRINT(0,"linear fine: %s\n",observables[obs].name);
-	preobserve(obs);
-	check_gain_chan_fine(&l,observables[obs].observe_insn.chanspec,dac);
-	a=linear_fit_func_x(&l,observables[obs].target);
+	DPRINT(0,"linear fine: %s\n", setup->observables[obs].name);
+	preobserve( setup, obs);
+	check_gain_chan_fine( setup, &l, setup->observables[obs].observe_insn.chanspec,dac);
+	a=linear_fit_func_x(&l,setup->observables[obs].target);
 
-	caldacs[dac].current=rint(a);
-	update_caldac( caldacs[dac] );
+	setup->caldacs[dac].current=rint(a);
+	update_caldac( setup, dac );
 	usleep(100000);
 
 	DPRINT(0,"caldac[%d] set to %g (%g)\n",dac,rint(a),a);
 	if(verbose>=3){
-		measure_observable(obs);
+		measure_observable( setup, obs);
 	}
 }
 
@@ -390,7 +384,7 @@ void chan_cal(int adc,int cdac,int range,double target)
 	a=caldacs[cdac].current+(target-offset)/gain;
 
 	caldacs[cdac].current=rint(a);
-	update_caldac(cdac);
+	update_caldac( setup, cdac);
 
 	read_chan2(s,adc,range);
 	DPRINT(1,"caldac[%d] set to %g, offset=%s\n",cdac,a,s);
@@ -423,54 +417,63 @@ void caldac_dependence(int caldac)
 #endif
 
 
-void setup_caldacs(void)
+void setup_caldacs( calibration_setup_t *setup, int caldac_subdev )
 {
-	int n_chan,i;
+	int n_chan, i;
 
-	if(caldac_subdev<0){
+	if( caldac_subdev < 0 ){
 		printf("no calibration subdevice\n");
 		return;
 	}
 
-	n_chan=comedi_get_n_channels(dev,caldac_subdev);
+	// XXX check subdevice type is really calibration
+	// XXX check we dont exceed max number of allowable caldacs
 
-	for(i=0;i<n_chan;i++){
-		caldacs[i].subdev=caldac_subdev;
-		caldacs[i].chan=i;
-		caldacs[i].maxdata=comedi_get_maxdata(dev,caldac_subdev,i);
-		caldacs[i].current=0;
+	n_chan = comedi_get_n_channels( setup->dev, caldac_subdev );
+
+	for(i = 0; i < n_chan; i++){
+		setup->caldacs[ setup->n_caldacs + i ].subdev = caldac_subdev;
+		setup->caldacs[ setup->n_caldacs + i ].chan = i;
+		setup->caldacs[ setup->n_caldacs + i ].maxdata = comedi_get_maxdata( setup->dev, caldac_subdev, i);
+		setup->caldacs[ setup->n_caldacs + i ].current=0;
 	}
 
-	n_caldacs=n_chan;
+	setup->n_caldacs += n_chan;
 }
 
-void reset_caldacs( const calibration_setup *setup )
+void reset_caldacs( calibration_setup_t *setup )
 {
 	int i;
 
 	for( i = 0; i < setup->n_caldacs; i++){
 		setup->caldacs[i].current = setup->caldacs[i].maxdata / 2;
-		update_caldac( setup->caldacs[i] );
+		update_caldac( setup, i );
 	}
 }
 
-void update_caldac( caldac dac )
+void update_caldac( calibration_setup_t *setup, unsigned int caldac_index )
 {
 	int ret;
+	caldac *dac = &setup->caldacs[ caldac_index ];
 
-	DPRINT(4,"update %d %d %d\n", dac.subdev, dac.chan, dac.current);
-	if( dac.current < 0 ){
-		DPRINT(1,"caldac set out of range (%d<0)\n", dac.current);
-		dac.current = 0;
+	if( caldac_index > setup->n_caldacs )
+	{
+		fprintf( stderr, "invalid caldac index\n" );
+		return;
 	}
-	if( dac.current > dac.maxdata ){
+	DPRINT(4,"update %d %d %d\n", dac->subdev, dac->chan, dac->current);
+	if( dac->current < 0 ){
+		DPRINT(1,"caldac set out of range (%d<0)\n", dac->current);
+		dac->current = 0;
+	}
+	if( dac->current > dac->maxdata ){
 		DPRINT(1,"caldac set out of range (%d>%d)\n",
-			dac.current, dac.maxdata);
-		dac.current = dac.maxdata;
+			dac->current, dac->maxdata);
+		dac->current = dac->maxdata;
 	}
 
-	ret = comedi_data_write(dev, dac.subdev, dac.chan, 0, 0,
-		dac.current);
+	ret = comedi_data_write( setup->dev, dac->subdev, dac->chan, 0, 0,
+		dac->current);
 	if(ret < 0) perror("update_caldac()");
 }
 
@@ -495,7 +498,7 @@ double check_gain_chan(int ad_chan,int range,int cdac)
 #endif
 
 
-double check_gain_chan_x(linear_fit_t *l,unsigned int ad_chanspec,int cdac)
+double check_gain_chan_x( calibration_setup_t *setup, linear_fit_t *l,unsigned int ad_chanspec,int cdac)
 {
 	int orig,i,n;
 	int step;
@@ -504,7 +507,7 @@ double check_gain_chan_x(linear_fit_t *l,unsigned int ad_chanspec,int cdac)
 	int sum_err_count=0;
 	char str[20];
 
-	n=caldacs[cdac].maxdata+1;
+	n = setup->caldacs[cdac].maxdata+1;
 	memset(l,0,sizeof(*l));
 
 	step=n/256;
@@ -518,28 +521,28 @@ double check_gain_chan_x(linear_fit_t *l,unsigned int ad_chanspec,int cdac)
 		exit(1);
 	}
 
-	orig=caldacs[cdac].current;
+	orig = setup->caldacs[cdac].current;
 
-	new_sv_init(&sv,dev,0,
+	new_sv_init(&sv, setup->dev,0,
 		CR_CHAN(ad_chanspec),
 		CR_RANGE(ad_chanspec),
 		CR_AREF(ad_chanspec));
 	// read internal calibration source and turn on dithering
 	sv.cr_flags = CR_ALT_FILTER | CR_ALT_SOURCE;
 
-	caldacs[cdac].current=0;
-	update_caldac( caldacs[cdac] );
+	setup->caldacs[cdac].current=0;
+	update_caldac( setup, cdac );
 	usleep(100000);
 
-	new_sv_measure(&sv);
+	new_sv_measure( setup->dev, &sv);
 
 	sum_err=0;
 	for(i=0;i*step<n;i++){
-		caldacs[cdac].current=i*step;
-		update_caldac( caldacs[cdac] );
+		setup->caldacs[cdac].current=i*step;
+		update_caldac( setup, cdac );
 		//usleep(100000);
 
-		new_sv_measure(&sv);
+		new_sv_measure( setup->dev, &sv);
 
 		l->y_data[i]=sv.average;
 		if(!isnan(sv.average)){
@@ -549,8 +552,8 @@ double check_gain_chan_x(linear_fit_t *l,unsigned int ad_chanspec,int cdac)
 		l->n++;
 	}
 
-	caldacs[cdac].current=orig;
-	update_caldac( caldacs[cdac] );
+	setup->caldacs[cdac].current=orig;
+	update_caldac( setup, cdac );
 
 	l->yerr=sum_err/sum_err_count;
 	l->dx=step;
@@ -573,7 +576,7 @@ double check_gain_chan_x(linear_fit_t *l,unsigned int ad_chanspec,int cdac)
 }
 
 
-double check_gain_chan_fine(linear_fit_t *l,unsigned int ad_chanspec,int cdac)
+double check_gain_chan_fine( calibration_setup_t *setup, linear_fit_t *l,unsigned int ad_chanspec,int cdac)
 {
 	int orig,i,n;
 	int step;
@@ -596,28 +599,28 @@ double check_gain_chan_fine(linear_fit_t *l,unsigned int ad_chanspec,int cdac)
 		exit(1);
 	}
 
-	orig=caldacs[cdac].current;
+	orig = setup->caldacs[cdac].current;
 
-	new_sv_init(&sv,dev,0,
+	new_sv_init(&sv, setup->dev,0,
 		CR_CHAN(ad_chanspec),
 		CR_RANGE(ad_chanspec),
 		CR_AREF(ad_chanspec));
 	// read internal calibration source and turn on dithering
 	sv.cr_flags = CR_ALT_FILTER | CR_ALT_SOURCE;
 
-	caldacs[cdac].current=0;
-	update_caldac( caldacs[cdac] );
+	setup->caldacs[cdac].current=0;
+	update_caldac( setup, cdac );
 	usleep(100000);
 
-	new_sv_measure(&sv);
+	new_sv_measure( setup->dev, &sv);
 
 	sum_err=0;
 	for(i=0;i<n;i++){
-		caldacs[cdac].current=i+orig-fine_size;
-		update_caldac( caldacs[cdac] );
+		setup->caldacs[cdac].current=i+orig-fine_size;
+		update_caldac( setup, cdac );
 		usleep(100000);
 
-		new_sv_measure(&sv);
+		new_sv_measure( setup->dev, &sv);
 
 		l->y_data[i]=sv.average;
 		if(!isnan(sv.average)){
@@ -627,8 +630,8 @@ double check_gain_chan_fine(linear_fit_t *l,unsigned int ad_chanspec,int cdac)
 		l->n++;
 	}
 
-	caldacs[cdac].current=orig;
-	update_caldac( caldacs[cdac] );
+	setup->caldacs[cdac].current=orig;
+	update_caldac( setup, cdac );
 
 	l->yerr=sum_err/sum_err_count;
 	l->dx=1;
@@ -717,26 +720,26 @@ int get_unipolar_lowgain(comedi_t *dev,int subdev)
 }
 
 
-int read_eeprom(int addr)
+int read_eeprom( calibration_setup_t *setup, int addr)
 {
 	unsigned int data=0;
 
-	comedi_data_read(dev,eeprom_subdev,addr,0,0,&data);
+	comedi_data_read( setup->dev, eeprom_subdev, addr,0,0,&data);
 
 	return data;
 }
 
-double read_chan(int adc,int range)
+double read_chan( calibration_setup_t *setup, int adc,int range)
 {
 	int n;
 	new_sv_t sv;
 	char str[20];
 
-	new_sv_init(&sv,dev,0,adc,range,AREF_OTHER);
+	new_sv_init(&sv, setup->dev, 0,adc,range,AREF_OTHER);
 	sv.order=7;
 	sv.cr_flags = CR_ALT_FILTER;
 
-	n=new_sv_measure(&sv);
+	n=new_sv_measure( setup->dev, &sv);
 
 	sci_sprint_alt(str,sv.average,sv.error);
 	printf("chan=%d ave=%s\n",adc,str);
@@ -744,17 +747,17 @@ double read_chan(int adc,int range)
 	return sv.average;
 }
 
-int read_chan2(char *s,int adc,int range)
+int read_chan2( calibration_setup_t *setup, char *s,int adc,int range)
 {
 	int n;
 	new_sv_t sv;
 
-	new_sv_init(&sv,dev,0,adc,range,AREF_OTHER);
+	new_sv_init(&sv, setup->dev,0,adc,range,AREF_OTHER);
 	sv.order=7;
 	// turn on dithering
 	sv.cr_flags = CR_ALT_FILTER;
 
-	n=new_sv_measure(&sv);
+	n=new_sv_measure( setup->dev, &sv);
 
 	return sci_sprint_alt(s,sv.average,sv.error);
 }
@@ -793,7 +796,7 @@ int new_sv_init(new_sv_t *sv,comedi_t *dev,int subdev,int chan,int range,int are
 	return 0;
 }
 
-int new_sv_measure(new_sv_t *sv)
+int new_sv_measure( comedi_t *dev, new_sv_t *sv)
 {
 	lsampl_t *data;
 	int n,i,ret;
@@ -836,7 +839,7 @@ out:
 	return ret;
 }
 
-int new_sv_measure_order(new_sv_t *sv,int order)
+int new_sv_measure_order( comedi_t *dev, new_sv_t *sv,int order)
 {
 	lsampl_t *data;
 	int n,i,ret;
