@@ -20,6 +20,16 @@
     - more portable
  */
 
+ /***************************************************************************
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU Lesser General Public License as        *
+ *   published by                                                          *
+ *   the Free Software Foundation; either version 2.1 of the License, or   *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ ***************************************************************************/
+
 #define _GNU_SOURCE
 
 #include <stdio.h>
@@ -57,7 +67,7 @@ struct board_struct drivers[] = {
 	{ "ni_atmio",	ni_id,	ni_setup },
 	{ "ni_mio_cs",	ni_id,	ni_setup },
 	{ "cb_pcidas",	cb_id,	cb_setup },
-	{ "cb_pcidas64",	cb_id,	cb_setup },
+	{ "cb_pcidas64",	cb64_id,	cb64_setup },
 };
 #define n_drivers (sizeof(drivers)/sizeof(drivers[0]))
 

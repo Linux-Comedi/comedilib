@@ -1,3 +1,12 @@
+/***************************************************************************
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU Lesser General Public License as        *
+ *   published by                                                          *
+ *   the Free Software Foundation; either version 2.1 of the License, or   *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ ***************************************************************************/
 
 #ifndef __CALIB_H_
 #define __CALIB_H_
@@ -91,9 +100,11 @@ void reset_caldacs( calibration_setup_t *setup);
 
 extern char ni_id[];
 extern char cb_id[];
+extern char cb64_id[];
 
 int ni_setup( calibration_setup_t*, const char *device_name );
 int cb_setup( calibration_setup_t*, const char *device_name );
+int cb64_setup( calibration_setup_t*, const char *device_name );
 
 /* low level */
 
@@ -119,7 +130,8 @@ void set_ao(comedi_t *dev,int subdev,int chan,int range,double value);
 void check_gain(int ad_chan,int range);
 double check_gain_chan(int ad_chan,int range,int cdac);
 
-void cal_ni_results(void);
+int cb_actual_source_voltage( comedi_t *dev, unsigned int subdevice,
+	unsigned int eeprom_channel, float *voltage);
 
 /* helper functions */
 
