@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
 
 	fn = "/dev/comedi0";
 	while (1) {
-		c = getopt(argc, argv, "f:v");
+		c = getopt(argc, argv, "f:vq");
 		if (c == -1)
 			break;
 		switch (c) {
@@ -548,6 +548,7 @@ void cal_ni_mio_E(void)
 
 	reset_caldacs();
 	printf("please send this output to <ds@stm.lbl.gov>\n");
+	printf("$Id$\n");
 	printf("%s\n",comedi_get_board_name(dev));
 
 	n_ranges=comedi_get_n_ranges(dev,ad_subdev,0);
