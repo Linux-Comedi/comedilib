@@ -119,7 +119,7 @@ lsampl_t comedi_from_phys(double data,comedi_range *rng,lsampl_t maxdata);
 int comedi_data_read(comedi_t *it,unsigned int subd,unsigned int chan,
 	unsigned int range,unsigned int aref,lsampl_t *data);
 int comedi_data_read_delayed(comedi_t *it,unsigned int subd,unsigned int chan,
-	unsigned int range,unsigned int aref,lsampl_t *data, unsigned int micro_sec);
+	unsigned int range,unsigned int aref,lsampl_t *data, unsigned int nano_sec);
 int comedi_data_write(comedi_t *it,unsigned int subd,unsigned int chan,
 	unsigned int range,unsigned int aref,lsampl_t data);
 int comedi_dio_config(comedi_t *it,unsigned int subd,unsigned int chan,
