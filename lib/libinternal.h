@@ -137,6 +137,9 @@ enum{
 #define HAVE_COMEDI_INSN
 #endif
 
+#ifdef COMEDI_POLL
+#define HAVE_COMEDI_POLL
+#endif
 
 
 #endif
