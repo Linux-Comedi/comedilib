@@ -1,0 +1,28 @@
+diff -ur comedilib-0.7.18/Makefile configedcomedilib/Makefile
+--- comedilib-0.7.18/Makefile Tue Oct 16 03:19:29 2001
++++ configedcomedilib/Makefile      Thu Feb 21 13:25:42 2002
+@@ -20,7 +20,7 @@
+
+ all: $(TARGETS)
+
+-SUBDIRS= lib demo comedi_calibrate testing comedi_config
++SUBDIRS= lib comedi_calibrate testing comedi_config
+
+ DOCFILES= README `find doc -type f`
+
+diff -ur comedilib-0.7.18/demo/Makefile configedcomedilib/demo/Makefile
+--- comedilib-0.7.18/demo/Makefile  Sun Jan 20 18:33:05 2002
++++ configedcomedilib/demo/Makefile Thu Feb 21 13:26:14 2002
+@@ -1,9 +1,9 @@
+
+-include ../Config
++# include ../Config
+
+
+-CFLAGS += -I ../include -I .
+-LIBS += ../lib/libcomedi.a -lm
++CFLAGS += -I usr/include -I .
++LIBS += /usr/lib/libcomedi.a -lm
+
+
+ BINS=tut1 tut2 # sv
