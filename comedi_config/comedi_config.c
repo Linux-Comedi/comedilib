@@ -81,7 +81,7 @@ void do_help(int i)
 "  --write-buffer <size>\n"
 "      set buffer size in kilobytes used for writing\n"
 "\n"
-"  <optN> are integers whose interpretation is driver dependent."
+"  <optN> are integers whose interpretation is driver dependent.\n"
 "  In general, for PCI boards, <opt1> and <opt2> refer to the bus/slot\n"
 "  indices of the board.  If not specified, a board will automatically\n"
 "  be chosen.  For non-PCI boards, <opt1> specifies the I/O port base\n"
