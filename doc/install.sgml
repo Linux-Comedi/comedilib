@@ -1,37 +1,66 @@
 <!-- <!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook V3.1//EN"> -->
 
-<section>
+<section id="install">
 <title>
-Installation and Configuration
+Configuration
 </title>
 
 <para>
-I assume that your hardware device is in your computer, and that
-you know the relevant details about it, i.e., what kind of card
-it is, the I/O base, the IRQ, jumper settings related to input
+This section assumes that you have successfully compiled and installed
+the &comedi; software, that your hardware device is in your computer,
+and that you know the relevant details about it, i.e., what kind of
+card it is, the I/O base, the IRQ, jumper settings related to input
 ranges, etc.
 </para>
 
+
+<section id="cardconfiguration">
+<title>
+Configuration
+</title>
 <para>
-To tell the comedi kernel module that you have a particular device, and
-some information about it, you will be running the comedi_config
-command.  Perhaps you should read the man page now.
+Before being able to get information from a DAQ card, you first have
+to tell the &comedi; core kernel module which device you have, which
+driver you want to attach to the card, and which run-time options
+you want to give to the driver. This configuration is done by running
+the <command>comedi_config</command> command. (As root of course.)
+Here is an example of how to use the command (perhaps you should read
+its <command>man</command> page now):
+<screen>
+/usr/sbin/comedi_config /dev/comedi0 ni_atmio 0x260,3
+</screen>
+This command says that the &ldquo;file&rdquo;
+<filename>/dev/comedi0</filename> can be used to access the &comedi;
+device that uses the <parameter>ni_atmio</parameter> driver, and that
+you give it two run-time parameters (<literal>0x260</literal> and
+<literal>3</literal>). More parameters are possible, for example to
+discriminate between two or more identical cards in your system.
+</para>
+<para>
+If you want to have the board configured in this way every time you
+boot, put the line above into a start-up script file of your Linux
+system (for example, the
+<filename>/etc/rc.d/rc.local</filename> file), or in the system-wide
+&comedi; configuration file <filename>/etc/comedi.conf</filename>.
+You can, of course, also run this command at a command prompt.
 </para>
 
 <para>
-In this tutorial, I will go through the process of configuring comedi
-for two devices, a National Instruments AT-MIO-16E-10
-and a Data Translation DT2821-F-8DI.
+This tutorial goes through the process of configuring &comedi;
+for two devices, a
+<literal>National Instruments AT-MIO-16E-10</literal> (which has the
+driver mentioned above), and a
+<literal>Data Translation DT2821-F-8DI</literal>.
 </para>
 
 <para>
-The NI board is plug-and-play, and the man page tells me that I need
-to configure the PnP part of the board with isapnptools.  The isapnptools
-package is a little cryptic, but the concepts are simple.  Once I
-learned how to use it, I settled on a /etc/isapnp.conf file that
-contained the lines:
+The NI board is plug-and-play, and the <command>man</command> page
+tells you that you need to configure the PnP part of the board with
+<command>isapnptools</command>.  The <command>isapnptools</command>
+package is a little cryptic, but the concepts are simple.  Once you've
+learned how to use it, you can settle on a
+<filename>/etc/isapnp.conf</filename> file such as this:
 </para>
-
 
 <screen>
 # ANSI string --&gt;National Instruments, AT-MIO-16E-10&lt;--
@@ -44,46 +73,41 @@ contained the lines:
 ))
 </screen>
 
-
 <para>
-It also contains a few lines about overall configuration and about my
-sound card.  I found out after a bit of trial-and-error that the NI
-board does not always work with interrupts other than IRQ 3.  YMMV.
+(This file also contains a few lines about overall configuration and
+about the sound card that happens to be in the same computer.) 
 Currently, the driver doesn't use DMA, but it may in the future, so
-I commented out the DMA lines.  It is a curious fact that the device
-ignores the IRQ and DMA information given here, however, I keep the
-information here to remind myself that the numbers aren't arbitrary.
+the DMA lines are commented out.  It has been reported that the
+National Instruments board does not always work with interrupts other
+than IRQ 3, and that the device ignores the IRQ and DMA information
+given here. However, keep the information here to remind yourself that
+the numbers aren't arbitrary.
 </para>
 
 <para>
-When I run comedi_config (as root, of course), I provide the same
-information.  Since I want to have the board configured every time
-I boot, I put the lines
-</para>
-
-<screen>
-export PATH=/sbin:/usr/sbin:/usr/local/sbin:$PATH
-comedi_config /dev/comedi0 ni_atmio 0x260,3
-</screen>
-
-<para>
-into <filename>/etc/rc.d/rc.local</filename>.  You can, of course, run this command at
-a command prompt.  The man page tells me that the option list
-is supposed to be "(I/O base),(IRQ)", so I used the same numbers
-as I put in /etc/isapnp.conf, i.e., 0x260,3.
+The <command>man</command> page
+explains that the option list is supposed to be 
+&ldquo;<literal>(I/O base),(IRQ)</literal>&rdquo;, so use the same
+numbers as in <filename>/etc/isapnp.conf</filename>, i.e.,
+<literal>0x260,3</literal>.
 </para>
 
 <para>
-For the Data Translation board, I need to have a list of the
-jumper settings.  Fortunately, I wrote them all down in the
-manual -- I hope they are still correct.  However, I had to
-open the case to figure out which board in the series I had.
-It is a DT2821-f-8di.  The man page of comedi_config tells
-me that I need to know the I/O base, IRQ, DMA 1, DMA 2.  However,
-since I wrote the driver, I know that it also recognizes the
+For the <literal>Data Translation</literal> board, you need to have a
+list of the jumper settings; these are given in the &comedi; manual
+section about this card. (Check first to see whether they are still
+correct!)  
+The card discussed her is a <literal>DT2821-f-8di</literal>.  The
+<command>man</command> page of <command>comedi_config</command> tells
+you that you need to know the I/O base, IRQ, DMA 1, DMA 2.  However,
+the &comedi; driver also recognizes the
 differential/single-ended and unipolar/bipolar jumpers.  As always,
-the source is the final authority, and looking in module/dt282x.c
-tells me that the options list is interpreted as:
+the source is the final authority, and looking in
+<filename>module/dt282x.c</filename>
+tells us that the options list is interpreted as:
+</para>
+<para>
+(... TO BE FILLED IN ...)
 </para>
 
 <!-- XXX
@@ -97,44 +121,40 @@ tells me that the options list is interpreted as:
 <item>dma1
 <item>dma2
 </itemize>
+(ai=analog input, ao=analog output.)
 -->
 
 <para>
-(ai=analog input, ao=analog output.)  From this, I decide that
-the appropriate options list is
-</para>
-
+So, the appropriate options list is:
 <screen>
 0x200,4,,1,1,1
 </screen>
-
-<para>
-I left the differential/single-ended number blank, since the
+and the full configuration command is:
+<screen>
+/usr/sbin/comedi_config /dev/comedi1 dt2821-f-8di 0x200,4,,1,1,1
+</screen>
+The differential/single-ended number is left blank, since the
 driver already knowns (from the board name), that it is
-differential.  I  also left the DMA numbers blank, since I
-don't want the driver to use DMA.  (Don't want it to interfere
-with my sound card -- life is full of difficult choices.)
+differential. Also the DMA numbers are left blank, since we
+don't want the driver to use DMA.  (Which could interfere
+with the sound card...)
 Keep in mind that things commented in the source, but not in
 the documentation are about as likely to change as the weather,
-so I put good comments next to the following lines when I put
-it in rc.local.
+so put good comments next to the following line when you put
+it in a start-up file.
 </para>
 
-<screen>
-export PATH=/sbin:/usr/sbin:/usr/local/sbin:$PATH
-comedi_config /dev/comedi1 dt2821-f-8di 0x200,4,,1,1,1
-</screen>
-
 <para>
-So now I think that I have my boards configured correctly.
+So now you have your boards configured correctly.
 Since data acquisition boards are not typically well-engineered,
-Comedi sometimes can't figure out if the board is actually there.
+&comedi; sometimes can't figure out if the board is actually there.
 If it can't, it assumes you are right.  Both of these boards
-are well-made, so comedi will give me an error message if it
-can't find them.  The comedi kernel module, since it is a part
+are well-made, so &comedi; will give an error message if it
+can't find them.  The &comedi; kernel module, since it is a part
 of the kernel, prints messages to the kernel logs, which you
-can access through the command 'dmesg' or /var/log/messages.
-Here is a configuration failure (from dmesg):
+can access through the command <command>dmesg</command> or the file
+<filename>/var/log/messages</filename>.
+Here is a configuration failure (from <command>dmesg</command>):
 </para>
 
 <screen>
@@ -142,7 +162,7 @@ comedi0: ni_atmio: 0x0200 can't find board
 </screen>
 
 <para>
-When it does work, I get:
+When it does work, you get:
 </para>
 
 <screen>
@@ -150,19 +170,20 @@ comedi0: ni_atmio: 0x0260 at-mio-16e-10 ( irq = 3 )
 </screen>
 
 <para>
-Note that it also correctly identified my board.
+Note that it also correctly identified the board.
 </para>
 
+</section>
 
-<section>
+<section id="gettinginformation">
 <title>
-Getting information from comedi
+Getting information about a card
 </title>
 
 <para>
-So now that we have comedi talking to the hardware, we want to
-talk to comedi.  Here's some pretty low-level information --
-it's sometimes useful for debugging:
+So now that you have &comedi; talking to the hardware, try to
+talk to &comedi;.  Here's some pretty low-level information, which can
+sometimes be useful for debugging:
 </para>
 
 <screen>
@@ -170,7 +191,8 @@ cat /proc/comedi
 </screen>
 
 <para>
-Right now, on my computer, this command gives:
+On the particular system this demonstration was carried out, this
+command gives:
 </para>
 
 <screen>
@@ -181,19 +203,19 @@ format string
 </screen>
 
 <para>
-This is a feature that is not well-developed yet.  Basically, it
-currently tells you driver name, device name, and number of
+This documentation feature is not well-developed yet.  Basically, it
+currently returns the driver name, the device name, and the number of
 subdevices.
 </para>
 
 <para>
-In the <filename>demo/</filename> directory, there is a command called
-<command>info</command>, which provides information about each
-subdevice on the
-board.  The output of it is rather long, since I have 7
-subdevices  (4 or fewer is common for other boards.)
-Here's part of the output of the NI board (which
-is on <filename>/dev/comedi0</filename>.)  ('demo/info /dev/comedi0')
+In the <filename role=directory>demo/</filename> directory, there is a
+command called <command>info</command>, which provides information
+about each subdevice on the board.  Its output can be rather long,
+if the board has several subdevices.
+Here's part of the output of the <literal>National Instruments</literal>
+board (which is on <filename>/dev/comedi0</filename>), as a result of
+the command <command>demo/info /dev/comedi0</command>:
 </para>
 
 <screen>
@@ -203,33 +225,30 @@ overall info:
   board name: at-mio-16e-10
   number of subdevices: 7
 subdevice 0:
-  type: 1 (unknown)
+  type: 1 (analog input)
   number of channels: 16
   max data value: 4095
 ...
 </screen>
 
 <para>
-The overall info gives information about the device -- basically
-the same information as /proc/comedi.
+The overall info gives information about the device; basically
+the same information as <filename>/proc/comedi</filename>.
 </para>
 
 <para>
-This board has 7 subdevices.  Devices are separated into
-subdevices that each have a distinct purpose -- e.g., analog
+This board has seven subdevices.  Devices are separated into
+subdevices that each have a distinct purpose; e.g., analog
 input, analog output, digital input/output.  This board also
 has an EEPROM and calibration DACs that are also subdevices.
 </para>
 
 <para>
-Subdevice 0 is the analog input subdevice.  You would have
-known this from the 'type: 1 (unknown)' line, if I've updated
-demo/info recently, because it would say 'type: 1 (analog input)'
-instead.  The other lines should be self-explanitory.  Comedi
-has more information about the device, but demo/info doesn't
-currently display this.
+&comedi; has more information about the device than what is displayed
+above, but <command>demo/info</command> doesn't currently display
+this.
 </para>
 
-
 </section>
+
 </section>

@@ -1,20 +1,27 @@
-<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook V3.1//EN" [
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook V3.1//EN"
+	"docbook/dtd/3.1/docbook.dtd" [
 <!ENTITY intro SYSTEM "intro.sgml">
 <!ENTITY install SYSTEM "install.sgml">
 <!ENTITY tutorial SYSTEM "tutorial.sgml">
 <!ENTITY other SYSTEM "other.sgml">
+<!ENTITY driverwriting SYSTEM "driverwriting.sgml">
 <!ENTITY drivers SYSTEM "drivers.sgml">
 <!ENTITY reference SYSTEM "reference.sgml">
 <!ENTITY funcref SYSTEM "funcref.sgml">
 <!ENTITY glossary SYSTEM "glossary.sgml">
+<!ENTITY comedi "<acronym>Comedi</acronym>">
 ]>
 
 <article>
 
 <artheader>
   <title>
-    Comedi Documentation
+    Comedi 
   </title>
+  <subtitle>
+The <emphasis>Control and Measurement Device Interface</emphasis>
+handbook
+  </subtitle>
   <author>
     <firstname>David</firstname>
     <surname>Schleef</surname>
@@ -42,35 +49,92 @@
       </address>
     </affiliation>
   </author>
+ <copyright>
+  <year>1998-2003</year>
+  <holder>David Schleef</holder>
+ </copyright>
+
+ <abstract>
+ <para>
+ <emphasis role="strong">Abstract</emphasis>
+ </para>
+ <para>
+&comedi; is a free software project to interface
+<emphasis>digital acquisition</emphasis> (DAQ) cards. It is the
+combination of three complementary software items: (i) a generic,
+device-independent API, (ii) a collection of Linux kernel modules that
+implement this API for a wide range of cards, and (iii) a Linux user
+space library with a developer-oriented programming interface to
+configure and use the cards.
+ </para>
+ </abstract>
+
+ <legalnotice>
+  <para>
+This document is part of Comedilib.  In the context of this
+document, the term "source code" as defined by the license is
+interpreted as the SGML source.
+
+COMEDILIB - Linux Control and Measurement Device Interface Library
+Copyright (C) 1997-2003 David A. Schleef &lt;ds@schleef.org&gt;
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation, version 2.1
+of the License.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+USA.
+ </legalnotice>
+
 </artheader>
 
-&intro
+&intro;
 
-&install
+&install;
 
-&tutorial
+&tutorial;
 
-&other
+&other;
 
-&drivers
+&driverwriting;
 
-<section>
+<section id="lowleveldrivers">
   <title>
-    Comedi Reference
+    Low-level drivers
   </title>
-  <para>
-    Reference for functions, macros, and constants.
-  </para>
 
-  &reference
-
-  &funcref
-
-  &glossary
+&drivers;
 
 </section>
 
+<section id="comedireference">
+  <title>
+    &comedi; Reference
+  </title>
+  <para>
+    Reference for 
+  <link linkend="constantsmacros">constants and macros</link>,
+  <link linkend="datatypesstructures">data types and structures</link>,
+  and <link linkend="functionreference">functions</link>.
+  </para>
 
+  &reference;
+
+<!-- </section> -->
+
+  &funcref;
+
+</section>
+
+  &glossary;
 
 
 </article>
