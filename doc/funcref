@@ -7,7 +7,7 @@ Returns:
  If sucessful, comedi_close returns 0.  On failure, -1 is returned.
 
 Function: comedi_open -- open a Comedi device
-Retval: comedi_t
+Retval: comedi_t *
 Param: const char * filename
 Description:
  Open a Comedi device specified by the file filename.
@@ -464,21 +464,76 @@ Description:
  For the A/D conversion (if appropriate),
  the device is configured to use range specification
  range and (if appropriate) analog reference type
- aref.  Analog reference types that are not supported
+ aref. Analog reference types that are not supported
  by the device are silently ignored.
 
  The function comedi_data_read() reads one data value from
  the specified channel and places the data value in the
  location pointed to by data.
 
- On sucess, comedi_data_read() returns 0.  If there is an
- error, -1 is returned.
- 
+ WARNING: comedi_data_read() does not do any pausing to
+ allow multiplexed analog inputs to settle before
+ performing an analog to digital conversion.  If you are
+ switching between different channels and need to allow
+ your analog input to settle for an accurate reading,
+ use comedi_data_read_delayed(), or set the
+ input channel at an earlier time with
+ comedi_data_read_hint().
+
+ On sucess, comedi_data_read() returns 1 (the number of samples
+ read).  If there is an error, -1 is returned.
+
  Data values returned by this function are unsigned integers
  less than or equal to the maximum sample value of the channel,
  which can be determined using the function comedi_get_maxdata().
  Conversion of data values to physical units can be performed
  by the function comedi_to_phys().
+
+Function: comedi_data_read_delayed -- read single sample from channel after delaying for specified settling time
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int channel
+Param: unsigned int range
+Param: unsigned int aref
+Param: lsampl_t * data
+Param: unsigned int nanosec
+Description:
+ Similar to comedi_data_read() except it will wait for the
+ specified number of nanoseconds between setting the input
+ channel and taking a sample.  For analog inputs, most
+ boards have a single
+ analog to digital converter which is multiplexed to be
+ able to read multiple channels.  If the input is not allowed
+ to settle after the multiplexer switches channels, the
+ reading will be inaccurate.  This function is useful
+ for allowing a multiplexed analog input to settle
+ when switching channels.
+
+ Although the settling time is specified in nanoseconds, the
+ actual settling time will be rounded up to the nearest
+ microsecond.
+
+Function: comedi_data_read_hint -- tell driver which channel/range/aref you are going to read from next
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int channel
+Param: unsigned int range
+Param: unsigned int aref
+Description:
+ Used to prepare an analog input for a subsequent call to
+ comedi_data_read().  It is not necessary to use this
+ function, but it can be useful for eliminating inaccuaracies
+ caused by insufficient settling times when switching the
+ channel
+ or gain on an analog input.  This function sets an analog input
+ to the channel, range, and aref specified but does not
+ perform an actual analog to digital conversion.
+
+ Alternatively, one can simply use comedi_data_read_delayed(),
+ which sets up the
+ input, pauses to allow settling, then performs a conversion.
 
 Function: comedi_data_write -- write single sample to channel
 Retval: int
@@ -499,8 +554,8 @@ Description:
  The function comedi_data_write() writes the data value specified
  by the parameter data to the specified channel.
 
- On sucess, comedi_data_write() returns 0.  If there is an error, -1 is
- returned.
+ On sucess, comedi_data_write() returns 1 (the number of samples
+ written).  If there is an error, -1 is returned.
 
 Function: comedi_dio_config -- change input/output properties of channel
 Retval: int
@@ -519,7 +574,7 @@ Description:
  case, a single call to comedi_dio_config() for any channel in the
  group will affect the entire group.
 
- If sucessful, 0 is returned, otherwise -1.
+ If sucessful, 1 is returned, otherwise -1.
 
 Function: comedi_dio_read -- read single bit from digital channel
 Retval: int
@@ -724,10 +779,10 @@ Retval: int
 Param: comedi_t * device
 Param: unsigned int subdevice
 Description:
- The function comedi_mark_buffer_read() is used on a subdevice
+ The function comedi_get_buffer_offset() is used on a subdevice
  that has a Comedi command in progress.  This function returns
- the offset of the read pointer in the streaming buffer.  This
- offset is only useful for memory mapped buffers.
+ the offset in bytes of the read pointer in the streaming buffer.
+ This offset is only useful for memory mapped buffers.
  If there is an error, -1 is returned.
 
 Function: comedi_get_timer -- timer information (deprecated)
@@ -737,8 +792,8 @@ Param: unsigned int subdevice
 Param: double frequency
 Param: unsigned int * trigvar
 Param: double * actual_frequency
-Description:
 Status: deprecated
+Description:
  The function comedi_get_timer converts the frequency frequency
  to a number suitable to send to the driver in a comedi_trig
  structure.  This function remains for compatibility with very
@@ -757,15 +812,15 @@ Param: unsigned int aref
 Param: double frequency
 Param: unsigned int num_samples
 Param: double * data
-Description:
 Status: deprecated
+Description:
  Not documented.
 
 Function: comedi_set_global_oor_behavior -- out-of-range behavior
 Retval: int
 Param: enum comedi_oor_behavior behavior
-Description:
 Status: alpha
+Description:
  This function changes the Comedilib out-of-range behavior.
  This currently affects the behavior of comedi_to_phys() when
  converting endpoint sample values, that is, sample values
@@ -776,3 +831,91 @@ Status: alpha
 
  The previous out-of-range behavior is returned.
 
+Function: comedi_apply_calibration -- set calibration from file
+Retval: int
+Param: comedi_t *device
+Param: unsigned int subdevice
+Param: unsigned int channel
+Param: unsigned int range
+Param: unsigned int aref
+Param: const char *file_path
+Status: alpha
+Description:
+ This function sets the calibration of the specified subdevice
+ so that it is in proper calibration when using the specified
+ channel, range and aref.  Depending on the hardware, the
+ calibration settings used may or may not depend on the channel,
+ range, or aref.  The file_path parameter can be used
+ to specify the file which contains the calibration information.
+ If <parameter>file_path</parameter> is NULL, then comedilib
+ will use a default
+ file location.  The calibration information used by this function
+ is generated by the comedi_calibrate program (see its man page).
+
+ The functions comedi_parse_calibration_file(),
+ comedi_apply_parsed_calibration(), and comedi_cleanup_calibration()
+ provide the same functionality at a slightly lower level.
+Returns:
+ Zero on success, a negative number on failure.
+
+Function: comedi_apply_parsed_calibration -- set calibration from memory
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int channel
+Param: unsigned int range
+Param: unsigned int aref
+Param: const comedi_calibration_t *calibration
+Status: alpha
+Description:
+ This function is similar to comedi_apply_calibration()
+ except the calibration information is read from memory
+ instead of a file.  This function can be more
+ efficient than comedi_apply_calibration() since the
+ calibration file does not need to be reparsed with
+ every call.  The <parameter>calibration</parameter> is
+ obtained by a call to comedi_parse_calibration_file().
+
+Returns:
+ Zero on success, a negative number on failure.
+
+Function: comedi_cleanup_calibration_file -- free calibration resources
+Retval: void
+Param: comedi_calibration_t *calibration
+Status: alpha
+Description:
+ This function frees the resources associated with a
+ <parameter>calibration</parameter> obtained from
+ comedi_parse_calibration_file().  <parameter>calibration</parameter>
+ can not be used again after calling this function.
+
+Function: comedi_get_default_calibration_path -- get default calibration file path
+Retval: char*
+Param: comedi_t *dev
+Status: alpha
+Description:
+ This function returns a string containing a default calibration file
+ path appropriate for <parameter>dev</parameter>.  Memory for the
+ string is allocated by the function, and should be freed when
+ the string is no longer needed.
+Returns:
+ A string which contains a file path useable by
+ comedi_parse_calibration_file().  On error, NULL is returned.
+
+Function: comedi_parse_calibration_file -- set calibration
+Retval: comedi_calibration_t*
+Param: const char *file_path
+Status: alpha
+Description:
+ This function parses a calibration file (produced by the
+ comedi_calibrate program) and returns a pointer to a
+ comedi_calibration_t which can be passed to the
+ comedi_apply_parsed_calibration() function.  When you are
+ finished using the comedi_calibration_t, you should
+ call comedi_cleanup_calibration() to free the resources
+ associated with the comedi_calibration_t.
+
+ The comedi_get_default_calibration_path() function may
+ be useful in conjunction with this function.
+Returns:
+ A pointer to parsed calibration information on success,  or NULL on failure.
