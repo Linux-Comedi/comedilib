@@ -45,7 +45,7 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into debian/tmp.
-	$(MAKE) install_debian DESTDIR=`pwd`/debian/tmp
+	$(MAKE) install_distro DESTDIR=`pwd`/debian/tmp
 	#(cd debian/tmp;mv usr/doc/libcomedi usr/share/doc/libcomedi-dev;rmdir usr/doc)
 
 
