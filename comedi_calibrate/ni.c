@@ -62,6 +62,7 @@ int cal_ni_pci_6024e(calibration_setup_t *setup);
 int cal_ni_at_mio_16xe_50(calibration_setup_t *setup);
 int cal_ni_pci_mio_16xe_10(calibration_setup_t *setup);
 int cal_ni_pci_6052e(calibration_setup_t *setup);
+int cal_ni_pci_mio_16e_4(calibration_setup_t *setup);
 
 static struct board_struct boards[]={
 	{ "at-mio-16e-2",	STATUS_DONE,	cal_ni_at_mio_16e_2 },
@@ -70,7 +71,7 @@ static struct board_struct boards[]={
 	{ "at-mio-16e-1",	STATUS_SOME,	cal_ni_at_mio_16e_1 },
 	{ "pci-mio-16e-1",	STATUS_DONE,	cal_ni_pci_mio_16e_1 },
 	{ "pci-6025e",		STATUS_SOME,	cal_ni_pci_6025e },
-	{ "pci-6035e",		STATUS_SOME,	cal_ni_pci_6035e },
+	{ "pci-6035e",		STATUS_DONE,	cal_ni_pci_6035e },
 	{ "pci-6071e",		STATUS_SOME,	cal_ni_pci_6071e },
 	{ "pxi-6071e",		STATUS_GUESS,	cal_ni_pxi_6071e },
 	{ "at-mio-16e-10",	STATUS_GUESS,	cal_ni_at_mio_16e_10 },
@@ -79,6 +80,7 @@ static struct board_struct boards[]={
 	{ "pci-mio-16xe-10",	STATUS_DONE,	cal_ni_pci_mio_16xe_10 },
 	{ "pci-6052e",		STATUS_DONE,	cal_ni_pci_6052e },
 	{ "pci-6024e",		STATUS_SOME,	cal_ni_pci_6024e },
+	{ "pci-mio-16e-4",	STATUS_SOME,    cal_ni_pci_mio_16e_4 },
 #if 0
 //	{ "at-mio-16de-10",	cal_ni_unknown },
 	{ "at-mio-64e-3",	cal_ni_16e_1 },
@@ -86,7 +88,6 @@ static struct board_struct boards[]={
 //	{ "at-mio-16xe-10",	cal_ni_unknown },
 //	{ "at-ai-16xe-10",	cal_ni_unknown },
 //	{ "pxi-6030e",		cal_ni_unknown },
-//	{ "pci-mio-16e-4",	cal_ni_unknown },
 //	{ "pxi-6040e",		cal_ni_unknown },
 //	{ "pci-6031e",		cal_ni_unknown },
 //	{ "pci-6032e",		cal_ni_unknown },
@@ -384,6 +385,8 @@ int cal_ni_pci_mio_16e_1(calibration_setup_t *setup)
 
 int cal_ni_pci_6035e(calibration_setup_t *setup)
 {
+	/* this is for the ad8804_debug caldac */
+
 	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,4);
 
 	cal1( setup, ni_zero_offset_high,0);
@@ -565,6 +568,27 @@ int cal_ni_pci_6052e(calibration_setup_t *setup)
 		cal1( setup, ni_ao1_zero_offset,12+1);
 		cal1( setup, ni_ao1_reference,12+9);
 		cal1( setup, ni_ao1_reference,12+5);
+	}
+	return 0;
+}
+
+int cal_ni_pci_mio_16e_4(calibration_setup_t *setup)
+{
+	/* this is for the ad8804_debug caldac */
+
+	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,4);
+	cal1( setup, ni_zero_offset_high,8);
+	cal1( setup, ni_reference_low,2);
+
+	cal1( setup, ni_unip_offset_low,7);
+
+	if(do_output){
+		cal1( setup, ni_ao0_zero_offset,6);
+		//cal1( setup, ni_ao0_nonlinearity,10);
+		cal1( setup, ni_ao0_reference,11);
+		cal1( setup, ni_ao1_zero_offset,9);
+		//cal1( setup, ni_ao1_nonlinearity,1);
+		cal1( setup, ni_ao1_reference,5);
 	}
 	return 0;
 }
