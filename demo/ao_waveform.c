@@ -58,10 +58,6 @@
 /* frequency of the sine wave to output */
 double waveform_frequency	= 100.0;
 
-/* update rate for the DAC, typically much higher than
-   the frequency of the sine wave. */
-double update_frequency		= 50000.0;
-
 /* peak-to-peak amplitude, in DAC units (i.e., 0-4095) */
 double amplitude		= 4000;
 
@@ -91,6 +87,7 @@ void dds_init_sawtooth(void);
 int main(int argc, char *argv[])
 {
 	comedi_cmd cmd;
+	comedi_insn insn;
 	int err;
 	int n,m;
 	int total=0;
@@ -104,16 +101,19 @@ int main(int argc, char *argv[])
 	}
 
 	dev = comedi_open(filename);
-
+	if(dev == NULL){
+		fprintf(stderr, "error opening %s\n", filename);
+		return -1;
+	}
 	subdevice = comedi_find_subdevice_by_type(dev,COMEDI_SUBD_AO,0);
 
 	memset(&cmd,0,sizeof(cmd));
 	cmd.subdev = subdevice;
 	cmd.flags = 0;
-	cmd.start_src = TRIG_NOW;
+	cmd.start_src = TRIG_INT;
 	cmd.start_arg = 0;
 	cmd.scan_begin_src = TRIG_TIMER;
-	cmd.scan_begin_arg = 1e9/update_frequency;
+	cmd.scan_begin_arg = 1e9/freq;
 	cmd.convert_src = TRIG_NOW;
 	cmd.convert_arg = 0;
 	cmd.scan_end_src = TRIG_COUNT;
@@ -131,14 +131,19 @@ int main(int argc, char *argv[])
 	dds_output(data,BUF_LEN);
 	dds_output(data,BUF_LEN);
 
-	m=write(comedi_fileno(dev),data,BUF_LEN*sizeof(sampl_t));
-	perror("write");
-	printf("m=%d\n",m);
-
 	if ((err = comedi_command(dev, &cmd)) < 0) {
 		comedi_perror("comedi_command");
 		exit(1);
 	}
+
+	m=write(comedi_fileno(dev),data,BUF_LEN*sizeof(sampl_t));
+	perror("write");
+	printf("m=%d\n",m);
+	
+	memset(&insn, 0, sizeof(comedi_insn));
+	insn.insn = INSN_INTTRIG;
+	comedi_do_insn(dev, &insn);
+
 	while(1){
 		dds_output(data,BUF_LEN);
 		n=BUF_LEN*sizeof(sampl_t);
@@ -174,7 +179,7 @@ void dds_init(void)
 {
 	int i;
 
-	adder=waveform_frequency/update_frequency*(1<<16)*(1<<WAVEFORM_SHIFT);
+	adder=waveform_frequency/freq*(1<<16)*(1<<WAVEFORM_SHIFT);
 
 	dds_init_function();
 
