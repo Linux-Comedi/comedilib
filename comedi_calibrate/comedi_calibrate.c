@@ -1271,9 +1271,6 @@ int new_sv_init(new_sv_t *sv,comedi_t *dev,int subdev,unsigned int chanspec)
 	sv->rng=comedi_get_range(dev,subdev,
 		CR_CHAN(chanspec), CR_RANGE(chanspec));
 
-	/* pci-611x needs at least order 10 to overcome pickup in
-	 * its internal reference.  Probably order 12 would be better
-	 * for it.  Should make this adjustable XXX. */
 	sv->order=10;
 
 	return 0;
