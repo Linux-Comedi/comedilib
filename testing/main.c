@@ -26,6 +26,7 @@ int range;
 int test_info(void);
 int test_mode0_read(void);
 int test_insn_read(void);
+int test_insn_read_0(void);
 int test_insn_read_time(void);
 int test_cmd_no_cmd(void);
 int test_cmd_probe_src_mask(void);
@@ -52,6 +53,7 @@ struct test_struct tests[]={
 	{ "info", test_info, TEST_STD },
 	{ "mode0_read", test_mode0_read, TEST_NEVER },
 	{ "insn_read", test_insn_read, TEST_STD },
+	{ "insn_read_0", test_insn_read_0, TEST_STD },
 	{ "insn_read_time", test_insn_read_time, TEST_STD },
 	{ "cmd_no_cmd", test_cmd_no_cmd, TEST_STD },
 	{ "cmd_probe_src_mask", test_cmd_probe_src_mask, TEST_STD },
