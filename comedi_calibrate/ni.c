@@ -339,7 +339,7 @@ static void ni_setup_ao_observables( calibration_setup_t *setup )
 			CR_PACK(REF_DAC_GND( channel ),ai_bipolar_lowgain,AREF_OTHER)
 			| CR_ALT_SOURCE | CR_ALT_FILTER;
 		o->reference_source = REF_DAC_GND( channel );
-		set_target( setup, ni_ao_reference( channel ),5.0);
+		set_target( setup, ni_ao_reference( channel ),8.0);
 
 		/* ao linearity, mid */
 		o = setup->observables + ni_ao_mid_linearity( channel );
@@ -353,7 +353,7 @@ static void ni_setup_ao_observables( calibration_setup_t *setup )
 			CR_PACK(REF_DAC_GND( channel ),ai_bipolar_lowgain,AREF_OTHER)
 			| CR_ALT_SOURCE | CR_ALT_FILTER;
 		o->reference_source = REF_DAC_GND( channel );
-		set_target( setup, ni_ao_mid_linearity( channel ),2.5);
+		set_target( setup, ni_ao_mid_linearity( channel ),4.0);
 
 		if( ao_unipolar_lowgain >= 0 )
 		{
