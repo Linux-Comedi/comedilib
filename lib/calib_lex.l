@@ -42,6 +42,7 @@ char *string_buf_ptr;
 
 "#" BEGIN(COMMENT);
 <COMMENT>\n { yylloc.first_line++; BEGIN(INITIAL); }
+<COMMENT>.
 
 \" { string_buf_ptr = string_buf; BEGIN(STRING); }
 <STRING>\" {
