@@ -26,19 +26,6 @@ AC_SUBST(COMEDILIB_CFLAGS)
 AC_SUBST(COMEDILIB_LIBS)
 
 AM_PATH_PYTHON
-AC_MSG_CHECKING(for python >= 2.2)
-prog="
-import sys, string
-minver = (2,2,0,'final',0)
-if sys.version_info < minver:
-  sys.exit(1)
-sys.exit(0)"
-if $PYTHON -c "$prog" 2>&AC_FD_CC 2>&AC_FD_CC
-then
-  AC_MSG_RESULT(ok)
-else
-  AC_MSG_ERROR(too old)
-fi
 AM_CHECK_PYTHON_HEADERS(,[AC_MSG_ERROR(could not find Python headers)])
 
 
