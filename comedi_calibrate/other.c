@@ -18,19 +18,24 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
 #include <comedilib.h>
-
-
-/* Note that this silently fails if delay >= 100000 */
+#include <unistd.h>
 
 void comedi_nanodelay(comedi_t *dev, unsigned int delay)
 {
 	comedi_insn insn;
+	lsampl_t data = delay;
+	int retval;
 
 	memset(&insn, 0, sizeof(insn));
 	insn.insn = INSN_WAIT;
 	insn.n = 1;
-	insn.data = &delay;
+	insn.data = &data;
+	retval = comedi_do_insn( dev, &insn );
+	// fall back on usleep for long delays
+	if( retval < 0 )
+		usleep( delay / 1000 );
 
+	return;
 }
 
 
