@@ -81,11 +81,12 @@ int _comedi_mark_buffer_read(comedi_t *it, unsigned int subdev, unsigned int byt
 	comedi_bufinfo bi;
 
 	memset(&bi, 0, sizeof(bi));
+	bi.subdevice = subdev;
 	bi.bytes_read = bytes;
 	ret = comedi_ioctl(it->fd, COMEDI_BUFINFO, (unsigned long)&bi);
 	__comedi_errno = errno;
 	if(__comedi_errno == EPIPE)__comedi_errno = EBUF_OVR;
-	return bi.buf_int_count - bi.buf_user_count;
+	return bi.buf_write_count - bi.buf_read_count;
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_mark_buffer_written,comedi_mark_buffer_written,0.7.23);
@@ -95,11 +96,12 @@ int _comedi_mark_buffer_written(comedi_t *it, unsigned int subdev, unsigned int 
 	comedi_bufinfo bi;
 
 	memset(&bi, 0, sizeof(bi));
+	bi.subdevice = subdev;
 	bi.bytes_written = bytes;
 	ret = comedi_ioctl(it->fd, COMEDI_BUFINFO, (unsigned long)&bi);
 	__comedi_errno = errno;
 	if(__comedi_errno == EPIPE)__comedi_errno = EBUF_UNDR;
-	return bi.buf_int_count - bi.buf_user_count;
+	return bi.buf_write_count - bi.buf_read_count;
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_get_buffer_offset,comedi_get_buffer_offset,0.7.18);
@@ -109,9 +111,10 @@ int _comedi_get_buffer_offset(comedi_t *it, unsigned int subdev)
 	comedi_bufinfo bi;
 
 	memset(&bi, 0, sizeof(bi));
+	bi.subdevice = subdev;
 	ret = comedi_ioctl(it->fd, COMEDI_BUFINFO, (unsigned long)&bi);
 	if(ret < 0) return ret;
-	return bi.buf_user_ptr;
+	return bi.buf_read_ptr;
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_get_front_count,comedi_get_front_count,0.7.18);
@@ -121,8 +124,9 @@ int _comedi_get_front_count(comedi_t *it, unsigned int subdev)
 	comedi_bufinfo bi;
 
 	memset(&bi, 0, sizeof(bi));
+	bi.subdevice = subdev;
 	ret = comedi_ioctl(it->fd, COMEDI_BUFINFO, (unsigned long)&bi);
 	if(ret < 0) return ret;
-	return bi.buf_int_count;
+	return bi.buf_write_count;
 }
 

@@ -76,6 +76,7 @@ int main(int argc, char *argv[])
 	comedi_range *rng;
 	int ret;
 	int size;
+	int num_samples;
 	sampl_t *map;
 	/* peak-to-peak amplitude, in DAC units (i.e., 0-4095) */
 	double amplitude;
@@ -148,36 +149,45 @@ int main(int argc, char *argv[])
 		perror("mmap");
 		exit(1);
 	}
-	write_waveform(map, size / sizeof(sampl_t), amplitude, offset, maxdata);
+	num_samples = size / sizeof(sampl_t);
+	write_waveform(map, num_samples, amplitude, offset, maxdata);
 	if(msync(map, size, MS_SYNC) < 0)
 	{
 		perror("msync");
 		exit(1);
 	}
-	if(comedi_mark_buffer_written(dev, subdevice, size) < 0)
+	printf("marking %i samples as written\n", num_samples);
+	ret = comedi_mark_buffer_written(dev, subdevice, size);
+	if(ret < 0)
 	{
 		comedi_perror("comedi_mark_buffer_written");
 		exit(1);
 	}
 	ret = comedi_internal_trigger(dev, subdevice, 0);
 	if(ret<0){
-		comedi_perror("comedi_internal_trigger\n");
+		comedi_perror("comedi_internal_trigger");
 		exit(1);
 	}
-	while(1){
+	while(1)
+	{
 		int bytes_marked = comedi_get_buffer_contents(dev,subdevice);
-		if(bytes_marked < 1)
+		if(bytes_marked < 0)
 		{
 			comedi_perror("comedi_get_buffer_contents");
 			exit(1);
 		}
 		int bytes_unmarked = size - bytes_marked;
-		// this keeps comedi from reporting a buffer underrun
-		if(comedi_mark_buffer_written(dev, subdevice, bytes_unmarked) < 0)
+		if(bytes_unmarked > 0)
 		{
-			comedi_perror("comedi_mark_buffer_written");
-			exit(1);
-		}
+			// this keeps comedi from reporting a buffer underrun
+			if(comedi_mark_buffer_written(dev, subdevice, bytes_unmarked) < 0)
+			{
+				comedi_perror("comedi_mark_buffer_written");
+				exit(1);
+			}
+			printf("marked %i more samples as written\n", bytes_unmarked / sizeof(sampl_t));
+		}else
+			usleep(10000);
 	}
 	return 0;
 }
