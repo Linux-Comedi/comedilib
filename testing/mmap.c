@@ -55,13 +55,15 @@ void setup_segfaulter(void)
 int test_mmap(void)
 {
 	comedi_cmd cmd;
-	char *buf;
+	unsigned char *buf;
 	unsigned int chanlist[1];
 	int go;
+	int fails;
 	int total=0;
 	int ret;
-	void *b, *adr;
-	sampl_t *map;
+	void *b;
+	unsigned char *adr;
+	unsigned char *map;
 	unsigned int flags;
 	int i;
 
@@ -88,7 +90,7 @@ int test_mmap(void)
 	}
 
 	/* test readability */
-	for(adr=map;adr<(void *)map+MAPLEN;adr+=PAGE_SIZE){
+	for(adr=map;adr<map+MAPLEN;adr+=PAGE_SIZE){
 		ret=test_segfault(adr);
 		if(ret){
 			printf("E: %p failed\n",adr);
@@ -127,22 +129,23 @@ int test_mmap(void)
 		}
 	}
 
-	go = 1;
+	fails = 0;
 	for(i=0;i<total;i++){
-		if(buf[i]!=((char *)map)[i]){
-			printf("E: mmap compare failed\n");
+		if(buf[i]!=map[i]){
+			if(fails==0)printf("E: mmap compare failed\n");
 			printf("offset %d (read=%02x mmap=%02x)\n",i,
-				buf[i], ((char *)map)[i]);
+				buf[i], map[i]);
 			go = 0;
-			break;
+			fails++;
+			if(fails>10)break;
 		}
 	}
-	if(go) printf("compare ok\n");
+	if(fails==0) printf("compare ok\n");
 
 	munmap(map,MAPLEN);
 
 	/* test if area is really unmapped */
-	for(adr=map;adr<(void *)map+MAPLEN;adr+=PAGE_SIZE){
+	for(adr=map;adr<map+MAPLEN;adr+=PAGE_SIZE){
 		ret=test_segfault(adr);
 		if(ret){
 			printf("%p segfaulted (ok)\n",adr);
