@@ -142,6 +142,7 @@ int main(int argc, char *argv[])
 	
 	memset(&insn, 0, sizeof(comedi_insn));
 	insn.insn = INSN_INTTRIG;
+	insn.subdev = subdevice;
 	comedi_do_insn(dev, &insn);
 
 	while(1){
