@@ -17,6 +17,7 @@ other demos.
 The perl subdirectory contains a few examples for the perl wrapper.
 
 
+
 DEMO PROGRAMS:
 
 ao_waveform:
@@ -31,7 +32,9 @@ common:
 cmd: 
 	An example for directly using Comedi commands.  Comedi commands
 	are used for asynchronous acquisition, with the timing controlled
-	by on-board timers or external events.
+	by on-board timers or external events.  If this demo doesn't work
+	with your hardware, read the comments in the source.  Hint: data
+	is written to stdout, comments to stderr.
  
 dio:
 	Requirements:  A board with a digital I/O subdevice.  Not just
@@ -68,7 +71,8 @@ ledclock:
 mmap:
 	This example shows how to map the internal Comedi buffer
 	and directly access samples instead of using read() and
-	write().
+	write().  This is very similar to cmd.c, so look there for
+	comments on most of the code.
 
 outp <value>:
 	Write one <value> to one channel of one subdevice.  Requires
