@@ -39,10 +39,14 @@ int main(int argc, char *argv[])
 	fn = "/dev/comedi0";
 
 	dev = comedi_open(fn);
+	if(!dev){
+		perror(fn);
+		exit(1);
+	}
 
-	//fcntl(comedi_fileno(dev),F_SETFL,O_NONBLOCK);
+	fcntl(comedi_fileno(dev),F_SETFL,O_NONBLOCK);
 
-	do_cmd_2(dev);
+	do_cmd_1(dev);
 
 	return 0;
 }
@@ -103,14 +107,15 @@ static void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 				usleep(10000);
 			}else{
 				go = 0;
+				perror("read");
 			}
+		}else if(ret==0){
+			go = 0;
 		}else{
 			total+=ret;
+			printf("read %d %d\n",ret,total);
 		}
-		printf("read %d %d\n",ret,total);
 	}
-	perror("ack");
-	printf("errno=%d\n",errno);
 }
 
 static void do_cmd_1(comedi_t *dev)

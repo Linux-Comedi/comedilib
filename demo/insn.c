@@ -35,7 +35,7 @@ comedi_t *device;
  *
  */
 
-#define N_SAMPLES 10
+#define N_SAMPLES 1
 
 int main(int argc, char *argv[])
 {
@@ -69,6 +69,7 @@ int main(int argc, char *argv[])
 	insn[0].n=2;
 	insn[0].data=(void *)&t1;
 
+//#if 0
 	/* Instruction 1: do 10 analog input reads */
 	insn[1].insn=INSN_READ;
 	insn[1].n=N_SAMPLES;
@@ -80,6 +81,12 @@ int main(int argc, char *argv[])
 	insn[2].insn=INSN_GTOD;
 	insn[2].n=2;
 	insn[2].data=(void *)&t2;
+//#endif
+#if 0
+	insn[1].insn=INSN_GTOD;
+	insn[1].n=2;
+	insn[1].data=(void *)&t2;
+#endif
 
 	ret=comedi_do_insnlist(device,&il);
 	if(ret<0){
@@ -92,6 +99,9 @@ int main(int argc, char *argv[])
 		printf("%d\n",data[i]);
 	}
 	printf("final time: %ld.%06ld\n",t2.tv_sec,t2.tv_usec);
+
+	printf("difference (us): %ld\n",(t2.tv_sec-t1.tv_sec)*1000000+
+			(t2.tv_usec-t1.tv_usec));
 
 	return 0;
 }

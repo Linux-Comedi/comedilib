@@ -36,7 +36,7 @@ int external_trigger_number = 0;
 
 #define N_SAMPLES	(N_CHANS*N_SCANS)
 
-sampl_t data[N_SAMPLES];
+sampl_t data[4096];
 
 
 int main(int argc, char *argv[])
@@ -44,12 +44,12 @@ int main(int argc, char *argv[])
 	char *fn = NULL;
 	comedi_trig it;
 	int err;
-	int n,i;
+	int n,i,m;
 	comedi_t *dev;
 	double actual_freq;
 	unsigned int chan[N_CHANS];
 
-	fn = "/dev/comedi3";
+	fn = "/dev/comedi0";
 
 	dev = comedi_open(fn);
 
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 	it.n_chan = 1;
 	it.chanlist = chan;
 	it.data = data;
-	it.n = N_SCANS;
+	it.n = 0; //N_SCANS;
 	it.trigsrc = 0;
 	it.trigvar = 10000;
 	it.trigvar1 = 10000;
@@ -74,12 +74,21 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	if((n=read(comedi_fileno(dev),data,N_SAMPLES*sizeof(sampl_t)))<0){
-		perror("read");
-		exit(1);
+	m=0;
+	while(1){
+		if((n=read(comedi_fileno(dev),data,4096*sizeof(sampl_t)))<0){
+			perror("read");
+			exit(1);
+		}
+		if(n==0){
+			perror("damn");
+			exit(1);
+		}
+		n/=sizeof(sampl_t);
+		m+=n;
+		printf("read=%d total=%d data[0]=%d data[N-1]=%d\n",
+			n,m,data[0],data[n-1]);
 	}
-	printf("number of samples read=%d\ndata[0]=%d\ndata[N-1]=%d\n",
-		n/sizeof(sampl_t),data[0],data[N_SAMPLES-1]);
 
 	return 0;
 }
