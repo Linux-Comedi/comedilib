@@ -1,5 +1,5 @@
 
-CFLAGS=-Wall -O2 -I../include
+CFLAGS=-Wall -Wstrict-prototypes -O2 -I../include
 #LDFLAGS=-L../lib/ -lcomedi
 LDFLAGS=
 

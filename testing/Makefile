@@ -1,7 +1,7 @@
 
 
 
-CFLAGS +=-I ../include -I . -O2 -Wall
+CFLAGS =-I ../include -I . -O2 -Wall -Wstrict-prototypes
 LDFLAGS=-L../lib/ -lcomedi
 
 
@@ -14,6 +14,6 @@ $(TARG):	$(OBJS)
 	$(CC) -o $(TARG) $(OBJS) $(LDFLAGS)
 
 clean:
-	-rm $(TARG) $(OBJS)
+	-rm -f $(TARG) $(OBJS)
 
 distclean: clean

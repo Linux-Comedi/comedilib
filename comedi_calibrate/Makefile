@@ -1,7 +1,7 @@
 
 
 
-CFLAGS +=-I ../include -I . -O2 -Wall
+CFLAGS =-I ../include -I . -O2 -Wall -Wstrict-prototypes
 LDFLAGS=-L../lib/ -lcomedi -lm
 
 
@@ -13,4 +13,4 @@ comedi_calibrate: comedi_calibrate.o
 	$(CC) -o comedi_calibrate comedi_calibrate.o $(LDFLAGS)
 
 clean:
-	-rm *.o $(BINS)
+	-rm -f *.o $(BINS)
