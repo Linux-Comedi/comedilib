@@ -50,7 +50,7 @@ typedef struct comedi_sv_struct{
 	/* range policy */
 	int range;
 	int aref;
-	
+
 	/* number of measurements to average (for ai) */
 	int n;
 
@@ -153,7 +153,7 @@ int comedi_sv_update(comedi_sv_t *it);
 int comedi_sv_measure(comedi_sv_t *it,double *data);
 
 /* streaming I/O (commands) */
- 
+
 int comedi_get_cmd_src_mask(comedi_t *dev,unsigned int subdevice,
 	comedi_cmd *cmd);
 int comedi_get_cmd_generic_timed(comedi_t *dev,unsigned int subdevice,
@@ -193,6 +193,8 @@ int comedi_get_rangetype(comedi_t *it,unsigned int subdevice,
    compatibility.  In practice, this is a holding place for the next
    library ABI version change.
  */
+int comedi_set_calibration( comedi_t *dev, unsigned int subdev, unsigned int channel,
+	unsigned int range, unsigned int aref, const char *cal_file_path);
 
 
 #endif
