@@ -58,6 +58,7 @@ int get_subdevices(comedi_t *it)
 
 	for(i=0;i<it->n_subdevices;i++){
 		r[i].type	= s[i].type;
+		if(r[i].type==COMEDI_SUBD_UNUSED)continue;
 		r[i].n_chan	= s[i].n_chan;
 		r[i].subd_flags	= s[i].subd_flags;
 		r[i].timer_type	= s[i].timer_type;
