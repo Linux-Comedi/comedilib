@@ -28,7 +28,7 @@
 
 #define YYERROR_VERBOSE
 
-struct calibration_file_contents file_contents;
+struct calibration_file_contents *parsed_file;
 static struct caldac_setting caldac;
 static int cal_index;
 FILE *calib_yyin;
@@ -157,33 +157,44 @@ static int add_caldac( struct calibration_file_contents *file_contents,
 	return 0;
 }
 
-static void init_calib_parse( void )
+static struct calibration_file_contents* alloc_calib_parse( void )
 {
-	memset( &file_contents, 0, sizeof( file_contents ) );
-	cal_index = 0;
+	struct calibration_file_contents *file_contents;
+	file_contents = malloc( sizeof( *file_contents ) );
+	if( file_contents == NULL ) return file_contents;
+	memset( file_contents, 0, sizeof( *file_contents ) );
+	return file_contents;
 }
 
-extern void cleanup_calibration_parse( void )
+extern void cleanup_calibration_parse( struct calibration_file_contents *file_contents )
 {
-	if( file_contents.driver_name )
+	if( file_contents->driver_name )
 	{
-		free( file_contents.driver_name );
-		file_contents.driver_name = NULL;
+		free( file_contents->driver_name );
+		file_contents->driver_name = NULL;
 	}
-	if( file_contents.board_name )
+	if( file_contents->board_name )
 	{
-		free( file_contents.board_name );
-		file_contents.board_name = NULL;
+		free( file_contents->board_name );
+		file_contents->board_name = NULL;
 	}
-	free_calibrations( &file_contents );
+	free_calibrations( file_contents );
+	free( file_contents );
+	file_contents = NULL;
 }
 
-extern const struct calibration_file_contents* parse_calibration_file( FILE *file )
+extern struct calibration_file_contents* parse_calibration_file( FILE *file )
 {
 	calib_yyin = file;
-	init_calib_parse();
-	if( calib_yyparse() ) return NULL;
-	return &file_contents;
+	parsed_file = alloc_calib_parse();
+	if( parsed_file == NULL ) return parsed_file;
+	cal_index = 0;
+	if( calib_yyparse() )
+	{
+		cleanup_calibration_parse( parsed_file );
+		return NULL;
+	}
+	return parsed_file;
 }
 
 %}
@@ -218,13 +229,13 @@ extern const struct calibration_file_contents* parse_calibration_file( FILE *fil
 
 	hash_element: T_DRIVER_NAME T_ASSIGN T_STRING
 		{
-			if( file_contents.driver_name != NULL ) YYABORT;
-			file_contents.driver_name = strdup( $3 );
+			if( parsed_file->driver_name != NULL ) YYABORT;
+			parsed_file->driver_name = strdup( $3 );
 		}
 		| T_BOARD_NAME T_ASSIGN T_STRING
 		{
-			if( file_contents.board_name != NULL ) YYABORT;
-			file_contents.board_name = strdup( $3 );
+			if( parsed_file->board_name != NULL ) YYABORT;
+			parsed_file->board_name = strdup( $3 );
 		}
 		| T_CALIBRATIONS T_ASSIGN '[' calibrations_array ']'
 		;
@@ -242,7 +253,7 @@ extern const struct calibration_file_contents* parse_calibration_file( FILE *fil
 	calibration_setting_element: T_SUBDEVICE T_ASSIGN T_NUMBER
 		{
 			struct calibration_setting *setting;
-			setting = current_setting( &file_contents );
+			setting = current_setting( parsed_file );
 			if( setting == NULL ) YYABORT;
 			setting->subdevice = $3;
 		}
@@ -257,7 +268,7 @@ extern const struct calibration_file_contents* parse_calibration_file( FILE *fil
 		| channel ',' channels_array
 		;
 
-	channel: T_NUMBER { add_channel( &file_contents, $1 ); }
+	channel: T_NUMBER { add_channel( parsed_file, $1 ); }
 		;
 
 	ranges_array: /* empty */
@@ -265,7 +276,7 @@ extern const struct calibration_file_contents* parse_calibration_file( FILE *fil
 		| range ',' ranges_array
 		;
 
-	range: T_NUMBER { add_range( &file_contents, $1 ); }
+	range: T_NUMBER { add_range( parsed_file, $1 ); }
 		;
 
 	arefs_array: /* empty */
@@ -273,7 +284,7 @@ extern const struct calibration_file_contents* parse_calibration_file( FILE *fil
 		| aref ',' arefs_array
 		;
 
-	aref: T_NUMBER { add_aref( &file_contents, $1 ); }
+	aref: T_NUMBER { add_aref( parsed_file, $1 ); }
 		;
 
 	caldacs_array: /* empty */
@@ -281,7 +292,7 @@ extern const struct calibration_file_contents* parse_calibration_file( FILE *fil
 		| '{' caldac '}' ',' caldacs_array
 		;
 
-	caldac: /* empty */ { add_caldac( &file_contents, caldac ); }
+	caldac: /* empty */ { add_caldac( parsed_file, caldac ); }
 		| caldac_element
 		| caldac_element ',' caldac
 		;

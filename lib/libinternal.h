@@ -186,8 +186,8 @@ struct calibration_file_contents
 int calib_yylex( void );
 void calib_yyerror( char *s );
 int calib_yyparse( void );
-const struct calibration_file_contents* parse_calibration_file( FILE *file );
-void cleanup_calibration_parse( void );
+struct calibration_file_contents* parse_calibration_file( FILE *file );
+void cleanup_calibration_parse( struct calibration_file_contents *parsed_file );
 
 #endif
 
