@@ -68,7 +68,7 @@ double offset			= 2048;
 /* This is the size of chunks we deal with when creating and
    outputting data.  This *could* be 1, but that would be
    inefficient */
-#define BUF_LEN		8192	
+#define BUF_LEN 0x8000
 
 int subdevice;
 int external_trigger_number = 0;
@@ -158,9 +158,6 @@ int main(int argc, char *argv[])
 
 	dds_init();
 
-	dds_output(data,BUF_LEN);
-	dds_output(data,BUF_LEN);
-
 	dump_cmd(stdout,&cmd);
 
 	err = comedi_command_test(dev, &cmd);
@@ -180,13 +177,18 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	m=write(comedi_fileno(dev),data,BUF_LEN*sizeof(sampl_t));
-	if(m<0){
-		perror("write");
-		exit(1);
+	dds_output(data,BUF_LEN);
+	n=BUF_LEN*sizeof(sampl_t);
+	while(n>0){
+		m=write(comedi_fileno(dev),(void *)data+(BUF_LEN*sizeof(sampl_t)-n),n);
+		if(m<0){
+			perror("write");
+			exit(0);
+		}
+		printf("m=%d\n",m);
+		n-=m;
 	}
-	printf("m=%d\n",m);
-	
+
 	ret = comedi_internal_trigger(dev, subdevice, 0);
 	if(ret<0){
 		perror("comedi_internal_trigger\n");
