@@ -127,6 +127,7 @@ int write_calibration_file( calibration_setup_t *setup )
 	{
 		fprintf( stderr, "failed to open file %s for writing\n",
 			setup->cal_save_file_path );
+		perror( "fopen" );
 		return -1;
 	}
 
