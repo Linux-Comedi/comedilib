@@ -63,6 +63,7 @@ void reset_caldacs(void);
 void setup_caldacs(void);
 void cal_ni_mio_E(void);
 void ni_mio_ai_postgain_cal(void);
+void ni_mio_ai_postgain_cal_2(int chan,int dac,int range_lo,int range_hi,double gain);
 void channel_dependence(int adc,int range);
 void caldac_dependence(int caldac);
 void dump_curve(int adc,int caldac);
@@ -263,6 +264,68 @@ void cal_ni_mio_E(void)
 
 		return;
 	}
+	if(!strcmp(boardname,"pci-mio-16xe-10")){
+/*
+ * results of channel dependence test:
+ *
+ * 		[0]	[1]	[2]	[3]	[8]
+ * offset, lo			1.9e-4*	2.2e-6	2.4e-7
+ * offset, hi			2.0e-6*	2.1e-8	2.7e-7
+ * offset, unip			1.9e-4	2.1e-6	3.9e-7
+ * ref		-2.3e-5*-1.3e-6*1.9e-4*	2.1e-6* 3.2e-7
+ *
+ * thus, 2,3 are postgain offset, 8 is pregain, and
+ * 0,1 is gain.  Note the suspicious lack of unipolar
+ * offset.
+ * 
+ * layout
+ *
+ * 0	AI gain			-2.3e-5
+ * 1	AI gain			-1.3e-6
+ * 2	AI postgain offset	1.9e-4
+ * 3	AI postgain offset	2.2e-6
+ * 4	AO
+ * 5	AO
+ * 6	AO
+ * 7	AO
+ * 8	AI pregain offset	2.4e-7
+ * 9	unknown
+ * 10	unknown
+ */
+		printf("last factory calibration %02d/%02d/%02d\n",
+			read_eeprom(508),read_eeprom(507),read_eeprom(506));
+
+		printf("lsb=%d msb=%d\n",read_eeprom(430),read_eeprom(431));
+
+		ref=5.000+(0.001*(read_eeprom(430)+read_eeprom(431)));
+		printf("ref=%g\n",ref);
+
+		reset_caldacs();
+
+		printf("postgain offset\n");
+		ni_mio_ai_postgain_cal_2(0,2,0,6,100.0);
+		ni_mio_ai_postgain_cal_2(0,3,0,6,100.0);
+
+		printf("pregain offset\n");
+		chan_cal(0,8,6,0.0);
+		chan_cal(0,8,6,0.0);
+
+		//printf("unipolar offset\n");
+		//chan_cal(0,2,8,0.0);
+		//chan_cal(0,2,8,0.0);
+
+		printf("gain offset\n");
+		chan_cal(5,0,0,5.0);
+		chan_cal(5,1,0,5.0);
+		chan_cal(5,1,0,5.0);
+
+		printf("results (offset)\n");
+		for(i=0;i<16;i++){
+			read_chan(0,i);
+		}
+
+		//return;
+	}
 
 	{
 		int n_ranges;
@@ -273,15 +336,19 @@ void cal_ni_mio_E(void)
 
 	n_ranges=comedi_get_n_ranges(dev,ad_subdev,0);
 
+	/* 0 offset, low gain */
 	printf("channel dependence 0 range 0\n");
 	channel_dependence(0,0);
 
+	/* 0 offset, high gain */
 	printf("channel dependence 0 range %d\n",n_ranges/2-1);
 	channel_dependence(0,n_ranges/2-1);
 
+	/* unip/bip offset */
 	printf("channel dependence 0 range %d\n",n_ranges/2);
 	channel_dependence(0,n_ranges/2);
 
+	/* voltage reference */
 	printf("channel dependence 5 range 0\n");
 	channel_dependence(5,0);
 	}
@@ -313,6 +380,32 @@ void ni_mio_ai_postgain_cal(void)
 
 	caldacs[1].current=rint(a);
 	update_caldac(1);
+}
+
+void ni_mio_ai_postgain_cal_2(int chan,int dac,int range_lo,int range_hi,double gain)
+{
+	double offset_lo,offset_hi;
+	linear_fit_t l;
+	double slope;
+	double a;
+
+	check_gain_chan_x(&l,chan,range_lo,dac);
+	offset_lo=linear_fit_func_y(&l,caldacs[dac].current);
+	printf("offset lo %g\n",offset_lo);
+
+	check_gain_chan_x(&l,chan,range_hi,dac);
+	offset_hi=linear_fit_func_y(&l,caldacs[dac].current);
+	printf("offset hi %g\n",offset_hi);
+
+	slope=l.slope;
+	
+	a=(offset_lo-offset_hi)/(gain-1.0);
+	a=caldacs[dac].current-a/slope;
+
+	printf("%g\n",a);
+
+	caldacs[dac].current=rint(a);
+	update_caldac(dac);
 }
 
 void chan_cal(int adc,int cdac,int range,double target)
@@ -385,8 +478,6 @@ void setup_caldacs(void)
 		caldacs[i].subdev=s;
 		caldacs[i].chan=i;
 		caldacs[i].maxdata=comedi_get_maxdata(dev,s,i);
-/* XXX */
-caldacs[i].maxdata=255;
 		caldacs[i].current=0;
 		//printf("caldac %d, %d\n",i,caldacs[i].maxdata);
 	}
