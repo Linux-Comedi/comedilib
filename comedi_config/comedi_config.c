@@ -21,7 +21,7 @@
 
 */
 
-#define CC_VERSION	"0.7.49"
+#define CC_VERSION	"0.7.12"
 
 #include <sys/types.h>
 #include <sys/stat.h>
