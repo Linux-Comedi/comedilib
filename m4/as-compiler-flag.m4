@@ -3,7 +3,7 @@ dnl autostars m4 macro for detection of compiler flags
 dnl
 dnl ds@schleef.org
 
-AC_DEFUN(AS_COMPILER_FLAG,
+AC_DEFUN([AS_COMPILER_FLAG],
 [
   AC_MSG_CHECKING(to see if compiler understands $1)
 

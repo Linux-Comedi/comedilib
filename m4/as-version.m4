@@ -19,7 +19,7 @@ dnl   maintainer mode from running ok
 dnl
 dnl don't forget to put #undef [$2] and [$2]_RELEASE in acconfig.h
 
-AC_DEFUN(AS_VERSION,
+AC_DEFUN([AS_VERSION],
 [
   PACKAGE=[$1]
   [$2]_MAJOR=[$3]

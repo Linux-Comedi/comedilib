@@ -13,10 +13,10 @@ dnl - defines [$PREFIX]_LT_LDFLAGS to set versioning
 dnl - AC_SUBST's them all
 dnl
 dnl if USE_RELEASE = yes, then add a -release option to the LDFLAGS
-dnl with the (pre-defined) [$PREFIX]_VERSION 
+dnl with the (pre-defined) [$PREFIX]_VERSION
 dnl then use [$PREFIX]_LT_LDFLAGS in the relevant Makefile.am's
 
-AC_DEFUN(AS_LIBTOOL,
+AC_DEFUN([AS_LIBTOOL],
 [
   [$1]_CURRENT=[$2]
   [$1]_REVISION=[$3]

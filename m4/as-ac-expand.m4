@@ -3,7 +3,7 @@ dnl example
 dnl AS_AC_EXPAND(SYSCONFDIR, $sysconfdir)
 dnl will set SYSCONFDIR to /usr/local/etc
 
-AC_DEFUN(AS_AC_EXPAND,
+AC_DEFUN([AS_AC_EXPAND],
 [
   EXP_VAR=[$1]
   FROM_VAR=[$2]
