@@ -22,6 +22,7 @@
 #include <sys/time.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <string.h>
 #include "examples.h"
 
 #define BUFSZ 10000
