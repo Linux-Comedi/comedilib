@@ -92,12 +92,12 @@ AC_SUBST(pcmciadir)
 
 #see: http://linux-hotplug.sourceforge.net/
 #the hotplug expects the device dependent scripts here:
-usbhotplugdir="/etc/hotplug/usb"
+usbhotplugdir="\${sysconfdir}/hotplug/usb"
 AC_SUBST(usbhotplugdir)
 
 #firmware for the hotplug script
 #see: http://linux-hotplug.sourceforge.net/
-usbfirmwaredir="/usr/share/usb"
+usbfirmwaredir="\${datadir}/usb"
 AC_SUBST(usbfirmwaredir)
 
 AC_CONFIG_FILES(

@@ -1,13 +1,16 @@
 
-EXTRA_DIST = demo ext lib
+EXTRA_DIST = demo lib
 
-BUILT_SOURCES = ext/comedi_ruby_wrap.c
+#BUILT_SOURCES = ext/comedi_ruby_wrap.c
 
 if HAVE_SWIG
-ext/comedi_ruby_wrap.c: ../comedi.i
-	$(SWIG) -ruby -o ./ext/comedi_ruby_wrap.c ../comedi.i
+ext/comedi_ruby_wrap.c: $(srcdir)/../comedi.i
+	mkdir -p ext
+	cp $(srcdir)/../comedi.i ext/comedi.i
+	$(SWIG) -ruby -o ext/comedi_ruby_wrap.c ext/comedi.i
 else
 ext/comedi_ruby_wrap.c:
+	mkdir -p ext
 	echo WARNING: creating bogus comedi_ruby_wrap.c because you don\'t have swig.
 	touch ext/comedi_ruby_wrap.c
 endif
