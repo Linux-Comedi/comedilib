@@ -25,6 +25,8 @@
 #ifndef _LIBINTERNAL_H
 #define _LIBINTERNAL_H
 
+#define _COMEDILIB_DEPRECATED
+
 #include <comedilib.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
