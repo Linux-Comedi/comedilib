@@ -276,6 +276,8 @@ void generic_prep_adc_caldacs( calibration_setup_t *setup,
 	const generic_layout_t *layout, unsigned int channel, unsigned int range );
 void generic_prep_dac_caldacs( calibration_setup_t *setup,
 	const generic_layout_t *layout, unsigned int channel, unsigned int range );
+void generic_peg( calibration_setup_t *setup, int observable, int caldac,
+	int maximize );
 
 #endif
 

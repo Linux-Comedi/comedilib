@@ -118,7 +118,7 @@ void generic_prep_dac_caldacs( calibration_setup_t *setup,
 	}
 }
 
-static void generic_prep_adc_for_dac( calibration_setup_t *setup, const generic_layout_t *layout,
+static void generic_prep_adc_for_dac( calibration_setup_t *setup,
 	comedi_calibration_t *calibration, int observable )
 {
 	unsigned int adc_channel, adc_range;
@@ -154,7 +154,9 @@ static void generic_do_dac_channel( calibration_setup_t *setup, const generic_la
 	static const int max_iterations = 4;
 	int i;
 
-	generic_prep_adc_for_dac( setup, layout, calibration,
+	current_cal->subdevice = setup->da_subdev;
+
+	generic_prep_adc_for_dac( setup, calibration,
 		layout->dac_ground_observable( setup, channel, range ) );
 
 	for( i = 0; i < max_iterations; i++ )
@@ -172,7 +174,6 @@ static void generic_do_dac_channel( calibration_setup_t *setup, const generic_la
 	if( i == max_iterations )
 		DPRINT(0, "WARNING: unable to calibrate dac channel %i, range %i to desired %g tolerance\n",
 			channel, range, layout->dac_fractional_tolerance );
-	current_cal->subdevice = setup->da_subdev;
 	sc_push_channel( current_cal, channel );
 	sc_push_range( current_cal, range );
 	sc_push_aref( current_cal, SC_ALL_AREFS );
@@ -197,6 +198,8 @@ static void generic_do_adc_channel( calibration_setup_t *setup, const generic_la
 	static const int max_iterations = 4;
 	int i;
 
+	current_cal->subdevice = setup->ad_subdev;
+
 	for( i = 0; i < max_iterations; i++ )
 	{
 		generic_do_relative( setup, current_cal, layout->adc_high_observable( setup, channel, range ),
@@ -212,7 +215,6 @@ static void generic_do_adc_channel( calibration_setup_t *setup, const generic_la
 	if( i == max_iterations )
 		DPRINT(0, "WARNING: unable to calibrate adc channel %i, range %i to desired %g tolerance\n",
 			channel, range, layout->adc_fractional_tolerance );
-	current_cal->subdevice = setup->ad_subdev;
 	sc_push_channel( current_cal, channel );
 	sc_push_range( current_cal, range );
 	sc_push_aref( current_cal, SC_ALL_AREFS );
@@ -223,6 +225,8 @@ static void generic_do_adc_postgain_offset( calibration_setup_t *setup, const ge
 {
 	int lowgain, highgain;
 	int bip_lowgain;
+
+	current_cal->subdevice = setup->ad_subdev;
 
 	bip_lowgain = get_bipolar_lowgain( setup->dev, setup->ad_subdev );
 	if( unipolar )
@@ -248,7 +252,6 @@ static void generic_do_adc_postgain_offset( calibration_setup_t *setup, const ge
 	generic_do_relative( setup, current_cal, layout->adc_ground_observable( setup, channel, lowgain ),
 		layout->adc_ground_observable( setup, channel, highgain ), layout->adc_postgain_offset( channel ) );
 
-	current_cal->subdevice = setup->ad_subdev;
 	sc_push_channel( current_cal, channel );
 	sc_push_aref( current_cal, SC_ALL_AREFS );
 }

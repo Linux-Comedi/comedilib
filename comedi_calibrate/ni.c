@@ -1120,7 +1120,7 @@ static int cal_ni_daqcard_6024e( calibration_setup_t *setup )
 }
 
 static void prep_adc_caldacs_generic( calibration_setup_t *setup,
-	const ni_caldac_layout_t *layout )
+	const ni_caldac_layout_t *layout, unsigned int range )
 {
 	int retval;
 
@@ -1136,7 +1136,7 @@ static void prep_adc_caldacs_generic( calibration_setup_t *setup,
 	}else
 	{
 		retval = comedi_apply_parsed_calibration( setup->dev, setup->ad_subdev,
-			0, 0, AREF_GROUND, setup->old_calibration );
+			0, range, AREF_GROUND, setup->old_calibration );
 		if( retval < 0 )
 		{
 			DPRINT( 0, "Failed to apply existing calibration, reseting adc caldacs.\n" );
@@ -1179,12 +1179,35 @@ static void prep_dac_caldacs_generic( calibration_setup_t *setup,
 	}
 }
 
+static void prep_adc_for_dac( calibration_setup_t *setup, int observable )
+{
+	unsigned int adc_range;
+	int chanspec;
+
+	if( observable < 0 ) return;
+
+	chanspec = setup->observables[ observable ].observe_insn.chanspec;
+	adc_range = CR_RANGE( chanspec );
+
+	comedi_apply_parsed_calibration( setup->dev, setup->ad_subdev,
+		0, adc_range, 0, setup->new_calibration );
+}
+
 static int cal_ni_generic( calibration_setup_t *setup, const ni_caldac_layout_t *layout )
 {
 	comedi_calibration_setting_t *current_cal;
 	int retval;
+	int num_ai_ranges;
+	int range;
+	int ai_unipolar_lowgain, ai_bipolar_lowgain;
 
-	prep_adc_caldacs_generic( setup, layout );
+	num_ai_ranges = comedi_get_n_ranges( setup->dev, setup->ad_subdev, 0 );
+	assert( num_ai_ranges > 0 );
+
+	ai_bipolar_lowgain = get_bipolar_lowgain( setup->dev, setup->ad_subdev );
+	ai_unipolar_lowgain = get_unipolar_lowgain( setup->dev, setup->ad_subdev );
+
+	prep_adc_caldacs_generic( setup, layout, ai_bipolar_lowgain );
 
 	current_cal = sc_alloc_calibration_setting( setup );
 	current_cal->subdevice = setup->ad_subdev;
@@ -1199,11 +1222,55 @@ static int cal_ni_generic( calibration_setup_t *setup, const ni_caldac_layout_t 
 		ni_zero_offset_high, layout->adc_postgain_offset_fine );
 	generic_do_cal( setup, current_cal, ni_zero_offset_high,
 		layout->adc_pregain_offset_fine );
-	generic_do_cal( setup, current_cal, ni_unip_zero_offset_high, layout->adc_unip_offset );
 	sc_push_channel( current_cal, SC_ALL_CHANNELS );
-	sc_push_range( current_cal, SC_ALL_RANGES );
 	sc_push_aref( current_cal, SC_ALL_AREFS );
+	if( layout->adc_unip_offset >= 0 )
+	{
+		sc_push_range( current_cal, SC_ALL_RANGES );
+	}else
+	{
+		for( range = 0; range < num_ai_ranges; range++ )
+		{
+			if( is_bipolar( setup->dev, setup->ad_subdev, 0, range ) )
+				sc_push_range( current_cal, range );
+		}
+	}
 
+	/* do seperate unipolar calibration if appropriate */
+	if( ai_unipolar_lowgain >= 0 )
+	{
+		current_cal = sc_alloc_calibration_setting( setup );
+		current_cal->subdevice = setup->ad_subdev;
+		if( layout->adc_unip_offset >= 0 )
+		{
+			generic_do_cal( setup, current_cal, ni_unip_zero_offset_high,
+				layout->adc_unip_offset );
+		}else
+		{
+			prep_adc_caldacs_generic( setup, layout, ai_unipolar_lowgain );
+			generic_peg( setup, ni_unip_zero_offset_low,
+				layout->adc_pregain_offset, 1 );
+			generic_do_relative( setup, current_cal, ni_unip_zero_offset_low,
+				ni_unip_reference_low, layout->adc_gain );
+			generic_do_relative( setup, current_cal, ni_unip_zero_offset_low,
+				ni_unip_zero_offset_high, layout->adc_postgain_offset );
+			generic_do_cal( setup, current_cal, ni_unip_zero_offset_high,
+				layout->adc_pregain_offset );
+			generic_do_relative( setup, current_cal, ni_unip_zero_offset_low,
+				ni_unip_reference_low, layout->adc_gain_fine );
+			generic_do_relative( setup, current_cal, ni_unip_zero_offset_low,
+				ni_unip_zero_offset_high, layout->adc_postgain_offset_fine );
+			generic_do_cal( setup, current_cal, ni_unip_zero_offset_high,
+				layout->adc_pregain_offset_fine );
+		}
+		for( range = 0; range < num_ai_ranges; range++ )
+		{
+			if( is_unipolar( setup->dev, setup->ad_subdev, 0, range ) )
+				sc_push_range( current_cal, range );
+		}
+		sc_push_channel( current_cal, SC_ALL_CHANNELS );
+		sc_push_aref( current_cal, SC_ALL_AREFS );
+	}
 	if( setup->da_subdev >= 0 && setup->do_output )
 	{
 		unsigned int channel, range;
@@ -1215,6 +1282,7 @@ static int cal_ni_generic( calibration_setup_t *setup, const ni_caldac_layout_t 
 		{
 			num_ao_ranges = comedi_get_n_ranges( setup->dev, setup->da_subdev, channel );
 			prep_dac_caldacs_generic( setup, layout, channel, ao_bipolar_lowgain );
+			prep_adc_for_dac( setup, ni_ao_reference( channel ) );
 
 			current_cal = sc_alloc_calibration_setting( setup );
 			current_cal->subdevice = setup->da_subdev;
