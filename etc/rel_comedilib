@@ -18,6 +18,8 @@ lasttag=r0_7_$lastminor
 
 export CVSROOT=oss.lineo.com:/var/cvs
 
+rm -rf comedilib-${version}
+
 echo "deleting tag $tag"
 cvs rtag -d $tag comedilib
 
