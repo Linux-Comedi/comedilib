@@ -32,6 +32,7 @@
 #include <math.h>
 #include <sys/time.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include <libinternal.h>
 
