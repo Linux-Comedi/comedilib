@@ -146,6 +146,14 @@ enum reference_sources {
 	REF_DAC1_5V = 7,
 };
 
+// 611x documentation wrong, this was determined from hardware behaviour
+enum reference_sources_611x {
+	REF_GND_GND_611x = 0,
+	REF_5V_0V_611x = 1,
+	REF_DAC0_0V_611x = 2,
+	REF_DAC1_0V_611x = 3,
+};
+
 int ni_setup( calibration_setup_t *setup , const char *device_name )
 {
 	ni_setup_board( setup, device_name );
@@ -341,7 +349,7 @@ void ni_setup_observables_611x( calibration_setup_t *setup )
 		o->observe_insn = tmpl;
 		o->observe_insn.chanspec = CR_PACK(ai_chan, range, AREF_DIFF)
 			| CR_ALT_SOURCE | CR_ALT_FILTER;
-		o->reference_source = REF_GND_GND;
+		o->reference_source = REF_GND_GND_611x;
 		o->target = 0.0;
 
 		/* voltage reference */
@@ -350,8 +358,8 @@ void ni_setup_observables_611x( calibration_setup_t *setup )
 		o->observe_insn = tmpl;
 		o->observe_insn.chanspec = CR_PACK(ai_chan, range, AREF_DIFF)
 			| CR_ALT_SOURCE | CR_ALT_FILTER;
-		o->reference_source = REF_5V_5V;
-		o->target = 0.0;
+		o->reference_source = REF_5V_0V_611x;
+		o->target = 5.0;
 	}
 
 	memset(&po_tmpl,0,sizeof(po_tmpl));
@@ -370,7 +378,7 @@ void ni_setup_observables_611x( calibration_setup_t *setup )
 	o->observe_insn = tmpl;
 	o->observe_insn.chanspec = CR_PACK( 0, ai_range_for_ao, AREF_DIFF )
 		| CR_ALT_SOURCE | CR_ALT_FILTER;
-	o->reference_source = REF_DAC0_0V;
+	o->reference_source = REF_DAC0_0V_611x;
 	set_target( setup, ni_ao0_zero_offset_611x, 0.0 );
 
 	/* ao 0, gain */
@@ -382,9 +390,8 @@ void ni_setup_observables_611x( calibration_setup_t *setup )
 	o->observe_insn = tmpl;
 	o->observe_insn.chanspec = CR_PACK( 0, ai_range_for_ao, AREF_DIFF )
 		| CR_ALT_SOURCE | CR_ALT_FILTER;
-	o->reference_source = REF_DAC0_5V;
+	o->reference_source = REF_DAC0_0V_611x;
 	set_target( setup, ni_ao0_reference_611x, 5.0 );
-	o->target -= voltage_reference;
 
 	/* ao 1, zero offset */
 	o = setup->observables + ni_ao1_zero_offset_611x;
@@ -395,7 +402,7 @@ void ni_setup_observables_611x( calibration_setup_t *setup )
 	o->observe_insn = tmpl;
 	o->observe_insn.chanspec = CR_PACK( 0, ai_range_for_ao, AREF_DIFF)
 		| CR_ALT_SOURCE | CR_ALT_FILTER;
-	o->reference_source = REF_DAC1_0V;
+	o->reference_source = REF_DAC1_0V_611x;
 	set_target( setup, ni_ao1_zero_offset_611x, 0.0 );
 
 	/* ao 1, gain */
@@ -407,9 +414,8 @@ void ni_setup_observables_611x( calibration_setup_t *setup )
 	o->observe_insn = tmpl;
 	o->observe_insn.chanspec = CR_PACK( 0, ai_range_for_ao, AREF_DIFF )
 		| CR_ALT_SOURCE | CR_ALT_FILTER;
-	o->reference_source = REF_DAC1_5V;
+	o->reference_source = REF_DAC1_0V_611x;
 	set_target( setup, ni_ao1_reference_611x, 5.0 );
-	o->target -= voltage_reference;
 
 	setup->n_observables = ni_ao1_reference_611x + 1;
 }
