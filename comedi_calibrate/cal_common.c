@@ -64,8 +64,10 @@ void generic_prep_adc_caldacs( calibration_setup_t *setup,
 		reset_caldac( setup, layout->adc_gain( channel ) );
 		reset_caldac( setup, layout->adc_offset_fine( channel ) );
 		reset_caldac( setup, layout->adc_gain_fine( channel ) );
+		// don't reset postgain offset here
 	}else
 	{
+		// need to preserve postgain offset? XXX
 		retval = comedi_apply_calibration( setup->dev, setup->ad_subdev,
 			channel, range, AREF_GROUND, setup->cal_save_file_path);
 		if( retval < 0 )
@@ -75,6 +77,7 @@ void generic_prep_adc_caldacs( calibration_setup_t *setup,
 			reset_caldac( setup, layout->adc_gain( channel ) );
 			reset_caldac( setup, layout->adc_offset_fine( channel ) );
 			reset_caldac( setup, layout->adc_gain_fine( channel ) );
+			// don't reset postgain offset here
 		}
 	}
 }
@@ -90,6 +93,8 @@ void generic_prep_dac_caldacs( calibration_setup_t *setup,
 	{
 		reset_caldac( setup, layout->dac_offset( channel ) );
 		reset_caldac( setup, layout->dac_gain( channel ) );
+		reset_caldac( setup, layout->dac_offset_fine( channel ) );
+		reset_caldac( setup, layout->dac_gain_fine( channel ) );
 	}else
 	{
 		retval = comedi_apply_calibration( setup->dev, setup->da_subdev,
@@ -99,6 +104,8 @@ void generic_prep_dac_caldacs( calibration_setup_t *setup,
 			DPRINT( 0, "Failed to apply existing calibration, reseting dac caldacs.\n" );
 			reset_caldac( setup, layout->dac_offset( channel ) );
 			reset_caldac( setup, layout->dac_gain( channel ) );
+			reset_caldac( setup, layout->dac_offset_fine( channel ) );
+			reset_caldac( setup, layout->dac_gain_fine( channel ) );
 		}
 	}
 }
@@ -179,12 +186,15 @@ static void generic_do_dac_channel( calibration_setup_t *setup, const generic_la
 
 	generic_prep_adc_for_dac( setup, layout, saved_cals, saved_cals_length,
 		layout->dac_ground_observable( setup, channel, range ) );
-		
+
 	generic_do_relative( setup, current_cal, layout->dac_ground_observable( setup, channel, range ),
 		layout->dac_high_observable( setup, channel, range ), layout->dac_gain( channel ) );
-
 	generic_do_cal( setup, current_cal, layout->dac_ground_observable( setup, channel, range ),
 		layout->dac_offset( channel ) );
+	generic_do_relative( setup, current_cal, layout->dac_ground_observable( setup, channel, range ),
+		layout->dac_high_observable( setup, channel, range ), layout->dac_gain_fine( channel ) );
+	generic_do_cal( setup, current_cal, layout->dac_ground_observable( setup, channel, range ),
+		layout->dac_offset_fine( channel ) );
 
 	current_cal->subdevice = setup->da_subdev;
 	sc_push_channel( current_cal, channel );
@@ -192,20 +202,17 @@ static void generic_do_dac_channel( calibration_setup_t *setup, const generic_la
 	sc_push_aref( current_cal, SC_ALL_AREFS );
 }
 
-static void generic_do_adc_channel( calibration_setup_t *setup, const generic_layout_t *layout ,
+static void generic_do_adc_channel( calibration_setup_t *setup, const generic_layout_t *layout,
 	saved_calibration_t *current_cal, unsigned int channel, unsigned int range )
 {
 	generic_prep_adc_caldacs( setup, layout, channel, range );
 
 	generic_do_relative( setup, current_cal, layout->adc_high_observable( setup, channel, range ),
 		layout->adc_ground_observable( setup, channel, range ), layout->adc_gain( channel ) );
-
 	generic_do_cal( setup, current_cal, layout->adc_ground_observable( setup, channel, range ),
 		layout->adc_offset( channel ) );
-
 	generic_do_relative( setup, current_cal, layout->adc_high_observable( setup, channel, range ),
 		layout->adc_ground_observable( setup, channel, range ), layout->adc_gain_fine( channel ) );
-
 	generic_do_cal( setup, current_cal, layout->adc_ground_observable( setup, channel, range ),
 		layout->adc_offset_fine( channel ) );
 
@@ -344,7 +351,10 @@ void init_generic_layout( generic_layout_t *layout )
 	layout->adc_offset_fine = dummy_caldac;
 	layout->adc_gain_fine = dummy_caldac;
 	layout->dac_offset = dummy_caldac;
+	layout->adc_postgain_offset = dummy_caldac;
 	layout->dac_gain = dummy_caldac;
+	layout->dac_offset_fine = dummy_caldac;
+	layout->dac_gain_fine = dummy_caldac;
 	layout->adc_high_observable = dummy_observable;
 	layout->adc_ground_observable = dummy_observable;
 	layout->dac_high_observable = dummy_observable;

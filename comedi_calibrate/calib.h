@@ -251,10 +251,13 @@ typedef struct
 {
 	int (*adc_offset)( unsigned int channel );
 	int (*adc_offset_fine)( unsigned int channel );
+	int (*adc_postgain_offset)( unsigned int channel );
 	int (*adc_gain)( unsigned int channel );
 	int (*adc_gain_fine)( unsigned int channel );
 	int (*dac_offset)( unsigned int channel );
+	int (*dac_offset_fine)( unsigned int channel );
 	int (*dac_gain)( unsigned int channel );
+	int (*dac_gain_fine)( unsigned int channel );
 	int (*adc_high_observable)( const calibration_setup_t *setup,
 		unsigned int channel, unsigned int range );
 	int (*adc_ground_observable)( const calibration_setup_t *setup,
