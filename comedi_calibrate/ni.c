@@ -859,6 +859,8 @@ static int cal_ni_daqcard_6062e( calibration_setup_t *setup )
 
 	current_cal = saved_cals;
 
+	memset( saved_cals, 0, sizeof( saved_cals ) );
+
 	cal_postgain_binary( setup, ni_zero_offset_low, ni_zero_offset_high, ADC_PREGAIN_OFFSET );
 	cal_binary( setup, ni_zero_offset_high, ADC_POSTGAIN_OFFSET );
 	cal_binary( setup, ni_reference_low, ADC_GAIN );
