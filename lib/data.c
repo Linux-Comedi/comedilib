@@ -173,3 +173,41 @@ int comedi_data_read(comedi_t *it,unsigned int subdev,unsigned int chan,unsigned
 	}
 }
 
+int comedi_data_read_delayed( comedi_t *it, unsigned int subdev, unsigned int chan, unsigned int range,
+	unsigned int aref, lsampl_t *data, unsigned int nano_sec)
+{
+	subdevice *s;
+	comedi_insnlist ilist;
+	comedi_insn insn[3];
+	lsampl_t delay = nano_sec;
+
+	if( !valid_chan( it, subdev, chan ) )
+		return -1;
+
+	s = it->subdevices + subdev;
+
+	memset(&insn,0,sizeof(insn));
+
+	// setup, no conversions
+	insn[0].insn = INSN_READ;
+	insn[0].n = 0;
+	insn[0].data = data;
+	insn[0].subdev = subdev;
+	insn[0].chanspec = CR_PACK( chan, range, aref );
+	// delay
+	insn[1].insn = INSN_WAIT;
+	insn[1].n = 1;
+	insn[1].data = &delay;
+	// take conversion
+	insn[2].insn = INSN_READ;
+	insn[2].n = 1;
+	insn[2].data = data;
+	insn[2].subdev = subdev;
+	insn[2].chanspec = CR_PACK( chan, range, aref );
+
+	ilist.insns = insn;
+	ilist.n_insns = sizeof(insn) / sizeof(insn[0]);
+
+	return comedi_do_insnlist(it, &ilist);
+}
+
