@@ -1,7 +1,7 @@
 Source: comedilib
 Section: devel
 Priority: optional
-Maintainer: David Schleef <ds@stm.lbl.gov>
+Maintainer: David Schleef <ds@schleef.org>
 Standards-Version: 3.0.1
 
 Package: libcomedi-dev
