@@ -1,8 +1,9 @@
 
+include ../Config
 
 
-CFLAGS =-I ../include -I . -O2 -Wall -Wstrict-prototypes
-LDFLAGS=-L../lib/ -lcomedi -lm
+CFLAGS += -I../include
+LDFLAGS += -L../lib/ -lcomedi -lm
 
 
 BINS=comedi_calibrate

@@ -1,7 +1,8 @@
 
-CFLAGS=-Wall -Wstrict-prototypes -O2 -I../include
-#LDFLAGS=-L../lib/ -lcomedi
-LDFLAGS=
+include ../Config
+
+CFLAGS += -I../include
+LDFLAGS +=
 
 OBJS=comedi_config.o
 
