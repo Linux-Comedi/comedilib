@@ -1,11 +1,20 @@
 
-VERSION{
-
-v0.7.0{
-	global:
-		comedi_*;
+v0.7.18 {
 	local:
-		*;
+		_comedi_*;
+		get_rangeinfo;
+		get_subdevices;
+		initialize;
+		internal_error;
+		libc_error;
+		sv_measure_l;
+		sv_measure_s;
+		valid_chan;
+		valid_dev;
+		valid_subd;
 };
 
-}
+v0.7.19 {
+
+} v0.7.18;
+

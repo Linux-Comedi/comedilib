@@ -43,6 +43,7 @@ char *__comedilib_error_strings[]={
 int __comedi_loglevel=1;
 int __comedi_errno=0;
 
+EXPORT_SYMBOL(comedi_loglevel,0.7.18);
 int comedi_loglevel(int loglevel)
 {
 	int old_loglevel=__comedi_loglevel;
@@ -52,11 +53,13 @@ int comedi_loglevel(int loglevel)
 	return old_loglevel;
 }
 
+EXPORT_SYMBOL(comedi_errno,0.7.18);
 int comedi_errno(void)
 {
 	return __comedi_errno;
 }
 
+EXPORT_SYMBOL(comedi_strerr,0.7.18);
 char *comedi_strerror(int errnum)
 {
 	if(errnum<COMEDI_NOERROR || errnum>=COMEDI_NOERROR+n_errors)
@@ -65,6 +68,7 @@ char *comedi_strerror(int errnum)
 	return _(__comedilib_error_strings[errnum-COMEDI_NOERROR]);
 }
 
+EXPORT_SYMBOL(comedi_perror,0.7.18);
 void comedi_perror(const char *s)
 {
 	if(__comedi_loglevel>=3){

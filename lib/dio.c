@@ -35,6 +35,7 @@
 #include <libinternal.h>
 
 
+EXPORT_SYMBOL(comedi_dio_config,0.7.18);
 int comedi_dio_config(comedi_t *it,unsigned int subdev,unsigned int chan,unsigned int io)
 {
 	subdevice *s;
@@ -79,6 +80,7 @@ int comedi_dio_config(comedi_t *it,unsigned int subdev,unsigned int chan,unsigne
 	}
 }
 
+EXPORT_SYMBOL(comedi_dio_read,0.7.18);
 int comedi_dio_read(comedi_t *it,unsigned int subdev,unsigned int chan,
 	unsigned int *val)
 {
@@ -129,6 +131,7 @@ int comedi_dio_read(comedi_t *it,unsigned int subdev,unsigned int chan,
 	}
 }
 
+EXPORT_SYMBOL(comedi_dio_write,0.7.18);
 int comedi_dio_write(comedi_t *it,unsigned int subdev,unsigned int chan,
 	unsigned int val)
 {
@@ -174,6 +177,7 @@ int comedi_dio_write(comedi_t *it,unsigned int subdev,unsigned int chan,
 	}
 }
 
+EXPORT_SYMBOL(comedi_dio_bitfield,0.7.18);
 int comedi_dio_bitfield(comedi_t *it,unsigned int subdev,unsigned int mask,unsigned int *bits)
 {
 	int ret;

@@ -36,7 +36,7 @@
 #include <libinternal.h>
 
 
-
+EXPORT_SYMBOL(comedi_data_write,0.7.18);
 int comedi_data_write(comedi_t *it,unsigned int subdev,unsigned int chan,unsigned int range,
 		unsigned int aref,lsampl_t data)
 {
@@ -143,6 +143,7 @@ static inline int comedi_internal_data_read_n(comedi_t *it,
 	}
 }
 
+EXPORT_SYMBOL(comedi_data_read_n,0.7.19);
 int comedi_data_read_n(comedi_t *it, unsigned int subdev,
 	unsigned int chan, unsigned int range,
 	unsigned int aref, lsampl_t *data, unsigned int n)
@@ -168,6 +169,7 @@ int comedi_data_read_n(comedi_t *it, unsigned int subdev,
 	return 0;
 }
 
+EXPORT_SYMBOL(comedi_data_read,0.7.18);
 int comedi_data_read(comedi_t *it, unsigned int subdev, unsigned int chan,
 	unsigned int range, unsigned int aref, lsampl_t *data)
 {
@@ -175,6 +177,7 @@ int comedi_data_read(comedi_t *it, unsigned int subdev, unsigned int chan,
 		CR_PACK(chan, range, aref), data, 1);
 }
 
+EXPORT_SYMBOL(comedi_data_read_hint,0.7.19);
 int comedi_data_read_hint(comedi_t *it, unsigned int subdev,
 	unsigned int chan, unsigned int range, unsigned int aref)
 {
@@ -183,6 +186,7 @@ int comedi_data_read_hint(comedi_t *it, unsigned int subdev,
 		CR_PACK(chan, range, aref), &dummy_data, 0);
 }
 
+EXPORT_SYMBOL(comedi_data_read_delayed,0.7.19);
 int comedi_data_read_delayed( comedi_t *it, unsigned int subdev,
 	unsigned int chan, unsigned int range, unsigned int aref,
 	lsampl_t *data, unsigned int nano_sec)

@@ -36,6 +36,7 @@
 #include <libinternal.h>
 
 
+EXPORT_SYMBOL(comedi_get_n_subdevices,0.7.18);
 int comedi_get_n_subdevices(comedi_t *it)
 {
 	if(!valid_dev(it))
@@ -44,6 +45,7 @@ int comedi_get_n_subdevices(comedi_t *it)
 	return it->n_subdevices;
 }
 
+EXPORT_SYMBOL(comedi_get_version_code,0.7.18);
 int comedi_get_version_code(comedi_t *it)
 {
 	if(!valid_dev(it))
@@ -52,6 +54,7 @@ int comedi_get_version_code(comedi_t *it)
 	return it->devinfo.version_code;
 }
 
+EXPORT_SYMBOL(comedi_get_driver_name,0.7.18);
 char *comedi_get_driver_name(comedi_t *it)
 {
 	if(!valid_dev(it))
@@ -60,6 +63,7 @@ char *comedi_get_driver_name(comedi_t *it)
 	return it->devinfo.driver_name;
 }
 
+EXPORT_SYMBOL(comedi_get_board_name,0.7.18);
 char *comedi_get_board_name(comedi_t *it)
 {
 	if(!valid_dev(it))
@@ -68,6 +72,7 @@ char *comedi_get_board_name(comedi_t *it)
 	return it->devinfo.board_name;
 }
 
+EXPORT_SYMBOL(comedi_get_subdevice_flags,0.7.18);
 int comedi_get_subdevice_flags(comedi_t *it,unsigned int subd)
 {
 	if(!valid_dev(it))
@@ -76,6 +81,7 @@ int comedi_get_subdevice_flags(comedi_t *it,unsigned int subd)
 	return it->subdevices[subd].subd_flags;
 }
 
+EXPORT_SYMBOL(comedi_get_subdevice_type,0.7.18);
 int comedi_get_subdevice_type(comedi_t *it,unsigned int subd)
 {
 	if(!valid_dev(it))
@@ -84,6 +90,7 @@ int comedi_get_subdevice_type(comedi_t *it,unsigned int subd)
 	return it->subdevices[subd].type;
 }
 
+EXPORT_SYMBOL(comedi_get_subdevice_type,0.7.18);
 int comedi_find_subdevice_by_type(comedi_t *it,int type,unsigned int subd)
 {
 	if(!valid_subd(it,subd))
@@ -96,6 +103,7 @@ int comedi_find_subdevice_by_type(comedi_t *it,int type,unsigned int subd)
 	return -1;
 }
 
+EXPORT_SYMBOL(comedi_get_read_subdevice,0.7.18);
 int comedi_get_read_subdevice(comedi_t *dev)
 {
 	if(!valid_dev(dev))
@@ -104,6 +112,7 @@ int comedi_get_read_subdevice(comedi_t *dev)
 	return dev->devinfo.read_subdevice;
 }
 
+EXPORT_SYMBOL(comedi_get_write_subdevice,0.7.18);
 int comedi_get_write_subdevice(comedi_t *dev)
 {
 	if(!valid_dev(dev))
@@ -112,6 +121,7 @@ int comedi_get_write_subdevice(comedi_t *dev)
 	return dev->devinfo.write_subdevice;
 }
 
+EXPORT_SYMBOL(comedi_get_n_channels,0.7.18);
 int comedi_get_n_channels(comedi_t *it,unsigned int subd)
 {
 	if(!valid_subd(it,subd))
@@ -123,6 +133,7 @@ int comedi_get_n_channels(comedi_t *it,unsigned int subd)
 
 /* */
 
+EXPORT_SYMBOL(comedi_get_maxdata,0.7.18);
 lsampl_t comedi_get_maxdata(comedi_t *it,unsigned int subdevice,unsigned int chan)
 {
 	if(!valid_chan(it,subdevice,chan))
@@ -134,6 +145,7 @@ lsampl_t comedi_get_maxdata(comedi_t *it,unsigned int subdevice,unsigned int cha
 	return it->subdevices[subdevice].maxdata;
 }
 
+EXPORT_SYMBOL(comedi_maxdata_is_chan_specific,0.7.18);
 int comedi_maxdata_is_chan_specific(comedi_t *it,unsigned int subdevice)
 {
 	if(it->subdevices[subdevice].maxdata_list)
@@ -141,6 +153,7 @@ int comedi_maxdata_is_chan_specific(comedi_t *it,unsigned int subdevice)
 	return 0;
 }
 
+EXPORT_SYMBOL(comedi_get_rangetype,0.7.18);
 int comedi_get_rangetype(comedi_t *it,unsigned int subdevice,unsigned int chan)
 {
 	if(!valid_chan(it,subdevice,chan))
@@ -153,6 +166,7 @@ int comedi_get_rangetype(comedi_t *it,unsigned int subdevice,unsigned int chan)
 }
 
 
+EXPORT_SYMBOL(comedi_get_range,0.7.18);
 comedi_range * comedi_get_range(comedi_t *it,unsigned int subdevice,unsigned int chan,unsigned int range)
 {
 	int range_type;

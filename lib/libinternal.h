@@ -59,6 +59,13 @@
 
 #define COMEDILIB_MAGIC 0xc001dafe
 
+/* handle versioning */
+
+#define EXPORT_SYMBOL(a,b) __asm__(".symver " #a "," #a "@v" #b )
+#define EXPORT_ALIAS_VER(a,b,c) __asm__(".symver " #a "," #b "@v" #c )
+#define EXPORT_ALIAS_DEFAULT(a,b,c) __asm__(".symver " #a "," #b "@@v" #c )
+
+
 extern int __comedi_init;
 extern int __comedi_loglevel;
 extern int __comedi_errno;

@@ -49,6 +49,7 @@ INTERNAL void initialize(void)
 	}
 }
   
+EXPORT_SYMBOL(comedi_open,0.7.18);
 comedi_t *comedi_open(const char *fn)
 {
 	comedi_t *it;
@@ -82,11 +83,7 @@ cleanup:
 	return NULL;
 }
 
-#if 0
-/* this is an example of how we do versioned symbols */
-__asm__(".symver comedi_open_0,comedi_open@");
-#endif
-
+EXPORT_SYMBOL(comedi_open,0.7.18);
 int comedi_close(comedi_t *it)
 {
 	subdevice *s;
@@ -122,16 +119,19 @@ int comedi_close(comedi_t *it)
 	return 0;
 }
 
+EXPORT_SYMBOL(comedi_cancel,0.7.18);
 int comedi_cancel(comedi_t *it,unsigned int subdevice)
 {
 	return comedi_ioctl(it->fd,COMEDI_CANCEL,subdevice);
 }
 
+EXPORT_SYMBOL(comedi_poll,0.7.18);
 int comedi_poll(comedi_t *it,unsigned int subdevice)
 {
 	return comedi_ioctl(it->fd,COMEDI_POLL,subdevice);
 }
 
+EXPORT_SYMBOL(comedi_fileno,0.7.18);
 int comedi_fileno(comedi_t *it)
 {
 	if(!it)
@@ -140,6 +140,7 @@ int comedi_fileno(comedi_t *it)
 	return it->fd;
 }
 
+EXPORT_SYMBOL(comedi_trigger,0.7.18);
 int comedi_trigger(comedi_t *it,comedi_trig *t)
 {
 	if(!it || !t)
@@ -148,6 +149,7 @@ int comedi_trigger(comedi_t *it,comedi_trig *t)
 	return comedi_ioctl(it->fd, COMEDI_TRIG, (unsigned long)t);
 }
 
+EXPORT_SYMBOL(comedi_command,0.7.18);
 int comedi_command(comedi_t *it,comedi_cmd *t)
 {
 	int ret;
@@ -161,6 +163,7 @@ int comedi_command(comedi_t *it,comedi_cmd *t)
 	return ret;
 }
 
+EXPORT_SYMBOL(comedi_command_test,0.7.18);
 int comedi_command_test(comedi_t *it,comedi_cmd *t)
 {
 	int ret;
@@ -174,6 +177,7 @@ int comedi_command_test(comedi_t *it,comedi_cmd *t)
 	return ret;
 }
 
+EXPORT_SYMBOL(comedi_do_insnlist,0.7.18);
 int comedi_do_insnlist(comedi_t *it,comedi_insnlist *il)
 {
 	int ret;
@@ -182,6 +186,7 @@ int comedi_do_insnlist(comedi_t *it,comedi_insnlist *il)
 	return ret;
 }
 
+EXPORT_SYMBOL(comedi_do_insn,0.7.18);
 int comedi_do_insn(comedi_t *it,comedi_insn *insn)
 {
 	if(it->has_insn_ioctl){
@@ -200,11 +205,13 @@ int comedi_do_insn(comedi_t *it,comedi_insn *insn)
 	}
 }
 
+EXPORT_SYMBOL(comedi_lock,0.7.18);
 int comedi_lock(comedi_t *it,unsigned int subdevice)
 {
 	return comedi_ioctl(it->fd, COMEDI_LOCK, subdevice);
 }
 
+EXPORT_SYMBOL(comedi_unlock,0.7.18);
 int comedi_unlock(comedi_t *it,unsigned int subdevice)
 {
 	return comedi_ioctl(it->fd, COMEDI_UNLOCK, subdevice);
