@@ -76,7 +76,7 @@ struct board_struct boards[]={
 	{ "at-mio-16e-10",	STATUS_GUESS,	cal_ni_at_mio_16e_10 },
 	{ "pci-mio-16xe-50",	STATUS_SOME,	cal_ni_pci_mio_16xe_50 },
 	{ "pci-6023e",		STATUS_SOME,	cal_ni_pci_6023e },
-	{ "pci-mio-16xe-10",	STATUS_SOME,	cal_ni_pci_mio_16xe_10 },
+	{ "pci-mio-16xe-10",	STATUS_DONE,	cal_ni_pci_mio_16xe_10 },
 	{ "pci-6052e",		STATUS_SOME,	cal_ni_pci_6052e },
 	{ "pci-6024e",		STATUS_SOME,	cal_ni_pci_6024e },
 #if 0
@@ -330,6 +330,7 @@ void cal_ni_at_mio_16xe_50(void)
 void cal_ni_pci_mio_16xe_10(void)
 {
 	postgain_cal(ni_zero_offset_low, ni_zero_offset_high, 2);
+	postgain_cal(ni_zero_offset_low, ni_zero_offset_high, 3);
 	cal1(ni_zero_offset_high, 8);
 	cal1(ni_reference_low, 0);
 	cal1(ni_reference_low, 1);
