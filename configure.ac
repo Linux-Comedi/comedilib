@@ -28,27 +28,22 @@ COMEDILIB_LIBS="$COMEDILIB_LIBS \$(top_builddir)/lib/libcomedi.la -lm"
 AC_SUBST(COMEDILIB_CFLAGS)
 AC_SUBST(COMEDILIB_LIBS)
 
-
 #swig
-AC_PATH_PROG(SWIG, swig, no)
-if test "$SWIG" == no ; then
-	AC_MSG_WARN([swig not found, will not be able to regenerate code for swig bindings])
+AC_PATH_PROG(SWIG, swig, "no")
+if test "$SWIG" == "no" ; then
+	AC_MSG_WARN([swig not found, will not be able to build swig based bindings])
 fi
-AM_CONDITIONAL(HAVE_SWIG, [test "$SWIG" != "no"])
-
 
 #python
 AC_ARG_ENABLE([python-binding],[  --disable-python-binding	Disable building of Python binding],
 	[ENABLE_PYTHON=$enableval],[ENABLE_PYTHON="yes"])
-if test "$ENABLE_PYTHON" == "yes"; then
+if test "$ENABLE_PYTHON" == "yes" && test "$SWIG" != "no"; then
 	AM_PATH_PYTHON
 	AM_CHECK_PYTHON_HEADERS(HAVE_PYTHON=yes,[HAVE_PYTHON=no;AC_MSG_WARN([python headers not found, disabling python binding])])
 else
 	HAVE_PYTHON="no"
 fi
 AM_CONDITIONAL(HAVE_PYTHON, [test "$HAVE_PYTHON" == "yes" && test "$ENABLE_PYTHON" == "yes"])
-
-
 
 AS_COMPILER_FLAG([-fno-strict-aliasing],[PYTHON_QUIET="$PYTHON_QUIET -fno-strict-aliasing"], true )
 AS_COMPILER_FLAG([-Wno-unused-function],[PYTHON_QUIET="$PYTHON_QUIET -Wno-unused-function"], true )
@@ -57,7 +52,7 @@ AC_SUBST(PYTHON_QUIET)
 # ruby
 AC_ARG_ENABLE([ruby-binding], [  --disable-ruby-binding	Disable building of Ruby binding],
 	[ENABLE_RUBY=$enableval], [ENABLE_RUBY="yes"])
-if test "$ENABLE_RUBY" == "yes"; then
+if test "$ENABLE_RUBY" == "yes" && test "$SWIG" != "no"; then
 	AC_PATH_PROG(RUBY, ruby, no)
 	if test "$RUBY" != "no" ; then
 		RUBY_INC_DIR=`$RUBY -e "require 'rbconfig'; c = ::Config::CONFIG; print c[['archdir']];"`
@@ -82,17 +77,13 @@ if test "$RUBY_SO_DIR" != "" ; then
 fi
 AC_SUBST(RUBY_CONFIG_OPTIONS)
 
-
 # scxi
 AC_ARG_ENABLE([scxi], [  --enable-scxi  Enable SCXI convenience library],
 	[ENABLE_SCXI=$enableval], [ENABLE_SCXI="no"])
 AM_CONDITIONAL(BUILD_SCXI, [test "$ENABLE_SCXI" == "yes"])
 
-
 # docbook
 AC_ARG_ENABLE([docbook-binding],[  --disable-docbook-binding        Disable docbook],[ENABLE_DOCBOOK=$enableval],[ENABLE_DOCBOOK="yes"])
-
-
 
 if test "$ENABLE_DOCBOOK" == "yes"; then
 	AC_PATH_PROG(DOCBOOK2MAN, docbook2man, no)
@@ -104,11 +95,10 @@ else
 fi
 AM_CONDITIONAL(HAVE_DOCBOOK2MAN, [test "$DOCBOOK2MAN" != "no"])
 
-
 if test "$ENABLE_DOCBOOK" == "yes"; then
 	AC_PATH_PROG(DOCBOOK2PDF, docbook2pdf, no)
 	if test "$DOCBOOK2PDF" = "no" ; then
-  		AC_MSG_WARN([docbook2pdf not found, will not be able to rebuild pdf documentation])
+		AC_MSG_WARN([docbook2pdf not found, will not be able to rebuild pdf documentation])
 	fi
 else
 	DOCBOOK2PDF="no"
