@@ -600,7 +600,7 @@ int cb_actual_source_voltage( comedi_t *dev, unsigned int subdevice, unsigned in
 			retval = comedi_data_read( dev, subdevice, eeprom_channel + i, 0, 0, &data );
 			if( retval < 0 )
 			{
-				perror( __FUNCTION__ );
+				comedi_perror( __FUNCTION__ );
 				return retval;
 			}
 			word[ i ] = data;
@@ -615,7 +615,7 @@ int cb_actual_source_voltage( comedi_t *dev, unsigned int subdevice, unsigned in
 			retval = comedi_data_read( dev, subdevice, eeprom_channel + i, 0, 0, &data );
 			if( retval < 0 )
 			{
-				perror( __FUNCTION__ );
+				comedi_perror( __FUNCTION__ );
 				return retval;
 			}
 			byte[ i ] = data;
