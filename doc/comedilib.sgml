@@ -1817,5 +1817,260 @@ returns 0.  On error, this function returns -1.
 </itemize>
 
 
+<sect>Interface reference
+
+<p>
+This chapter is meant to be a reference for some of the advanced
+features of Comedi.
+
+<sect1>INSN_CONFIG
+
+<p>
+Configuration instructions are used to access device and driver features
+that do not fit well into other parts of the Comedi interface.  This
+includes changing the direction of configurable digital I/O lines,
+configuring complex triggering engines, and counter/timer configuration.
+
+<p>
+If a specified ID is not supported, the driver must return -EINVAL.
+
+
+<sect2>Digital I/O configuration
+
+<p>Status: Implemented
+<p>ID: COMEDI_INPUT, COMEDI_OUTPUT, COMEDI_OPENDRAIN
+<p>Length: 1
+<p>Chanspec: used to specify channel
+
+<p>
+These IDs are used to configure direction of digital I/O lines.
+Direction is chosen by the ID.  On typical devices, multiple
+channels are grouped together in blocks for determining direction.
+Configuring one channel in a block configures the entire block.
+
+<p>
+There should also be a method to read the configuration.
+
+<p>
+Errors:  Should return -EINVAL if the ID is not supported.
+
+
+<sect2>Analog conversion configuration
+
+<p>Status: design
+<p>ID: not assigned
+<p>Length: 
+<p>Chanspec: used to specify channel
+
+<p>Description:
+<p>
+Some devices have the capability to add white noise (dithering) to
+analog input measurement.  This additional noise can then be averaged
+out, to get a more accurate measurement of the input signal.  It
+should not be assumed that channels can be separately configured.
+A simple design can use 1 bit to turn this feature on/off.
+
+<p>
+Some devices have the capability of changing the glitch characteristics
+of analog output subsytems.  The default (off) case should be where
+the average settling time is lowest.  A simple design can use 1 bit
+to turn this feature on/off.
+
+<p>
+Some devices have a configurable analog filters as part of the analog
+input stage.  A simple designe can use 1 bit to enable/disable the
+filter.  Default is disabled, i.e., the filter being bypassed, or if
+the choice is between two filters, the filter with the largest
+bandwidth.
+
+
+
+<sect2>Analog Output Waveform Generation
+
+<p>Status: design
+<p>ID: not assigned
+<p>Length:
+<p>Chanspec: ignored
+
+<p>
+Some devices have the ability to cyclicly loop through samples kept in
+an on-board analog output FIFO.  This config should allow the user to
+enable/disable this mode.
+
+<p>
+This config should allow the user to configure the number of samples
+to loop through.  It may be necessary to configure the channels used.
+
+
+<sect2>Extended Triggering
+
+<p>Status: design
+<p>ID: not assigned
+<p>CHanspec: ignored
+
+<p>
+This section covers common information for all extended
+triggering configuration, and doesn't describe a particular
+type of extended trigger.
+
+<p>
+Extended triggering is used to configure triggering engines that
+do not fit into commands.  In a typical programming sequence, the
+application will use configuration instructions to configure an
+extended trigger, and the issue a command, specifying TRIG_OTHER 
+as one of the trigger sources.
+
+<p>
+Extended trigger configuration should be designed in such a way
+that the user can probe for valid parameters, similar to how
+command testing works.  An extended trigger config instruction
+should not configure the hardware directly, rather, the configuration
+should be saved until the subsequent command is issued.  This
+allows more flexibility for future interface changes.
+
+<p>
+It has not been decided whether the config stage should return a
+token that is then used as the trigger argument in the command.
+Using tokens is one method to satisfy the problem that extended
+trigger configurations may have subtle compatiblity issues with
+other trigger sources/arguments that can only be determined at
+command test time.  Passing all stages of a command test should
+only be allowed with a properly configured extended trigger.
+
+<p>
+Various types of extended triggers must use data[1] to know which
+event the extended trigger will be assigned to in the command
+structure.  The possible values are an OR'd mask of the following:
+
+<itemize>
+<item>COMEDI_EV_START
+<item>COMEDI_EV_SCAN_BEGIN
+<item>COMEDI_EV_CONVERT
+<item>COMEDI_EV_SCAN_END
+<item>COMEDI_EV_STOP
+</itemize>
+
+<p>
+Extended triggers must use data[2] as flags.  The upper 16 bits
+are reserved and used only for flags that are common to
+all extended triggers.  The lower 16 bits may be defined by the
+particular type of extended trigger.
+
+<p>
+Notes: data[1] and data[2] may eventually be combined.
+
+
+<sect2>Analog Triggering
+
+<p>Status: design
+<p>ID: not assigned
+<p>Chanspec: ignored
+
+<p>
+Analog triggering is described by a state machine that has two
+states, "set" and "reset".  Transitions from the reset state to
+the set state cause a trigger to be issued.  The state machine is
+configured by specifying the chanspec
+for the analog line to trigger on (data[3]), the voltage level that
+resets the trigger (data[4]), and the voltage level that sets the
+trigger (data[5]).  The interpretation of the chanspec and voltage
+levels is device dependent, but should correspond to similar values
+of the analog input subdevice, if relevant.
+
+<p>
+If the set voltage is greater than the reset voltage, it is
+assumed that any voltage greater than the set voltage is sufficient
+for the set condition, and any voltage lesser than the reset voltage
+is sufficient for the reset condition.
+
+<p>
+Notes:  Reading range information is not addressed.  This makes it
+difficult to convert voltages to data values.  A simple
+set/reset model may not be sufficient to describe all analog triggers.
+In particular, this doesn't properly describe analog triggering that
+operates when the input voltage is within some range, but not greater
+or lesser than the range.
+
+<p>
+Possible extensions: A parameter that specifies the necessary time
+that the set condition has to be true before the trigger is generated.
+A parameter that specifies the necessary time that the reset condition
+has to be true before the state machine is reset.
+
+
+<sect2>Pattern Matching Triggering
+
+<p>Status: design
+<p>ID: not assigned
+<p>Chanspec: ignored
+
+<p>
+The pattern matching trigger issues a trigger when all of a specifed 
+set of input lines match a specified pattern.  If the device allows,
+the input lines should correspond to the input lines of a digital input
+subdevice, however, this will necessarily be device dependent.  Each
+possible digital line that can be matched is assigned a bit in the
+mask and pattern.  A bit set in the mask (data[3]) indicates that the
+input line must match the corresponding bit in the pattern (data[4]).
+A bit cleared in the mask indicates that the input line is ignored.
+
+<p>
+Notes: This only allows 32 bits in the pattern/mask, which may be
+too few.  Devices may support selecting different sets of lines from
+which to match a pattern.
+
+
+<sect2>Counter configuration
+
+<p>Status: design
+<p>ID: not assigned
+<p>Chanspec: used to specify counter
+
+<p>
+Counters can be operated either in synchronous mode (using insn_read)
+or asynchronous mode (using commands), similar to analog input subdevices.
+Commands on counter subdevices are almost always specified using
+scan_begin_src=TRIG_OTHER, with the counter configuration also serving
+as the extended configuration for the scan begin source.
+
+<p>
+Counters are made up of an accumulator and a state machine that
+determines when the accumulator should be incremented or decremented
+based on the values of the input signals.  The state machine
+optionally determines when the accumulator should be latched and
+put into a buffer.
+
+
+<p>
+Notes: How to access multiple pieces of data acquired at each event?
+
+
+<sect2>One source plus auxiliary counter configuration
+
+<p>Status: design
+<p>ID: not assigned
+<p>Chanspec: ?
+
+<p>
+data[1] is flags, including the flags for the command triggering
+configuration.  If a command is not subsequently issued on the
+subdevice, the command triggering portion of the flags are ignored.
+
+<p>
+data[2] determines the mode of operation.  The mode of operation
+is actually a bitfield that encodes what to do for various
+transitions of the source signals.
+
+<p>
+data[3] and data[4] determine the primary source for the counter,
+similar to _src and _arg used in commands.
+
+
+<p>
+Notes: How to specify which events cause a latch and push, and what
+should get latched.
+
+
+
 </article>
 
