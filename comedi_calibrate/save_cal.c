@@ -68,7 +68,9 @@ void write_calibration_setting( FILE *file, saved_calibration_t setting )
 		fprintf( file, "%i,", setting.arefs[ i ] );
 	fprintf( file, "],\n" );
 	fprintf( file, "%s", indent );
-	fprintf( file, "\tcaldacs => [\n" );
+	fprintf( file, "\tcaldacs =>\n" );
+	fprintf( file, "%s", indent );
+	fprintf( file, "\t[\n" );
 	for( i = 0; i < setting.caldacs_length; i++ )
 	{
 		write_caldac( file, setting.caldacs[ i ] );
@@ -88,8 +90,10 @@ int write_calibration_perl_hash( FILE *file, comedi_t *dev,
 	int i;
 
 	fprintf( file, "{\n" );
+	fprintf( file, "\tdriver_name => \"%s\",\n", comedi_get_driver_name( dev ) );
 	fprintf( file, "\tboard_name => \"%s\",\n", comedi_get_board_name( dev ) );
-	fprintf( file, "\tcalibrations => [\n" );
+	fprintf( file, "\tcalibrations =>\n"
+		"\t[\n" );
 	for( i = 0; i < num_settings; i++ )
 	{
 		write_calibration_setting( file, settings[ i ] );
@@ -124,8 +128,9 @@ int write_calibration_file( comedi_t *dev, saved_calibration_t settings[],
 		return -1;
 	}
 
-	snprintf( file_path, sizeof( file_path ), "%s/comedi_0x%lx",
-		save_dir, ( unsigned long ) file_stats.st_dev );
+	snprintf( file_path, sizeof( file_path ), "%s/%s_0x%lx",
+		save_dir, comedi_get_board_name( dev ),
+		( unsigned long ) file_stats.st_ino );
 	file = fopen( file_path, "w" );
 	if( file == NULL )
 	{

@@ -755,6 +755,7 @@ int cal_cb_pci_64xx( calibration_setup_t *setup )
 
 int cal_cb_pci_60xx( calibration_setup_t *setup )
 {
+	saved_calibration_t saved_cals[1];
 	enum cal_knobs_60xx
 	{
 		DAC0_OFFSET = 0,
@@ -779,7 +780,22 @@ int cal_cb_pci_60xx( calibration_setup_t *setup )
 	cal1( setup, OBS_5V_RANGE_10V_BIP_60XX, ADC_GAIN_FINE );
 	cal1_fine( setup, OBS_5V_RANGE_10V_BIP_60XX, ADC_GAIN_FINE );
 
-	return 0;
+	saved_cals[ 0 ].subdevice = setup->ad_subdev;
+	saved_cals[ 0 ].caldacs_length = 0;
+	saved_cals[ 0 ].caldacs[ saved_cals[ 0 ].caldacs_length++ ] =
+		setup->caldacs[ ADC_OFFSET_FINE ];
+	saved_cals[ 0 ].caldacs[ saved_cals[ 0 ].caldacs_length++ ] =
+		setup->caldacs[ ADC_OFFSET_COARSE ];
+	saved_cals[ 0 ].caldacs[ saved_cals[ 0 ].caldacs_length++ ] =
+		setup->caldacs[ ADC_GAIN_COARSE ];
+	saved_cals[ 0 ].caldacs[ saved_cals[ 0 ].caldacs_length++ ] =
+		setup->caldacs[ ADC_GAIN_FINE ];
+	saved_cals[ 0 ].channels_length = 0;
+	saved_cals[ 0 ].ranges[ 0 ] = 0;
+	saved_cals[ 0 ].ranges_length = 1;
+	saved_cals[ 0 ].arefs_length = 0;
+
+	return write_calibration_file( setup->dev, saved_cals, 1 );
 }
 
 int cal_cb_pci_4020( calibration_setup_t *setup )
