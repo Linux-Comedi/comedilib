@@ -19,8 +19,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
-#include <getopt.h>
-#include <ctype.h>
+#include <string.h>
 #include "examples.h"
 
 
