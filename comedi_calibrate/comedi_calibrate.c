@@ -188,10 +188,10 @@ ok:
 	if(verbose>=0){
 		char *s = "$Id$";
 
-		printf("%.*s\n",strlen(s)-2,s+1);
+		printf("%.*s\n",(int)strlen(s)-2,s+1);
 		printf("Driver name: %s\n",drivername);
 		printf("Device name: %s\n",devicename);
-		printf("%.*s\n",strlen(this_board->id)-2,this_board->id+1);
+		printf("%.*s\n",(int)strlen(this_board->id)-2,this_board->id+1);
 		printf("Comedi version: %d.%d.%d\n",
 			(comedi_get_version_code(dev)>>16)&0xff,
 			(comedi_get_version_code(dev)>>8)&0xff,
