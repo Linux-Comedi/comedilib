@@ -1,4 +1,12 @@
 
+comedilib-0.7.18:
+
+ - Converted documentation to DocBook-3.1.  Added man pages for all
+   functions.
+ - Added comedi_calibrate README, mostly for myself
+ - comedi_calibrate: added some boards, added fine calibration
+ - demos: now link against local library
+
 comedilib-0.7.17:
 
  - Added gettext support.
