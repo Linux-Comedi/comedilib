@@ -33,7 +33,8 @@ char *subdevice_types[]={
 	"timer",
 	"memory",
 	"calibration",
-	"processor"
+	"processor",
+	"serial digital I/O"
 };
 
 comedi_t *it;
