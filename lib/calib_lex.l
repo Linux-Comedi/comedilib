@@ -35,6 +35,10 @@
 
 %%
 
+%{
+	calib_llocp->first_line = 1;
+%}
+
 <STRING,INITIAL>\n { calib_llocp->first_line++; }
 
 "#" { BEGIN(COMMENT); }
@@ -43,9 +47,9 @@
 
 \" { BEGIN(STRING); }
 <STRING>[^\"]*\" {
-	if( strlen( yytext ) > 0 )
-		yytext[ strlen( yytext ) - 1 ] = 0;
-	calib_lvalp->sval = yytext;
+	if( strlen( calib_yytext ) > 0 )
+		calib_yytext[ strlen( calib_yytext ) - 1 ] = 0;
+	calib_lvalp->sval = calib_yytext;
 	BEGIN(INITIAL);
 	return ( T_STRING );
 }
@@ -62,7 +66,7 @@ channel	{ return ( T_CHANNEL ); }
 value	{ return ( T_VALUE ); }
 =>	{ return ( T_ASSIGN ); };
 
-(0x)?(00)?[0-9a-fA-F]+ { calib_lvalp->ival = strtol( calib_yytext, NULL, 0 );
+(0[xX])?(00)?[0-9a-fA-F]+ { calib_lvalp->ival = strtol( calib_yytext, NULL, 0 );
 	return( T_NUMBER ); }
 
 [ \t]
