@@ -55,7 +55,7 @@ install_man:
 	install -d $(INSTALLDIR_MAN)/man3/
 	install -d $(INSTALLDIR_MAN)/man7/
 	install -d $(INSTALLDIR_MAN)/man8/
-	install doc/man/*.3 $(INSTALLDIR_MAN)/man3/
+	-install doc/man/*.3 $(INSTALLDIR_MAN)/man3/
 	install man/*.7 $(INSTALLDIR_MAN)/man7/
 	install man/*.8 $(INSTALLDIR_MAN)/man8/
 
@@ -63,7 +63,7 @@ install_doc:
 	install -d $(INSTALLDIR_DOC)
 	install README doc/FAQ doc/drivers.txt $(INSTALLDIR_DOC)
 	install -d $(INSTALLDIR_DOC)/html/
-	install doc/html/* $(INSTALLDIR_DOC)/html/
+	-install doc/html/* $(INSTALLDIR_DOC)/html/
 	install -d $(INSTALLDIR_DOC)/etc/
 	install -m 755 etc/das1600.conf $(INSTALLDIR_DOC)/etc/
 	install -m 755 etc/dt282x.conf $(INSTALLDIR_DOC)/etc/
