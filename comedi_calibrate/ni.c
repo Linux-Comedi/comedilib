@@ -97,7 +97,7 @@ static struct board_struct boards[]={
 	{ "pci-6025e", STATUS_SOME, cal_ni_pci_6025e, ni_setup_observables, 0x1af, 0x1b0 },
 	{ "pci-6031e", STATUS_DONE, cal_ni_pci_mio_16xe_10, ni_setup_observables, 0x1ae, 0x1af },
 	{ "pci-6032e", STATUS_DONE, cal_ni_pci_6032e, ni_setup_observables, 0x1ae, 0x1af },
-	{ "pci-6033e", STATUS_SOME, cal_ni_pci_6032e, ni_setup_observables, -1, -1 },
+	{ "pci-6033e", STATUS_SOME, cal_ni_pci_6032e, ni_setup_observables, 0xb6, 0xb7 },
 	{ "pci-6034e", STATUS_UNKNOWN, NULL, ni_setup_observables, -1, -1 },
 	{ "pci-6035e", STATUS_DONE, cal_ni_pci_6035e, ni_setup_observables, 0x1af, 0x1b0 },
 	{ "pci-6036e", STATUS_DONE, cal_ni_pci_6036e, ni_setup_observables, 0x1ab, 0x1ac },
@@ -1258,20 +1258,21 @@ static int cal_ni_generic( calibration_setup_t *setup, const ni_caldac_layout_t 
 				layout->adc_unip_offset );
 			generic_do_cal( setup, current_cal, ni_unip_zero_offset_high,
 				layout->adc_unip_offset_fine );
+		/* if we don't have a unipolar offset caldac, do a fully
+		 * independent calibration for unipolar ranges */
 		}else
 		{
 			prep_adc_caldacs_generic( setup, layout, ai_unipolar_lowgain );
 			generic_peg( setup, ni_unip_zero_offset_low,
 				layout->adc_pregain_offset, 1 );
-			reset_caldac( setup, layout->adc_gain_fine );
+			generic_peg( setup, ni_unip_zero_offset_low,
+				layout->adc_postgain_offset, 1 );
 			generic_do_relative( setup, current_cal, ni_unip_zero_offset_low,
 				ni_unip_reference_low, layout->adc_gain );
-			reset_caldac( setup, layout->adc_postgain_offset_fine );
 			generic_do_relative( setup, current_cal, ni_unip_zero_offset_low,
 				ni_unip_zero_offset_high, layout->adc_postgain_offset );
 			generic_do_relative( setup, current_cal, ni_unip_zero_offset_low,
 				ni_unip_zero_offset_high, layout->adc_postgain_offset_fine );
-			reset_caldac( setup, layout->adc_pregain_offset_fine );
 			generic_do_cal( setup, current_cal, ni_unip_zero_offset_high,
 				layout->adc_pregain_offset );
 			generic_do_relative( setup, current_cal, ni_unip_zero_offset_low,
