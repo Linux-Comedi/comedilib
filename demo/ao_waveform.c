@@ -131,8 +131,6 @@ int main(int argc, char *argv[])
 	dds_output(data,BUF_LEN);
 	dds_output(data,BUF_LEN);
 
-	//lseek no longer needed or used
-	//lseek(comedi_fileno(dev),subdevice,SEEK_SET);
 	m=write(comedi_fileno(dev),data,BUF_LEN*sizeof(sampl_t));
 	perror("write");
 	printf("m=%d\n",m);
