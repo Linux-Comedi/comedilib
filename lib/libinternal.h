@@ -31,7 +31,9 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <stdio.h>
+#ifdef I18N
 #include <libintl.h>
+#endif
 
 #include <comedi_errno.h>
 
