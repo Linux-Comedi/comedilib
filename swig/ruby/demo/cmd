@@ -51,16 +51,18 @@ ret, cmd = dev.prepare_cmd_lib($subdevice, $freq, Comedi_cmd_struct.new)
 $stderr.printf("command before testing:\n")
 dump_cmd($stderr, cmd)
 
-ret, cmd = dev.command_test(cmd)
-if ret < 0
+begin
+    ret, cmd = dev.command_test(cmd)
+rescue
     comedi_perror("comedi_command_test")
     exit 1
 end
 $stderr.printf("first test returned %d (%s)\n", ret, cmdtest_messages[ret])
 dump_cmd($stderr, cmd)
 
-ret, cmd = dev.command_test(cmd)
-if ret < 0
+begin
+    ret, cmd = dev.command_test(cmd)
+rescue
     comedi_perror("comedi_command_test")
     exit 1
 end
@@ -70,8 +72,9 @@ dump_cmd($stderr, cmd)
 tstart = Time.new
 $stderr.printf("start time: %d.%06d\n", tstart.tv_sec, tstart.tv_usec)
 
-ret = dev.command(cmd)
-if ret < 0
+begin
+    ret = dev.command(cmd)
+rescue
     comedi_perror("comedi_command")
     exit 1
 end

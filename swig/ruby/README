@@ -12,7 +12,7 @@ Instructions for building by hand (you shouldn't need to do this):
         library and the file lib/comedi.rb, which provides more
         Ruby-like method syntax.
 
-The file 'lib/comedi.rb' provides syntactic sugar in three forms:
+The file 'lib/comedi.rb' provides syntactic sugar in four forms:
 
 1.  Method names without the 'comedi_' prefix. The Comedi module
     disambiguates the namespace. For example, you can say
@@ -25,6 +25,10 @@ The file 'lib/comedi.rb' provides syntactic sugar in three forms:
 3.  A pre-defined IO object and an accessor method to simplify
     reading from the file descriptor associated with the comedi device.
     Data from comedi device 'dev' can be read by 'dev.ios.read'.
+
+4.  A ComediError exception class. If the underlying comedi
+    function returns an error indication, the ruby method will raise
+    ComediError.
 
 The file 'demo/cmd' is a straight port of 'cmd.c' from the
 Comedilib 'demo' directory. It illustrates the basics of programming
@@ -44,4 +48,4 @@ omitted from the parameter list. For example:
 
 Steven Jenkins
 steven.jenkins@ieee.org
-2004-01-12
+2004-03-02
