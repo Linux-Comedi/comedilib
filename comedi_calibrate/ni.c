@@ -304,6 +304,7 @@ void cal_ni_daqcard_ai_16xe_50(void)
 	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,2);
 	cal1(ni_zero_offset_high,8);
 	cal1(ni_reference_low,0);
+	cal1_fine(ni_reference_low,0);
 	cal1(ni_reference_low,1);
 }
 
@@ -312,6 +313,7 @@ void cal_ni_at_mio_16xe_50(void)
 	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,2);
 	cal1(ni_zero_offset_high,8);
 	cal1(ni_reference_low,0);
+	cal1_fine(ni_reference_low,0);
 	cal1(ni_reference_low,1);
 	
 	if(do_output){

@@ -311,11 +311,11 @@ void postgain_cal(int obs1, int obs2, int dac)
 	a = (offset1-offset2)/(slope1-slope2);
 	a=caldacs[dac].current-a;
 
-	DPRINT(0,"caldac[%d] set to %g\n",dac,a);
-
 	caldacs[dac].current=rint(a);
 	update_caldac(dac);
 	usleep(100000);
+
+	DPRINT(0,"caldac[%d] set to %g (%g)\n",dac,rint(a),a);
 
 	if(verbose>=2){
 		preobserve(obs1);
@@ -339,7 +339,27 @@ void cal1(int obs, int dac)
 	update_caldac(dac);
 	usleep(100000);
 
-	DPRINT(0,"caldac[%d] set to %g\n",dac,a);
+	DPRINT(0,"caldac[%d] set to %g (%g)\n",dac,rint(a),a);
+	if(verbose>=3){
+		measure_observable(obs);
+	}
+}
+
+void cal1_fine(int obs, int dac)
+{
+	linear_fit_t l;
+	double a;
+
+	DPRINT(0,"linear fine: %s\n",observables[obs].name);
+	preobserve(obs);
+	check_gain_chan_fine(&l,observables[obs].observe_insn.chanspec,dac);
+	a=linear_fit_func_x(&l,observables[obs].target);
+
+	caldacs[dac].current=rint(a);
+	update_caldac(dac);
+	usleep(100000);
+
+	DPRINT(0,"caldac[%d] set to %g (%g)\n",dac,rint(a),a);
 	if(verbose>=3){
 		measure_observable(obs);
 	}
@@ -390,15 +410,6 @@ void caldac_dependence(int caldac)
 	for(i=0;i<8;i++){
 		gain=check_gain_chan(i,0,caldac);
 	}
-}
-#endif
-
-#if 0
-void dump_curve(int adc,int caldac)
-{
-	linear_fit_t l;
-
-	check_gain_chan_x(&l,CR_PACK(adc,0,AREF_OTHER),caldac);
 }
 #endif
 
@@ -474,6 +485,7 @@ double check_gain_chan(int ad_chan,int range,int cdac)
 }
 #endif
 
+
 double check_gain_chan_x(linear_fit_t *l,unsigned int ad_chanspec,int cdac)
 {
 	int orig,i,n;
@@ -506,14 +518,15 @@ double check_gain_chan_x(linear_fit_t *l,unsigned int ad_chanspec,int cdac)
 
 	caldacs[cdac].current=0;
 	update_caldac(cdac);
+	usleep(100000);
 
 	new_sv_measure(&sv);
-	usleep(100000);
 
 	sum_err=0;
 	for(i=0;i*step<n;i++){
 		caldacs[cdac].current=i*step;
 		update_caldac(cdac);
+		//usleep(100000);
 
 		new_sv_measure(&sv);
 
@@ -541,28 +554,88 @@ double check_gain_chan_x(linear_fit_t *l,unsigned int ad_chanspec,int cdac)
 		//printf("--> %g\n",fabs(l.slope/l.err_slope));
 	}
 
-	if(verbose>=3){
-		static int dump_number=0;
-		double x,y;
-
-		printf("start dump %d\n",dump_number);
-		for(i=0;i<l->n;i++){
-			x=l->x0+i*l->dx-l->ave_x;
-			y=l->y_data[i];
-			printf("D%d: %d %g %g %g\n",dump_number,i,y,
-				l->ave_y+l->slope*x,
-				l->ave_y+l->slope*x-y);
-		}
-		printf("end dump\n");
-		dump_number++;
-	}
-
+	if(verbose>=3)dump_curve(l);
 
 	free(l->y_data);
 
 	return l->slope;
 }
 
+
+double check_gain_chan_fine(linear_fit_t *l,unsigned int ad_chanspec,int cdac)
+{
+	int orig,i,n;
+	int step;
+	new_sv_t sv;
+	double sum_err;
+	int sum_err_count=0;
+	char str[20];
+	int fine_size = 10;
+
+	n=2*fine_size+1;
+	memset(l,0,sizeof(*l));
+
+	step=1;
+	l->n=0;
+
+	l->y_data=malloc(n*sizeof(double)/step);
+	if(l->y_data == NULL)
+	{
+		perror("comedi_calibrate");
+		exit(1);
+	}
+
+	orig=caldacs[cdac].current;
+
+	new_sv_init(&sv,dev,0,
+		CR_CHAN(ad_chanspec),
+		CR_RANGE(ad_chanspec),
+		CR_AREF(ad_chanspec));
+
+	caldacs[cdac].current=0;
+	update_caldac(cdac);
+	usleep(100000);
+
+	new_sv_measure(&sv);
+
+	sum_err=0;
+	for(i=0;i<n;i++){
+		caldacs[cdac].current=i+orig-fine_size;
+		update_caldac(cdac);
+		usleep(100000);
+
+		new_sv_measure(&sv);
+
+		l->y_data[i]=sv.average;
+		if(!isnan(sv.average)){
+			sum_err+=sv.error;
+			sum_err_count++;
+		}
+		l->n++;
+	}
+
+	caldacs[cdac].current=orig;
+	update_caldac(cdac);
+
+	l->yerr=sum_err/sum_err_count;
+	l->dx=1;
+	l->x0=orig-fine_size;
+
+	linear_fit_monotonic(l);
+
+	if(verbose>=2 || (verbose>=1 && fabs(l->slope/l->err_slope)>4.0)){
+		sci_sprint_alt(str,l->slope,l->err_slope);
+		printf("caldac[%d] gain=%s V/bit S_min=%g dof=%g\n",
+			cdac,str,l->S_min,l->dof);
+		//printf("--> %g\n",fabs(l.slope/l.err_slope));
+	}
+
+	if(verbose>=3)dump_curve(l);
+
+	free(l->y_data);
+
+	return l->slope;
+}
 
 
 
@@ -895,6 +968,24 @@ double linear_fit_func_y(linear_fit_t *l,double x)
 double linear_fit_func_x(linear_fit_t *l,double y)
 {
 	return l->ave_x+(y-l->ave_y)/l->slope;
+}
+
+void dump_curve(linear_fit_t *l)
+{
+	static int dump_number=0;
+	double x,y;
+	int i;
+
+	printf("start dump %d\n",dump_number);
+	for(i=0;i<l->n;i++){
+		x=l->x0+i*l->dx-l->ave_x;
+		y=l->y_data[i];
+		printf("D%d: %d %g %g %g\n",dump_number,i,y,
+			l->ave_y+l->slope*x,
+			l->ave_y+l->slope*x-y);
+	}
+	printf("end dump\n");
+	dump_number++;
 }
 
 

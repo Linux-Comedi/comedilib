@@ -92,12 +92,12 @@ void update_caldac(int i);
 void setup_caldacs(void);
 void postgain_cal(int obs1, int obs2, int dac);
 void cal1(int obs, int dac);
+void cal1_fine(int obs, int dac);
 
 /* misc and temp */
 
 void channel_dependence(int adc,int range);
 void caldac_dependence(int caldac);
-void dump_curve(int adc,int caldac);
 void chan_cal(int adc,int caldac,int range,double target);
 int read_eeprom(int addr);
 
@@ -153,6 +153,8 @@ int linear_fit_monotonic(linear_fit_t *l);
 double linear_fit_func_y(linear_fit_t *l,double x);
 double linear_fit_func_x(linear_fit_t *l,double y);
 double check_gain_chan_x(linear_fit_t *l,unsigned int ad_chanspec,int cdac);
+double check_gain_chan_fine(linear_fit_t *l,unsigned int ad_chanspec,int cdac);
+void dump_curve(linear_fit_t *l);
 
 /* slowly varying measurements */
 
