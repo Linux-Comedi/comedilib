@@ -691,7 +691,7 @@ Description:
  period period_ns.  The rate is adjusted to a rate that the device
  can handle.  If sucessful, 0 is returned, otherwise -1.
 
-Function: comedi_cancel -- stop streaming input/outpu in progress
+Function: comedi_cancel -- stop streaming input/output in progress
 Retval: int
 Param: comedi_t * device
 Param: unsigned int subdevice
