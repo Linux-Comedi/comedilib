@@ -84,6 +84,9 @@ struct subdevice_struct{
 
 	comedi_range *rangeinfo;
 	comedi_range **rangeinfo_list;
+
+	unsigned int has_cmd;
+	unsigned int has_insn;
 };
 
 
@@ -129,6 +132,10 @@ enum{
 
 #ifdef COMEDI_CMD
 #define HAVE_COMEDI_CMD
+#endif
+
+#ifdef COMEDI_INSNLIST
+#define HAVE_COMEDI_INSN
 #endif
 
 
