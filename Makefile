@@ -16,8 +16,13 @@ DOCFILES= README INSTALL `find doc -type f`
 
 INSTALLDIR=$(DESTDIR)/usr
 INSTALLDIR_LIB=$(DESTDIR)/usr/lib
+ifeq ($(DEBIAN),)
 INSTALLDIR_DOC=$(DESTDIR)/usr/share/doc/libcomedi
 INSTALLDIR_MAN=$(DESTDIR)/usr/share/man
+else
+INSTALLDIR_DOC=$(DESTDIR)/usr/doc/libcomedi
+INSTALLDIR_MAN=$(DESTDIR)/usr/man
+endif
 INSTALLDIR_BIN=$(DESTDIR)/usr/bin
 INSTALLDIR_SBIN=$(DESTDIR)/usr/sbin
 
@@ -34,8 +39,10 @@ install:	dummy
 	(cd $(INSTALLDIR_LIB);ln -sf libcomedi.so.${version} libcomedi.so)
 	install -m 644 lib/libcomedi.a ${INSTALLDIR_LIB}
 	#/sbin/ldconfig -n ${INSTALLDIR}/lib
+ifneq ($(INSTALLDIR),)
 	install -d ${INSTALLDIR_DOC}
 	install ${DOCFILES} ${INSTALLDIR_DOC}
+endif
 	install man/*.7 ${INSTALLDIR_MAN}/man7
 	install man/*.8 ${INSTALLDIR_MAN}/man8
 	install -s -m 755 comedi_config/comedi_config ${INSTALLDIR_SBIN}
