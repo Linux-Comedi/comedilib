@@ -49,11 +49,6 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd);
 #define msec_to_usec(x) ((x)*1000)
 #define usec_to_nsec(x) ((x)*1000)
 
-int comedi_poll(comedi_t *dev,unsigned int subdev)
-{
-	return ioctl(comedi_fileno(dev),COMEDI_POLL,subdev);
-}
-
 int main(int argc, char *argv[])
 {
 	comedi_cmd cmd;
