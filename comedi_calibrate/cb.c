@@ -222,20 +222,12 @@ static unsigned int ao_high_observable_1xxx( calibration_setup_t *setup,
 }
 
 static double ai_low_target_1xxx( calibration_setup_t *setup,
-	unsigned int range_index )
+	unsigned int range )
 {
-	comedi_range *range;
-	int max_data;
-
-	range = comedi_get_range( setup->dev, setup->ad_subdev, 0, range_index );
-	assert( range != NULL );
-	max_data = comedi_get_maxdata( setup->dev, setup->ad_subdev, 0 );
-	assert( max_data != 0 );
-
-	if( range->min < -0.0001 )
+	if( is_bipolar( setup->dev, setup->ad_subdev, 0, range ) )
 		return 0.0;
-	else	// return half a bit above zero for unipolar ranges
-		return comedi_to_phys( 1, range, max_data ) / 2.0;
+	else
+		return very_low_target( setup->dev, setup->ad_subdev, 0, range );
 }
 
 static int source_eeprom_addr_1xxx( calibration_setup_t *setup, unsigned int range_index )

@@ -141,6 +141,12 @@ int get_bipolar_lowgain(comedi_t *dev,int subdev);
 int get_bipolar_highgain(comedi_t *dev,int subdev);
 int get_unipolar_lowgain(comedi_t *dev,int subdev);
 int get_unipolar_highgain(comedi_t *dev,int subdev);
+double very_low_target( comedi_t *dev, unsigned int subdevice,
+	unsigned int channel, unsigned int range );
+int is_bipolar( comedi_t *dev, unsigned int subdevice,
+	unsigned int channel, unsigned int range );
+int is_unipolar( comedi_t *dev, unsigned int subdevice,
+	unsigned int channel, unsigned int range );
 
 /* other */
 

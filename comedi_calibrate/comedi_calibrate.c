@@ -990,6 +990,34 @@ double check_gain_chan_fine( calibration_setup_t *setup, linear_fit_t *l,unsigne
 
 /* helpers */
 
+int is_unipolar( comedi_t *dev, unsigned int subdevice,
+	unsigned int channel, unsigned int range )
+{
+	comedi_range *range_ptr;
+
+	range_ptr = comedi_get_range( dev, subdevice, channel, range );
+	assert( range_ptr != NULL );
+	/* This method is better than a direct test, which might fail */
+	if( fabs( range_ptr->min ) < fabs( range_ptr->max * 0.001 ) )
+		return 1;
+	else
+		return 0;
+}
+
+int is_bipolar( comedi_t *dev, unsigned int subdevice,
+	unsigned int channel, unsigned int range )
+{
+	comedi_range *range_ptr;
+
+	range_ptr = comedi_get_range( dev, subdevice, channel, range );
+	assert( range_ptr != NULL );
+	/* This method is better than a direct test, which might fail */
+	if( fabs( range_ptr->max + range_ptr->min ) < fabs( range_ptr->max * 0.001 ) )
+		return 1;
+	else
+		return 0;
+}
+
 int get_bipolar_lowgain(comedi_t *dev,int subdev)
 {
 	int ret = -1;
@@ -1000,8 +1028,7 @@ int get_bipolar_lowgain(comedi_t *dev,int subdev)
 
 	for(i=0;i<n_ranges;i++){
 		range = comedi_get_range(dev,subdev,0,i);
-		/* This method is better than a direct test, which might fail */
-		if((range->min+range->max)>(range->max*0.0001))continue;
+		if( is_bipolar( dev, subdev, 0, i ) == 0 ) continue;
 		if(range->max>max){
 			ret = i;
 			max=range->max;
@@ -1022,7 +1049,7 @@ int get_bipolar_highgain(comedi_t *dev,int subdev)
 	for(i=0;i<n_ranges;i++){
 		range = comedi_get_range(dev,subdev,0,i);
 		/* This method is better than a direct test, which might fail */
-		if((range->min+range->max)>(range->max*0.0001))continue;
+		if( is_unipolar( dev, subdev, 0, i ) == 0 ) continue;
 		if(range->max<min){
 			ret = i;
 			min=range->max;
@@ -1398,4 +1425,17 @@ int sci_sprint_alt(char *s,double x,double y)
 	return sprintf(s,"%0.*f(%2.0f)e%d",sigfigs-1,mantissa,error,maxsig);
 }
 
+double very_low_target( comedi_t *dev, unsigned int subdevice,
+	unsigned int channel, unsigned int range )
+{
+	comedi_range *range_ptr;
+	int max_data;
+
+	range_ptr = comedi_get_range( dev, subdevice, channel, range );
+	assert( range_ptr != NULL );
+	max_data = comedi_get_maxdata( dev, subdevice, 0 );
+	assert( max_data > 0 );
+
+	return comedi_to_phys( 1, range_ptr, max_data ) / 2.0;
+}
 
