@@ -27,13 +27,11 @@ $(DOC).pdf: $(DOC).sgml $(SGML)
 	$(JW_PATH) -f docbook -b pdf $(DOC).sgml
 
 html: $(DOC).sgml $(SGML)
-	mkdir -p html
-	$(JW_PATH) -f docbook -b html -o html $(DOC).sgml && touch html
+	{ $(JW_PATH) -f docbook -b html -o html $(DOC).sgml && touch html; } || { $(RM) -r html; exit 1; }
 	ln -sf ../acq-seq.gif html/acq-seq.gif
 
 man: $(DOC).sgml $(SGML)
-	mkdir -p man
-	-$(JW_PATH) -f docbook -b man -o man $(DOC).sgml && touch man
+	-{ $(JW_PATH) -f docbook -b man -o man $(DOC).sgml && touch man; } || { $(RM) -r man; exit 1; }
 
 funcref.sgml: funcref mkref
 	./mkref funcref >funcref.sgml
