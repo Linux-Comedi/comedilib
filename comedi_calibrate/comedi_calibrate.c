@@ -531,6 +531,52 @@ void cal1_fine( calibration_setup_t *setup, int obs, int dac )
 	}
 }
 
+void peg_binary( calibration_setup_t *setup, int obs, int dac, int maximize )
+{
+	int x0, x1, x;
+	double y0, y1;
+	new_sv_t sv;
+	unsigned int chanspec = setup->observables[obs].observe_insn.chanspec;
+	int polarity;
+
+	DPRINT(0,"binary peg: %s\n", setup->observables[obs].name);
+	preobserve( setup, obs);
+
+	comedi_set_global_oor_behavior( COMEDI_OOR_NUMBER );
+
+	my_sv_init(&sv, setup, setup->ad_subdev, chanspec);
+
+	x0 = setup->caldacs[dac].maxdata;
+	update_caldac( setup, dac, x0 );
+	usleep(caldac_settle_usec);
+	new_sv_measure( setup->dev, &sv);
+	y0 = sv.average;
+
+	x1 = 0;
+	update_caldac( setup, dac, x1 );
+	usleep(caldac_settle_usec);
+	new_sv_measure( setup->dev, &sv);
+	y1 = sv.average;
+
+	if( (y0 - y1) > 0.0 ) polarity = 1;
+	else polarity = -1;
+
+	if( maximize )
+	{
+		if( polarity > 0 ) x = x0;
+		else x = x1;
+	}else
+	{
+		if( polarity > 0 ) x = x1;
+		else x = x0;
+	}
+	update_caldac( setup, dac, x );
+	DPRINT(0,"caldac[%d] set to %d\n",dac,x);
+	if(verbose>=3){
+		measure_observable( setup, obs);
+	}
+}
+
 void cal_binary( calibration_setup_t *setup, int obs, int dac)
 {
 	int x0, x1, x2, x;

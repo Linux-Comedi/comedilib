@@ -51,6 +51,13 @@ void generic_do_linearity( calibration_setup_t *setup,
 	sc_push_caldac( saved_cal, setup->caldacs[ caldac ] );
 }
 
+void generic_peg( calibration_setup_t *setup,
+	comedi_calibration_setting_t *saved_cal, int observable, int caldac, int maximize )
+{
+	if( caldac < 0 || observable < 0 ) return;
+	peg_binary( setup, observable, caldac, maximize );
+}
+
 void generic_prep_adc_caldacs( calibration_setup_t *setup,
 	const generic_layout_t *layout, unsigned int channel, unsigned int range )
 {
@@ -172,6 +179,14 @@ static void generic_do_adc_postgain_offset( calibration_setup_t *setup, const ge
 	{
 		lowgain = get_unipolar_lowgain( setup->dev, setup->ad_subdev );
 		highgain = get_unipolar_highgain( setup->dev, setup->ad_subdev );
+
+		reset_caldac( setup, layout->adc_postgain_offset( channel ) );
+		/* need to make sure we aren't stuck on zero for unipolar,
+		 * by setting pregain offset to maximum */
+		generic_peg( setup, current_cal, layout->adc_ground_observable( setup, channel, lowgain ),
+			layout->adc_offset( channel ), 1 );
+		generic_peg( setup, current_cal, layout->adc_ground_observable( setup, channel, lowgain ),
+			layout->adc_offset_fine( channel ), 1 );
 	}else
 	{
 		lowgain = get_bipolar_lowgain( setup->dev, setup->ad_subdev );

@@ -121,6 +121,7 @@ void cal_binary( calibration_setup_t *setup, int obs, int dac);
 void cal_postgain_binary( calibration_setup_t *setup, int obs1, int obs2, int dac);
 void cal_relative_binary( calibration_setup_t *setup, int obs1, int obs2, int dac);
 void cal_linearity_binary( calibration_setup_t *setup, int obs1, int obs2, int obs3, int dac);
+void peg_binary( calibration_setup_t *setup, int obs, int dac, int maximize );
 
 /* misc and temp */
 
