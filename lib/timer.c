@@ -33,7 +33,7 @@
 #include <comedi.h>
 #include <string.h>
 
-#include <libinternal.h>
+#include "libinternal.h"
 
 
 

@@ -2,7 +2,8 @@
 include ../Config
 include ../version
 
-CFLAGS += -fPIC -D_REENTRANT -I../include -I.
+CPPFLAGS += -I../include -I.
+CFLAGS += -fPIC -D_REENTRANT
 
 OBJS=comedi.o timer.o sv.o range.o ioctl.o filler.o timed.o error.o \
 	dio.o data.o get.o cmd.o buffer.o calib.o calib_lex.o calib_yacc.o
@@ -24,3 +25,11 @@ calib_lex.c:  calib_lex.l calib_yacc.h
 
 calib_yacc.c + calib_yacc.h: calib_yacc.y
 	bison -d -y -p calib_yy -o calib_yacc.c calib_yacc.y
+
+#dependency stuff
+%.d: %.c
+	set -e; $(CC) -MM $(CPPFLAGS) $< \
+		| sed 's/\($*\)\.o[ :]*/\1.o $@ : /g' > $@; \
+		[ -s $@ ] || rm -f $@
+
+include $(OBJS:.o=.d)

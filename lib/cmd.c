@@ -34,7 +34,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <libinternal.h>
+#include "libinternal.h"
 
 
 EXPORT_SYMBOL(comedi_get_cmd_src_mask,0.7.18);

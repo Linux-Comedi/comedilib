@@ -21,7 +21,7 @@
     USA.
 */
 
-#include <libinternal.h>
+#include "libinternal.h"
 
 #include <stdio.h>
 #include <string.h>

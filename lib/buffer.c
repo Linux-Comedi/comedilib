@@ -23,7 +23,7 @@
 
 #include <comedi.h>
 
-#include <libinternal.h>
+#include "libinternal.h"
 #include <string.h>
 
 EXPORT_SYMBOL(comedi_set_buffer_size,0.7.18);

@@ -32,7 +32,7 @@
 #include <comedi.h>
 #include <string.h>
 
-#include <libinternal.h>
+#include "libinternal.h"
 
 
 EXPORT_SYMBOL(comedi_dio_config,0.7.18);

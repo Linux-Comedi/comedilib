@@ -36,7 +36,7 @@
 #include <comedi.h>
 #include <string.h>
 
-#include <libinternal.h>
+#include "libinternal.h"
 
 
 /* sometimes we can't find a definition of NAN */

@@ -33,7 +33,7 @@
 #include <comedi.h>
 #include <string.h>
 
-#include <libinternal.h>
+#include "libinternal.h"
 
 
 EXPORT_SYMBOL(comedi_data_write,0.7.18);
