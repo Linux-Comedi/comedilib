@@ -1,37 +1,38 @@
 
-DOC=comedilib
+SUBDIRS = html man
+
 SGML= drivers.sgml funcref.sgml glossary.sgml \
 	install.sgml intro.sgml other.sgml reference.sgml tutorial.sgml \
 	driverwriting.sgml 
 
+BUILT_SOURCES = funcref.sgml drivers.sgml
+
 EXTRA_DIST=$(SGML) comedilib.sgml funcref mkref drivers.txt mkdr acq-seq.gif
 
-if HAVE_DOCBOOK
-all-local: html $(DOC).pdf man
-
-install-data-local:
-	$(INSTALL) -d $(mandir)/man3
-	-$(INSTALL_DATA) man/*.3 $(mandir)/man3
-	$(INSTALL) -d $(pkgdatadir)/html
-	$(INSTALL_DATA) html/* $(pkgdatadir)/html
+if HAVE_DOCBOOK2PDF
+all_pdf = comedilib.pdf
+install_pdf = install_pdf
 else
+all_pdf = 
+install_pdf = 
 endif
 
+all-local: $(all_pdf)
+
+install-data-local: $(install_pdf)
+
+install_pdf:
+	$(INSTALL) -d $(pkgdatadir)
+	$(INSTALL_DATA) comedilib.pdf $(pkgdatadir)
+
+uninstall-local:
+	rm -f $(pkgdatadir)/comedilib.pdf
+
 clean-local:
-	rm -rf comedilib.pdf drivers.sgml funcref.sgml
-	rm -rf html man
+	rm -f comedilib.pdf drivers.sgml funcref.sgml
 
-locales = de
-
-$(DOC).pdf: $(DOC).sgml $(SGML)
-	$(JW_PATH) -f docbook -b pdf $(DOC).sgml
-
-html: $(DOC).sgml $(SGML)
-	{ $(JW_PATH) -f docbook -b html -o html $(DOC).sgml && touch html; } || { $(RM) -r html; exit 1; }
-	ln -sf ../acq-seq.gif html/acq-seq.gif
-
-man: $(DOC).sgml $(SGML)
-	-{ $(JW_PATH) -f docbook -b man -o man $(DOC).sgml && touch man; } || { $(RM) -r man; exit 1; }
+comedilib.pdf: $(srcdir)/comedilib.sgml $(SGML)
+	$(DOCBOOK2PDF) -f docbook -b pdf $(srcdir)/comedilib.sgml
 
 funcref.sgml: funcref mkref
 	./mkref funcref >funcref.sgml
@@ -39,8 +40,10 @@ funcref.sgml: funcref mkref
 drivers.sgml: drivers.txt mkdr
 	./mkdr drivers.txt >drivers.sgml
 
+locales = de
+
 messages: .phony
-	xgettext -k_ -k_s $(shell find .. -name '*.c')
+	xgettext -k_ -k_s `find .. -name '*.c'`
 	for i in $(locales);do \
 	  msgmerge po/$$i.po messages.po -o $$i.po; \
 	  mkdir -p locale/$$i/LC_MESSAGES; \

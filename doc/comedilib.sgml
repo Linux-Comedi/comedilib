@@ -9,6 +9,8 @@
 <!ENTITY funcref SYSTEM "funcref.sgml">
 <!ENTITY glossary SYSTEM "glossary.sgml">
 <!ENTITY comedi "<acronym>Comedi</acronym>">
+<!ENTITY uuml "u">
+<!ENTITY hellip "...">
 ]>
 
 <article>
