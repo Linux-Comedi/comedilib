@@ -56,6 +56,7 @@ void cal_ni_pxi_6071e(void);
 void cal_ni_at_mio_16e_10(void);
 void cal_ni_pci_mio_16xe_50(void);
 void cal_ni_pci_6023e(void);
+void cal_ni_pci_6024e(void);
 void cal_ni_at_mio_16xe_50(void);
 void cal_ni_pci_mio_16xe_10(void);
 void cal_ni_pci_6052e(void);
@@ -71,10 +72,11 @@ struct board_struct boards[]={
 	{ "pci-6071e",		STATUS_SOME,	cal_ni_pci_6071e },
 	{ "pxi-6071e",		STATUS_GUESS,	cal_ni_pxi_6071e },
 	{ "at-mio-16e-10",	STATUS_GUESS,	cal_ni_at_mio_16e_10 },
-	{ "pci-mio-16xe-50",	STATUS_GUESS,	cal_ni_pci_mio_16xe_50 },
-	{ "pci-6023e",		STATUS_GUESS,	cal_ni_pci_6023e },
+	//{ "pci-mio-16xe-50",	STATUS_GUESS,	cal_ni_pci_mio_16xe_50 },
+	{ "pci-6023e",		STATUS_SOME,	cal_ni_pci_6023e },
 	{ "pci-mio-16xe-10",	STATUS_SOME,	cal_ni_pci_mio_16xe_10 },
 	{ "pci-6052e",		STATUS_SOME,	cal_ni_pci_6052e },
+	{ "pci-6024e",		STATUS_SOME,	cal_ni_pci_6024e },
 #if 0
 //	{ "at-mio-16de-10",	cal_ni_unknown },
 	{ "at-mio-64e-3",	cal_ni_16e_1 },
@@ -87,7 +89,6 @@ struct board_struct boards[]={
 //	{ "pci-6031e",		cal_ni_unknown },
 //	{ "pci-6032e",		cal_ni_unknown },
 //	{ "pci-6033e",		cal_ni_unknown },
-	{ "pci-6024e",		cal_ni_6023e }, // guess
 	{ "pxi-6025e",		cal_ni_6023e }, // guess
 	{ "pci-6034e",		cal_ni_6023e }, // guess
 //	{ "pci-6110e",		cal_ni_unknown },
@@ -418,18 +419,35 @@ void cal_ni_at_mio_16e_10(void)
 
 void cal_ni_pci_mio_16xe_50(void)
 {
-	// 16xe-50 (old) (same as daqcard?)
-	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,2);
-	cal1(ni_zero_offset_high,8);
-	cal1(ni_reference_low,0);
-	if(do_output){
-		// unknown
-	}
+	// broken
 }
 
 void cal_ni_pci_6023e(void)
 {
-	cal_ni_pci_6035e();
+	/* There seems to be a bug in the driver that doesn't allow
+	 * access to caldac 10, and possibly others. */
+	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
+	//cal1(ni_zero_offset_high,10);
+	//cal1(ni_zero_offset_high,0);
+	cal1(ni_reference_low,3);
+}
+
+void cal_ni_pci_6024e(void)
+{
+	/* There seems to be a bug in the driver that doesn't allow
+	 * access to caldac 10, and possibly others. */
+	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
+	//cal1(ni_zero_offset_high,10);
+	//cal1(ni_zero_offset_high,0);
+	cal1(ni_reference_low,3);
+	if(do_output){
+		cal1(ni_ao0_zero_offset,5);
+		//cal1(ni_ao0_zero_offset,4); // nonlinearity?
+		//cal1(ni_ao0_reference,6);
+		cal1(ni_ao1_zero_offset,8);
+		//cal1(ni_ao1_zero_offset,7); // nonlinearity?
+		//cal1(ni_ao1_reference,9);
+	}
 }
 
 void cal_ni_pci_6025e(void)
@@ -447,19 +465,54 @@ void cal_ni_pci_6025e(void)
 
 void cal_ni_pci_6052e(void)
 {
+	/*
+	 * This board has noisy caldacs
+	 *
+	 * The NI documentation says:
+	 *   0, 8   AI pregain  (coarse, fine)		3, 11
+	 *   4, 12  AI postgain				7
+	 *   2, 10  AI reference			1, 9
+	 *   14, 7  AI unipolar offset			5
+	 *
+	 *   0      AO0 linearity
+	 *   8, 4   AO0 reference			19, 15
+	 *   12     AO0 offset				23
+	 *   2      AO1 linearity			
+	 *   10, 6  AO1 reference			21, 17
+	 *   14     AO1 offset				13
+	 *
+	 *   0	3	x	0011
+	 *
+	 *   2	1	x	0001
+	 *
+	 *   4	7	15 3	0111 0011
+	 *
+	 *   6		17 5	     0101
+	 *   7	x	
+	 *   8	11	19 7	1011 0111
+	 *
+	 *   10	9	21 9	1001 1001
+	 *
+	 *   12	x	23 11	     1011
+	 *
+	 *   14 5	13 1	0101 0001
+	 *
+	 */
+
 	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,3);
 	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,11);
 	// cal1(ni_zero_offset_high,7); // wrong
 	cal1(ni_reference_low,1);
 	cal1_fine(ni_reference_low,1);
-	//cal1(ni_reference_low,9);  // also (guess)
+	cal1(ni_reference_low,9);  // maybe
 	cal1(ni_unip_offset_low,5);
-	//cal1(ni_unip_offset_low,0); // also (guess )
 	if(do_output){
-		//cal1(ni_ao0_zero_offset,23); // wrong
-		//cal1(ni_ao0_reference,19); // wrong
-		//cal1(ni_ao1_zero_offset,13); // wrong
-		//cal1(ni_ao1_reference,21); // wrong
+		cal1(ni_ao0_zero_offset,23);
+		cal1(ni_ao0_reference,19);
+		cal1(ni_ao0_reference,15); // maybe
+		cal1(ni_ao1_zero_offset,13);
+		cal1(ni_ao1_reference,21);
+		cal1(ni_ao1_reference,17); // maybe
 	}
 }
 
