@@ -43,7 +43,7 @@ int comedi_get_cmd_generic_timed(comedi_t *it,unsigned int s,comedi_cmd *cmd)
 	}else if(cmd->start_src&TRIG_FOLLOW){
 		cmd->start_src=TRIG_FOLLOW;
 		cmd->start_arg=0;
-	}
+	}else{
 		/* hmmm... don't know what to do */
 		return -1;
 	}
