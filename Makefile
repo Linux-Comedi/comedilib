@@ -16,7 +16,9 @@ DOCFILES= README INSTALL `find doc -type f`
 
 INSTALLDIR=$(DESTDIR)/usr
 INSTALLDIR_LIB=$(DESTDIR)/usr/lib
-INSTALLDIR_DOC=$(DESTDIR)/usr/doc/libcomedi
+INSTALLDIR_DOC=$(DESTDIR)/usr/share/doc/libcomedi
+INSTALLDIR_MAN=$(DESTDIR)/usr/share/man
+INSTALLDIR_BIN=$(DESTDIR)/usr/bin
 
 comedilib:	subdirs
 
@@ -33,6 +35,10 @@ install:	dummy
 	#/sbin/ldconfig -n ${INSTALLDIR}/lib
 	install -d ${INSTALLDIR_DOC}
 	install ${DOCFILES} ${INSTALLDIR_DOC}
+	install man/*.7 ${INSTALLDIR_MAN}/man7
+	install man/*.8 ${INSTALLDIR_MAN}/man8
+	install -m 755 comedi_config/comedi_config ${INSTALLDIR_BIN}
+	install -m 755 comedi_calibrate/comedi_calibrate ${INSTALLDIR_BIN}
 
 lpr:	dummy
 	find . -name '*.[chs]'|xargs enscript -2r -pit.ps
