@@ -249,7 +249,15 @@ ok:
 	
 	if(do_reset)reset_caldacs( &setup );
 	if(do_dump) observe( &setup );
-	if(do_calibrate && setup.do_cal) setup.do_cal( &setup );
+	if(do_calibrate && setup.do_cal)
+	{
+		retval = setup.do_cal( &setup );
+		if( retval < 0 )
+		{
+			fprintf( stderr, "calibration function returned error\n" );
+			return -1;
+		}
+	}
 	if(do_results) observe( &setup );
 
 	comedi_close(dev);
@@ -788,8 +796,8 @@ void setup_caldacs( calibration_setup_t *setup, int caldac_subdev )
 
 void reset_caldac( calibration_setup_t *setup, int caldac_index )
 {
-	assert( caldac_index < setup->n_caldacs );
 	if( caldac_index < 0 ) return;
+	assert( caldac_index < setup->n_caldacs );
 	update_caldac( setup, caldac_index, setup->caldacs[ caldac_index ].maxdata / 2 );
 }
 

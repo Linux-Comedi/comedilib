@@ -174,18 +174,22 @@ static inline unsigned int ni_ao_unip_linearity( unsigned int channel )
 }
 
 static const int num_ao_observables_611x = 4;
-static int ni_ao_zero_offset_611x( unsigned int channel, unsigned int range ) {
+static int ni_ao_zero_offset_611x( const calibration_setup_t *setup,
+	unsigned int channel, unsigned int range ) {
 	assert( range = 0 );
 	return 2 * channel;
 };
-static int ni_ao_reference_611x( unsigned int channel, unsigned int range ) {
+static int ni_ao_reference_611x( const calibration_setup_t *setup,
+	unsigned int channel, unsigned int range ) {
 	assert( range = 0 );
 	return 2 * channel + 1;
 };
-static int ni_zero_offset_611x( unsigned int channel, unsigned int range ) {
+static int ni_zero_offset_611x( const calibration_setup_t *setup,
+	unsigned int channel, unsigned int range ) {
 	return num_ao_observables_611x + 8 * range + 2 * channel;
 };
-static int ni_reference_611x( unsigned int channel, unsigned int range ) {
+static int ni_reference_611x( const calibration_setup_t *setup,
+	unsigned int channel, unsigned int range ) {
 	return num_ao_observables_611x + 8 * range + 2 * channel + 1;
 };
 
@@ -561,7 +565,7 @@ static void ni_setup_observables_611x( calibration_setup_t *setup )
 		for( range = 0; range < num_ai_ranges; range++ )
 		{
 			/* 0 offset */
-			o = setup->observables + ni_zero_offset_611x( channel, range );
+			o = setup->observables + ni_zero_offset_611x( setup, channel, range );
 			assert( o->name == NULL );
 			asprintf( &o->name, "ai, ch %i, range %i, zero offset",
 				channel, range );
@@ -572,7 +576,7 @@ static void ni_setup_observables_611x( calibration_setup_t *setup )
 			o->target = 0.0;
 
 			/* voltage reference */
-			o = setup->observables + ni_reference_611x( channel, range );
+			o = setup->observables + ni_reference_611x( setup, channel, range );
 			assert( o->name == NULL );
 			asprintf( &o->name, "ai, ch %i, range %i, voltage reference",
 				channel, range );
@@ -593,7 +597,7 @@ static void ni_setup_observables_611x( calibration_setup_t *setup )
 		static const int ai_range_for_ao = 2;
 
 		/* ao zero offset */
-		o = setup->observables + ni_ao_zero_offset_611x( channel, 0 );
+		o = setup->observables + ni_ao_zero_offset_611x( setup, channel, 0 );
 		assert( o->name == NULL );
 		asprintf( &o->name, "ao ch %i, zero offset", channel );
 		o->preobserve_insn = po_tmpl;
@@ -603,10 +607,10 @@ static void ni_setup_observables_611x( calibration_setup_t *setup )
 		o->observe_insn.chanspec = CR_PACK( 0, ai_range_for_ao, AREF_DIFF )
 			| CR_ALT_SOURCE | CR_ALT_FILTER;
 		o->reference_source = REF_DAC0_GND;
-		set_target( setup, ni_ao_zero_offset_611x( channel, 0 ), 0.0 );
+		set_target( setup, ni_ao_zero_offset_611x( setup, channel, 0 ), 0.0 );
 
 		/* ao gain */
-		o = setup->observables + ni_ao_reference_611x( channel, 0 );
+		o = setup->observables + ni_ao_reference_611x( setup, channel, 0 );
 		assert( o->name == NULL );
 		asprintf( &o->name, "ao ch %i, reference voltage", channel );
 		o->preobserve_insn = po_tmpl;
@@ -616,7 +620,7 @@ static void ni_setup_observables_611x( calibration_setup_t *setup )
 		o->observe_insn.chanspec = CR_PACK( 0, ai_range_for_ao, AREF_DIFF )
 			| CR_ALT_SOURCE | CR_ALT_FILTER;
 		o->reference_source = REF_DAC0_GND;
-		set_target( setup, ni_ao_reference_611x( channel, 0 ), 5.0 );
+		set_target( setup, ni_ao_reference_611x( setup, channel, 0 ), 5.0 );
 	}
 
 	setup->n_observables = num_ao_observables_611x + 2 * num_ai_ranges * num_ai_channels;
