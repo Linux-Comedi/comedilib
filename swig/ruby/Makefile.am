@@ -22,9 +22,9 @@ install-data-local:
 endif
 
 ext/Makefile:
-	$(RUBY) setup.rb config
+	$(RUBY) setup.rb config $(RUBY_CONFIG_OPTIONS)
 
-ext/comedi.so: ext/Makefile
+ext/comedi.so ext/comedi_ruby_wrap.o: ext/Makefile ext/comedi_ruby_wrap.c
 	$(RUBY) setup.rb setup
 
 clean-local:

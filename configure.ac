@@ -29,42 +29,51 @@ AC_SUBST(COMEDILIB_CFLAGS)
 AC_SUBST(COMEDILIB_LIBS)
 
 AC_PATH_PROG(SWIG, swig, no)
-if test "x$SWIG" == xno ; then
+if test "$SWIG" == no ; then
   AC_MSG_WARN([swig not found, will not be able to regenerate code for swig bindings])
 fi
-AM_CONDITIONAL(HAVE_SWIG, [test "x$SWIG" != xno])
+AM_CONDITIONAL(HAVE_SWIG, [test "$SWIG" != "no"])
 
 AM_PATH_PYTHON
 AM_CHECK_PYTHON_HEADERS(HAVE_PYTHON=yes,[HAVE_PYTHON=no;AC_MSG_WARN([python headers not found, disabling python binding])])
-AM_CONDITIONAL(HAVE_PYTHON, [test "x$HAVE_PYTHON" = xyes])
+AM_CONDITIONAL(HAVE_PYTHON, [test "$HAVE_PYTHON" == "yes"])
 
 AS_COMPILER_FLAG([-fno-strict-aliasing],[PYTHON_QUIET="$PYTHON_QUIET -fno-strict-aliasing"], true )
 AS_COMPILER_FLAG([-Wno-unused-function],[PYTHON_QUIET="$PYTHON_QUIET -Wno-unused-function"], true )
 AC_SUBST(PYTHON_QUIET)
 
 AC_PATH_PROG(RUBY, ruby, no)
-if test "x$RUBY" == xno ; then
+if test "$RUBY" == "no" ; then
   AC_MSG_WARN([ruby not found, disabling ruby binding])
 fi
-AM_CONDITIONAL(HAVE_RUBY, [test "x$RUBY" != xno])
+AM_CONDITIONAL(HAVE_RUBY, [test "$RUBY" != "no"])
+AC_ARG_VAR(RUBY_PREFIX,[path prefix for Ruby binding [PREFIX/]])
+AC_ARG_VAR(RUBY_SO_DIR,[path for Ruby extensions])
+if test "$RUBY_PREFIX" != "" ; then
+	RUBY_CONFIG_OPTIONS="$RUBY_CONFIG_OPTIONS --prefix=\$(RUBY_PREFIX)"
+fi
+if test "$RUBY_SO_DIR" != "" ; then
+	RUBY_CONFIG_OPTIONS="$RUBY_CONFIG_OPTIONS --so-dir=\$(RUBY_SO_DIR)"
+fi
+AC_SUBST(RUBY_CONFIG_OPTIONS)
 
 AC_PATH_PROG(DOCBOOK2MAN, docbook2man, no)
-if test x$DOCBOOK2MAN = xno ; then
+if test "$DOCBOOK2MAN" = "no" ; then
   AC_MSG_WARN([docbook2man not found, will not be able to rebuild man pages])
 fi
-AM_CONDITIONAL(HAVE_DOCBOOK2MAN, [test "x$DOCBOOK2MAN" != xno])
+AM_CONDITIONAL(HAVE_DOCBOOK2MAN, [test "$DOCBOOK2MAN" != "no"])
 
 AC_PATH_PROG(DOCBOOK2PDF, docbook2pdf, no)
-if test x$DOCBOOK2PDF = xno ; then
+if test "$DOCBOOK2PDF" = "no" ; then
   AC_MSG_WARN([docbook2pdf not found, will not be able to rebuild pdf documentation])
 fi
-AM_CONDITIONAL(HAVE_DOCBOOK2PDF, [test "x$DOCBOOK2PDF" != xno])
+AM_CONDITIONAL(HAVE_DOCBOOK2PDF, [test "$DOCBOOK2PDF" != "no"])
 
 AC_PATH_PROG(DOCBOOK2HTML, docbook2html, no)
-if test x$DOCBOOK2HTML = xno ; then
+if test "$DOCBOOK2HTML" = "no" ; then
   AC_MSG_WARN([docbook2html not found, will not be able to rebuild html documentation])
 fi
-AM_CONDITIONAL(HAVE_DOCBOOK2HTML, [test "x$DOCBOOK2HTML" != xno])
+AM_CONDITIONAL(HAVE_DOCBOOK2HTML, [test "$DOCBOOK2HTML" != "no"])
 
 pcmciadir="\${sysconfdir}/pcmcia"
 AC_SUBST(pcmciadir)
