@@ -5,27 +5,30 @@ After installing comedi and comedilib, cd to this directory (comedilib*/demo).
 
 Use ./info for a very first test. If hardware and software are correctly
 installed, the program prints a list of subdevices it recognises. If the
-device is not /dev/comedi0, you can use the command-line option
-'-f <device file>'.
+device is not /dev/comedi0, use here and in the following the command-line
+option -f <device>.
 
 Continue with ./inp -s <subdevice> -c <channel> to read individual samples,
-or with ./outp -s <subdevice> -c <channel> <integer value> to set an
-output value.
+and with ./outp -s <subdevice> -c <channel> <integer value> to set an
+output value.  Other beginning demos are: cmd, dio, inpn, tut1, tut2.
+You should understand how these work before trying to understand the
+other demos.
+
+The perl subdirectory contains a few examples for the perl wrapper.
 
 
-Examples
-
+DEMO PROGRAMS:
 
 ao_waveform:
 	You need a device (and driver) capable of streaming analog output,
 	which currently is some of the members of the NI AT-MIO and PCI-MIO
 	E series.  Creates a sine wave on an analog output channel.
 
-cmd:
-	An example for using Comedi commands.  Comedi commands
+cmd: 
+	An example for directly using Comedi commands.  Comedi commands
 	are used for asynchronous acquisition, with the timing controlled
 	by on-board timers or external events.
-
+ 
 dio:
 	Requirements:  A board with a digital I/O subdevice.  Not just
 	a 'digital input' or 'digital output' subdevice, but one in
@@ -50,38 +53,46 @@ insn:
 	Example showing how to use instructions directly. Not
 	recommended for beginners: use higher-level functions such
 	as comedi_data_read(), comedi_data_write(), etc., as demonstrated
-	in the inp, outp, and dio examples.
-
+	in the inp, outp, and dio examples.  
+	
 ledclock:
-	Requirements:  A board with a digital I/O subdevice. Not just
-	a 'digital input' or 'digital output' subdevice, but one in
-	which the channels can be configured between input and output.
+	This demo requires a Fantazein clock modified to be directly
+	controlled by the parallel port on a computer.  The original
+	demo used a real-time task and controlled the parallel port
+	directly.  This version is not complete.
 
 main:
-	This is not a demo. The file main.c contains just an auxiliary
-	function. See below.
+	This is not a demo.  The file main.c just contains auxiliary
+	functions and parses options.
 
 mmap:
-	Similar to the cmd demo, except the data is obtained through
-	a memory mapping instead of doing read() on /dev/comediX.
+	This example shows how to map the internal Comedi buffer
+	and directly access samples instead of using read() and
+	write().
 
-outp:
-	Write one <value> to one channel of one subdevice.
+outp <value>:
+	Write one <value> to one channel of one subdevice.  Requires
+	a digital or analog output subdevice.
 
 receiver:
-	Requirements:  A board with a digital I/O subdevice.  Not just
-	a 'digital input' or 'digital output' subdevice, but one in
-	which the channels can be configured between input and output.
-
+	This demo is meant to be used in conjunction with the sender
+	demo.  Receiver requires a digital input subdevice, and sender
+	requires a digital output subdevice.  When the clock and data
+	pins are connected between the sending and receiving devices,
+	one should be able to send bits over the link.
+ 
 select:
 	An example for using select() with asynchronous input.  This
 	example requires an asynchronous input subdevice that can
 	handle TRIG_TIMER as a scan_begin_src.
 
 sender:
-	Requirements:  A board with a digital I/O subdevice.  Not just
-	a 'digital input' or 'digital output' subdevice, but one in
-	which the channels can be configured between input and output.
+	See receiver.
+
+sigio:
+	Similar to the cmd demo.  This demo sets up a signal handler
+	for SIGIO, which is called whenever data is ready to be read
+	from the device.
 
 sv:
 	Similar to inp, but measures the input using the comedi_sv_*()
@@ -90,23 +101,23 @@ sv:
 
 tut1:
 tut2:
-	Tutorial examples.
+	Tutorial examples.  See the Comedilib documentation.
 
+
+COMMAND-LINE OPTIONS:
 
 Many of these demos are linked with the file main.c, which parses
 command line options.  Some options don't make sense with all programs.
 The options are:
 
-
--a <aref>	uses analog reference <aref> (default: 0)
--c <chan>	uses channel <chan>
--s <subd>	uses subdevice <subd>
--r <range>	uses voltage range <range>
--f <file>	uses device file <file> (default: /dev/comedi0)
+-a <aref>	use analog reference <aref> (default: 0 == ground)
+-c <chan>	use channel <chan> (default: 0)
+-s <subd>	use subdevice <subd> (default: 0)
+-r <index>	use voltage range <index> (default: 0)
+-f <file>	use device file <file> (default: /dev/comedi0)
 -v		verbose
 -d		set analog reference to differential
 -g		set analog reference to ground
 -o		set analog reference to other
 -m		set analog reference to common
-
 
