@@ -85,15 +85,13 @@ int comedi_data_write(comedi_t *it,unsigned int subdev,unsigned int chan,unsigne
 	}
 }
 
-static inline int comedi_internal_data_read_n(comedi_t *it, unsigned int subdev, unsigned int chan, unsigned int range,
-		unsigned int aref, unsigned int flags, lsampl_t *data, unsigned int n)
+static inline int comedi_internal_data_read_n(comedi_t *it,
+	unsigned int subdev, unsigned int chanspec, lsampl_t *data,
+	unsigned int n)
 {
 	subdevice *s;
 	
-	flags &= CR_FLAGS_MASK;
-	chan &= ~CR_FLAGS_MASK;
-
-	if(!valid_chan(it,subdev,chan))
+	if(!valid_subd(it,subdev))
 		return -1;
 
 	s = it->subdevices + subdev;
@@ -107,7 +105,7 @@ static inline int comedi_internal_data_read_n(comedi_t *it, unsigned int subdev,
 		insn.n = n;
 		insn.data = data;
 		insn.subdev = subdev;
-		insn.chanspec = CR_PACK_FLAGS(chan,range,aref,flags);
+		insn.chanspec = chanspec;
 
 		return comedi_do_insn(it,&insn);
 	}else{
@@ -124,10 +122,8 @@ static inline int comedi_internal_data_read_n(comedi_t *it, unsigned int subdev,
 		sampl_t sdata[n];
 		unsigned int i;
 
-		chan=CR_PACK_FLAGS(chan,range,aref,flags);
-
 		cmd.subdev=subdev;
-		cmd.chanlist=&chan;
+		cmd.chanlist=&chanspec;
 		if(s->subd_flags & SDF_LSAMPL){
 			cmd.data=(sampl_t *)data;
 		}else{
@@ -147,8 +143,9 @@ static inline int comedi_internal_data_read_n(comedi_t *it, unsigned int subdev,
 	}
 }
 
-int comedi_data_read_n(comedi_t *it, unsigned int subdev, unsigned int chan, unsigned int range,
-		unsigned int aref, lsampl_t *data, unsigned int n)
+int comedi_data_read_n(comedi_t *it, unsigned int subdev,
+	unsigned int chan, unsigned int range,
+	unsigned int aref, lsampl_t *data, unsigned int n)
 {
 	static const int max_chunk_size = 100;
 	unsigned int chunk_size;
@@ -161,7 +158,9 @@ int comedi_data_read_n(comedi_t *it, unsigned int subdev, unsigned int chan, uns
 			chunk_size = max_chunk_size;
 		else
 			chunk_size = n;
-		retval = comedi_internal_data_read_n( it, subdev, chan, range, aref, chan, &data[sample_count], chunk_size);
+		retval = comedi_internal_data_read_n(it, subdev,
+			CR_PACK(chan, range, aref),
+			data+sample_count, chunk_size);
 		if( retval < 0 ) return retval;
 		n -= chunk_size;
 		sample_count += chunk_size;
@@ -169,30 +168,30 @@ int comedi_data_read_n(comedi_t *it, unsigned int subdev, unsigned int chan, uns
 	return 0;
 }
 
-int comedi_data_read(comedi_t *it, unsigned int subdev, unsigned int chan, unsigned int range,
-	unsigned int aref, lsampl_t *data)
+int comedi_data_read(comedi_t *it, unsigned int subdev, unsigned int chan,
+	unsigned int range, unsigned int aref, lsampl_t *data)
 {
-	return comedi_internal_data_read_n(it, subdev, chan, range, aref, chan, data, 1);
+	return comedi_internal_data_read_n(it, subdev,
+		CR_PACK(chan, range, aref), data, 1);
 }
 
-int comedi_data_read_hint(comedi_t *it,unsigned int subdev,unsigned int chan,unsigned int range,
-unsigned int aref)
+int comedi_data_read_hint(comedi_t *it, unsigned int subdev,
+	unsigned int chan, unsigned int range, unsigned int aref)
 {
 	lsampl_t dummy_data;
-	return comedi_internal_data_read_n(it, subdev, chan, range, aref, chan, &dummy_data, 0);
+	return comedi_internal_data_read_n(it, subdev,
+		CR_PACK(chan, range, aref), &dummy_data, 0);
 }
 
-int comedi_data_read_delayed( comedi_t *it, unsigned int subdev, unsigned int chan, unsigned int range,
-	unsigned int aref, lsampl_t *data, unsigned int nano_sec)
+int comedi_data_read_delayed( comedi_t *it, unsigned int subdev,
+	unsigned int chan, unsigned int range, unsigned int aref,
+	lsampl_t *data, unsigned int nano_sec)
 {
 	subdevice *s;
 	comedi_insnlist ilist;
 	comedi_insn insn[3];
 	lsampl_t delay = nano_sec;
-	unsigned int flags = chan & CR_FLAGS_MASK;
 	
-	chan &= ~CR_FLAGS_MASK;
-
 	if( !valid_chan( it, subdev, chan ) )
 		return -1;
 
@@ -206,7 +205,7 @@ int comedi_data_read_delayed( comedi_t *it, unsigned int subdev, unsigned int ch
 	insn[0].n = 0;
 	insn[0].data = data;
 	insn[0].subdev = subdev;
-	insn[0].chanspec = CR_PACK_FLAGS( chan, range, aref, flags );
+	insn[0].chanspec = CR_PACK( chan, range, aref );
 	// delay
 	insn[1].insn = INSN_WAIT;
 	insn[1].n = 1;
@@ -216,7 +215,7 @@ int comedi_data_read_delayed( comedi_t *it, unsigned int subdev, unsigned int ch
 	insn[2].n = 1;
 	insn[2].data = data;
 	insn[2].subdev = subdev;
-	insn[2].chanspec = CR_PACK_FLAGS( chan, range, aref, flags );
+	insn[2].chanspec = CR_PACK( chan, range, aref );
 
 	ilist.insns = insn;
 	ilist.n_insns = sizeof(insn) / sizeof(insn[0]);
