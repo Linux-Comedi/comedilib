@@ -17,6 +17,7 @@
 #include <errno.h>
 #include <getopt.h>
 #include <ctype.h>
+#include <stdlib.h>
 #include "examples.h"
 
 comedi_t *device;
