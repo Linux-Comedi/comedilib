@@ -53,7 +53,7 @@ int write_buf_size=0;
 
 int init_fd;
 #define MAX_NUM_INIT_FILES 4
-char *init_file[MAX_NUM_INIT_FILES] = {NULL};
+char *init_file[MAX_NUM_INIT_FILES] = {NULL,NULL,NULL,NULL};
 
 enum option_ids
 {
@@ -128,12 +128,12 @@ void read_init_files(char* file_names[], int num_files, int *options)
 	for(i = 0; i < num_files; ++i)
 	{
 		struct stat buf;
-		if(files[i] == NULL) 
+		if(file_names[i] == NULL) 
 		{
 			sizes[i] = 0;
 			continue;
 		}
-		files[i] = fopen(file_names[i], O_RDONLY);
+		files[i] = fopen(file_names[i],"r");
 		if(files[i] == NULL)
 		{
 			perror(file_names[i]);
