@@ -31,8 +31,13 @@ fi
 #
 # please modify if needed
 #
-echo "$COMEDI_CONFIG -i $USBDUX_FIRMWARE /dev/comedi0 usbdux"
-$COMEDI_CONFIG -i $USBDUX_FIRMWARE /dev/comedi0 usbdux
+# firmware upload into the usb device
+fxload -v -2 -I $USBDUX_FIRMWARE
+# 
+# just to make sure we remove the comedi device
+$COMEDI_CONFIG -r /dev/comedi0
 #
+# connecting the comedi device comedi0 with the module usbdux
+$COMEDI_CONFIG /dev/comedi0 usbdux
 #
 #
