@@ -71,11 +71,11 @@ struct board_struct drivers[] = {
 };
 #define n_drivers (sizeof(drivers)/sizeof(drivers[0]))
 
-int do_dump = 0;
-int do_reset = 1;
-int do_calibrate = 1;
-int do_results = 0;
-int do_output = 1;
+static int do_dump = 0;
+static int do_reset = 1;
+static int do_calibrate = 1;
+static int do_results = 0;
+static int do_output = 1;
 
 struct option options[] = {
 	{ "verbose", 0, 0, 'v' },
@@ -245,6 +245,8 @@ ok:
 	}
 
 	setup.do_reset = do_reset;
+	setup.do_output = do_output;
+	
 	if(do_reset)reset_caldacs( &setup );
 	if(do_dump) observe( &setup );
 	if(do_calibrate && setup.do_cal) setup.do_cal( &setup );

@@ -78,6 +78,7 @@ static int cal_ni_pci_mio_16e_4(calibration_setup_t *setup);
 static int cal_ni_pci_6032e(calibration_setup_t *setup);
 static int cal_ni_daqcard_ai_16e_4(calibration_setup_t *setup);
 static int cal_ni_pci_611x(calibration_setup_t *setup);
+static int cal_ni_daqcard_6062e(calibration_setup_t *setup);
 
 static double ni_get_reference( calibration_setup_t *setup, int lsb_loc,int msb_loc);
 
@@ -102,6 +103,7 @@ static struct board_struct boards[]={
 	{ "DAQCard-ai-16e-4",	STATUS_DONE,	cal_ni_daqcard_ai_16e_4,	ni_setup_observables },
 	{ "pci-6110",	STATUS_DONE,	cal_ni_pci_611x,	ni_setup_observables_611x },
 	{ "pci-6111",	STATUS_DONE,	cal_ni_pci_611x,	ni_setup_observables_611x },
+	{ "DAQCard-6062e",	STATUS_SOME, cal_ni_daqcard_6062e, ni_setup_observables },
 #if 0
 //	{ "at-mio-16de-10",	cal_ni_unknown },
 	{ "at-mio-64e-3",	cal_ni_16e_1 },
@@ -118,7 +120,6 @@ static struct board_struct boards[]={
 //	{ "pci-6713",		cal_ni_unknown },
 //	{ "pxi-6070e",		cal_ni_unknown },
 //	{ "pxi-6052e",		cal_ni_unknown },
-//	{ "DAQCard-6062e",	cal_ni_unknown },
 //	{ "DAQCard-6024e",	cal_ni_unknown },
 #endif
 };
@@ -242,7 +243,7 @@ static void ni_setup_observables( calibration_setup_t *setup )
 			| CR_ALT_SOURCE | CR_ALT_FILTER;
 
 		o->reference_source = REF_GND_GND;
-		o->target = 0;
+		o->target = 0.0;
 
 #if 0
 		/* unip gain */
@@ -454,7 +455,7 @@ static int cal_ni_at_mio_16e_2(calibration_setup_t *setup)
 	cal1( setup, ni_zero_offset_high,0);
 	cal1( setup, ni_reference_low,3);
 	cal1( setup, ni_unip_offset_low,2);
-	if(do_output){
+	if(setup->do_output){
 		cal1( setup, ni_ao0_zero_offset,5);
 		cal1( setup, ni_ao0_reference,6);
 		cal1( setup, ni_ao1_zero_offset,8);
@@ -507,7 +508,7 @@ static int cal_ni_at_mio_16xe_50(calibration_setup_t *setup)
 	cal1_fine( setup, ni_reference_low,0);
 	cal1( setup, ni_reference_low,1);
 
-	if(do_output){
+	if(setup->do_output){
 		cal1( setup, ni_ao0_zero_offset,6);
 		cal1( setup, ni_ao0_reference,4);
 		cal1( setup, ni_ao1_zero_offset,7);
@@ -524,7 +525,7 @@ static int cal_ni_pci_mio_16xe_10(calibration_setup_t *setup)
 	cal1( setup, ni_reference_low, 0);
 	cal1( setup, ni_reference_low, 1);
 
-	if(do_output){
+	if(setup->do_output){
 		cal1( setup, ni_ao0_zero_offset,6);
 		cal1( setup, ni_ao0_reference,4);
 		cal1( setup, ni_ao1_zero_offset,7);
@@ -546,7 +547,7 @@ static int cal_ni_pci_mio_16e_1(calibration_setup_t *setup)
 	cal1( setup, ni_zero_offset_high,0);
 	cal1( setup, ni_reference_low,3);
 	cal1( setup, ni_unip_offset_low,2);
-	if(do_output){
+	if(setup->do_output){
 		cal1( setup, ni_ao0_zero_offset,5);
 		//cal1( setup, ni_ao0_zero_offset,4); /* linearity? */
 		cal1( setup, ni_ao0_reference,6);
@@ -582,7 +583,7 @@ static int cal_ni_pci_6035e(calibration_setup_t *setup)
 
 	cal1( setup, ni_reference_low,2);
 
-	if(do_output){
+	if(setup->do_output){
 		cal1( setup, ni_ao0_zero_offset,6);
 		//cal1( setup, ni_ao0_zero_offset,10); /* linearity? */
 		cal1( setup, ni_ao0_reference,11);
@@ -599,7 +600,7 @@ static int cal_ni_pci_6071e(calibration_setup_t *setup)
 	cal1( setup, ni_zero_offset_high,0);
 	cal1( setup, ni_reference_low,3);
 	cal1_fine( setup, ni_reference_low,3);
-	if(do_output){
+	if(setup->do_output){
 		cal1( setup, ni_ao0_zero_offset,5);
 		//cal1( setup, ni_ao0_zero_offset,4); /* linearity? */
 		/* caldac 6 should most likely be AO0 reference, but it
@@ -618,7 +619,7 @@ static int cal_ni_pxi_6071e(calibration_setup_t *setup)
 	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,1);
 	cal1( setup, ni_zero_offset_high,0);
 	cal1( setup, ni_reference_low,3);
-	if(do_output){
+	if(setup->do_output){
 		// unknown
 	}
 	return 0;
@@ -632,7 +633,7 @@ static int cal_ni_at_mio_16e_10(calibration_setup_t *setup)
 	cal1( setup, ni_zero_offset_high,0);
 	cal1( setup, ni_reference_low,3);
 	cal1( setup, ni_unip_offset_low,2);
-	if(do_output){
+	if(setup->do_output){
 		cal1( setup, ni_ao0_zero_offset,5); // guess
 		cal1( setup, ni_ao0_reference,6); // guess
 		cal1( setup, ni_ao1_zero_offset,8); // guess
@@ -649,7 +650,7 @@ static int cal_ni_pci_mio_16xe_50(calibration_setup_t *setup)
 	cal1_fine( setup, ni_reference_low,0);
 	cal1( setup, ni_reference_low,1);
 
-	if(do_output){
+	if(setup->do_output){
 		cal1( setup, ni_ao0_zero_offset,6);
 		cal1( setup, ni_ao0_reference,4);
 		cal1( setup, ni_ao1_zero_offset,7);
@@ -676,7 +677,7 @@ static int cal_ni_pci_6024e(calibration_setup_t *setup)
 	cal1( setup, ni_zero_offset_high,0);
 	cal1( setup, ni_zero_offset_high,8);
 	cal1( setup, ni_reference_low,2);
-	if(do_output){
+	if(setup->do_output){
 		cal1( setup, ni_ao0_zero_offset,6);
 		//cal1( setup, ni_ao0_zero_offset,10); // nonlinearity?
 		cal1( setup, ni_ao0_reference,11);
@@ -693,7 +694,7 @@ static int cal_ni_pci_6025e(calibration_setup_t *setup)
 	cal1( setup, ni_zero_offset_high,0);
 	cal1( setup, ni_zero_offset_high,8);
 	cal1( setup, ni_reference_low,2);
-	if(do_output){
+	if(setup->do_output){
 		cal1( setup, ni_ao0_zero_offset,6);
 		//cal1( setup, ni_ao0_zero_offset,10); /* nonlinearity */
 		cal1( setup, ni_ao0_reference,11);
@@ -749,7 +750,7 @@ static int cal_ni_pci_6052e(calibration_setup_t *setup)
 	cal1( setup, ni_reference_low,5);
 	cal1( setup, ni_unip_offset_low,6);
 	cal1_fine( setup, ni_unip_offset_low,6);
-	if(do_output){
+	if(setup->do_output){
 		cal1( setup, ni_ao0_zero_offset,12+11);
 		cal1_fine( setup, ni_ao0_zero_offset,12+11);
 		cal1( setup, ni_ao0_reference,12+7);
@@ -776,7 +777,7 @@ static int cal_ni_pci_mio_16e_4(calibration_setup_t *setup)
 	cal1( setup, ni_unip_offset_low,7);
 	cal1_fine( setup, ni_unip_offset_low,7);
 
-	if(do_output){
+	if(setup->do_output){
 		cal_binary( setup, ni_ao0_zero_offset,6);
 		cal1_fine( setup, ni_ao0_zero_offset,6);
 		//cal1( setup, ni_ao0_nonlinearity,10);
@@ -819,7 +820,7 @@ static int cal_ni_pci_611x( calibration_setup_t *setup )
 		cal1( setup, ni_reference_611x( i ), ( 2 * i + 1 ) );
 	}
 
-	if(do_output){
+	if(setup->do_output){
 		cal1( setup, ni_ao0_zero_offset_611x, 14 );
 		cal1( setup, ni_ao0_reference_611x, 13 );
 		cal1( setup, ni_ao1_zero_offset_611x, 16 );
@@ -827,6 +828,61 @@ static int cal_ni_pci_611x( calibration_setup_t *setup )
 	}
 
 	return 0;
+}
+
+static int cal_ni_daqcard_6062e( calibration_setup_t *setup )
+{
+	saved_calibration_t saved_cals[ 3 ], *current_cal;
+	static const int num_calibrations = sizeof( saved_cals ) / sizeof( saved_cals[0] );
+	int i, retval;
+
+	comedi_set_global_oor_behavior( COMEDI_OOR_NUMBER );
+
+	current_cal = saved_cals;
+
+	cal_postgain_binary( setup, ni_zero_offset_low, ni_zero_offset_high, 4 );
+	cal_binary( setup, ni_zero_offset_high,0 );
+	cal_binary( setup, ni_reference_low,2 );
+
+	current_cal->subdevice = setup->ad_subdev;
+	sc_push_caldac( current_cal, setup->caldacs[ 0 ] );
+	sc_push_caldac( current_cal, setup->caldacs[ 2 ] );
+	sc_push_caldac( current_cal, setup->caldacs[ 4 ] );
+	sc_push_channel( current_cal, SC_ALL_CHANNELS );
+	sc_push_range( current_cal, SC_ALL_RANGES );
+	sc_push_aref( current_cal, SC_ALL_AREFS );
+	current_cal++;
+
+	if(setup->do_output){
+		cal_binary( setup, ni_ao0_zero_offset, 6 );
+		cal_binary( setup, ni_ao0_reference, 3 );
+
+		current_cal->subdevice = setup->da_subdev;
+		sc_push_caldac( current_cal, setup->caldacs[ 6 ] );
+		sc_push_caldac( current_cal, setup->caldacs[ 3 ] );
+		sc_push_channel( current_cal, 0 );
+		sc_push_range( current_cal, SC_ALL_RANGES );
+		sc_push_aref( current_cal, SC_ALL_AREFS );
+		current_cal++;
+
+		cal_binary( setup, ni_ao1_zero_offset, 1 );
+		cal_binary( setup, ni_ao1_reference, 5 );
+
+		current_cal->subdevice = setup->da_subdev;
+		sc_push_caldac( current_cal, setup->caldacs[ 1 ] );
+		sc_push_caldac( current_cal, setup->caldacs[ 5 ] );
+		sc_push_channel( current_cal, 1 );
+		sc_push_range( current_cal, SC_ALL_RANGES );
+		sc_push_aref( current_cal, SC_ALL_AREFS );
+		current_cal++;
+	}
+
+	retval = write_calibration_file( setup, saved_cals, num_calibrations );
+	for( i = 0; i < num_calibrations; i++ )
+		clear_saved_calibration( &saved_cals[ i ] );
+	free( saved_cals );
+
+	return retval;
 }
 
 static double ni_get_reference( calibration_setup_t *setup, int lsb_loc,int msb_loc)

@@ -71,6 +71,7 @@ struct calibration_setup_struct {
 	int (*do_cal) ( calibration_setup_t *setup );
 	char *cal_save_file_path;
 	unsigned do_reset : 1;
+	unsigned do_output : 1;
 };
 
 extern char *devicename;
@@ -84,8 +85,6 @@ enum {
 	STATUS_SOME,
 	STATUS_DONE
 };
-
-extern int do_output;
 
 /* high level */
 
