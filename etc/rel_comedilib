@@ -51,7 +51,7 @@ cd ${exportdir}
 
 echo "version=$version" >comedilib-$version/version
 
-tar -czvf ../comedilib-$version.tgz comedilib-$version
+tar -czf ../comedilib-$version.tgz comedilib-$version
 
 exit
 
