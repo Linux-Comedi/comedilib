@@ -2,7 +2,7 @@
 pyexec_LTLIBRARIES = _comedi.la
 
 _comedi_la_SOURCES = comedi_wrap.c
-_comedi_la_CFLAGS = $(COMEDILIB_CFLAGS) -I/usr/include/python2.2
+_comedi_la_CFLAGS = $(COMEDILIB_CFLAGS) $(PYTHON_INCLUDES)
 _comedi_la_LDFLAGS = -module -avoid-version $(COMEDILIB_LIBS)
 
 pyexec_SCRIPTS = comedi.py
