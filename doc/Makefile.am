@@ -3,7 +3,8 @@ SGML = drivers.sgml funcref.sgml glossary.sgml \
 	install.sgml intro.sgml other.sgml reference.sgml tutorial.sgml \
 	driverwriting.sgml comedilib.sgml
 
-EXTRA_DIST = $(SGML) funcref mkref drivers.txt mkdr FAQ $(all_html) $(all_man) comedilib.pdf
+EXTRA_DIST = $(SGML) funcref mkref drivers.txt mkdr FAQ $(all_html) $(all_man) \
+	comedilib.pdf acq-seq.gif
 
 BUILT_SOURCES = funcref.sgml drivers.sgml
 
