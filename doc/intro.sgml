@@ -491,7 +491,7 @@ scan.
 </title>
 <mediaobject>
 <imageobject>
-<imagedata fileref="figures/acq-seq.gif" format="GIF">
+<imagedata fileref="acq-seq.gif" format="GIF">
 </imageobject>
 <!--
 <imageobject>
