@@ -78,7 +78,7 @@ static struct board_struct boards[]={
 	{ "pxi-6071e",		STATUS_GUESS,	cal_ni_pxi_6071e },
 	{ "at-mio-16e-10",	STATUS_GUESS,	cal_ni_at_mio_16e_10 },
 	{ "pci-mio-16xe-50",	STATUS_SOME,	cal_ni_pci_mio_16xe_50 },
-	{ "pci-6023e",		STATUS_SOME,	cal_ni_pci_6023e },
+	{ "pci-6023e",		STATUS_DONE,	cal_ni_pci_6023e },
 	{ "pci-mio-16xe-10",	STATUS_DONE,	cal_ni_pci_mio_16xe_10 },
 	{ "pci-6052e",		STATUS_DONE,	cal_ni_pci_6052e },
 	{ "pci-6024e",		STATUS_SOME,	cal_ni_pci_6024e },
@@ -495,9 +495,8 @@ int cal_ni_pci_6023e(calibration_setup_t *setup)
 	/* for comedi-0.7.65 */
 
 	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,4);
-	//postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,8);
-
 	cal1( setup, ni_zero_offset_high,0);
+	cal1( setup, ni_zero_offset_high,8); /* possibly wrong */
 	cal1( setup, ni_reference_low,2);
 
 	return 0;
@@ -522,17 +521,17 @@ int cal_ni_pci_6024e(calibration_setup_t *setup)
 
 int cal_ni_pci_6025e(calibration_setup_t *setup)
 {
-	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,4); // was 1
-	//cal1( setup, ni_zero_offset_high,XXX); // was 10
-	cal1( setup, ni_zero_offset_high,8); // was 0
-	cal1( setup, ni_reference_low,2); // was 3
+	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,4);
+	cal1( setup, ni_zero_offset_high,0);
+	cal1( setup, ni_zero_offset_high,8);
+	cal1( setup, ni_reference_low,2);
 	if(do_output){
-		cal1( setup, ni_ao0_zero_offset,6); // was 5
-		//cal1( setup, ni_ao0_zero_offset,10); // nonlinearity was 4
-		//cal1( setup, ni_ao0_reference,XXX); // was 6
-		cal1( setup, ni_ao1_zero_offset,9); // was 8
-		//cal1( setup, ni_ao1_zero_offset,1); // nonlinearity was 7
-		cal1( setup, ni_ao1_reference,5); // was 9
+		cal1( setup, ni_ao0_zero_offset,6);
+		//cal1( setup, ni_ao0_zero_offset,10); /* nonlinearity */
+		cal1( setup, ni_ao0_reference,11);
+		cal1( setup, ni_ao1_zero_offset,9);
+		//cal1( setup, ni_ao1_zero_offset,1); /* nonlinearity */
+		cal1( setup, ni_ao1_reference,5);
 	}
 	return 0;
 }
