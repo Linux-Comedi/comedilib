@@ -6,11 +6,11 @@
 	
 	run $> swig -python comedi.i
 	
-2) Building the module
+2) Building the module (section obsolete -Frank Hess)
 	i) edit the setup.py file so that the include and lib paths are correct for your system
 	ii) run $>	python setup.py build
 	
-3) Installing the module
+3) Installing the module (section obsolete -Frank Hess)
 	i) Manual installation I'm afraid. Copy comedi.py and _comedi.pyd files to somewhere in your PYTHONPATH
 	
 4) Using the module
