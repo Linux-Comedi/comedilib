@@ -10,7 +10,6 @@
       do any fine-tuning
     - statistics would be nice, to show how good
       the calibration is.
-    - doesn't check unipolar ranges
     - more portable
  */
 
@@ -60,6 +59,7 @@ static int cal_ni_at_mio_16e_2(calibration_setup_t *setup);
 static int cal_ni_daqcard_ai_16xe_50(calibration_setup_t *setup);
 static int cal_ni_at_mio_16e_1(calibration_setup_t *setup);
 static int cal_ni_pci_mio_16e_1(calibration_setup_t *setup);
+static int cal_ni_pci_6024e(calibration_setup_t *setup);
 static int cal_ni_pci_6025e(calibration_setup_t *setup);
 static int cal_ni_pci_6035e(calibration_setup_t *setup);
 static int cal_ni_pci_6071e(calibration_setup_t *setup);
@@ -67,14 +67,13 @@ static int cal_ni_pxi_6071e(calibration_setup_t *setup);
 static int cal_ni_at_mio_16e_10(calibration_setup_t *setup);
 static int cal_ni_pci_mio_16xe_50(calibration_setup_t *setup);
 static int cal_ni_pci_6023e(calibration_setup_t *setup);
-static int cal_ni_pci_6024e(calibration_setup_t *setup);
 static int cal_ni_at_mio_16xe_50(calibration_setup_t *setup);
 static int cal_ni_pci_mio_16xe_10(calibration_setup_t *setup);
 static int cal_ni_pci_6052e(calibration_setup_t *setup);
-static int cal_ni_pci_mio_16e_4(calibration_setup_t *setup);
 static int cal_ni_pci_6032e(calibration_setup_t *setup);
 static int cal_ni_daqcard_ai_16e_4(calibration_setup_t *setup);
 static int cal_ni_pci_611x(calibration_setup_t *setup);
+static int cal_ni_pci_mio_16e_4(calibration_setup_t *setup);
 static int cal_ni_daqcard_6062e(calibration_setup_t *setup);
 
 static double ni_get_reference( calibration_setup_t *setup, int lsb_loc,int msb_loc);
@@ -213,6 +212,44 @@ static struct board_struct* ni_board( calibration_setup_t *setup )
 	return setup->private_data;
 }
 
+typedef struct
+{
+	int adc_pregain_offset;
+	int adc_postgain_offset;
+	int adc_gain;
+	int adc_pregain_offset_fine;
+	int adc_postgain_offset_fine;
+	int adc_gain_fine;
+	int adc_unip_offset;
+	int dac_offset[ 2 ];
+	int dac_gain[ 2 ];
+	int dac_gain_fine[ 2 ];
+	int dac_linearity[ 2 ];
+} ni_caldac_layout_t;
+
+static int cal_ni_generic( calibration_setup_t *setup,
+	const ni_caldac_layout_t *layout );
+
+static inline void init_ni_caldac_layout( ni_caldac_layout_t *layout )
+{
+	int i;
+
+	layout->adc_pregain_offset = -1;
+	layout->adc_postgain_offset = -1;
+	layout->adc_gain = -1;
+	layout->adc_unip_offset = -1;
+	layout->adc_pregain_offset_fine = -1;
+	layout->adc_postgain_offset_fine = -1;
+	layout->adc_gain_fine = -1;
+	for( i = 0; i < 2; i++ )
+	{
+		layout->dac_offset[ i ] = -1;
+		layout->dac_gain[ i ] = -1;
+		layout->dac_gain_fine[ i ] = -1;
+		layout->dac_linearity[ i ] = -1;
+	}
+}
+
 int ni_setup( calibration_setup_t *setup , const char *device_name )
 {
 	int retval;
@@ -327,7 +364,7 @@ static void ni_setup_ao_observables( calibration_setup_t *setup )
 			/* ao unipolar gain */
 			o = setup->observables + ni_ao_unip_reference( channel );
 			assert( o->name == NULL );
-			asprintf( &o->name, "ao %i, unipolar reference voltage, low gain", channel );
+			asprintf( &o->name, "ao %i, unipolar high, low gain", channel );
 			o->preobserve_insn = po_tmpl;
 			o->preobserve_insn.chanspec = CR_PACK(channel,ao_unipolar_lowgain,0);
 			o->preobserve_insn.data = o->preobserve_data;
@@ -341,7 +378,7 @@ static void ni_setup_ao_observables( calibration_setup_t *setup )
 			/* ao unipolar linearity, negative */
 			o = setup->observables + ni_ao_unip_linearity( channel );
 			assert( o->name == NULL );
-			asprintf( &o->name, "ao %i, unipolar linearity, low gain", channel );
+			asprintf( &o->name, "ao %i, unipolar linearity (mid), low gain", channel );
 			o->preobserve_insn = po_tmpl;
 			o->preobserve_insn.chanspec = CR_PACK(channel,ao_unipolar_lowgain,0);
 			o->preobserve_insn.data = o->preobserve_data;
@@ -579,17 +616,19 @@ static void ni_setup_observables_611x( calibration_setup_t *setup )
 
 static int cal_ni_at_mio_16e_2(calibration_setup_t *setup)
 {
-	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,1);
-	cal1( setup, ni_zero_offset_high,0);
-	cal1( setup, ni_reference_low,3);
-	cal1( setup, ni_unip_zero_offset_low,2);
-	if(setup->do_output){
-		cal1( setup, ni_ao0_zero_offset,5);
-		cal1( setup, ni_ao0_reference,6);
-		cal1( setup, ni_ao1_zero_offset,8);
-		cal1( setup, ni_ao1_reference,9);
-	}
-	return 0;
+	ni_caldac_layout_t layout;
+
+	init_ni_caldac_layout( &layout );
+	layout.adc_pregain_offset = 0;
+	layout.adc_postgain_offset = 1;
+	layout.adc_gain = 3;
+	layout.adc_unip_offset = 2;
+	layout.dac_offset[ 0 ] = 5;
+	layout.dac_gain[ 0 ] = 6;
+	layout.dac_offset[ 1 ] = 8;
+	layout.dac_gain[ 1 ] = 9;
+
+	return cal_ni_generic( setup, &layout );
 }
 
 /*
@@ -620,46 +659,50 @@ static int cal_ni_at_mio_16e_2(calibration_setup_t *setup)
  */
 static int cal_ni_daqcard_ai_16xe_50(calibration_setup_t *setup)
 {
-	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,2);
-	cal1( setup, ni_zero_offset_high,8);
-	cal1( setup, ni_reference_low,0);
-	cal1_fine( setup, ni_reference_low,0);
-	cal1( setup, ni_reference_low,1);
-	return 0;
+	ni_caldac_layout_t layout;
+
+	init_ni_caldac_layout( &layout );
+	layout.adc_pregain_offset = 8;
+	layout.adc_postgain_offset = 2;
+	layout.adc_gain = 0;
+	layout.adc_gain_fine = 1;
+
+	return cal_ni_generic( setup, &layout );
 }
 
 static int cal_ni_at_mio_16xe_50(calibration_setup_t *setup)
 {
-	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,2);
-	cal1( setup, ni_zero_offset_high,8);
-	cal1( setup, ni_reference_low,0);
-	cal1_fine( setup, ni_reference_low,0);
-	cal1( setup, ni_reference_low,1);
+	ni_caldac_layout_t layout;
 
-	if(setup->do_output){
-		cal1( setup, ni_ao0_zero_offset,6);
-		cal1( setup, ni_ao0_reference,4);
-		cal1( setup, ni_ao1_zero_offset,7);
-		cal1( setup, ni_ao1_reference,5);
-	}
-	return 0;
+	init_ni_caldac_layout( &layout );
+	layout.adc_pregain_offset = 8;
+	layout.adc_postgain_offset = 2;
+	layout.adc_gain = 0;
+	layout.adc_gain_fine = 1;
+	layout.dac_offset[ 0 ] = 6;
+	layout.dac_gain[ 0 ] = 4;
+	layout.dac_offset[ 1 ] = 7;
+	layout.dac_gain[ 1 ] = 5;
+
+	return cal_ni_generic( setup, &layout );
 }
 
 static int cal_ni_pci_mio_16xe_10(calibration_setup_t *setup)
 {
-	postgain_cal( setup, ni_zero_offset_low, ni_zero_offset_high, 2);
-	postgain_cal( setup, ni_zero_offset_low, ni_zero_offset_high, 3);
-	cal1( setup, ni_zero_offset_high, 8);
-	cal1( setup, ni_reference_low, 0);
-	cal1( setup, ni_reference_low, 1);
+	ni_caldac_layout_t layout;
 
-	if(setup->do_output){
-		cal1( setup, ni_ao0_zero_offset,6);
-		cal1( setup, ni_ao0_reference,4);
-		cal1( setup, ni_ao1_zero_offset,7);
-		cal1( setup, ni_ao1_reference,5);
-	}
-	return 0;
+	init_ni_caldac_layout( &layout );
+	layout.adc_pregain_offset = 8;
+	layout.adc_postgain_offset = 2;
+	layout.adc_postgain_offset_fine = 3;
+	layout.adc_gain = 0;
+	layout.adc_gain_fine = 1;
+	layout.dac_offset[ 0 ] = 6;
+	layout.dac_gain[ 0 ] = 4;
+	layout.dac_offset[ 1 ] = 7;
+	layout.dac_gain[ 1 ] = 5;
+
+	return cal_ni_generic( setup, &layout );
 }
 
 static int cal_ni_at_mio_16e_1(calibration_setup_t *setup)
@@ -669,168 +712,177 @@ static int cal_ni_at_mio_16e_1(calibration_setup_t *setup)
 
 static int cal_ni_pci_mio_16e_1(calibration_setup_t *setup)
 {
-	//cal_ni_at_mio_16e_2();
+	ni_caldac_layout_t layout;
 
-	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,1);
-	cal1( setup, ni_zero_offset_high,0);
-	cal1( setup, ni_reference_low,3);
-	cal1( setup, ni_unip_zero_offset_low,2);
-	if(setup->do_output){
-		cal1( setup, ni_ao0_zero_offset,5);
-		//cal1( setup, ni_ao0_zero_offset,4); /* linearity? */
-		cal1( setup, ni_ao0_reference,6);
-		cal1( setup, ni_ao1_zero_offset,8);
-		//cal1( setup, ni_ao1_zero_offset,7); /* linearity? */
-		cal1( setup, ni_ao1_reference,9);
-	}
-	return 0;
+	init_ni_caldac_layout( &layout );
+	layout.adc_pregain_offset = 0;
+	layout.adc_postgain_offset = 1;
+	layout.adc_unip_offset = 2;
+	layout.adc_gain = 3;
+	layout.dac_offset[ 0 ] = 5;
+	layout.dac_gain[ 0 ] = 6;
+	layout.dac_linearity[ 0 ] = 4;
+	layout.dac_offset[ 1 ] = 8;
+	layout.dac_gain[ 1 ] = 9;
+	layout.dac_linearity[ 1 ] = 7;
+
+	return cal_ni_generic( setup, &layout );
 }
 
 static int cal_ni_pci_6032e(calibration_setup_t *setup)
 {
-	postgain_cal(setup, ni_zero_offset_low, ni_zero_offset_high, 2);
-	postgain_cal(setup, ni_zero_offset_low, ni_zero_offset_high, 3);
+	ni_caldac_layout_t layout;
 
-	cal1( setup, ni_zero_offset_high,8);
+	init_ni_caldac_layout( &layout );
+	layout.adc_pregain_offset = 8;
+	layout.adc_postgain_offset = 2;
+	layout.adc_postgain_offset_fine = 3;
+	layout.adc_gain = 0;
+	layout.adc_gain_fine = 1;
 
-	cal1( setup, ni_reference_low,0);
-	cal1_fine( setup, ni_reference_low,0);
-	cal1( setup, ni_reference_low,1);
-
-	return 0;
+	return cal_ni_generic( setup, &layout );
 }
 
 static int cal_ni_pci_6035e(calibration_setup_t *setup)
 {
 	/* this is for the ad8804_debug caldac */
+	ni_caldac_layout_t layout;
 
-	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,4);
+	init_ni_caldac_layout( &layout );
+	layout.adc_pregain_offset = 0;
+	layout.adc_pregain_offset_fine = 8;
+	layout.adc_postgain_offset = 4;
+	layout.adc_gain = 2;
+	layout.dac_offset[ 0 ] = 6;
+	layout.dac_gain[ 0 ] = 11;
+	layout.dac_linearity[ 0 ] = 10;
+	layout.dac_offset[ 1 ] = 0;
+	layout.dac_gain[ 1 ] = 5;
+	layout.dac_linearity[ 1 ] = 1;
 
-	cal1( setup, ni_zero_offset_high,0);
-	cal1( setup, ni_zero_offset_high,8);
-
-	cal1( setup, ni_reference_low,2);
-
-	if(setup->do_output){
-		cal1( setup, ni_ao0_zero_offset,6);
-		//cal1( setup, ni_ao0_zero_offset,10); /* linearity? */
-		cal1( setup, ni_ao0_reference,11);
-		cal1( setup, ni_ao1_zero_offset,9);
-		//cal1( setup, ni_ao1_zero_offset,1); /* linearity? */
-		cal1( setup, ni_ao1_reference,5);
-	}
-	return 0;
+	return cal_ni_generic( setup, &layout );
 }
 
 static int cal_ni_pci_6071e(calibration_setup_t *setup)
 {
-	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,1);
-	cal1( setup, ni_zero_offset_high,0);
-	cal1( setup, ni_reference_low,3);
-	cal1_fine( setup, ni_reference_low,3);
-	if(setup->do_output){
-		cal1( setup, ni_ao0_zero_offset,5);
-		//cal1( setup, ni_ao0_zero_offset,4); /* linearity? */
-		/* caldac 6 should most likely be AO0 reference, but it
-		 * isn't. */
-		/*cal1( setup, ni_ao0_reference,6);*/
-		cal1( setup, ni_ao1_zero_offset,8);
-		//cal1( setup, ni_ao1_zero_offset,7); /* linearity? */
-		cal1( setup, ni_ao1_reference,9);
-	}
-	return 0;
+	ni_caldac_layout_t layout;
+
+	init_ni_caldac_layout( &layout );
+	layout.adc_pregain_offset = 0;
+	layout.adc_postgain_offset = 1;
+	layout.adc_gain = 3;
+	layout.dac_offset[ 0 ] = 5;
+	/* caldac 6 should most likely be AO0 reference, but it
+	 * isn't. */
+	/* layout.dac_gain[ 0 ] = 6; */
+	layout.dac_linearity[ 0 ] = 4;
+	layout.dac_offset[ 1 ] = 8;
+	layout.dac_gain[ 1 ] = 9;
+	layout.dac_linearity[ 1 ] = 7;
+
+	return cal_ni_generic( setup, &layout );
 }
 
 static int cal_ni_pxi_6071e(calibration_setup_t *setup)
 {
 	// 6071e (old)
-	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,1);
-	cal1( setup, ni_zero_offset_high,0);
-	cal1( setup, ni_reference_low,3);
-	if(setup->do_output){
-		// unknown
-	}
-	return 0;
+	ni_caldac_layout_t layout;
+
+	init_ni_caldac_layout( &layout );
+	layout.adc_pregain_offset = 0;
+	layout.adc_postgain_offset = 1;
+	layout.adc_gain = 3;
+
+	return cal_ni_generic( setup, &layout );
 }
 
 static int cal_ni_at_mio_16e_10(calibration_setup_t *setup)
 {
 	// 16e-10 (old)
-	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,1);
-	cal1( setup, ni_zero_offset_high,10);
-	cal1( setup, ni_zero_offset_high,0);
-	cal1( setup, ni_reference_low,3);
-	cal1( setup, ni_unip_zero_offset_low,2);
-	if(setup->do_output){
-		cal1( setup, ni_ao0_zero_offset,5); // guess
-		cal1( setup, ni_ao0_reference,6); // guess
-		cal1( setup, ni_ao1_zero_offset,8); // guess
-		cal1( setup, ni_ao1_reference,9); // guess
-	}
-	return 0;
+	ni_caldac_layout_t layout;
+
+	init_ni_caldac_layout( &layout );
+	layout.adc_pregain_offset = 10;
+	layout.adc_pregain_offset_fine = 0;
+	layout.adc_postgain_offset = 1;
+	layout.adc_gain = 3;
+	layout.adc_unip_offset = 2;
+	layout.dac_offset[ 0 ] = 5; /* guess */
+	layout.dac_gain[ 0 ] = 6; /* guess */
+	layout.dac_offset[ 1 ] = 8; /* guess */
+	layout.dac_gain[ 1 ] = 9; /* guess */
+
+	return cal_ni_generic( setup, &layout );
 }
 
 static int cal_ni_pci_mio_16xe_50(calibration_setup_t *setup)
 {
-	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,2);
-	cal1( setup, ni_zero_offset_high,8);
-	cal1( setup, ni_reference_low,0);
-	cal1_fine( setup, ni_reference_low,0);
-	cal1( setup, ni_reference_low,1);
+	ni_caldac_layout_t layout;
 
-	if(setup->do_output){
-		cal1( setup, ni_ao0_zero_offset,6);
-		cal1( setup, ni_ao0_reference,4);
-		cal1( setup, ni_ao1_zero_offset,7);
-		cal1( setup, ni_ao1_reference,5);
-	}
-	return 0;
+	init_ni_caldac_layout( &layout );
+	layout.adc_pregain_offset = 8;
+	layout.adc_postgain_offset = 2;
+	layout.adc_gain = 0;
+	layout.adc_gain_fine = 1;
+	layout.adc_unip_offset = 7;
+	layout.dac_offset[ 0 ] = 6;
+	layout.dac_gain[ 0 ] = 4;
+	layout.dac_offset[ 1 ] = 7;
+	layout.dac_gain[ 1 ] = 5;
+
+	return cal_ni_generic( setup, &layout );
 }
 
 static int cal_ni_pci_6023e(calibration_setup_t *setup)
 {
 	/* for comedi-0.7.65 */
+	ni_caldac_layout_t layout;
 
-	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,4);
-	cal1( setup, ni_zero_offset_high,0);
-	cal1( setup, ni_zero_offset_high,8); /* possibly wrong */
-	cal1( setup, ni_reference_low,2);
+	init_ni_caldac_layout( &layout );
+	layout.adc_pregain_offset = 8; /* possibly wrong */
+	layout.adc_pregain_offset_fine = 0;
+	layout.adc_postgain_offset = 4;
+	layout.adc_gain = 2;
 
-	return 0;
+	return cal_ni_generic( setup, &layout );
 }
 
 static int cal_ni_pci_6024e(calibration_setup_t *setup)
 {
-	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,4);
-	cal1( setup, ni_zero_offset_high,0);
-	cal1( setup, ni_zero_offset_high,8);
-	cal1( setup, ni_reference_low,2);
-	if(setup->do_output){
-		cal1( setup, ni_ao0_zero_offset,6);
-		//cal1( setup, ni_ao0_zero_offset,10); // nonlinearity?
-		cal1( setup, ni_ao0_reference,11);
-		cal1( setup, ni_ao1_zero_offset,9);
-		//cal1( setup, ni_ao1_zero_offset,1); // nonlinearity?
-		cal1( setup, ni_ao1_reference,5);
-	}
-	return 0;
+	ni_caldac_layout_t layout;
+
+	init_ni_caldac_layout( &layout );
+	layout.adc_pregain_offset = 8;
+	layout.adc_postgain_offset = 4;
+	layout.adc_pregain_offset_fine = 0;
+	layout.adc_gain = 2;
+	layout.dac_offset[ 0 ] = 6;
+	layout.dac_gain[ 0 ] = 11;
+	layout.dac_linearity[ 0 ] = 10;
+	layout.dac_offset[ 1 ] = 9;
+	layout.dac_gain[ 1 ] = 5;
+	layout.dac_linearity[ 1 ] = 1;
+
+	return cal_ni_generic( setup, &layout );
 }
 
 static int cal_ni_pci_6025e(calibration_setup_t *setup)
 {
-	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,4);
-	cal1( setup, ni_zero_offset_high,0);
-	cal1( setup, ni_zero_offset_high,8);
-	cal1( setup, ni_reference_low,2);
-	if(setup->do_output){
-		cal1( setup, ni_ao0_zero_offset,6);
-		//cal1( setup, ni_ao0_zero_offset,10); /* nonlinearity */
-		cal1( setup, ni_ao0_reference,11);
-		cal1( setup, ni_ao1_zero_offset,9);
-		//cal1( setup, ni_ao1_zero_offset,1); /* nonlinearity */
-		cal1( setup, ni_ao1_reference,5);
-	}
-	return 0;
+	ni_caldac_layout_t layout;
+
+	init_ni_caldac_layout( &layout );
+	layout.adc_pregain_offset = 8;
+	layout.adc_postgain_offset = 4;
+	layout.adc_pregain_offset_fine = 0;
+	layout.adc_gain = 2;
+	layout.dac_offset[ 0 ] = 6;
+	layout.dac_gain[ 0 ] = 11;
+	layout.dac_linearity[ 0 ] = 10;
+	layout.dac_offset[ 1 ] = 9;
+	layout.dac_gain[ 1 ] = 5;
+	layout.dac_linearity[ 1 ] = 1;
+
+	return cal_ni_generic( setup, &layout );
 }
 
 static int cal_ni_pci_6052e(calibration_setup_t *setup)
@@ -868,72 +920,50 @@ static int cal_ni_pci_6052e(calibration_setup_t *setup)
 	 *   14 5	13 1	0101 0001
 	 *
 	 */
+	ni_caldac_layout_t layout;
 
-	cal_postgain_binary( setup, ni_zero_offset_low,ni_zero_offset_high,2);
-	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,3);
-	cal1( setup, ni_zero_offset_high,0);
-	cal1( setup, ni_zero_offset_high,1);
-	cal_binary( setup, ni_reference_low,4);
-	cal1_fine( setup, ni_reference_low,4);
-	cal1( setup, ni_reference_low,5);
-	cal1( setup, ni_unip_zero_offset_low,6);
-	cal1_fine( setup, ni_unip_zero_offset_low,6);
-	if(setup->do_output){
-		cal1( setup, ni_ao0_zero_offset,12+11);
-		cal1_fine( setup, ni_ao0_zero_offset,12+11);
-		cal1( setup, ni_ao0_reference,12+7);
-		cal1_fine( setup, ni_ao0_reference,12+7);
-		cal1( setup, ni_ao0_reference,12+3);
-		cal1( setup, ni_ao1_zero_offset,12+1);
-		cal1( setup, ni_ao1_reference,12+9);
-		cal1_fine( setup, ni_ao1_reference,12+9);
-		cal1( setup, ni_ao1_reference,12+5);
-	}
-	return 0;
-}
-
-static int cal_ni_pci_mio_16e_4(calibration_setup_t *setup)
-{
-	/* this is for the ad8804_debug caldac */
-
-	cal_postgain_binary( setup, ni_zero_offset_low,ni_zero_offset_high,4);
-	//cal_postgain_fine( setup, ni_zero_offset_low,ni_zero_offset_high,4);
-	cal1( setup, ni_zero_offset_high,8);
-	cal_binary( setup, ni_reference_low,2);
-	cal1_fine( setup, ni_reference_low,2);
-
-	cal1( setup, ni_unip_zero_offset_low,7);
-	cal1_fine( setup, ni_unip_zero_offset_low,7);
-
-	if(setup->do_output){
-		cal_binary( setup, ni_ao0_zero_offset,6);
-		cal1_fine( setup, ni_ao0_zero_offset,6);
-		//cal1( setup, ni_ao0_nonlinearity,10);
-		cal_binary( setup, ni_ao0_reference,11);
-		cal1_fine( setup, ni_ao0_reference,11);
-		cal_binary( setup, ni_ao1_zero_offset,9);
-		cal1_fine( setup, ni_ao1_zero_offset,9);
-		//cal1( setup, ni_ao1_nonlinearity,1);
-		cal_binary( setup, ni_ao1_reference,5);
-		cal1_fine( setup, ni_ao1_reference,5);
-	}
-	return 0;
+	init_ni_caldac_layout( &layout );
+	layout.adc_pregain_offset = 0;
+	layout.adc_postgain_offset = 2;
+	layout.adc_gain = 4;
+	layout.adc_unip_offset = 6;
+	layout.adc_pregain_offset_fine = 1;
+	layout.adc_postgain_offset_fine = 3;
+	layout.adc_gain_fine = 5;
+#if 1
+/* this seems broken, i think we need to change
+ * second caldac in driver to ad8804_debug */
+	layout.dac_offset[ 0 ] = 12 + 11;
+	layout.dac_gain[ 0 ] = 12 + 7;
+	layout.dac_gain_fine[ 0 ] = 12 + 3;
+	layout.dac_offset[ 1 ] = 12 + 1;
+	layout.dac_gain[ 1 ] = 12 + 9;
+	layout.dac_gain_fine[ 1 ] = 12 + 5;
+#else
+/* this should work if the first two caldacs were ad8804_debug */
+	layout.dac_offset[ 0 ] = 16 + 3;
+	layout.dac_gain[ 0 ] = 16 + 1;
+	layout.dac_gain_fine[ 0 ] = 16 + 2;
+	layout.dac_linearity[ 0 ] = 16 + 0;
+	layout.dac_offset[ 1 ] = 16 + 7;
+	layout.dac_gain[ 1 ] = 16 + 5;
+	layout.dac_gain_fine[ 1 ] = 16 + 6;
+	layout.dac_linearity[ 1 ] = 16 + 4;
+#endif
+	return cal_ni_generic( setup, &layout );
 }
 
 static int cal_ni_daqcard_ai_16e_4(calibration_setup_t *setup)
 {
-	cal_postgain_binary(setup, ni_zero_offset_low, ni_zero_offset_high, 1);
-	//cal_postgain_fine(setup, ni_zero_offset_low, ni_zero_offset_high, 1);
+	ni_caldac_layout_t layout;
 
-	cal_binary( setup, ni_zero_offset_high,0);
-	cal1_fine( setup, ni_zero_offset_high,0);
+	init_ni_caldac_layout( &layout );
+	layout.adc_pregain_offset = 0;
+	layout.adc_postgain_offset = 1;
+	layout.adc_gain = 3;
+	layout.adc_unip_offset = 2;
 
-	cal_binary( setup, ni_reference_low,3);
-	cal1_fine( setup, ni_reference_low,3);
-
-	cal1( setup, ni_unip_zero_offset_low,2);
-
-	return 0;
+	return cal_ni_generic( setup, &layout );
 }
 
 static int cal_ni_pci_611x( calibration_setup_t *setup )
@@ -944,59 +974,79 @@ static int cal_ni_pci_611x( calibration_setup_t *setup )
 	num_chans = comedi_get_n_channels( setup->dev, setup->ad_subdev );
 
 	for( i = 0; i < num_chans; i++ ){
-		cal1( setup, ni_zero_offset_611x( i ), ( 2 * i + 2 ) );
-		cal1( setup, ni_reference_611x( i ), ( 2 * i + 1 ) );
+		cal_binary( setup, ni_zero_offset_611x( i ), ( 2 * i + 2 ) );
+		cal_binary( setup, ni_reference_611x( i ), ( 2 * i + 1 ) );
 	}
 
 	if(setup->do_output){
-		cal1( setup, ni_ao0_zero_offset_611x, 14 );
-		cal1( setup, ni_ao0_reference_611x, 13 );
-		cal1( setup, ni_ao1_zero_offset_611x, 16 );
-		cal1( setup, ni_ao1_reference_611x, 15 );
+		cal_binary( setup, ni_ao0_zero_offset_611x, 14 );
+		cal_binary( setup, ni_ao0_reference_611x, 13 );
+		cal_binary( setup, ni_ao1_zero_offset_611x, 16 );
+		cal_binary( setup, ni_ao1_reference_611x, 15 );
 	}
 
 	return 0;
 }
 
-enum caldacs_dc6062e
+static int cal_ni_pci_mio_16e_4( calibration_setup_t *setup )
 {
-	DAC1_LINEARITY_DC6062E = 1, /* not sure exactly what this does */
-	ADC_GAIN_DC6062E = 2,	/* couples strongly to offset in bipolar ranges */
-	ADC_POSTGAIN_OFFSET_DC6062E = 4,
-	DAC1_GAIN_DC6062E = 5,
-	DAC0_OFFSET_DC6062E = 6,
-	ADC_UNIPOLAR_OFFSET_DC6062E = 7,
-	ADC_PREGAIN_OFFSET_DC6062E = 8,
-	DAC1_OFFSET_DC6062E = 9,
-	DAC0_LINEARITY_DC6062E = 10,
-	DAC0_GAIN_DC6062E = 11,
-};
-static inline unsigned int DAC_OFFSET_DC6062E( unsigned int channel )
-{
-	if( channel ) return DAC1_OFFSET_DC6062E;
-	else return DAC0_OFFSET_DC6062E;
-}
-static inline unsigned int DAC_GAIN_DC6062E( unsigned int channel )
-{
-	if( channel ) return DAC1_GAIN_DC6062E;
-	else return DAC0_GAIN_DC6062E;
-}
-static inline unsigned int DAC_LINEARITY_DC6062E( unsigned int channel )
-{
-	if( channel ) return DAC1_LINEARITY_DC6062E;
-	else return DAC0_LINEARITY_DC6062E;
+	ni_caldac_layout_t layout;
+
+	init_ni_caldac_layout( &layout );
+	layout.adc_pregain_offset = 8;
+	layout.adc_postgain_offset = 4;
+	layout.adc_gain = 2;
+	layout.adc_unip_offset = 7;
+	layout.dac_offset[ 0 ] = 6;
+	layout.dac_gain[ 0 ] = 11;
+	layout.dac_linearity[ 0 ] = 10;
+	layout.dac_offset[ 1 ] = 9;
+	layout.dac_gain[ 1 ] = 5;
+	layout.dac_linearity[ 1 ] = 1;
+
+	return cal_ni_generic( setup, &layout );
 }
 
-static void prep_adc_caldacs_dc6062e( calibration_setup_t *setup )
+static int cal_ni_daqcard_6062e( calibration_setup_t *setup )
+{
+	ni_caldac_layout_t layout;
+
+	init_ni_caldac_layout( &layout );
+	layout.adc_pregain_offset = 8;
+	layout.adc_postgain_offset = 4;
+	layout.adc_gain = 2;
+	layout.adc_unip_offset = 7;
+	layout.dac_offset[ 0 ] = 6;
+	layout.dac_gain[ 0 ] = 11;
+	layout.dac_linearity[ 0 ] = 10;
+	layout.dac_offset[ 1 ] = 9;
+	layout.dac_gain[ 1 ] = 5;
+	layout.dac_linearity[ 1 ] = 1;
+
+	return cal_ni_generic( setup, &layout );
+}
+
+static void ni_generic_reset_caldac( calibration_setup_t *setup,
+	int caldac )
+{
+	if( caldac < 0 ) return;
+	reset_caldac( setup, caldac );
+}
+
+static void prep_adc_caldacs_generic( calibration_setup_t *setup,
+	const ni_caldac_layout_t *layout )
 {
 	int retval;
 
 	if( setup->do_reset )
 	{
-		reset_caldac( setup, ADC_PREGAIN_OFFSET_DC6062E );
-		reset_caldac( setup, ADC_POSTGAIN_OFFSET_DC6062E );
-		reset_caldac( setup, ADC_GAIN_DC6062E );
-		reset_caldac( setup, ADC_PREGAIN_OFFSET_DC6062E );
+		ni_generic_reset_caldac( setup, layout->adc_pregain_offset );
+		ni_generic_reset_caldac( setup, layout->adc_postgain_offset );
+		ni_generic_reset_caldac( setup, layout->adc_gain );
+		ni_generic_reset_caldac( setup, layout->adc_pregain_offset_fine );
+		ni_generic_reset_caldac( setup, layout->adc_postgain_offset_fine );
+		ni_generic_reset_caldac( setup, layout->adc_gain_fine );
+		ni_generic_reset_caldac( setup, layout->adc_unip_offset );
 	}else
 	{
 		retval = comedi_apply_calibration( setup->dev, setup->ad_subdev,
@@ -1004,24 +1054,30 @@ static void prep_adc_caldacs_dc6062e( calibration_setup_t *setup )
 		if( retval < 0 )
 		{
 			DPRINT( 0, "Failed to apply existing calibration, reseting adc caldacs.\n" );
-			reset_caldac( setup, ADC_PREGAIN_OFFSET_DC6062E );
-			reset_caldac( setup, ADC_POSTGAIN_OFFSET_DC6062E );
-			reset_caldac( setup, ADC_GAIN_DC6062E );
-			reset_caldac( setup, ADC_PREGAIN_OFFSET_DC6062E );
+			ni_generic_reset_caldac( setup, layout->adc_pregain_offset );
+			ni_generic_reset_caldac( setup, layout->adc_postgain_offset );
+			ni_generic_reset_caldac( setup, layout->adc_gain );
+			ni_generic_reset_caldac( setup, layout->adc_pregain_offset_fine );
+			ni_generic_reset_caldac( setup, layout->adc_postgain_offset_fine );
+			ni_generic_reset_caldac( setup, layout->adc_gain_fine );
+			ni_generic_reset_caldac( setup, layout->adc_unip_offset );
 		}
 	}
 }
 
-static void prep_dac_caldacs_dc6062e( calibration_setup_t *setup,
-	unsigned int channel )
+static void prep_dac_caldacs_generic( calibration_setup_t *setup,
+	const ni_caldac_layout_t *layout, unsigned int channel )
 {
 	int retval;
 
+	if( setup->da_subdev < 0 ) return;
+
 	if( setup->do_reset )
 	{
-		reset_caldac( setup, DAC_OFFSET_DC6062E( channel ) );
-		reset_caldac( setup, DAC_GAIN_DC6062E( channel ) );
-		reset_caldac( setup, DAC_LINEARITY_DC6062E( channel ) );
+		ni_generic_reset_caldac( setup, layout->dac_offset[ channel ] );
+		ni_generic_reset_caldac( setup, layout->dac_gain[ channel ] );
+		ni_generic_reset_caldac( setup, layout->dac_gain_fine[ channel ] );
+		ni_generic_reset_caldac( setup, layout->dac_linearity[ channel ] );
 	}else
 	{
 		retval = comedi_apply_calibration( setup->dev, setup->da_subdev,
@@ -1029,66 +1085,129 @@ static void prep_dac_caldacs_dc6062e( calibration_setup_t *setup,
 		if( retval < 0 )
 		{
 			DPRINT( 0, "Failed to apply existing calibration, reseting dac caldacs.\n" );
-			reset_caldac( setup, DAC_OFFSET_DC6062E( channel ) );
-			reset_caldac( setup, DAC_GAIN_DC6062E( channel ) );
-			reset_caldac( setup, DAC_LINEARITY_DC6062E( channel ) );
+			ni_generic_reset_caldac( setup, layout->dac_offset[ channel ] );
+			ni_generic_reset_caldac( setup, layout->dac_gain[ channel ] );
+			ni_generic_reset_caldac( setup, layout->dac_gain_fine[ channel ] );
+			ni_generic_reset_caldac( setup, layout->dac_linearity[ channel ] );
 		}
 	}
 }
 
-static int cal_ni_daqcard_6062e( calibration_setup_t *setup )
+static void ni_generic_binary( calibration_setup_t *setup,
+	saved_calibration_t *saved_cal, int observable, int caldac )
 {
-	saved_calibration_t saved_cals[ 3 ], *current_cal;
-	static const int num_calibrations = sizeof( saved_cals ) / sizeof( saved_cals[0] );
+	if( caldac < 0 ) return;
+
+	cal_binary( setup, observable, caldac );
+	sc_push_caldac( saved_cal, setup->caldacs[ caldac ] );
+}
+
+static void ni_generic_relative( calibration_setup_t *setup,
+	saved_calibration_t *saved_cal, int observable1, int observable2, int caldac )
+{
+	if( caldac < 0 ) return;
+
+	cal_relative_binary( setup, observable1, observable2, caldac );
+	sc_push_caldac( saved_cal, setup->caldacs[ caldac ] );
+}
+
+static void ni_generic_linearity( calibration_setup_t *setup,
+	saved_calibration_t *saved_cal, int observable1, int observable2,
+	int observable3, int caldac )
+{
+	if( caldac < 0 ) return;
+
+	cal_linearity_binary( setup, observable1, observable2, observable3, caldac );
+	sc_push_caldac( saved_cal, setup->caldacs[ caldac ] );
+}
+
+static int cal_ni_generic( calibration_setup_t *setup, const ni_caldac_layout_t *layout )
+{
+	saved_calibration_t saved_cals[ 5 ], *current_cal;
 	int i, retval;
+	int num_calibrations;
 
 	current_cal = saved_cals;
 
 	memset( saved_cals, 0, sizeof( saved_cals ) );
 
-	prep_adc_caldacs_dc6062e( setup );
-
-	cal_relative_binary( setup, ni_zero_offset_low, ni_reference_low, ADC_GAIN_DC6062E );
-	cal_relative_binary( setup, ni_zero_offset_low, ni_zero_offset_high,
-		ADC_POSTGAIN_OFFSET_DC6062E );
-	cal_binary( setup, ni_zero_offset_high, ADC_PREGAIN_OFFSET_DC6062E );
-	cal_binary( setup, ni_unip_zero_offset_high, ADC_UNIPOLAR_OFFSET_DC6062E );
+	prep_adc_caldacs_generic( setup, layout );
 
 	current_cal->subdevice = setup->ad_subdev;
-	sc_push_caldac( current_cal, setup->caldacs[ ADC_PREGAIN_OFFSET_DC6062E ] );
-	sc_push_caldac( current_cal, setup->caldacs[ ADC_GAIN_DC6062E ] );
-	sc_push_caldac( current_cal, setup->caldacs[ ADC_POSTGAIN_OFFSET_DC6062E ] );
-	sc_push_caldac( current_cal, setup->caldacs[ ADC_UNIPOLAR_OFFSET_DC6062E ] );
+	ni_generic_relative( setup, current_cal, ni_zero_offset_low,
+		ni_reference_low, layout->adc_gain );
+	ni_generic_relative( setup, current_cal, ni_zero_offset_low,
+		ni_zero_offset_high, layout->adc_postgain_offset );
+	ni_generic_binary( setup, current_cal, ni_zero_offset_high, layout->adc_pregain_offset );
+	ni_generic_relative( setup, current_cal, ni_zero_offset_low,
+		ni_reference_low, layout->adc_gain_fine );
+	ni_generic_relative( setup, current_cal, ni_zero_offset_low,
+		ni_zero_offset_high, layout->adc_postgain_offset_fine );
+	ni_generic_binary( setup, current_cal, ni_zero_offset_high,
+		layout->adc_pregain_offset_fine );
+	ni_generic_binary( setup, current_cal, ni_unip_zero_offset_high, layout->adc_unip_offset );
 	sc_push_channel( current_cal, SC_ALL_CHANNELS );
 	sc_push_range( current_cal, SC_ALL_RANGES );
 	sc_push_aref( current_cal, SC_ALL_AREFS );
 	current_cal++;
 
-	if(setup->do_output)
+	if( setup->da_subdev >= 0 && setup->do_output )
 	{
-		unsigned int channel;
+		unsigned int channel, range;
+		int ao_unipolar_lowgain = get_unipolar_lowgain( setup->dev, setup->da_subdev );
+		int num_ao_ranges;
 
 		for( channel = 0; channel < 2; channel++ )
 		{
-			prep_dac_caldacs_dc6062e( setup, channel );
-
-			cal_linearity_binary( setup, ni_ao_linearity( channel ),
-				ni_ao_zero_offset( channel ), ni_ao_reference( channel ),
-				DAC_LINEARITY_DC6062E( channel ) );
-			cal_binary( setup, ni_ao_zero_offset( channel ), DAC_OFFSET_DC6062E( channel ) );
-			cal_binary( setup, ni_ao_reference( channel ), DAC_GAIN_DC6062E( channel ) );
+			num_ao_ranges = comedi_get_n_ranges( setup->dev, setup->da_subdev, channel );
+			prep_dac_caldacs_generic( setup, layout, channel );
 
 			current_cal->subdevice = setup->da_subdev;
-			sc_push_caldac( current_cal, setup->caldacs[ DAC_OFFSET_DC6062E( channel ) ] );
-			sc_push_caldac( current_cal, setup->caldacs[ DAC_GAIN_DC6062E( channel ) ] );
-			sc_push_caldac( current_cal, setup->caldacs[ DAC_LINEARITY_DC6062E( channel ) ] );
+			ni_generic_linearity( setup, current_cal, ni_ao_linearity( channel ),
+				ni_ao_zero_offset( channel ), ni_ao_reference( channel ),
+				layout->dac_linearity[ channel ] );
+			ni_generic_binary( setup, current_cal, ni_ao_zero_offset( channel ),
+				layout->dac_offset[ channel ] );
+			ni_generic_binary( setup, current_cal, ni_ao_reference( channel ),
+				layout->dac_gain[ channel ] );
+			ni_generic_binary( setup, current_cal, ni_ao_reference( channel ),
+				layout->dac_gain_fine[ channel ] );
 			sc_push_channel( current_cal, channel );
-			sc_push_range( current_cal, SC_ALL_RANGES );
+			for( range = 0; range < num_ao_ranges; range++ )
+			{
+				if( is_bipolar( setup->dev, setup->da_subdev, channel, range ) )
+					sc_push_range( current_cal, range );
+			}
 			sc_push_aref( current_cal, SC_ALL_AREFS );
 			current_cal++;
+
+			if( ao_unipolar_lowgain >= 0 )
+			{
+				prep_dac_caldacs_generic( setup, layout, channel );
+
+				current_cal->subdevice = setup->da_subdev;
+				ni_generic_linearity( setup, current_cal, ni_ao_unip_zero_offset( channel ),
+					ni_ao_unip_linearity( channel ), ni_ao_unip_reference( channel ),
+					layout->dac_linearity[ channel ] );
+				ni_generic_binary( setup, current_cal, ni_ao_unip_zero_offset( channel),
+					layout->dac_offset[ channel ] );
+				ni_generic_binary( setup, current_cal, ni_ao_unip_reference( channel ),
+					layout->dac_gain[ channel ] );
+				ni_generic_binary( setup, current_cal, ni_ao_unip_reference( channel ),
+					layout->dac_gain_fine[ channel ] );
+				sc_push_channel( current_cal, channel );
+				for( range = 0; range < num_ao_ranges; range++ )
+				{
+					if( is_unipolar( setup->dev, setup->da_subdev, channel, range ) )
+						sc_push_range( current_cal, range );
+				}
+				sc_push_aref( current_cal, SC_ALL_AREFS );
+				current_cal++;
+			}
 		}
 	}
 
+	num_calibrations = current_cal - saved_cals;
 	retval = write_calibration_file( setup, saved_cals, num_calibrations );
 	for( i = 0; i < num_calibrations; i++ )
 		clear_saved_calibration( &saved_cals[ i ] );
