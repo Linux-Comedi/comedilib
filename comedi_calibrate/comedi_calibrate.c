@@ -59,7 +59,7 @@ void write_caldac(comedi_t *dev,int subdev,int addr,int val);
 void check_gain(int ad_chan,int range);
 double check_gain_chan(int ad_chan,int range,int cdac);
 
-int verbose = 1;
+int verbose = 0;
 
 
 void update_caldac(int i);
@@ -73,6 +73,14 @@ void caldac_dependence(int caldac);
 void dump_curve(int adc,int caldac);
 void chan_cal(int adc,int caldac,int range,double target);
 int read_eeprom(int addr);
+
+int get_bipolar_lowgain(comedi_t *dev,int subdev);
+int get_bipolar_highgain(comedi_t *dev,int subdev);
+int get_unipolar_lowgain(comedi_t *dev,int subdev);
+
+int sci_sprint(char *s,double x,double y);
+int sci_sprint_alt(char *s,double x,double y);
+
 
 typedef struct {
 	int n;
@@ -135,6 +143,7 @@ void cal_ni_16e_10(void);
 void cal_ni_16xe_50(void);
 void cal_ni_16xe_10(void);
 void cal_ni_6023e(void);
+void cal_ni_6071e(void);
 void cal_ni_daqcard_ai_16xe_50(void);
 void cal_ni_unknown(void);
 
@@ -158,20 +167,21 @@ struct board_struct boards[]={
 	{ "pci-6033e",		cal_ni_unknown },
 	{ "pci-6071e",		cal_ni_unknown },
 	{ "pci-6023e",		cal_ni_6023e },
-	{ "pci-6024e",		cal_ni_unknown },
-	{ "pci-6025e",		cal_ni_unknown },
-	{ "pxi-6025e",		cal_ni_unknown },
-	{ "pci-6034e",		cal_ni_unknown },
-	{ "pci-6035e",		cal_ni_unknown },
+	{ "pci-6024e",		cal_ni_6023e }, // guess
+	{ "pci-6025e",		cal_ni_6023e }, // guess
+	{ "pxi-6025e",		cal_ni_6023e }, // guess
+	{ "pci-6034e",		cal_ni_6023e }, // guess
+	{ "pci-6035e",		cal_ni_6023e },
 	{ "pci-6052e",		cal_ni_unknown },
 	{ "pci-6110e",		cal_ni_unknown },
 	{ "pci-6111e",		cal_ni_unknown },
 //	{ "pci-6711",		cal_ni_unknown },
 //	{ "pci-6713",		cal_ni_unknown },
-	{ "pxi-6071e",		cal_ni_unknown },
+	{ "pxi-6071e",		cal_ni_6071e },
 	{ "pxi-6070e",		cal_ni_unknown },
 	{ "pxi-6052e",		cal_ni_unknown },
-	{ "DAQCard-ai-16xe-50",	cal_ni_daqcard_ai_16xe_50 },
+//	{ "DAQCard-ai-16xe-50",	cal_ni_daqcard_ai_16xe_50 },
+	{ "DAQCard-ai-16xe-50",	cal_ni_unknown },
 	{ "DAQCard-ai-16e-4",	cal_ni_unknown },
 	{ "DAQCard-6062e",	cal_ni_unknown },
 	{ "DAQCard-6024e",	cal_ni_unknown },
@@ -224,7 +234,7 @@ int main(int argc, char *argv[])
 	for(i=0;i<n_boards;i++){
 		if(!strcmp(boards[i].name,devicename)){
 			boards[i].calibrate();
-			break;
+			return 0;
 		}
 	}
 
@@ -547,12 +557,21 @@ void cal_ni_6023e(void)
 /*
  * results of channel dependency test:
  *
+ * PCI-6023e
  * 		[0]	[1]	[3]	[10]
  * offset, lo	-2.8e-9	-7.6e-4		
  * offset, hi	-2.0e-6	-3.8e-6	-1.4e-6
  * offset, unip		1.0e-1*		
  * ref		-7.6e-7	-7.6e-4	-5.6e-4	-6.2e-8
  * ref2		-6.3e-8	-7.5e-4	-5.6e-4	-1.5e-8
+ *
+ * PCI-6035e
+ * low gain = [-10,10], high gain = [-5,5] (mistake), unipolar gain = (none)
+ *		[0]	[1]	[3]
+ * offset, lo	-2.2e-7	-6.1e-4	1.0e-6
+ * offset, hi	-2.0e-7	-3.0e-4	5.3e-7
+ * offset, unip	N/A
+ * ref		-1.9e-7	-6.1e-4	3.6e-4
  *
  * 0 is pregain offset
  * 1 is postgain offset
@@ -604,9 +623,61 @@ void cal_ni_6023e(void)
 	}
 }
 
+void cal_ni_6071e(void)
+{
+	double ref;
+	int i;
+
+/*
+ * PCI-6071e
+ *
+ *		[0]	[1]	[3]	
+ * offset, lo	-1.3e-5	-7.6e-4	1.2e-6
+ * offset, hi	-8.6e-6	-3.8e-6
+ * offset, unip	-3.9e-6	-7.8e-4	-1.4e-6
+ * ref		-3.8e-6	-7.6e-4	-4.6e-4
+ *
+ * 0 is pregain offset
+ * 1 is postgain offset
+ * 3 is gain
+ */
+	int offset_ad = 0;
+	//int unipolar_offset_ad = 1;
+	int gain_ad = 5;
+	int pregain_offset_dac = 0;
+	int postgain_offset_dac = 1;
+	int gain_dac = 3;
+
+	printf("last factory calibration %02d/%02d/%02d\n",
+		read_eeprom(508),read_eeprom(507),read_eeprom(506));
+
+	ref=ni_get_reference(444,443);
+
+	reset_caldacs();
+
+	printf("postgain offset\n");
+	ni_mio_ai_postgain_cal_2(offset_ad,postgain_offset_dac,0,7,200.0);
+
+	printf("pregain offset\n");
+	chan_cal(offset_ad,pregain_offset_dac,7,0.0);
+	chan_cal(offset_ad,pregain_offset_dac,7,0.0);
+
+	printf("gain offset\n");
+	chan_cal(gain_ad,gain_dac,0,5.0);
+	chan_cal(gain_ad,gain_dac,0,5.0);
+
+	printf("results (offset)\n");
+	for(i=0;i<16;i++){
+		read_chan(0,i);
+	}
+}
+
 void cal_ni_unknown(void)
 {
-	int n_ranges;
+	comedi_range *range;
+	int bipolar_lowgain;
+	int bipolar_highgain;
+	int unipolar_lowgain;
 
 	reset_caldacs();
 	printf("Please send this output to <ds@schleef.org>\n");
@@ -617,23 +688,41 @@ void cal_ni_unknown(void)
 		(comedi_get_version_code(dev)>>8)&0xff,
 		(comedi_get_version_code(dev))&0xff);
 
-	n_ranges=comedi_get_n_ranges(dev,ad_subdev,0);
+	bipolar_lowgain = get_bipolar_lowgain(dev,ad_subdev);
+	bipolar_highgain = get_bipolar_highgain(dev,ad_subdev);
+	unipolar_lowgain = get_unipolar_lowgain(dev,ad_subdev);
 
 	/* 0 offset, low gain */
-	printf("channel dependence 0 range 0\n");
-	channel_dependence(0,0);
+	range = comedi_get_range(dev,ad_subdev,0,bipolar_lowgain);
+	if(verbose>=0){
+		printf("bipolar zero offset, low gain [%g,%g]\n",
+			range->min,range->max);
+	}
+	channel_dependence(0,bipolar_lowgain);
 
 	/* 0 offset, high gain */
-	printf("channel dependence 0 range %d\n",n_ranges/2-1);
-	channel_dependence(0,n_ranges/2-1);
+	range = comedi_get_range(dev,ad_subdev,0,bipolar_highgain);
+	if(verbose>=0){
+		printf("bipolar zero offset, high gain [%g,%g]\n",
+			range->min,range->max);
+	}
+	channel_dependence(0,bipolar_highgain);
 
 	/* unip/bip offset */
-	printf("channel dependence 0 range %d\n",n_ranges/2);
-	channel_dependence(0,n_ranges/2);
+	range = comedi_get_range(dev,ad_subdev,0,unipolar_lowgain);
+	if(verbose>=0){
+		printf("unipolar zero offset, low gain [%g,%g]\n",
+			range->min,range->max);
+	}
+	channel_dependence(0,unipolar_lowgain);
 
 	/* voltage reference */
-	printf("channel dependence 5 range 0\n");
-	channel_dependence(5,0);
+	range = comedi_get_range(dev,ad_subdev,0,bipolar_lowgain);
+	if(verbose>=0){
+		printf("bipolar voltage reference, low gain [%g,%g]\n",
+			range->min,range->max);
+	}
+	channel_dependence(5,bipolar_lowgain);
 
 }
 
@@ -810,6 +899,7 @@ double check_gain_chan_x(linear_fit_t *l,int ad_chan,int range,int cdac)
 	new_sv_t sv;
 	double sum_err;
 	int sum_err_count=0;
+	char str[20];
 
 	n=caldacs[cdac].maxdata+1;
 	memset(l,0,sizeof(*l));
@@ -859,9 +949,12 @@ double check_gain_chan_x(linear_fit_t *l,int ad_chan,int range,int cdac)
 
 	linear_fit_monotonic(l);
 
-	printf("caldac[%d] gain=%g V/bit err=%g S_min=%g dof=%g min=%g max=%g\n",
-		cdac,l->slope,l->err_slope,l->S_min,l->dof,l->min,l->max);
-	//printf("--> %g\n",fabs(l.slope/l.err_slope));
+	if(verbose>=1 || (verbose>=0 && fabs(l->slope/l->err_slope)>4.0)){
+		sci_sprint_alt(str,l->slope,l->err_slope);
+		printf("caldac[%d] gain=%s V/bit S_min=%g dof=%g\n",
+			cdac,str,l->S_min,l->dof);
+		//printf("--> %g\n",fabs(l.slope/l.err_slope));
+	}
 
 	if(verbose>=2){
 		static int dump_number=0;
@@ -890,6 +983,66 @@ double check_gain_chan_x(linear_fit_t *l,int ad_chan,int range,int cdac)
 
 /* helpers */
 
+int get_bipolar_lowgain(comedi_t *dev,int subdev)
+{
+	int ret = -1;
+	int i;
+	int n_ranges = comedi_get_n_ranges(dev,subdev,0);
+	double max = 0;
+	comedi_range *range;
+
+	for(i=0;i<n_ranges;i++){
+		range = comedi_get_range(dev,subdev,0,i);
+		if(range->min != -range->max)continue;
+		if(range->max>max){
+			ret = i;
+			max=range->max;
+		}
+	}
+
+	return ret;
+}
+
+int get_bipolar_highgain(comedi_t *dev,int subdev)
+{
+	int ret = -1;
+	int i;
+	int n_ranges = comedi_get_n_ranges(dev,subdev,0);
+	double min = HUGE_VAL;
+	comedi_range *range;
+
+	for(i=0;i<n_ranges;i++){
+		range = comedi_get_range(dev,subdev,0,i);
+		if(range->min != -range->max)continue;
+		if(range->max<min){
+			ret = i;
+			min=range->max;
+		}
+	}
+
+	return ret;
+}
+
+int get_unipolar_lowgain(comedi_t *dev,int subdev)
+{
+	int ret = -1;
+	int i;
+	int n_ranges = comedi_get_n_ranges(dev,subdev,0);
+	double max = 0;
+	comedi_range *range;
+
+	for(i=0;i<n_ranges;i++){
+		range = comedi_get_range(dev,subdev,0,i);
+		if(range->min != 0)continue;
+		if(range->max>max){
+			ret = i;
+			max=range->max;
+		}
+	}
+
+	return ret;
+}
+
 
 int read_eeprom(int addr)
 {
@@ -904,12 +1057,14 @@ double read_chan(int adc,int range)
 {
 	int n;
 	new_sv_t sv;
+	char str[20];
 
 	new_sv_init(&sv,dev,0,adc,range,AREF_OTHER);
 	sv.order=7;
 	n=new_sv_measure(&sv);
 
-	printf("chan=%d ave=%g error=%g\n",adc,sv.average,sv.error);
+	sci_sprint_alt(str,sv.average,sv.error);
+	printf("chan=%d ave=%s\n",adc,str);
 
 	return sv.average;
 }
@@ -1131,5 +1286,62 @@ int calculate_residuals(linear_fit_t *l)
 double linear_fit_func_y(linear_fit_t *l,double x)
 {
 	return l->ave_y+l->slope*(x-l->ave_x);
+}
+
+
+/* printing of scientific numbers (with errors) */
+
+int sci_sprint(char *s,double x,double y)
+{
+	int errsig;
+	int maxsig;
+	int sigfigs;
+	double mantissa;
+	double error;
+	double mindigit;
+
+	errsig = floor(log10(y));
+	maxsig = floor(log10(x));
+	mindigit = pow(10,errsig);
+
+	if(maxsig<errsig)maxsig=errsig;
+
+	sigfigs = maxsig-errsig+2;
+
+	mantissa = x*pow(10,-maxsig);
+	error = y*pow(10,-errsig+1);
+
+	return sprintf(s,"%0.*f(%2.0f)e%d",sigfigs-1,mantissa,error,maxsig);
+}
+
+int sci_sprint_alt(char *s,double x,double y)
+{
+	int errsig;
+	int maxsig;
+	int sigfigs;
+	double mantissa;
+	double error;
+	double mindigit;
+
+	errsig = floor(log10(y));
+	maxsig = floor(log10(x));
+	mindigit = pow(10,errsig);
+
+	if(maxsig<errsig)maxsig=errsig;
+
+	sigfigs = maxsig-errsig+2;
+
+	mantissa = x*pow(10,-maxsig);
+	error = y*pow(10,-errsig+1);
+
+
+	if(errsig==1 && maxsig<4 && maxsig>1){
+		return sprintf(s,"%0.0f(%2.0f)",x,error);
+	}
+	if(maxsig<=0 && maxsig>=-2){
+		return sprintf(s,"altnum %0.*f(%2.0f)",sigfigs-1-maxsig,
+			mantissa*pow(10,maxsig),error);
+	}
+	return sprintf(s,"%0.*f(%2.0f)e%d",sigfigs-1,mantissa,error,maxsig);
 }
 
