@@ -763,8 +763,8 @@ static int cal_cb_pci_64xx( calibration_setup_t *setup )
 	layout.adc_ground_observable = ai_ground_observable_index_64xx;
 	layout.dac_high_observable = ao_high_observable_index_64xx;
 	layout.dac_ground_observable = ao_ground_observable_index_64xx;
-	layout.adc_fractional_tolerance = get_tolerance( setup, setup->ad_subdev, 1 );
-	layout.dac_fractional_tolerance = get_tolerance( setup, setup->da_subdev, 1 );
+	layout.adc_fractional_tolerance = get_tolerance( setup, setup->ad_subdev, 1.0 );
+	layout.dac_fractional_tolerance = get_tolerance( setup, setup->da_subdev, 1.0 );
 	return generic_cal_by_range( setup, &layout );
 }
 
@@ -809,8 +809,8 @@ static int cal_cb_pci_60xx( calibration_setup_t *setup )
 	layout.adc_ground_observable = ai_ground_observable_index_60xx;
 	layout.dac_high_observable = ao_high_observable_index_60xx;
 	layout.dac_ground_observable = ao_ground_observable_index_60xx;
-	layout.adc_fractional_tolerance = get_tolerance( setup, setup->ad_subdev, 1 );
-	layout.dac_fractional_tolerance = get_tolerance( setup, setup->da_subdev, 1 );
+	layout.adc_fractional_tolerance = get_tolerance( setup, setup->ad_subdev, 1.0 );
+	layout.dac_fractional_tolerance = get_tolerance( setup, setup->da_subdev, 1.0 );
 	return generic_cal_by_range( setup, &layout );
 }
 
@@ -832,7 +832,7 @@ static int cal_cb_pci_4020( calibration_setup_t *setup )
 	layout.adc_gain = adc_gain_4020;
 	layout.adc_high_observable = ai_high_observable_index_4020;
 	layout.adc_ground_observable = ai_low_observable_index_4020;
-	layout.adc_fractional_tolerance = get_tolerance( setup, setup->ad_subdev, 1 );
+	layout.adc_fractional_tolerance = get_tolerance( setup, setup->ad_subdev, 1.0 );
 	return generic_cal_by_channel_and_range( setup, &layout );
 }
 

@@ -421,8 +421,8 @@ static int cal_cb_pci_1xxx( calibration_setup_t *setup )
 	layout.adc_ground_observable = ai_ground_observable_1xxx;
 	layout.dac_high_observable = ao_high_observable_1xxx;
 	layout.dac_ground_observable = ao_ground_observable_1xxx;
-	layout.adc_fractional_tolerance = get_tolerance( setup, setup->ad_subdev, 1 );
-	layout.dac_fractional_tolerance = get_tolerance( setup, setup->da_subdev, 1 );
+	layout.adc_fractional_tolerance = get_tolerance( setup, setup->ad_subdev, 1.0 );
+	layout.dac_fractional_tolerance = get_tolerance( setup, setup->da_subdev, 1.0 );
 	return generic_cal_by_range( setup, &layout );
 }
 
@@ -488,8 +488,8 @@ static int cal_cb_pci_1602_16( calibration_setup_t *setup )
 	layout.adc_ground_observable = ai_ground_observable_1xxx;
 	layout.dac_high_observable = ao_high_observable_1xxx;
 	layout.dac_ground_observable = ao_ground_observable_1xxx;
-	layout.adc_fractional_tolerance = get_tolerance( setup, setup->ad_subdev, 1 );
-	layout.dac_fractional_tolerance = get_tolerance( setup, setup->da_subdev, 1 );
+	layout.adc_fractional_tolerance = get_tolerance( setup, setup->ad_subdev, 1.0 );
+	layout.dac_fractional_tolerance = get_tolerance( setup, setup->da_subdev, 1.0 );
 	/* The bipolar postgain calibration should be good for both
 	 * bipolar and unipolar ranges, so disable separate
 	 * unipolar postgain offset calibration (it will fail
