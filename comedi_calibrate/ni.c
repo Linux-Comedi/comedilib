@@ -449,17 +449,17 @@ void cal_ni_pci_6052e(void)
 {
 	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,3);
 	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,11);
-	cal1(ni_zero_offset_high,7);
+	// cal1(ni_zero_offset_high,7); // wrong
 	cal1(ni_reference_low,1);
 	cal1_fine(ni_reference_low,1);
 	//cal1(ni_reference_low,9);  // also (guess)
 	cal1(ni_unip_offset_low,5);
 	//cal1(ni_unip_offset_low,0); // also (guess )
 	if(do_output){
-		cal1(ni_ao0_zero_offset,23);
-		cal1(ni_ao0_reference,19);
-		cal1(ni_ao1_zero_offset,13);
-		cal1(ni_ao1_reference,21);
+		//cal1(ni_ao0_zero_offset,23); // wrong
+		//cal1(ni_ao0_reference,19); // wrong
+		//cal1(ni_ao1_zero_offset,13); // wrong
+		//cal1(ni_ao1_reference,21); // wrong
 	}
 }
 
