@@ -137,11 +137,6 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 		}
 	}
 
-	{char s[10]; gets(s); }
-	munmap(map,0x1000);
-	//close(comedi_fileno(dev));
-
-	{char s[10]; gets(s); }
 	for(i=0;i<100;i++){
 		printf("%d\n",map[i]);
 	}
