@@ -1,5 +1,5 @@
 ;   usbdux_firmware.asm
-;   Copyright (C) 2003 Bernd Porr, Bernd.Porr@cn.stir.ac.uk
+;   Copyright (C) 2004 Bernd Porr, Bernd.Porr@cn.stir.ac.uk
 ;
 ;   This program is free software; you can redistribute it and/or modify
 ;   it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 ; Description: University of Stirling USB DAQ & INCITE Technology Limited
 ; Devices: [ITL] USB-DUX (usbdux.o)
 ; Author: Bernd Porr <Bernd.Porr@cn.stir.ac.uk>
-; Updated: Thu Oct 16
+; Updated: 25 Jan 2004
 ; Status: testing
 ;
 ;;;
@@ -160,7 +160,7 @@ ep8isoerr_isr:
 ;;; then engages in an endless loop
 main:
 	mov	DPTR,#CPUCS	; CPU control register
-	mov	a,#000010100b	; 48MHz clock
+	mov	a,#000100100b	; 48MHz clock
 	movx	@DPTR,a		; do it
 
 	mov	dptr,#INTSETUP	; IRQ setup register
@@ -169,16 +169,7 @@ main:
 
 	lcall	initAD		; init the ports to the converters
 
-	mov	dptr,#USBCS	; USB status
-	movx	a,@dptr		; get it
-	anl	a,#80H		; mask out high speed
-
-	jnz	inihi		; high speed
-	
 	lcall	inieplo		; init the isochronous data-transfer
-	sjmp	mloop2
-inihi:
-	lcall	iniephi		; init the irq transfer
 
 mloop2:	nop
 
@@ -408,72 +399,6 @@ inieplo:
 	ret
 
 
-;;; initilise the IRQ transfer
-iniephi:
-	mov	dptr,#FIFORESET
-	mov	a,#0fh		
-	movx	@dptr,a		; reset all fifos
-	mov	a,#00h		
-	movx	@dptr,a		; normal operat
-	
-	mov	DPTR,#EP2CFG
-	mov	a,#10110010b	; valid, out, double buff, irq
-	movx	@DPTR,a
-
-	mov	dptr,#EP2FIFOCFG
-	mov	a,#00000000b	; manual
-	movx	@dptr,a
-
-	mov	dptr,#EP2BCL	; "arm" it
-	mov	a,#80h
-	movx	@DPTR,a		; can receive data
-	movx	@DPTR,a		; can receive data
-	movx	@DPTR,a		; can receive data
-	
-	mov	DPTR,#EP4CFG
-	mov	a,#10100000b	; valid
-	movx	@dptr,a
-
-	mov	dptr,#EP4FIFOCFG
-	mov	a,#00000000b	; manual
-	movx	@dptr,a
-
-	mov	dptr,#EP4BCL	; "arm" it
-	mov	a,#80h
-	movx	@DPTR,a		; can receive data
-	movx	@dptr,a		; make shure its really empty
-
-	mov	DPTR,#EP6CFG	; IRQ data from here to the host
-	mov	a,#11110010b	; Valid
-	movx	@DPTR,a		; IRQ transfer, double buffering
-
-	mov	DPTR,#EP8CFG	; EP8
-	mov	a,#11100000b	; BULK data from here to the host
-	movx	@DPTR,a		;
-	
-	mov	dptr,#EPIE	; interrupt enable
-	mov	a,#11110000b	; enable irq for ep2,ep4,ep6,ep8
-	movx	@dptr,a		; do it
-
-	mov	dptr,#EPIRQ
-	mov	a,#11110000b	; clear irq bits
-	movx	@dptr,a
-
-	;; enable interrups
-        mov     DPTR,#USBIE	; USB int enables register
-        mov     a,#0            ; disables SOF (1ms/125ms interrupt)
-        movx    @DPTR,a         ; 
-
-	mov	EIE,#00000001b	; enable INT2 in the 8051's SFR
-	mov	IE,#80h		; IE, enable all interrupts
-
-	lcall	ep8_arm		; put dummy data into ep8
-	lcall	ep6_arm		; put dummy data into ep6
-		
-	ret
-
-
-	
 ;;; interrupt-routine for SOF
 ;;; is for full speed
 sof_isr:
@@ -493,12 +418,6 @@ sof_isr:
 	push	06h		; R6
 	push	07h		; R7
 		
-	mov	dptr,#USBCS	; USB status
-	movx	a,@dptr		; get it
-	anl	a,#80H		; mask out high speed
-
-	jnz	hispeed		; do nothing here
-	
 	mov	a,EP2468STAT
 	anl	a,#20H		; full?
 	jnz	epfull		; EP6-buffer is full
@@ -527,7 +446,6 @@ epfull:
 	movx	@DPTR,a		; can receive data
 	movx	@dptr,a
 
-hispeed:			
 epempty:	
 	;; clear INT2
 	mov	a,EXIF		; FIRST clear the USB (INT2) interrupt request
@@ -751,6 +669,7 @@ ep6_arm:
 
 	
 ;;; get all 8 channels in the high speed mode
+;;; not used just now
 ep6_isr:	
 	push	dps
 	push	dpl
@@ -917,6 +836,7 @@ ep8_isr:
 
 
 ;;; high speed mode, IRQ mode. Asynchronous transmission.
+;;; not used just now
 ep2_isr:
 	push	dps
 	push	dpl
