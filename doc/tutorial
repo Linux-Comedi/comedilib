@@ -272,13 +272,11 @@ The comedi_range structure looks like
            unsigned int unit;
    }comedi_range;
 
-As you might expect, ptr[range] is for range 'range',
-which you provided to comedi_data_read() above.  'min' represents
-the voltage corresponding to comedi_data_read() returning 0,
-and 'max' represents comedi_data_read() returning 'maxdata',
-(i.e., 4095 for 12 bit A/C converters, 65535 for 16 bit,
-or, 1 for digital input -- more on this in a bit.)  The
-'unit' entry tells you if min and
+The element 'min' represents the voltage corresponding to
+comedi_data_read() returning 0, and 'max' represents
+comedi_data_read() returning 'maxdata', (i.e., 4095 for 12
+bit A/C converters, 65535 for 16 bit, or, 1 for digital input
+-- more on this in a bit.)  The 'unit' entry tells you if min and
 max refer to voltage, current, etc.
 
 "Could it get easier?", you say.  Well, yes.  Use
