@@ -84,6 +84,13 @@ double check_gain_chan(int ad_chan,int range,int cdac);
 
 int verbose = 0;
 
+enum {
+	STATUS_UNKNOWN = 0,
+	STATUS_SOME,
+	STATUS_DONE
+};
+int device_status = STATUS_UNKNOWN;
+
 /* tmep */
 void do_cal(void);
 
@@ -169,9 +176,10 @@ int new_sv_init(new_sv_t *sv,comedi_t *dev,int subdev,int chan,int range,int are
 
 struct board_struct{
 	char *name;
-	void (*calibrate)(void);
+	void (*setup)(void);
 };
 
+#if 0
 void cal_ni_16e_1(void);
 void cal_ni_16e_10(void);
 void cal_ni_16xe_50(void);
@@ -220,26 +228,35 @@ struct board_struct boards[]={
 //	{ "DAQCard-6024e",	cal_ni_unknown },
 };
 #define n_boards (sizeof(boards)/sizeof(boards[0]))
+#endif
 
 struct board_struct drivers[] = {
-	{ "ni_pcimio",		cal_ni_unknown },
-	{ "ni_atmio",		cal_ni_unknown },
-	{ "ni_mio_cs",		cal_ni_unknown },
+	{ "ni_pcimio",		ni_setup },
+	{ "ni_atmio",		ni_setup },
+	{ "ni_mio_cs",		ni_setup },
 };
 #define n_drivers (sizeof(drivers)/sizeof(drivers[0]))
 
 int do_dump = 0;
 int do_reset = 1;
 int do_calibrate = 1;
-int do_show = 1;
+int do_results = 1;
+int do_output = 1;
 
 struct option options[] = {
 	{ "verbose", 0, 0, 'v' },
 	{ "quiet", 0, 0, 'q' },
-	{ "file", 0, 0, 'f' },
-	{ "dump", 0, 0, 'd' },
-	{ "reset", 0, 0, 'r' },
-	{ "show", 0, 0, 's' },
+	{ "file", 1, 0, 'f' },
+	{ "driver-name", 1, 0, 0x1000 },
+	{ "device-name", 1, 0, 0x1001 },
+	{ "reset", 0, &do_reset, 1 },
+	{ "no-reset", 0, &do_reset, 0 },
+	{ "calibrate", 0, &do_calibrate, 1 },
+	{ "no-calibrate", 0, &do_calibrate, 0 },
+	{ "dump", 0, &do_dump, 1 },
+	{ "no-dump", 0, &do_dump, 0 },
+	{ "results", 0, &do_results, 1 },
+	{ "no-results", 0, &do_results, 0 },
 	{ 0 },
 };
 
@@ -247,15 +264,15 @@ int main(int argc, char *argv[])
 {
 	char *fn = NULL;
 	int c;
-	char *drivername;
-	char *devicename;
-	//int i;
-	//struct board_struct *this_board;
+	char *drivername = NULL;
+	char *devicename = NULL;
+	int i;
+	struct board_struct *this_board;
 	int index;
 
 	fn = "/dev/comedi0";
 	while (1) {
-		c = getopt_long(argc, argv, "f:vqdr", options, &index);
+		c = getopt_long(argc, argv, "f:vq", options, &index);
 		if (c == -1)break;
 		switch (c) {
 		case 'f':
@@ -267,14 +284,11 @@ int main(int argc, char *argv[])
 		case 'q':
 			verbose--;
 			break;
-		case 'd':
-			do_dump = 1;
+		case 0x1000:
+			drivername = optarg;
 			break;
-		case 'r':
-			do_reset = 1;
-			break;
-		case 's':
-			do_show = 1;
+		case 0x1001:
+			devicename = optarg;
 			break;
 		default:
 			printf("bad option\n");
@@ -288,45 +302,73 @@ int main(int argc, char *argv[])
 		exit(0);
 	}
 
+	if(!drivername)
+		drivername=comedi_get_driver_name(dev);
+	if(!devicename)
+		devicename=comedi_get_board_name(dev);
+
 	ad_subdev=comedi_find_subdevice_by_type(dev,COMEDI_SUBD_AI,0);
 	da_subdev=comedi_find_subdevice_by_type(dev,COMEDI_SUBD_AO,0);
 	caldac_subdev=comedi_find_subdevice_by_type(dev,COMEDI_SUBD_CALIB,0);
 	eeprom_subdev=comedi_find_subdevice_by_type(dev,COMEDI_SUBD_MEMORY,0);
 
-	drivername=comedi_get_driver_name(dev);
-	devicename=comedi_get_board_name(dev);
-
-	ni_setup();
-
-	reset_caldacs();
-
-	observe();
-
-	do_cal();
-
-	observe();
-#if 0
-	for(i=0;i<n_boards;i++){
-		if(!strcmp(boards[i].name,devicename)){
-			this_board = boards+i;
-			goto ok;
-		}
-	}
 	for(i=0;i<n_drivers;i++){
 		if(!strcmp(drivers[i].name,drivername)){
 			this_board = drivers+i;
 			goto ok;
 		}
 	}
+	printf("Driver %s unknown\n",drivername);
+	return 1;
 
-	printf("device %s unknown\n",devicename);
-	return 0;
 ok:
-	this_board->calibrate();
-#endif
+	this_board->setup();
+
+	if(device_status<STATUS_DONE){
+		printf("Warning: device not fully calibrated due to insufficient information\n");
+		printf("Please send this output to <ds@schleef.org>\n");
+		if(verbose<0)verbose=0;
+		if(device_status==STATUS_UNKNOWN){
+			do_reset=1;
+			do_dump=1;
+			do_calibrate=0;
+			do_results=0;
+		}
+		if(device_status==STATUS_SOME){
+			do_reset=1;
+			do_dump=1;
+			do_calibrate=1;
+			do_results=1;
+		}
+	}
+	if(verbose>=0){
+		printf("$Id$\n");
+		printf("Driver name: %s\n",drivername);
+		printf("Device name: %s\n",devicename);
+		printf("Comedi version: %d.%d.%d\n",
+			(comedi_get_version_code(dev)>>16)&0xff,
+			(comedi_get_version_code(dev)>>8)&0xff,
+			(comedi_get_version_code(dev))&0xff);
+	}
+
+	if(do_reset)reset_caldacs();
+	if(do_dump)observe();
+	if(do_calibrate)do_cal();
+	if(do_results)observe();
 
 	return 0;
 }
+
+enum {
+	ni_zero_offset_low = 0,
+	ni_zero_offset_high,
+	ni_reference_low,
+	ni_unip_offset_low,
+	ni_ao0_zero_offset,
+	ni_ao0_reference,
+	ni_ao1_zero_offset,
+	ni_ao1_reference,
+};
 
 void ni_setup(void)
 {
@@ -334,8 +376,8 @@ void ni_setup(void)
 	int bipolar_lowgain;
 	int bipolar_highgain;
 	int unipolar_lowgain;
-	int i;
 	double voltage_reference;
+	observable *o;
 
 	bipolar_lowgain = get_bipolar_lowgain(dev,ad_subdev);
 	bipolar_highgain = get_bipolar_highgain(dev,ad_subdev);
@@ -348,47 +390,46 @@ void ni_setup(void)
 	tmpl.n = 1;
 	tmpl.subdev = ad_subdev;
 
-	i = 0;
 	/* 0 offset, low gain */
-	observables[i].name = "ai, bipolar zero offset, low gain";
-	observables[i].observe_insn = tmpl;
-	observables[i].observe_insn.chanspec =
-		CR_PACK(0,bipolar_lowgain,AREF_OTHER);
-	observables[i].target = 0;
-	i++;
+	o = observables + ni_zero_offset_low;
+	o->name = "ai, bipolar zero offset, low gain";
+	o->observe_insn = tmpl;
+	o->observe_insn.chanspec = CR_PACK(0,bipolar_lowgain,AREF_OTHER);
+	o->target = 0;
 
 	/* 0 offset, high gain */
-	observables[i].name = "ai, bipolar zero offset, high gain";
-	observables[i].observe_insn = tmpl;
-	observables[i].observe_insn.chanspec =
-		CR_PACK(0,bipolar_highgain,AREF_OTHER);
-	observables[i].target = 0;
-	i++;
+	o = observables + ni_zero_offset_high;
+	o->name = "ai, bipolar zero offset, high gain";
+	o->observe_insn = tmpl;
+	o->observe_insn.chanspec = CR_PACK(0,bipolar_highgain,AREF_OTHER);
+	o->target = 0;
 
 	/* voltage reference */
-	observables[i].name = "ai, bipolar voltage reference, low gain";
-	observables[i].observe_insn = tmpl;
-	observables[i].observe_insn.chanspec =
-		CR_PACK(5,bipolar_lowgain,AREF_OTHER);
-	observables[i].target = voltage_reference;
-	i++;
+	o = observables + ni_reference_low;
+	o->name = "ai, bipolar voltage reference, low gain";
+	o->observe_insn = tmpl;
+	o->observe_insn.chanspec = CR_PACK(5,bipolar_lowgain,AREF_OTHER);
+	o->target = voltage_reference;
 
 	if(unipolar_lowgain>=0){
 		/* unip/bip offset */
-		observables[i].name = "ai, unipolar zero offset, low gain";
-		observables[i].observe_insn = tmpl;
-		observables[i].observe_insn.chanspec =
+		o = observables + ni_unip_offset_low;
+		o->name = "ai, unipolar zero offset, low gain";
+		o->observe_insn = tmpl;
+		o->observe_insn.chanspec =
 			CR_PACK(0,unipolar_lowgain,AREF_OTHER);
-		observables[i].target = 0;
-		i++;
+		o->target = 0;
 
+#if 0
 		/* unip gain */
-		observables[i].name = "ai, unipolar voltage reference, low gain";
-		observables[i].observe_insn = tmpl;
-		observables[i].observe_insn.chanspec =
+		o = observables + ni_unip_reference_low;
+		o->name = "ai, unipolar voltage reference, low gain";
+		o->observe_insn = tmpl;
+		o->observe_insn.chanspec =
 			CR_PACK(5,unipolar_lowgain,AREF_OTHER);
-		observables[i].target = voltage_reference;
+		o->target = voltage_reference;
 		i++;
+#endif
 	}
 
 	if(da_subdev>=0){
@@ -400,54 +441,57 @@ void ni_setup(void)
 		po_tmpl.subdev = da_subdev;
 
 		/* ao 0, zero offset */
-		observables[i].name = "ao 0, zero offset, low gain";
-		observables[i].preobserve_insn = po_tmpl;
-		observables[i].preobserve_insn.chanspec = CR_PACK(0,0,0);
-		observables[i].preobserve_insn.data = &observables[i].preobserve_data;
-		observables[i].observe_insn = tmpl;
-		observables[i].observe_insn.chanspec =
+		o = observables + ni_ao0_zero_offset;
+		o->name = "ao 0, zero offset, low gain";
+		o->preobserve_insn = po_tmpl;
+		o->preobserve_insn.chanspec = CR_PACK(0,0,0);
+		o->preobserve_insn.data = &o->preobserve_data;
+		o->observe_insn = tmpl;
+		o->observe_insn.chanspec =
 			CR_PACK(2,bipolar_lowgain,AREF_OTHER);
-		set_target(i,0.0);
-		i++;
+		set_target(ni_ao0_zero_offset,0.0);
 
 		/* ao 0, gain */
-		observables[i].name = "ao 0, reference voltage, low gain";
-		observables[i].preobserve_insn = po_tmpl;
-		observables[i].preobserve_insn.chanspec = CR_PACK(0,0,0);
-		observables[i].preobserve_insn.data = &observables[i].preobserve_data;
-		observables[i].observe_insn = tmpl;
-		observables[i].observe_insn.chanspec =
+		o = observables + ni_ao0_reference;
+		o->name = "ao 0, reference voltage, low gain";
+		o->preobserve_insn = po_tmpl;
+		o->preobserve_insn.chanspec = CR_PACK(0,0,0);
+		o->preobserve_insn.data = &o->preobserve_data;
+		o->observe_insn = tmpl;
+		o->observe_insn.chanspec =
 			CR_PACK(6,bipolar_lowgain,AREF_OTHER);
-		set_target(i,5.0);
-		observables[i].target -= voltage_reference;
-		i++;
+		set_target(ni_ao0_reference,5.0);
+		o->target -= voltage_reference;
 
 		/* ao 1, zero offset */
-		observables[i].name = "ao 1, zero offset, low gain";
-		observables[i].preobserve_insn = po_tmpl;
-		observables[i].preobserve_insn.chanspec = CR_PACK(1,0,0);
-		observables[i].preobserve_insn.data = &observables[i].preobserve_data;
-		observables[i].observe_insn = tmpl;
-		observables[i].observe_insn.chanspec =
+		o = observables + ni_ao1_zero_offset;
+		o->name = "ao 1, zero offset, low gain";
+		o->preobserve_insn = po_tmpl;
+		o->preobserve_insn.chanspec = CR_PACK(1,0,0);
+		o->preobserve_insn.data = &o->preobserve_data;
+		o->observe_insn = tmpl;
+		o->observe_insn.chanspec =
 			CR_PACK(3,bipolar_lowgain,AREF_OTHER);
-		set_target(i,0.0);
-		i++;
+		set_target(ni_ao1_zero_offset,0.0);
 
 		/* ao 1, gain */
-		observables[i].name = "ao 1, reference voltage, low gain";
-		observables[i].preobserve_insn = po_tmpl;
-		observables[i].preobserve_insn.chanspec = CR_PACK(1,0,0);
-		observables[i].preobserve_insn.data = &observables[i].preobserve_data;
-		observables[i].observe_insn = tmpl;
-		observables[i].observe_insn.chanspec =
+		o = observables + ni_ao1_reference;
+		o->name = "ao 1, reference voltage, low gain";
+		o->preobserve_insn = po_tmpl;
+		o->preobserve_insn.chanspec = CR_PACK(1,0,0);
+		o->preobserve_insn.data = &o->preobserve_data;
+		o->observe_insn = tmpl;
+		o->observe_insn.chanspec =
 			CR_PACK(7,bipolar_lowgain,AREF_OTHER);
-		set_target(i,5.0);
-		observables[i].target -= voltage_reference;
-		i++;
+		set_target(ni_ao1_reference,5.0);
+		o->target -= voltage_reference;
+
 	}
-	n_observables = i;
+	n_observables = ni_ao1_reference + 1;
 
 	setup_caldacs();
+
+
 }
 
 void set_target(int obs,double target)
@@ -599,10 +643,69 @@ void cal1(int obs, int dac)
 
 void do_cal(void)
 {
+#if 0
 	// daqcard
-	postgain_cal(0,1,2);
-	cal1(1,8);
-	cal1(2,0);
+	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,2);
+	cal1(ni_zero_offset_high,8);
+	cal1(ni_reference_low,0);
+#endif
+
+	// 16e-2
+	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
+	cal1(ni_zero_offset_high,0);
+	cal1(ni_reference_low,3);
+	cal1(ni_unip_offset_low,2);
+	if(do_output){
+		cal1(ni_ao0_zero_offset,5);
+		cal1(ni_ao0_reference,6);
+		cal1(ni_ao1_zero_offset,8);
+		cal1(ni_ao1_reference,9);
+	}
+
+#if 0
+	// 16e-10 (old)
+	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
+	cal1(ni_zero_offset_high,10);
+	cal1(ni_zero_offset_high,0);
+	cal1(ni_reference_low,3);
+	cal1(ni_unip_offset_low,2);
+	if(do_output){
+		cal1(ni_ao0_zero_offset,5); // guess
+		cal1(ni_ao0_reference,6); // guess
+		cal1(ni_ao0_zero_offset,8); // guess
+		cal1(ni_ao0_reference,9); // guess
+	}
+#endif
+
+#if 0
+	// 16xe-50 (old) (same as daqcard?)
+	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,2);
+	cal1(ni_zero_offset_high,8);
+	cal1(ni_reference_low,0);
+	if(do_output){
+		// unknown
+	}
+#endif
+
+#if 0
+	// 6035e (old)
+	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
+	cal1(ni_zero_offset_high,0);
+	cal1(ni_reference_low,3);
+	if(do_output){
+		// unknown
+	}
+#endif
+
+#if 0
+	// 6071e (old)
+	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
+	cal1(ni_zero_offset_high,0);
+	cal1(ni_reference_low,3);
+	if(do_output){
+		// unknown
+	}
+#endif
 }
 
 
@@ -622,437 +725,6 @@ double ni_get_reference(int lsb_loc,int msb_loc)
 	printf("ref=%g\n",ref);
 
 	return ref;
-}
-
-void cal_ni_16e_1(void)
-{
-	double ref;
-
-	reset_caldacs();
-
-/* Device name: at-mio-16e-2
- * bipolar zero offset, low gain [-10,10]
- * caldac[0] gain=-88.5(21)e-7 V/bit S_min=190.407 dof=254
- * caldac[1] gain=-8158.8(22)e-7 V/bit S_min=1238.12 dof=254
- * caldac[3] gain=-26.8(21)e-7 V/bit S_min=240.556 dof=254
- * bipolar zero offset, high gain [-0.05,0.05]
- * caldac[0] gain=-8866.2(13)e-9 V/bit S_min=1300.15 dof=254
- * caldac[1] gain=-4094.0(13)e-9 V/bit S_min=990.392 dof=254
- * unipolar zero offset, low gain [0,20]
- * caldac[0] gain=-85.0(22)e-7 V/bit S_min=255.978 dof=254
- * caldac[1] gain=-8074.9(50)e-7 V/bit S_min=198.098 dof=144
- * caldac[2] gain=-9560.0(51)e-7 V/bit S_min=255.782 dof=141
- * caldac[3] gain=-9.3(22)e-7 V/bit S_min=226.69 dof=254
- * bipolar voltage reference, low gain [-10,10]
- * caldac[0] gain=-88.2(21)e-7 V/bit S_min=264.253 dof=254
- * caldac[1] gain=-8104.5(21)e-7 V/bit S_min=640.274 dof=254
- * caldac[3] gain=-4838.9(22)e-7 V/bit S_min=808.443 dof=254
- */
-/*
-   layout
-
-   0	AI pre-gain offset	1.5e-6
-   1	AI post-gain offset	8.1e-4
-   2	AI unipolar offset	7.9e-4
-   3	AI gain			
-   4	AO 0 	-1.2e-4		-1.2e-4
-   5	AO 0 	-8.0e-4		-8.0e-4
-   6	AO 0 	1.9e-4		-3.8e-7
-   7	AO 1	-8.0e-5		-1.2e-4
-   8	AO 1	-7.9e-4		-7.9e-4
-   9	AO 1	1.9e-4		3.0e-7
-   10	analog trigger
-   11	unknown
- */
-	printf("last factory calibration %02d/%02d/%02d\n",
-		read_eeprom(508),read_eeprom(507),read_eeprom(506));
-
-	ref=ni_get_reference(425,426);
-
-	printf("postgain offset\n");
-	ni_mio_ai_postgain_cal();
-
-	printf("pregain offset\n");
-	chan_cal(0,0,7,0.0);
-	chan_cal(0,0,7,0.0);
-
-	printf("unipolar offset\n");
-	chan_cal(0,2,8,0.0);
-	chan_cal(0,2,8,0.0);
-
-	printf("gain offset\n");
-	chan_cal(5,3,0,5.0);
-	chan_cal(5,3,0,5.0);
-
-	printf("ao 0 offset\n");
-	comedi_data_write(dev,1,0,0,0,2048);
-	chan_cal(2,4,0,0.0);
-	chan_cal(2,5,0,0.0);
-
-	printf("ao 0 gain\n");
-	comedi_data_write(dev,1,0,0,0,3072);
-	chan_cal(6,6,0,0.0);
-	chan_cal(6,6,0,0.0);
-	comedi_data_write(dev,1,0,0,0,2048);
-
-	cal_ni_results();
-}
-
-
-void cal_ni_16e_10(void)
-{
-	double ref;
-	int i;
-
-/*
-   layout
-
-   0	AI pre-gain offset	1.5e-6
-   1	AI post-gain offset	8.1e-4
-   2	AI unipolar offset	7.9e-4
-   3	AI gain			3.5e-4
-   4	AO
-   5	AO
-   6	AO
-   7	AO
-   8	AO
-   9	AO
-   10	AI pre-gain offset	6.4e-5
-   11	unknown
- */
-	printf("last factory calibration %02d/%02d/%02d\n",
-		read_eeprom(508),read_eeprom(507),read_eeprom(506));
-
-	ref=ni_get_reference(423,424);
-
-	reset_caldacs();
-
-	printf("postgain offset\n");
-	ni_mio_ai_postgain_cal();
-
-	printf("pregain offset\n");
-	chan_cal(0,10,7,0.0);
-	chan_cal(0,0,7,0.0);
-	chan_cal(0,0,7,0.0);
-
-	printf("unipolar offset\n");
-	chan_cal(0,2,8,0.0);
-	chan_cal(0,2,8,0.0);
-
-	printf("gain offset\n");
-	chan_cal(5,3,0,5.0);
-	chan_cal(5,3,0,5.0);
-
-	printf("results (offset)\n");
-	for(i=0;i<16;i++){
-		read_chan(i,0);
-	}
-}
-
-void cal_ni_16xe_10(void)
-{
-	double ref;
-	int i;
-
-/*
- * results of channel dependency test:
- *
- * 		[0]	[1]	[2]	[3]	[8]
- * offset, lo			1.9e-4*	2.2e-6	2.4e-7
- * offset, hi			2.0e-6*	2.1e-8	2.7e-7
- * offset, unip			1.9e-4	2.1e-6	3.9e-7
- * ref		-2.3e-5*-1.3e-6*1.9e-4*	2.1e-6* 3.2e-7
- *
- * thus, 2,3 are postgain offset, 8 is pregain, and
- * 0,1 is gain.  Note the suspicious lack of unipolar
- * offset.
- * 
- * layout
- *
- * 0	AI gain			-2.3e-5
- * 1	AI gain			-1.3e-6
- * 2	AI postgain offset	1.9e-4
- * 3	AI postgain offset	2.2e-6
- * 4	AO
- * 5	AO
- * 6	AO
- * 7	AO
- * 8	AI pregain offset	2.4e-7
- * 9	unknown
- * 10	unknown
- */
-	printf("last factory calibration %02d/%02d/%02d\n",
-		read_eeprom(508),read_eeprom(507),read_eeprom(506));
-
-	ref=ni_get_reference(430,431);
-
-	reset_caldacs();
-
-	printf("postgain offset\n");
-	ni_mio_ai_postgain_cal_2(0,2,0,6,100.0);
-	ni_mio_ai_postgain_cal_2(0,3,0,6,100.0);
-
-	printf("pregain offset\n");
-	chan_cal(0,8,6,0.0);
-	chan_cal(0,8,6,0.0);
-
-	//printf("unipolar offset\n");
-	//chan_cal(0,2,8,0.0);
-	//chan_cal(0,2,8,0.0);
-
-	printf("gain offset\n");
-	chan_cal(5,0,0,5.0);
-	chan_cal(5,1,0,5.0);
-	chan_cal(5,1,0,5.0);
-
-	printf("results (offset)\n");
-	for(i=0;i<16;i++){
-		read_chan(i,0);
-	}
-}
-
-void cal_ni_daqcard_ai_16xe_50(void)
-{
-	double ref;
-	int i;
-
-/*
- * results of channel dependency test:
- *
- * 		[0]	[1]	[2]	[3]	[8]
- * offset, lo	-2.2e-6		1.5e-4*		2.5e-7
- * offset, hi			7.8e-7*		1.3e-7
- * offset, unip	7.4e-4	1.1e-5	1.5e-4		5.5e-7
- * ref		-3.7e-4	-5.4e-6	1.5e-4*		5.5e-7
- *
- * thus, 2 is postgain offset, 8 is pregain, 0 is
- * unipolar offset, 1 is gain
- * 
- * layout
- *
- * 0	AI unipolar offset	7.4e-4
- * 1	AI gain			-5.4e-6
- * 2	AI postgain offset	1.5e-4
- * 3	unknown
- * 4	AO
- * 5	AO
- * 6	AO
- * 7	AO
- * 8	AI pregain offset	2.5e-7
- * 9	unknown
- * 10	unknown
- */
-	printf("last factory calibration %02d/%02d/%02d\n",
-		read_eeprom(508),read_eeprom(507),read_eeprom(506));
-
-	ref=ni_get_reference(446,447);
-
-	reset_caldacs();
-
-	printf("postgain offset\n");
-	ni_mio_ai_postgain_cal_2(0,2,0,3,100.0);
-
-	printf("pregain offset\n");
-	chan_cal(0,8,3,0.0);
-	chan_cal(0,8,3,0.0);
-
-	printf("unipolar offset\n");
-	chan_cal(0,0,4,0.0);
-	chan_cal(0,0,4,0.0);
-
-	printf("gain offset\n");
-	chan_cal(5,1,0,ref);
-	chan_cal(5,1,0,ref);
-
-	printf("results (offset)\n");
-	for(i=0;i<8;i++){
-		read_chan(0,i);
-	}
-}
-
-void cal_ni_16xe_50(void)
-{
-	double ref;
-	int i;
-
-/*
- * results of channel dependency test:
- *
- * 		[0]	[1]	[2]	[3]	[8]
- * offset, lo			1.6e-5		2.0e-7
- * offset, hi			1.6e-7		1.8e-7
- * offset, unip	
- * ref		-4.5e-5	-2.9e-6	1.6e-5*		5.5e-7
- *
- * thus, 2 is postgain offset, 8 is pregain, 0 is
- * unipolar offset, 1 is gain
- * 
- * layout
- *
- * 0	AI unipolar offset	7.4e-4
- * 1	AI gain			-5.4e-6
- * 2	AI postgain offset	1.5e-4
- * 3	unknown
- * 4	AO
- * 5	AO
- * 6	AO
- * 7	AO
- * 8	AI pregain offset	2.5e-7
- * 9	unknown
- * 10	unknown
- */
-	printf("last factory calibration %02d/%02d/%02d\n",
-		read_eeprom(508),read_eeprom(507),read_eeprom(506));
-
-	ref=ni_get_reference(437,438);
-
-	reset_caldacs();
-
-	printf("postgain offset\n");
-	ni_mio_ai_postgain_cal_2(0,2,0,3,100.0);
-
-	printf("pregain offset\n");
-	chan_cal(0,8,3,0.0);
-	chan_cal(0,8,3,0.0);
-
-#if 0
-	printf("unipolar offset\n");
-	chan_cal(0,0,4,0.0);
-	chan_cal(0,0,4,0.0);
-#endif
-
-	printf("gain offset\n");
-	chan_cal(5,0,0,5.0);
-	chan_cal(5,1,0,5.0);
-	chan_cal(5,1,0,5.0);
-
-	printf("results (offset)\n");
-	for(i=0;i<16;i++){
-		read_chan(0,i);
-	}
-}
-
-void cal_ni_6023e(void)
-{
-	double ref;
-	int i;
-
-/*
- * results of channel dependency test:
- *
- * PCI-6023e
- * 		[0]	[1]	[3]	[10]
- * offset, lo	-2.8e-9	-7.6e-4		
- * offset, hi	-2.0e-6	-3.8e-6	-1.4e-6
- * offset, unip		1.0e-1*		
- * ref		-7.6e-7	-7.6e-4	-5.6e-4	-6.2e-8
- * ref2		-6.3e-8	-7.5e-4	-5.6e-4	-1.5e-8
- *
- * PCI-6035e
- * low gain = [-10,10], high gain = [-5,5] (mistake), unipolar gain = (none)
- *		[0]	[1]	[3]
- * offset, lo	-2.2e-7	-6.1e-4	1.0e-6
- * offset, hi	-2.0e-7	-3.0e-4	5.3e-7
- * offset, unip	N/A
- * ref		-1.9e-7	-6.1e-4	3.6e-4
- *
- * 0 is pregain offset
- * 1 is postgain offset
- * 3 is gain
- * 
- * layout
- *
- * 0	AI pregain offset	-2.0e-6
- * 1	AI postgain offset	-7.6e-4
- * 2	unknown
- * 3	AI gain			-5.6e-4
- * 4	AO
- * 5	AO
- * 6	AO
- * 7	AO
- * 8	unknown
- * 9	unknown
- * 10	AI			?
- * 11	unknown
- */
-	int offset_ad = 0;
-	//int unipolar_offset_ad = 1;
-	int gain_ad = 5;
-	int pregain_offset_dac = 0;
-	int postgain_offset_dac = 1;
-	int gain_dac = 3;
-
-	printf("last factory calibration %02d/%02d/%02d\n",
-		read_eeprom(508),read_eeprom(507),read_eeprom(506));
-
-	ref=ni_get_reference(444,443);
-
-	reset_caldacs();
-
-	printf("postgain offset\n");
-	ni_mio_ai_postgain_cal_2(offset_ad,postgain_offset_dac,0,3,200.0);
-
-	printf("pregain offset\n");
-	chan_cal(offset_ad,pregain_offset_dac,3,0.0);
-	chan_cal(offset_ad,pregain_offset_dac,3,0.0);
-
-	printf("gain offset\n");
-	chan_cal(gain_ad,gain_dac,0,5.0);
-	chan_cal(gain_ad,gain_dac,0,5.0);
-
-	printf("results (offset)\n");
-	for(i=0;i<16;i++){
-		read_chan(0,i);
-	}
-}
-
-void cal_ni_6071e(void)
-{
-	double ref;
-	int i;
-
-/*
- * PCI-6071e
- *
- *		[0]	[1]	[3]	
- * offset, lo	-1.3e-5	-7.6e-4	1.2e-6
- * offset, hi	-8.6e-6	-3.8e-6
- * offset, unip	-3.9e-6	-7.8e-4	-1.4e-6
- * ref		-3.8e-6	-7.6e-4	-4.6e-4
- *
- * 0 is pregain offset
- * 1 is postgain offset
- * 3 is gain
- */
-	int offset_ad = 0;
-	//int unipolar_offset_ad = 1;
-	int gain_ad = 5;
-	int pregain_offset_dac = 0;
-	int postgain_offset_dac = 1;
-	int gain_dac = 3;
-
-	printf("last factory calibration %02d/%02d/%02d\n",
-		read_eeprom(508),read_eeprom(507),read_eeprom(506));
-
-	ref=ni_get_reference(444,443);
-
-	reset_caldacs();
-
-	printf("postgain offset\n");
-	ni_mio_ai_postgain_cal_2(offset_ad,postgain_offset_dac,0,7,200.0);
-
-	printf("pregain offset\n");
-	chan_cal(offset_ad,pregain_offset_dac,7,0.0);
-	chan_cal(offset_ad,pregain_offset_dac,7,0.0);
-
-	printf("gain offset\n");
-	chan_cal(gain_ad,gain_dac,0,5.0);
-	chan_cal(gain_ad,gain_dac,0,5.0);
-
-	printf("results (offset)\n");
-	for(i=0;i<16;i++){
-		read_chan(0,i);
-	}
 }
 
 void cal_ni_unknown(void)
