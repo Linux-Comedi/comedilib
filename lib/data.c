@@ -85,7 +85,7 @@ int comedi_data_write(comedi_t *it,unsigned int subdev,unsigned int chan,unsigne
 	}
 }
 
-int comedi_data_read_n(comedi_t *it, unsigned int subdev, unsigned int chan, unsigned int range,
+static inline int comedi_internal_data_read_n(comedi_t *it, unsigned int subdev, unsigned int chan, unsigned int range,
 		unsigned int aref, lsampl_t *data, unsigned int n)
 {
 	subdevice *s;
@@ -144,17 +144,39 @@ int comedi_data_read_n(comedi_t *it, unsigned int subdev, unsigned int chan, uns
 	}
 }
 
+int comedi_data_read_n(comedi_t *it, unsigned int subdev, unsigned int chan, unsigned int range,
+		unsigned int aref, lsampl_t *data, unsigned int n)
+{
+	static const int max_chunk_size = 100;
+	unsigned int chunk_size;
+	unsigned int sample_count = 0;
+	int retval;
+
+	while( n )
+	{
+		if( n > max_chunk_size)
+			chunk_size = max_chunk_size;
+		else
+			chunk_size = n;
+		retval = comedi_internal_data_read_n( it, subdev, chan, range, aref, &data[sample_count], chunk_size);
+		if( retval < 0 ) return retval;
+		n -= chunk_size;
+		sample_count += chunk_size;
+	}
+	return 0;
+}
+
 int comedi_data_read(comedi_t *it, unsigned int subdev, unsigned int chan, unsigned int range,
 	unsigned int aref, lsampl_t *data)
 {
-	return comedi_data_read_n(it, subdev, chan, range, aref, data, 1);
+	return comedi_internal_data_read_n(it, subdev, chan, range, aref, data, 1);
 }
 
 int comedi_data_read_hint(comedi_t *it,unsigned int subdev,unsigned int chan,unsigned int range,
 unsigned int aref)
 {
 	lsampl_t dummy_data;
-	return comedi_data_read_n(it, subdev, chan, range, aref, &dummy_data, 0);
+	return comedi_internal_data_read_n(it, subdev, chan, range, aref, &dummy_data, 0);
 }
 
 int comedi_data_read_delayed( comedi_t *it, unsigned int subdev, unsigned int chan, unsigned int range,
