@@ -1,0 +1,47 @@
+.TH comedi_calibrate 8 ""
+.SH NAME
+\fBcomedi_calibrate\fR - COMEDI calibration utility
+.SH SYNOPSIS
+\fBcomedi_calibrate\fR [-f /dev/comediN]
+.br
+.SH DESCRIPTION
+\fBcomedi_calibrate\fR is used to autocalibrate \fBcomedi\fR
+devices.  Some \fBcomedi\fR devices have the ability to
+measure internal stable voltage references and control
+gains and offsets using programmable DACs.  On these devices,
+\fBcomedi_calibrate\fR adjusts the programmable calibration
+DACs so that the measured value of reference voltages fall
+within acceptable limits.
+
+\fBComedi_calibrate\fR prints a lot of debugging information
+as it runs.
+
+.SH LIMITATIONS
+
+\fBComedi_calibrate\fR only works on boards that it understands.
+For boards that are known to have autocalibration ability,
+but are not currently supported, \fBcomedi_calibrate\fR will
+output basic debugging information that is useful for
+the author to add support for your device.  Please send this
+output to him.
+
+
+.SH OPTIONS
+
+\fBcomedi_calibrate\fR recognizes the following options:
+
+\fB-f /dev/comediN\fR	perform calibration on device \fB/dev/comediN\fR
+
+
+.SH SEE ALSO
+
+\fBcomedi\fR(7)
+
+.SH VERSION
+
+0.7.x
+
+.SH AUTHOR
+
+David Schleef, <ds@schleef.org>
+
