@@ -170,7 +170,7 @@ main:
 	lcall	syncdelaywr
 
 	mov	dptr,#IFCONFIG	; switch on IFCLK signal
-	mov	a,#10100010b	; gpif, 30MHz, 
+	mov	a,#10100010b	; gpif, 30MHz
 	lcall	syncdelaywr
 
 	mov	dptr,#FIFORESET
@@ -209,19 +209,7 @@ gpif_run:
 	anl	a,#80h		; done bit
 	jz	no_trig		; GPIF busy
 
-;;; buffer overflow
-	mov 	dptr,#0F800H	; EP8 fifo buffer
-	mov	a,#0ffh		; error
-	movx	@dptr,a		; write ffh into the EP buffer
-	inc	dptr		; next byte
-	movx	@dptr,a		; write ffh into the EP buffer
-	mov	dptr,#EP6BCH	; byte count EP6 high byte
-	mov	a,#02H		; 512 bytes
-	lcall	syncdelaywr	; write to memory and sync
-	mov	dptr,#EP6BCL	; byte count EP6 low byte
-	mov	a,#0		; low byte is zero
-	lcall	syncdelaywr	; write to memory and sync
-
+;;; gpif has stopped
 	mov	a,#06h		; RD,EP6
 	mov	GPIFTRIG,a
 no_trig:
