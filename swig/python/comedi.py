@@ -66,10 +66,6 @@ _comedi.chanlist_swigregister(chanlistPtr)
 chanlist_frompointer = _comedi.chanlist_frompointer
 
 
-COMEDI_MAJOR = _comedi.COMEDI_MAJOR
-COMEDI_NDEVICES = _comedi.COMEDI_NDEVICES
-COMEDI_NDEVCONFOPTS = _comedi.COMEDI_NDEVCONFOPTS
-COMEDI_NAMELEN = _comedi.COMEDI_NAMELEN
 CR_FLAGS_MASK = _comedi.CR_FLAGS_MASK
 CR_ALT_FILTER = _comedi.CR_ALT_FILTER
 CR_DITHER = _comedi.CR_DITHER
@@ -188,7 +184,8 @@ INSN_CONFIG_ALT_SOURCE = _comedi.INSN_CONFIG_ALT_SOURCE
 INSN_CONFIG_DIGITAL_TRIG = _comedi.INSN_CONFIG_DIGITAL_TRIG
 INSN_CONFIG_BLOCK_SIZE = _comedi.INSN_CONFIG_BLOCK_SIZE
 INSN_CONFIG_TIMER_1 = _comedi.INSN_CONFIG_TIMER_1
-CIO = _comedi.CIO
+INSN_CONFIG_FILTER = _comedi.INSN_CONFIG_FILTER
+INSN_CONFIG_CHANGE_NOTIFY = _comedi.INSN_CONFIG_CHANGE_NOTIFY
 class comedi_trig_struct(_object):
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, comedi_trig_struct, name, value)

@@ -1,5 +1,5 @@
 
-SUBDIRS = lib comedi_calibrate comedi_config man testing demo doc python \
+SUBDIRS = lib comedi_calibrate comedi_config man testing demo doc swig \
 	include etc
 
 #pkgconfigdir = $(libdir)/pkgconfig
