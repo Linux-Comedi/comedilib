@@ -1,8 +1,8 @@
 
+include ../Config
 
-
-CFLAGS =-I ../include -I . -O2 -Wall -Wstrict-prototypes
-LDFLAGS=-L../lib/ -lcomedi -lm
+CFLAGS += -I../include -I.
+LDFLAGS += -L../lib/ -lcomedi -lm
 
 
 TARG=comedi_test
@@ -15,10 +15,11 @@ $(TARG):	$(OBJS)
 	$(CC) -o $(TARG) $(OBJS) $(LDFLAGS)
 
 clean:
-	-rm -f $(TARG) $(OBJS)
+	-rm -f $(TARG) $(OBJS) test.out test.diff
 
 test: $(TARG)
-	LD_LIBRARY_PATH=../lib COMEDILIB_LOGLEVEL=3 ./comedi_test -f /dev/comedi0 >out 2>&1
-	-diff -u results/DAQCard-ai-16xe-50 out >xxx
+	LD_LIBRARY_PATH=../lib COMEDILIB_LOGLEVEL=3 ./comedi_test -f /dev/comedi0 >test.out 2>&1
+	devicename=`grep 'I: device name:' test.out | sed 's/I: device name: //'`
+	-diff -u results/`grep 'I: device name:' test.out | sed 's/I: device name: //'` test.out >test.diff
 
 distclean: clean
