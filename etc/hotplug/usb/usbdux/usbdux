@@ -32,7 +32,17 @@ fi
 # in 2.6 there might be a race condition between
 # the usbdevfs and this hotplug script.
 # Therefore we wait a bit to make sure that /proc/bus/usb/... is there.
+if ! [ -e $DEVICE ]; then
 sleep 1
+fi
+#
+# If the device is still not existing probably the usbdevfs hasn't been
+# mounted.
+if ! [ -e $DEVICE ]; then
+    echo "usbdux hotplug: /proc/bus/usb/... does not exist"
+    echo "Please make sure that usbdevfs is mounted."
+    exit 1
+fi
 #
 #
 # firmware upload into the usb device
