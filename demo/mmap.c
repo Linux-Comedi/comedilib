@@ -30,10 +30,6 @@
 #define N_SCANS		10
 #define N_CHANS		16
 
-int subdevice = 0;
-int chan=0;
-int range = 0;
-int aref = AREF_GROUND;
 double freq = 1000;
 
 #define BUFSZ 1000

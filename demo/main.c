@@ -18,11 +18,11 @@
 char *filename="/dev/comedi0";
 int verbose_flag;
 
-int value;
-int subdevice;
-int channel;
-int aref;
-int range;
+int value=0;
+int subdevice=0;
+int channel=0;
+int aref=0;
+int range=0;
 
 
 int parse_options(int argc, char *argv[])

@@ -28,10 +28,7 @@
 #define N_SCANS		10
 #define N_CHANS		16
 
-int subdevice = 0;
 int chan=9;
-int range = 0;
-int aref = AREF_GROUND;
 int n_chan = 3;
 double freq = 1000;
 
