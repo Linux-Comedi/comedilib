@@ -1040,8 +1040,8 @@ int linear_fit_monotonic(linear_fit_t *l)
 	double sxp;
 	int i;
 
-	l->min=INFINITY;
-	l->max=-INFINITY;
+	l->min=HUGE_VAL;
+	l->max=-HUGE_VAL;
 	l->s1=0;
 	l->sx=0;
 	l->sy=0;
