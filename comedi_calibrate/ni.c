@@ -1217,8 +1217,9 @@ static double ni_get_reference( calibration_setup_t *setup, int lsb_loc,int msb_
 	int16_t uv;
 	double ref;
 
-	lsb=read_eeprom( setup, lsb_loc);
-	msb=read_eeprom( setup, msb_loc);
+	lsb=read_eeprom( setup, lsb_loc );
+	msb=read_eeprom( setup, msb_loc );
+	assert( lsb >=0 && msb >= 0 );
 	DPRINT(0,"eeprom reference lsb=%d msb=%d\n", lsb, msb);
 
 	uv = ( lsb & 0xff ) | ( ( msb << 8 ) & 0xff00 );

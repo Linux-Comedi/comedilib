@@ -37,8 +37,8 @@ typedef struct{
 	int maxdata;
 	int current;
 
-	int type;
-	double gain;
+//	int type;
+//	double gain;
 }caldac_t;
 
 typedef struct{
@@ -71,9 +71,9 @@ struct calibration_setup_struct {
 	int (*do_cal) ( calibration_setup_t *setup );
 	char *cal_save_file_path;
 	unsigned do_output : 1;
-	void *private_data;
 	comedi_calibration_t *old_calibration;
 	comedi_calibration_t *new_calibration;
+	void *private_data;
 };
 
 extern int verbose;
@@ -99,10 +99,12 @@ void reset_caldacs( calibration_setup_t *setup);
 extern char ni_id[];
 extern char cb_id[];
 extern char cb64_id[];
+extern char ni_labpc_id[];
 
 int ni_setup( calibration_setup_t*, const char *device_name );
 int cb_setup( calibration_setup_t*, const char *device_name );
 int cb64_setup( calibration_setup_t*, const char *device_name );
+int ni_labpc_setup( calibration_setup_t*, const char *device_name );
 
 /* low level */
 

@@ -45,9 +45,6 @@
 /* global variables */
 int verbose = 0;
 
-/* */
-
-
 struct board_struct{
 	char *name;
 	char *id;
@@ -60,6 +57,7 @@ struct board_struct drivers[] = {
 	{ "ni_mio_cs",	ni_id,	ni_setup },
 	{ "cb_pcidas",	cb_id,	cb_setup },
 	{ "cb_pcidas64",	cb64_id,	cb64_setup },
+	{ "ni_labpc", ni_labpc_id,	ni_labpc_setup },
 };
 #define n_drivers (sizeof(drivers)/sizeof(drivers[0]))
 
@@ -234,8 +232,8 @@ ok:
 	device_status = setup.status;
 
 	if(device_status<STATUS_DONE){
-		printf("Warning: device may not be not fully calibrated due to "
-			"insufficient information.\n"
+		printf("Warning: device may be incompletely or incorrectly calibrated due to\n"
+			"insufficient testing.\n"
 			"Please send this output to <ds@schleef.org>.\n"
 			"This output will also allow comedi_calibrate to execute more\n"
 			"quickly in the future.\n");
