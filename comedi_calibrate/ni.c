@@ -870,13 +870,13 @@ static int cal_ni_at_mio_16e_10(calibration_setup_t *setup)
 		 "for this calibration to work properly\n" );
 	}
 	init_ni_caldac_layout( &layout );
-//	layout.adc_pregain_offset = ;
+	layout.adc_pregain_offset = 0;
 	layout.adc_pregain_offset_fine = 8;
 	layout.adc_postgain_offset = 4;
 	layout.adc_gain = 2;
-//	layout.adc_unip_offset = ;
+	layout.adc_unip_offset = 7;
 	layout.dac_offset[ 0 ] = 6;
-//	layout.dac_gain[ 0 ] = ; 
+	layout.dac_gain[ 0 ] = 11; 
 	layout.dac_linearity[ 0 ] = 10;
 	layout.dac_offset[ 1 ] = 9;
 	layout.dac_gain[ 1 ] = 5;
