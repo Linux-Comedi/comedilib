@@ -58,11 +58,12 @@ information here to remind myself that the numbers aren't arbitrary.
 <para>
 When I run comedi_config (as root, of course), I provide the same
 information.  Since I want to have the board configured every time
-I boot, I put the line
+I boot, I put the lines
 </para>
 
 <screen>
-/usr/sbin/comedi_config /dev/comedi0 ni_atmio 0x260,3
+export PATH=/sbin:/usr/sbin:/usr/local/sbin:$PATH
+comedi_config /dev/comedi0 ni_atmio 0x260,3
 </screen>
 
 <para>
@@ -115,12 +116,13 @@ don't want the driver to use DMA.  (Don't want it to interfere
 with my sound card -- life is full of difficult choices.)
 Keep in mind that things commented in the source, but not in
 the documentation are about as likely to change as the weather,
-so I put good comments next to the following line when I put
+so I put good comments next to the following lines when I put
 it in rc.local.
 </para>
 
 <screen>
-/usr/sbin/comedi_config /dev/comedi1 dt2821-f-8di 0x200,4,,1,1,1
+export PATH=/sbin:/usr/sbin:/usr/local/sbin:$PATH
+comedi_config /dev/comedi1 dt2821-f-8di 0x200,4,,1,1,1
 </screen>
 
 <para>

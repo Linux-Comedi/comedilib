@@ -1,6 +1,6 @@
 
 DOC=comedilib
-SGML= advanced.sgml drivers.sgml funcref.sgml glossary.sgml \
+SGML= drivers.sgml funcref.sgml glossary.sgml \
 	install.sgml intro.sgml other.sgml reference.sgml tutorial.sgml
 
 EXTRA_DIST=$(SGML) funcref mkref drivers.txt mkdr
