@@ -112,14 +112,14 @@ static struct board_struct boards[]={
 	{ "pxi-6052e", STATUS_UNKNOWN, NULL, ni_setup_observables, -1, -1 },
 	{ "pxi-6070e", STATUS_UNKNOWN, NULL, ni_setup_observables, -1, -1 },
 	{ "pxi-6071e", STATUS_GUESS, cal_ni_pxi_6071e, ni_setup_observables, -1, -1 },
-	{ "pci-6711", STATUS_UNKNOWN, cal_ni_pci_6711, ni67xx_setup_observables, -1, -1}, //0x1d4, 0x1d5},
-	{ "pci-6713", STATUS_UNKNOWN, cal_ni_pci_6711, ni67xx_setup_observables, -1, -1},
-	{ "pci-6731", STATUS_UNKNOWN, cal_ni_pci_6711, ni67xx_setup_observables, -1, -1},
-	{ "pci-6733", STATUS_UNKNOWN, cal_ni_pci_6711, ni67xx_setup_observables, -1, -1},
-	{ "pxi-6711", STATUS_UNKNOWN, cal_ni_pci_6711, ni67xx_setup_observables, -1, -1},
-	{ "pxi-6713", STATUS_UNKNOWN, cal_ni_pci_6711, ni67xx_setup_observables, -1, -1},
-	{ "pxi-6731", STATUS_UNKNOWN, cal_ni_pci_6711, ni67xx_setup_observables, -1, -1},
-	{ "pxi-6733", STATUS_UNKNOWN, cal_ni_pci_6711, ni67xx_setup_observables, -1, -1},
+	{ "pci-6711", STATUS_DONE, cal_ni_pci_6711, ni67xx_setup_observables, 0x1d4, 0x1d5},
+	{ "pci-6713", STATUS_GUESS, cal_ni_pci_6711, ni67xx_setup_observables, -1, -1},
+	{ "pci-6731", STATUS_GUESS, cal_ni_pci_6711, ni67xx_setup_observables, -1, -1},
+	{ "pci-6733", STATUS_GUESS, cal_ni_pci_6711, ni67xx_setup_observables, -1, -1},
+	{ "pxi-6711", STATUS_GUESS, cal_ni_pci_6711, ni67xx_setup_observables, -1, -1},
+	{ "pxi-6713", STATUS_GUESS, cal_ni_pci_6711, ni67xx_setup_observables, -1, -1},
+	{ "pxi-6731", STATUS_GUESS, cal_ni_pci_6711, ni67xx_setup_observables, -1, -1},
+	{ "pxi-6733", STATUS_GUESS, cal_ni_pci_6711, ni67xx_setup_observables, -1, -1},
 #if 0
 	{ "at-mio-64e-3",	cal_ni_16e_1 },
 #endif
@@ -1408,7 +1408,7 @@ static inline int ni67xx_ao_offset_caldac(unsigned int ao_channel)
 static int ni67xx_ao_ground_observable_index( const calibration_setup_t *setup,
 	unsigned int channel, unsigned int ao_range )
 {
-	return 3 * channel;
+	return 3 * channel + 0;
 }
 
 static int ni67xx_ao_mid_observable_index( const calibration_setup_t *setup,
@@ -1423,16 +1423,63 @@ static int ni67xx_ao_high_observable_index( const calibration_setup_t *setup,
 	return 3 * channel + 2;
 }
 
+static const double ni67xx_unitless_adc_offset = 0.5;
+
+/* determine conversion factor between actual voltage and
+ * interval [0,1) returned by reads from the calibration adc
+ * subdevice.
+ */
+static double ni67xx_unitless_adc_slope(calibration_setup_t *setup)
+{
+	double reference_in_volts;
+	double reference_unitless;
+	double slope;
+	comedi_insn insn;
+	lsampl_t data;
+	comedi_range *range;
+	static const int maxdata = 0x10000;
+	int retval;
+
+	if(ni_board(setup)->ref_eeprom_lsb >= 0 &&
+		ni_board(setup)->ref_eeprom_msb >= 0)
+	{
+		reference_in_volts = ni_get_reference(setup,
+			ni_board(setup)->ref_eeprom_lsb, ni_board(setup)->ref_eeprom_msb );
+	}else
+	{
+		DPRINT( 0, "WARNING: unknown eeprom address for reference voltage\n"
+			"correction.  This might be fixable if you send us an eeprom dump\n"
+			"(see the demo/eeprom_dump program).\n");
+		reference_in_volts = 5.0;
+	}
+
+	memset(&insn, 0, sizeof(insn));
+	insn.insn = INSN_READ;
+	insn.n = 1;
+	insn.subdev = setup->ad_subdev;
+	insn.data = &data;
+	insn.chanspec = CR_PACK(0, 0, AREF_GROUND) | CR_ALT_SOURCE;
+	retval = comedi_do_insn(setup->dev, &insn);
+	assert(retval >= 0);
+
+	range = comedi_get_range(setup->dev, setup->ad_subdev, 0, 0);
+	assert( range );
+	reference_unitless = comedi_to_phys(data, range, maxdata);
+
+	slope = (reference_unitless - ni67xx_unitless_adc_offset) / reference_in_volts;
+
+	return slope;
+}
+
 /* calibration adc uses RANGE_UNKNOWN, so it will return a value from
    0.0 to 1.0 instead of a voltage, so we need to renormalize. */
-void ni67xx_set_target( calibration_setup_t *setup, int obs,double target)
+static void ni67xx_set_target( calibration_setup_t *setup, int obs, double target, double slope)
 {
-	static const double reference = 5.0;
-
 	set_target(setup, obs, target);
-	/* calibration adc is roughly +=10V range, and inverted */
-	setup->observables[obs].target *= -1.0 / (reference * 4.0);
-	setup->observables[obs].target += 0.5;
+	/* convert target from volts to interval [0,1) which calibration
+	 * adc returns */
+	setup->observables[obs].target *= slope;
+	setup->observables[obs].target += ni67xx_unitless_adc_offset;
 }
 
 static void ni67xx_setup_observables( calibration_setup_t *setup )
@@ -1441,6 +1488,9 @@ static void ni67xx_setup_observables( calibration_setup_t *setup )
 	observable *o;
 	int num_ao_channels;
 	int i;
+	double slope;
+
+	slope = ni67xx_unitless_adc_slope(setup);
 
 	/* calibration adc is very slow (15HZ) but accurate, so only sample a few times */
 	setup->sv_order = 1;
@@ -1472,7 +1522,7 @@ static void ni67xx_setup_observables( calibration_setup_t *setup )
 		o->preobserve_insn.data = o->preobserve_data;
 		o->observe_insn = tmpl;
 		o->observe_insn.chanspec = CR_PACK(i, 0, AREF_GROUND);
-		ni67xx_set_target(setup, ni67xx_ao_ground_observable_index(setup, i, 0), 0.0);
+		ni67xx_set_target(setup, ni67xx_ao_ground_observable_index(setup, i, 0), 0.0, slope);
 		setup->n_observables++;
 
 		o = setup->observables + ni67xx_ao_mid_observable_index( setup,
@@ -1485,7 +1535,7 @@ static void ni67xx_setup_observables( calibration_setup_t *setup )
 		o->preobserve_insn.data = o->preobserve_data;
 		o->observe_insn = tmpl;
 		o->observe_insn.chanspec = CR_PACK(i, 0, AREF_GROUND);
-		ni67xx_set_target(setup, ni67xx_ao_mid_observable_index(setup, i, 0), 4.0);
+		ni67xx_set_target(setup, ni67xx_ao_mid_observable_index(setup, i, 0), 4.0, slope);
 		setup->n_observables++;
 
 		o = setup->observables + ni67xx_ao_high_observable_index( setup, i, 0);
@@ -1497,7 +1547,7 @@ static void ni67xx_setup_observables( calibration_setup_t *setup )
 		o->preobserve_insn.data = o->preobserve_data;
 		o->observe_insn = tmpl;
 		o->observe_insn.chanspec = CR_PACK(i, 0, AREF_GROUND);
-		ni67xx_set_target(setup, ni67xx_ao_high_observable_index(setup, i, 0), 8.0);
+		ni67xx_set_target(setup, ni67xx_ao_high_observable_index(setup, i, 0), 8.0, slope);
 		setup->n_observables++;
 	}
 
