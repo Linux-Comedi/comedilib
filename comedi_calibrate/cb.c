@@ -700,7 +700,7 @@ static int cal_cb_pci_1xxx( calibration_setup_t *setup )
 		current_cal++;
 	}
 
-	if( setup->da_subdev >= 0 )
+	if( setup->da_subdev >= 0 && setup->do_output)
 	{
 		for( range = 0; range < num_ao_ranges; range++ )
 		{
@@ -752,24 +752,19 @@ static int cal_cb_pci_1001( calibration_setup_t *setup )
 		ADC_GAIN,
 	};
 
-	cal1( setup, OBS_0V_RANGE_10V_BIP_1XXX, ADC_OFFSET_COARSE );
-	cal1_fine( setup, OBS_0V_RANGE_10V_BIP_1XXX, ADC_OFFSET_COARSE );
+	cal_binary( setup, OBS_0V_RANGE_10V_BIP_1XXX, ADC_OFFSET_COARSE );
+	cal_binary( setup, OBS_0V_RANGE_10V_BIP_1XXX, ADC_OFFSET_FINE );
+	cal_binary( setup, OBS_7V_RANGE_10V_BIP_1XXX, ADC_GAIN );
 
-	cal1( setup, OBS_0V_RANGE_10V_BIP_1XXX, ADC_OFFSET_FINE );
-	cal1_fine( setup, OBS_0V_RANGE_10V_BIP_1XXX, ADC_OFFSET_FINE );
-
-	cal1( setup, OBS_7V_RANGE_10V_BIP_1XXX, ADC_GAIN );
-	cal1_fine( setup, OBS_7V_RANGE_10V_BIP_1XXX, ADC_GAIN );
-
-	if( setup->da_subdev >= 0 )
+	if( setup->da_subdev >= 0 && setup->do_output )
 	{
-		cal1( setup, OBS_DAC0_GROUND_1XXX, DAC0_OFFSET );
-		cal1( setup, OBS_DAC0_HIGH_1XXX, DAC0_GAIN_COARSE );
-		cal1( setup, OBS_DAC0_HIGH_1XXX, DAC0_GAIN_FINE );
+		cal_binary( setup, OBS_DAC0_GROUND_1XXX, DAC0_OFFSET );
+		cal_binary( setup, OBS_DAC0_HIGH_1XXX, DAC0_GAIN_COARSE );
+		cal_binary( setup, OBS_DAC0_HIGH_1XXX, DAC0_GAIN_FINE );
 
-		cal1( setup, OBS_DAC1_GROUND_1XXX, DAC1_OFFSET );
-		cal1( setup, OBS_DAC1_HIGH_1XXX, DAC1_GAIN_COARSE );
-		cal1( setup, OBS_DAC1_HIGH_1XXX, DAC1_GAIN_FINE );
+		cal_binary( setup, OBS_DAC1_GROUND_1XXX, DAC1_OFFSET );
+		cal_binary( setup, OBS_DAC1_HIGH_1XXX, DAC1_GAIN_COARSE );
+		cal_binary( setup, OBS_DAC1_HIGH_1XXX, DAC1_GAIN_FINE );
 	}
 
 	return 0;
@@ -792,14 +787,9 @@ static int cal_cb_pci_1602_16( calibration_setup_t *setup )
 		ADC_PREGAIN_OFFSET,
 	};
 
-	cal1( setup, OBS_0V_RANGE_10V_BIP_1602_16, ADC_PREGAIN_OFFSET );
-	cal1_fine( setup, OBS_0V_RANGE_10V_BIP_1602_16, ADC_PREGAIN_OFFSET );
-
-	cal1( setup, OBS_0V_RANGE_10V_BIP_1602_16, ADC_POSTGAIN_OFFSET );
-	cal1_fine( setup, OBS_0V_RANGE_10V_BIP_1602_16, ADC_POSTGAIN_OFFSET );
-
-	cal1( setup, OBS_7V_RANGE_10V_BIP_1602_16, ADC_GAIN );
-	cal1_fine( setup, OBS_7V_RANGE_10V_BIP_1602_16, ADC_GAIN );
+	cal_binary( setup, OBS_0V_RANGE_10V_BIP_1602_16, ADC_PREGAIN_OFFSET );
+	cal_binary( setup, OBS_0V_RANGE_10V_BIP_1602_16, ADC_POSTGAIN_OFFSET );
+	cal_binary( setup, OBS_7V_RANGE_10V_BIP_1602_16, ADC_GAIN );
 
 	return 0;
 }

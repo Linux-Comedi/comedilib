@@ -103,7 +103,8 @@ static struct board_struct boards[]={
 	{ "DAQCard-ai-16e-4",	STATUS_DONE,	cal_ni_daqcard_ai_16e_4,	ni_setup_observables },
 	{ "pci-6110",	STATUS_DONE,	cal_ni_pci_611x,	ni_setup_observables_611x },
 	{ "pci-6111",	STATUS_DONE,	cal_ni_pci_611x,	ni_setup_observables_611x },
-	{ "DAQCard-6062e", STATUS_SOME, cal_ni_daqcard_6062e, ni_setup_observables },
+	{ "DAQCard-6062E", STATUS_SOME, cal_ni_daqcard_6062e, ni_setup_observables },
+	{ "DAQCard-6024E",	STATUS_UNKNOWN, NULL, ni_setup_observables },
 #if 0
 //	{ "at-mio-16de-10",	cal_ni_unknown },
 	{ "at-mio-64e-3",	cal_ni_16e_1 },
@@ -120,7 +121,6 @@ static struct board_struct boards[]={
 //	{ "pci-6713",		cal_ni_unknown },
 //	{ "pxi-6070e",		cal_ni_unknown },
 //	{ "pxi-6052e",		cal_ni_unknown },
-//	{ "DAQCard-6024e",	cal_ni_unknown },
 #endif
 };
 #define n_boards (sizeof(boards)/sizeof(boards[0]))
@@ -162,7 +162,10 @@ enum reference_sources {
 
 int ni_setup( calibration_setup_t *setup , const char *device_name )
 {
-	ni_setup_board( setup, device_name );
+	int retval;
+
+	retval = ni_setup_board( setup, device_name );
+	if( retval < 0 ) return retval;
 	setup_caldacs( setup, setup->caldac_subdev );
 
 	return 0;

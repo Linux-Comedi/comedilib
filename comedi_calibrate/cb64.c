@@ -834,7 +834,7 @@ static int cal_cb_pci_64xx( calibration_setup_t *setup )
 
 	update_caldac( setup, ADC_OFFSET_64XX, adc_offset_for_ao );
 	update_caldac( setup, ADC_GAIN_64XX, adc_gain_for_ao );
-	for( i = 0; i < num_ao_ranges ; i++ )
+	for( i = 0; i < num_ao_ranges && setup->do_output; i++ )
 	{
 		prep_dac_caldacs_64xx( setup, 0, i );
 
@@ -999,7 +999,7 @@ static int cal_cb_pci_60xx( calibration_setup_t *setup )
 	update_caldac( setup, ADC_OFFSET_COARSE_60XX, adc_offset_coarse_for_ao );
 	update_caldac( setup, ADC_GAIN_FINE_60XX, adc_gain_fine_for_ao );
 	update_caldac( setup, ADC_GAIN_COARSE_60XX, adc_gain_coarse_for_ao );
-	for( i = 0; i < num_ao_ranges ; i++ )
+	for( i = 0; i < num_ao_ranges && setup->do_output; i++ )
 	{
 		prep_dac_caldacs_60xx( setup, 0, i );
 

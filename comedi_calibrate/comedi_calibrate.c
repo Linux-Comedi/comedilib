@@ -2,9 +2,6 @@
    A little auto-calibration utility, for boards
    that support it.
 
-   Right now, it only supports NI E series boards,
-   but it should be easily portable.
-
    A few things need improvement here:
     - current system gets "close", but doesn't
       do any fine-tuning
@@ -267,10 +264,11 @@ void set_target( calibration_setup_t *setup, int obs,double target)
 		setup->observables[obs].preobserve_insn.subdev,
 		CR_CHAN( setup->observables[obs].preobserve_insn.chanspec ),
 		CR_RANGE( setup->observables[obs].preobserve_insn.chanspec ));
+	assert( range );
 	maxdata = comedi_get_maxdata( setup->dev,
 		setup->observables[obs].preobserve_insn.subdev,
 		CR_CHAN(setup->observables[obs].preobserve_insn.chanspec));
-
+	assert( maxdata > 0 );
 	data = comedi_from_phys(target,range,maxdata);
 
 	setup->observables[obs].preobserve_data[0] = data;
