@@ -570,7 +570,6 @@ static int init_observables_60xx( calibration_setup_t *setup )
 	}
 	for( i = 0; i < num_ranges; i++ )
 	{
-fprintf(stderr, "setting up ai observables for range %i out of %i\n", i, num_ranges);
 		o = setup->observables + ai_ground_observable_index_60xx( setup, 0, i );
 		o->reference_source = CAL_SRC_GROUND;
 		assert( o->name == NULL );
