@@ -21,7 +21,7 @@
 ; Description: University of Stirling USB DAQ & INCITE Technology Limited
 ; Devices: [ITL] USB-DUX (usbdux.o)
 ; Author: Bernd Porr <Bernd.Porr@f2s.com>
-; Updated: 23 Jul 2004
+; Updated: 18 Aug 2004
 ; Status: testing
 ;
 ;;;
@@ -847,8 +847,13 @@ ep6_arm:
 ;;; also gets the content of the digital ports B and D depending on
 ;;; the COMMAND flag
 ep8_ops:
+	mov	dptr,#0fc01h	; ep8 fifo buffer
+	clr	a		; high byte
+	movx	@dptr,a		; set H=0
+	mov	dptr,#0fc00h	; low byte
 	mov	r0,#CMD_FLAG
 	mov	a,@r0
+	movx	@dptr,a		; save command byte
 
 	mov	dptr,#ep8_jmp	; jump table for the different functions
 	rl	a		; multiply by 2: sizeof sjmp
@@ -867,7 +872,7 @@ ep8_jmp:
 	;; reads all counters
 ep8_readctr:
 	mov	r0,#CTR0	; points to counter0
-	mov	dptr,#0fc00h	; ep8 fifo buffer
+	mov	dptr,#0fc02h	; ep8 fifo buffer
 	mov	r1,#8		; transfer 4 16bit counters
 ep8_ctrlp:
 	mov	a,@r0		; get the counter
@@ -885,7 +890,7 @@ ep8_sglchannel:
 	
 	lcall 	readAD		; start the conversion
 		
-	mov 	DPTR,#0fc00h	; EP8 FIFO 
+	mov 	DPTR,#0fc02h	; EP8 FIFO 
 	mov 	a,R3		; get low byte
 	movx 	@DPTR,A		; store in FIFO
 	inc	dptr		; next fifo entry
@@ -896,7 +901,7 @@ ep8_sglchannel:
 
 	;; read the digital lines
 ep8_dio:	
-	mov 	DPTR,#0fc00h	; store the contents of port B
+	mov 	DPTR,#0fc02h	; store the contents of port B
 	mov	a,IOB		; in the next
 	movx	@dptr,a		; entry of the buffer
 
