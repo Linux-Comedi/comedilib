@@ -19,7 +19,7 @@
 int test_mode0_read(void)
 {
 	comedi_trig it;
-	lsampl_t data;
+	sampl_t data;
 	unsigned int chanspec;
 	int save_errno;
 	int ret;
@@ -31,7 +31,7 @@ int test_mode0_read(void)
 	it.mode = 0;
 	it.n_chan = 1;
 	it.chanlist = &chanspec;
-	it.data = (sampl_t *)&data;
+	it.data = &data;
 	it.n = 1;
 
 	chanspec = CR_PACK(0,0,0);
