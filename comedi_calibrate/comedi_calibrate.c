@@ -547,9 +547,13 @@ void cal_ni_mio_E(void)
 		int n_ranges;
 
 	reset_caldacs();
-	printf("please send this output to <ds@stm.lbl.gov>\n");
+	printf("Please send this output to <ds@schleef.org>\n");
 	printf("$Id$\n");
-	printf("%s\n",comedi_get_board_name(dev));
+	printf("Device name: %s\n",comedi_get_board_name(dev));
+	printf("Comedi version: %d.%d.%d\n",
+		(comedi_get_version_code(dev)>>16)&0xff,
+		(comedi_get_version_code(dev)>>8)&0xff,
+		(comedi_get_version_code(dev))&0xff);
 
 	n_ranges=comedi_get_n_ranges(dev,ad_subdev,0);
 
