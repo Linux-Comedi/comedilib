@@ -1,4 +1,19 @@
 
+comedilib-0.7.17:
+
+ - Added gettext support.
+ - Config, lib/Makefile: Added ability to add suffix to lib soname.
+ - Makefile: added install_dev, install_runtime, install_doc targets.
+ - comedi_calibrate/: major rewrite, more modular.  Have new system
+   for verifying calibration results
+ - demo/ao_waveform.c: Comedi now supports TRIG_INT.
+ - doc/: Added documentation
+ - include/comedi.h: synchronized with Comedi
+ - Changed copyright headers to be LGPL-2.1.
+ - lib/range.c: new (alpha) functions comedi_sampl_to_phys() and
+   comedi_sampl_from_phys().
+ - testing/results: additional results
+
 comedilib-0.7.16:
 
  - New Config file meant to be user-edited, plus necessary changes to
