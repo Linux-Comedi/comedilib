@@ -24,7 +24,8 @@ static char *subdevice_types[]={
 	"timer",
 	"memory",
 	"calibration",
-	"processor"
+	"processor",
+	"serial"
 };
 
 
