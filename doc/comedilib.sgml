@@ -570,7 +570,7 @@ the start and end of each scan, and each conversion is called an
 event.
 
 Each of these 5 types of events are caused by a triggering
-source, specified through the *_src members of the
+source, specified through the <tt/*_src/ members of the
 <ref id="comedi_cmd" name="comedi_cmd"> structure.  The source types are:
 
 <itemize>
@@ -585,42 +585,42 @@ source, specified through the *_src members of the
 <item>TRIG_OTHER:	driver-specific meaning
 </itemize>
 
+Not all triggers are applicable to all events.  Supported triggers
+for specific events depend significantly on your particular
+device.  The <ref id="comedi_get_cmd_src_mask" name="comedi_get_cmd_src_mask()">
+function is useful for determining what triggers a subdevice supports.
+
 For every trigger, there is a corresponding
-argument (the *_arg members of the <ref id="comedi_cmd" name="comedi_cmd">
+argument (the <tt/*_arg/ members of the <ref id="comedi_cmd" name="comedi_cmd">
 structure) whose meaning depends on the type of trigger.  The meanings
 of the arguments are as follows:
 
-
-Not all triggers are applicable to all events.  Supported triggers
-for specific events depends significantly on your particular
-device.
-
-TRIG_NONE is typically used only as a stop_src.  The arg for TRIG_NONE
+TRIG_NONE is typically used only as a <tt/stop_src/.  The argument for TRIG_NONE
 is reserved and should be set to 0.
 
-TRIG_NOW is most often used as a start_src.  The arg for TRIG_NOW is
+TRIG_NOW is most often used as a <tt/start_src/.  The argument for TRIG_NOW is
 the number of nanoseconds between when the command is issued and when
-the event should occur.  In the case of using TRIG now as a start_src,
+the event should occur.  In the case of using TRIG now as a <tt/start_src/,
 it indicates a delay between issuing the command and the start of
 acquisition.  Most drivers only support a delay of 0.
 
 TRIG_FOLLOW is a special type of trigger for events that trigger on
 the completion of some other, logically connected event.  The argument
 is reserved and should be set to 0.  When used
-as a scan_begin_src, it indicates that a trigger should occur as a
+as a <tt/scan_begin_src/, it indicates that a trigger should occur as a
 logical continuation of convert events.  This is done in order to
 properly describe boards that do not have separate timers for
-convert and scan_begin events.  When used as a start_src for analog
+convert and scan_begin events.  When used as a <tt/start_src/ for analog
 output subdevices, it indicates that conversion of output samples
 should begin when samples are written to the buffer.
 
 TRIG_TIME is reserved for future use.
 
-TRIG_TIMER is most often used as a convert_src, a scan_begin_src, or
+TRIG_TIMER is most often used as a <tt/convert_src/, a <tt/scan_begin_src/, or
 both.  It indicates that triggers should occur at a specific rate.
 The argument specifies the interval between triggers in nanoseconds.
 
-TRIG_COUNT is used for scan_end_src and stop_src.  It indicates that
+TRIG_COUNT is used for <tt/scan_end_src/ and <tt/stop_src/.  It indicates that
 a trigger should occur when the specified number of corresponding
 lower-level triggers (convert and scan_begin, respectively) occur.
 The argument is the count of lower-level triggers.
@@ -632,7 +632,7 @@ have one dedicated line, others may allow generic digital input
 lines to be used.  The argument indicates the particular external
 line to use as the trigger.
 
-TRIG_INT is typically used as a start_src.  This trigger occurs when
+TRIG_INT is typically used as a <tt/start_src/.  This trigger occurs when
 the application performs an INSN_INTTRIG instruction.  Using TRIG_INT
 is a method by which the application can accurately record the time of
 the start of acquisition, since the parsing and setup time of a
@@ -645,16 +645,25 @@ that otherwise does not fit into the command interface.  Configuration
 of TRIG_OTHER features are done by INSN_CONFIG insns.  The argument
 is reserved and should be set to 0.
 
+Ths <tt/subdev/ member of the <ref id="comedi_cmd" name="comedi_cmd">
+structure is the index of the subdevice the command is intended for.  The
+<ref id="comedi_find_subdevice_by_type" name="comedi_find_subdevice_by_type()">
+function can be useful in discovering the index of your desired subdevice.
 
-The chanlist member of the <ref id="comedi_cmd" name="comedi_cmd">
-structure should point to an array whose number of elements is specificed by chanlist_len
+The <tt/chanlist/ member of the <ref id="comedi_cmd" name="comedi_cmd">
+structure should point to an array whose number of elements is specificed by <tt/chanlist_len/
 (this will generally be the same as the scan_end_arg).
 The chanlist specifies the sequence of channels and gains (and analog references)
 that should be stepped through for each scan.  The elements of the chanlist array
 should be initialized by packing the channel, range and reference information
 together with the <ref id="CR_PACK" name="CR_PACK(channel, range, aref)"> macro.
 
-The final member of the <ref id="comedi_cmd" name="comedi_cmd"> structure is 'flags'.
+The <tt/data/ and <tt/data_len/ members can be safely ignored when issueing commands
+from a user-space program.  They only have meaning when a command is sent from a kernel
+module using the kcomedilib interface, in which case they specify the buffer where
+the driver should write/read its data to/from.
+
+The final member of the <ref id="comedi_cmd" name="comedi_cmd"> structure is <tt/flags/.
 The following flags are valid, and can be bitwise-or'd together.
 
 <itemize>
@@ -666,11 +675,12 @@ reduce latency in handling interrupts from your data aquisition hardware.  It ca
 be useful if you are sampling at high frequency, or if your hardware has a small onboard
 fifo.  You must have a real-time kernel (RTAI or RTLinux) and must compile
 comedi with real-time support or this flag will do nothing.
-<item>TRIG_CONFIG:	perform configuration, not triggering.
+<item>TRIG_CONFIG:	perform configuration, not triggering.  This is a legacy of the
+deprecated comedi_trig_struct, and has no function at present.
 <item>TRIG_WAKE_EOS:	some drivers will change their behaviour when this flag is set,
 trying to transfer data at the end of every scan (instead of, for example, passing
 data in chunks whenever the board's onboard fifo is half full).  This flag
-may degrade a driver's performance at higher frequencies.
+may degrade a driver's performance at high frequencies.
 <item>TRIG_WRITE:	write to bidirectional devices.  Could be useful in principle, if someone
 wrote a driver that supported commands for a digital i/o device that could do either
 input or output.
@@ -1143,6 +1153,7 @@ Source: <tt>/lib/error.c</tt>
 
 <p>
 <sect2>comedi_find_subdevice_by_type()
+<label id="comedi_find_subdevice_by_type" >
 <p>
 
 <tt>int comedi_find_subdevice_by_type(comedi_t *it,int type,unsigned int
