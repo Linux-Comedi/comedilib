@@ -467,7 +467,7 @@ void cal_ni_pci_6024e(void)
 void cal_ni_pci_6025e(void)
 {
 	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,4); // was 1
-	cal1(ni_zero_offset_high,XXX); // was 10
+	//cal1(ni_zero_offset_high,XXX); // was 10
 	cal1(ni_zero_offset_high,8); // was 0
 	cal1(ni_reference_low,2); // was 3
 	if(do_output){
