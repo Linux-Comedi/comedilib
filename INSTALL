@@ -1,10 +1,4 @@
 
-Comedi has a mailing list.  Send "subscribe comedi" to
-majordomo@stm.lbl.gov to subscribe.
-
-If you are upgrading from a previous version, see the upgrade notes
-below.
-
 Compile using 'make'.  If this doesn't work, make sure you have the
 basic tools installed to compile.  If you can successfully compile
 other things, consult the author, as he has probably made a mistake.
@@ -14,6 +8,9 @@ Install using 'make install' as root.  This installs the files:
 	/usr/include/comedi.h
 	/usr/include/comedilib.h
 	and other things...
+
+If you run Debian GNU/Linux, comedilib is packaged as the packages
+libcomedi0 and libcomedi-dev.  These are available as part of woody.
 
 To write programs that use comedi, look at examples in the demo/ and
 the documentation in the doc/ directory.
