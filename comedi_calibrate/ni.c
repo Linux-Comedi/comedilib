@@ -92,7 +92,7 @@ static struct board_struct boards[]={
 	{ "pci-6023e", STATUS_DONE, cal_ni_pci_6023e, ni_setup_observables, 0x1bb, 0x1bc },
 	{ "pci-6024e", STATUS_SOME, cal_ni_pci_6024e, ni_setup_observables, 0x1af, 0x1b0 },
 	{ "pci-6025e", STATUS_SOME, cal_ni_pci_6025e, ni_setup_observables, 0x1af, 0x1b0 },
-	{ "pci-6031e", STATUS_SOME, cal_ni_pci_mio_16xe_10, ni_setup_observables, 0x1ae, 0x1af },
+	{ "pci-6031e", STATUS_DONE, cal_ni_pci_mio_16xe_10, ni_setup_observables, 0x1ae, 0x1af },
 	{ "pci-6032e", STATUS_DONE, cal_ni_pci_6032e, ni_setup_observables, 0x1ae, 0x1af },
 	{ "pci-6033e", STATUS_UNKNOWN, NULL, ni_setup_observables, 0x1ae, 0x1af },
 	{ "pci-6034e", STATUS_UNKNOWN, NULL, ni_setup_observables, -1, -1 },
@@ -1248,8 +1248,9 @@ static int cal_ni_generic( calibration_setup_t *setup, const ni_caldac_layout_t 
 		}else
 		{
 			prep_adc_caldacs_generic( setup, layout, ai_unipolar_lowgain );
-			generic_peg( setup, ni_unip_zero_offset_low,
-				layout->adc_pregain_offset, 1 );
+			if( setup->old_calibration == NULL )
+				generic_peg( setup, ni_unip_zero_offset_low,
+					layout->adc_pregain_offset, 1 );
 			generic_do_relative( setup, current_cal, ni_unip_zero_offset_low,
 				ni_unip_reference_low, layout->adc_gain );
 			generic_do_relative( setup, current_cal, ni_unip_zero_offset_low,

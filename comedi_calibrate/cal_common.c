@@ -239,7 +239,7 @@ static void generic_do_adc_postgain_offset( calibration_setup_t *setup, const ge
 		highgain = get_bipolar_highgain( setup->dev, setup->ad_subdev );
 	}
 	generic_prep_adc_caldacs( setup, layout, channel, highgain );
-	if( unipolar )
+	if( unipolar && setup->old_calibration == NULL )
 	{
 		/* Need to make sure we aren't stuck on zero for unipolar,
 		 * by setting pregain offset to maximum.  Use bipolar lowgain
