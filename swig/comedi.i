@@ -55,6 +55,10 @@ static unsigned int cr_aref(unsigned int a){
 
 %array_class(unsigned int, chanlist);
 
+%typemap(ruby, argout) comedi_cmd *INOUT(VALUE info) {
+    $result = output_helper($result, $arg);
+};
+
 /* below are (modified) copies of comedi.h and comedilib.h */
 
 /* comedi.h */
