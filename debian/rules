@@ -29,6 +29,7 @@ build-stamp:
 		--mandir=\$${prefix}/share/man \
 		--datadir=\$${prefix}/share/doc/ \
 		--sysconfdir=/etc \
+		--localstatedir=/var/lib/libcomedi0 \
 		--disable-dependency-tracking
 
 	$(MAKE)
@@ -51,7 +52,11 @@ install: build
 	dh_installdirs
 
 	$(MAKE) install prefix=`pwd`/debian/tmp/usr \
-		pkgdatadir=`pwd`/debian/tmp/usr/share/doc/libcomedi-dev
+		pkgdatadir=`pwd`/debian/tmp/usr/share/doc/libcomedi0 \
+		sysconfdir=`pwd`/debian/tmp/etc \
+		localstatedir=`pwd`/debian/tmp/var
+	
+	cd debian/tmp/usr/share/doc && ln -s libcomedi0 libcomedi-dev
 
 binary-indep: build install
 

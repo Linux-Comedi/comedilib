@@ -2,5 +2,6 @@ usr/lib/libcomedi.so
 usr/lib/libcomedi.a
 usr/include/*
 usr/share/man/man3/*
-usr/share/doc/libcomedi-dev/html/*
-usr/share/doc/libcomedi-dev/comedilib.pdf
+usr/share/doc/libcomedi0/html/*
+usr/share/doc/libcomedi0/comedilib.pdf
+usr/share/doc/libcomedi-dev
