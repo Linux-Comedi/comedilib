@@ -15,5 +15,5 @@ libtoolize --copy --force && \
 autoheader && \
 autoconf && \
 automake -a -c && \
-./configure --enable-maintainer-mode
+./configure --enable-maintainer-mode $*
 
