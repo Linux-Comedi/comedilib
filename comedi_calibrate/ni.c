@@ -268,6 +268,14 @@ static void ni_setup_observables( calibration_setup_t *setup )
 	o->target = voltage_reference;
 
 	if(unipolar_lowgain>=0){
+		comedi_range *range;
+		int max_data;
+
+		range = comedi_get_range( setup->dev, setup->ad_subdev, 0, unipolar_lowgain );
+			assert( range != NULL );
+		max_data = comedi_get_maxdata( setup->dev, setup->ad_subdev, 0 );
+		assert( max_data > 0 );
+
 		o = setup->observables + ni_unip_zero_offset_low;
 		o->name = "ai, unipolar zero offset, low gain";
 		o->observe_insn = tmpl;
@@ -275,7 +283,7 @@ static void ni_setup_observables( calibration_setup_t *setup )
 			CR_PACK(REF_GND_GND,unipolar_lowgain,AREF_OTHER)
 			| CR_ALT_SOURCE | CR_ALT_FILTER;
 		o->reference_source = REF_GND_GND;
-		o->target = 0.0;
+		o->target = comedi_to_phys( 1, range, max_data ) / 2.0;
 
 		o = setup->observables + ni_unip_reference_low;
 		o->name = "ai, unipolar voltage reference, low gain";
@@ -289,6 +297,14 @@ static void ni_setup_observables( calibration_setup_t *setup )
 
 	if(unipolar_highgain >= 0)
 	{
+		comedi_range *range;
+		int max_data;
+
+		range = comedi_get_range( setup->dev, setup->ad_subdev, 0, unipolar_highgain );
+			assert( range != NULL );
+		max_data = comedi_get_maxdata( setup->dev, setup->ad_subdev, 0 );
+		assert( max_data > 0 );
+
 		o = setup->observables + ni_unip_zero_offset_high;
 		o->name = "ai, unipolar zero offset, high gain";
 		o->observe_insn = tmpl;
@@ -296,7 +312,7 @@ static void ni_setup_observables( calibration_setup_t *setup )
 			CR_PACK(REF_GND_GND,unipolar_highgain,AREF_OTHER)
 			| CR_ALT_SOURCE | CR_ALT_FILTER;
 		o->reference_source = REF_GND_GND;
-		o->target = 0.0;
+		o->target = comedi_to_phys( 1, range, max_data ) / 2.0;
 	}
 
 	if(setup->da_subdev>=0){
