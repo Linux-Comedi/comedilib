@@ -85,8 +85,8 @@ int main(int argc, char *argv[])
 	/* prepare_cmd_lib() uses a Comedilib routine to find a
 	 * good command for the device.  prepare_cmd() explicitly
 	 * creates a command, which may not work for your device. */
-	//prepare_cmd_lib(dev,subdevice,cmd);
-	prepare_cmd(dev,subdevice,cmd);
+	prepare_cmd_lib(dev,subdevice,cmd);
+	//prepare_cmd(dev,subdevice,cmd);
 	
 	fprintf(stderr,"command before testing:\n");
 	dump_cmd(stderr,cmd);
@@ -126,16 +126,16 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
+	/* this is only for informational purposes */
+	gettimeofday(&start,NULL);
+	fprintf(stderr,"start time: %ld.%06ld\n",start.tv_sec,start.tv_usec);
+
 	/* start the command */
 	ret=comedi_command(dev,cmd);
 	if(ret<0){
 		comedi_perror("comedi_command");
 		exit(1);
 	}
-
-	/* this is only for informational purposes */
-	gettimeofday(&start,NULL);
-	fprintf(stderr,"start time: %ld.%06ld\n",start.tv_sec,start.tv_usec);
 
 	while(1){
 		ret=read(comedi_fileno(dev),buf,BUFSZ);
@@ -184,11 +184,16 @@ int prepare_cmd_lib(comedi_t *dev,int subdevice,comedi_cmd *cmd)
 {
 	int ret;
 
+	memset(cmd,0,sizeof(*cmd));
+
 	/* This comedilib function will get us a generic timed
 	 * command for a particular board.  If it returns -1,
 	 * that's bad. */
 	ret = comedi_get_cmd_generic_timed(dev,subdevice,cmd,1e9/freq);
-	if(ret<0)return ret;
+	if(ret<0){
+		printf("comedi_get_cmd_generic_timed failed\n");
+		return ret;
+	}
 
 	/* Modify parts of the command */
 	cmd->chanlist		= chanlist;
