@@ -19,6 +19,7 @@ while(<>){
 }
 
 $secend="";
+$status="unknown";
 
 while($s = shift @lines){
 	@x = $s;
@@ -42,6 +43,8 @@ while($s = shift @lines){
 			$devices = $1;
 		}elsif($x =~ m/^Author: (.*)/){
 			$author = $1
+		}elsif($x =~ m/^Status: (.*)/){
+			$status = $1
 		}
 	}else{
 		if($s eq "\n"){
@@ -52,9 +55,11 @@ while($s = shift @lines){
 		$comment = $comment . $s;
 	}
 	if($blank==3){
+		$comment =~ s/&/&amp;/g;
 		$comment =~ s/@/&#64;/g;
 		$comment =~ s/</&lt;/g;
 		$comment =~ s/>/&gt;/g;
+		$author =~ s/&/&amp;/g;
 		$author =~ s/@/&#64;/g;
 		$author =~ s/</&lt;/g;
 		$author =~ s/>/&gt;/g;
@@ -66,6 +71,9 @@ $driver -- $description
   </title>
   <para>
 Author: $author
+  </para>
+  <para>
+Status: $status
   </para>
 ";
 		if($devices ne ""){
@@ -138,6 +146,7 @@ $comment
 		$blank=0;
 
 		$comment="";
+		$status="unknown";
 	}
 }
 
