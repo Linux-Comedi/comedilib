@@ -208,10 +208,12 @@ void set_target( calibration_setup_t *setup, int obs,double target)
 	comedi_range *range;
 	lsampl_t maxdata, data;
 
-	range = comedi_get_range(setup->dev, setup->observables[obs].preobserve_insn.subdev,
+	range = comedi_get_range(setup->dev,
+		setup->observables[obs].preobserve_insn.subdev,
 		CR_CHAN( setup->observables[obs].preobserve_insn.chanspec ),
 		CR_RANGE( setup->observables[obs].preobserve_insn.chanspec ));
-	maxdata = comedi_get_maxdata( setup->dev, setup->observables[obs].preobserve_insn.subdev,
+	maxdata = comedi_get_maxdata( setup->dev,
+		setup->observables[obs].preobserve_insn.subdev,
 		CR_CHAN(setup->observables[obs].preobserve_insn.chanspec));
 
 	data = comedi_from_phys(target,range,maxdata);
@@ -256,12 +258,11 @@ void measure_observable( calibration_setup_t *setup, int obs)
 
 	new_sv_init(&sv, setup->dev,
 		setup->observables[obs].observe_insn.subdev,
-		CR_CHAN( setup->observables[obs].observe_insn.chanspec),
-		CR_RANGE( setup->observables[obs].observe_insn.chanspec),
-		CR_AREF( setup->observables[obs].observe_insn.chanspec));
+		setup->observables[obs].observe_insn.chanspec);
 	sv.order=7;
 	// read internal calibration source and turn on dithering
-	sv.cr_flags = CR_ALT_FILTER | CR_ALT_SOURCE;
+	//sv.cr_flags = CR_ALT_FILTER | CR_ALT_SOURCE;
+	//sv.cr_flags = CR_ALT_FILTER;
 	n = new_sv_measure(setup->dev, &sv);
 
 	sci_sprint_alt(s,sv.average,sv.error);
@@ -529,12 +530,10 @@ double check_gain_chan_x( calibration_setup_t *setup, linear_fit_t *l,unsigned i
 
 	orig = setup->caldacs[cdac].current;
 
-	new_sv_init(&sv, setup->dev,0,
-		CR_CHAN(ad_chanspec),
-		CR_RANGE(ad_chanspec),
-		CR_AREF(ad_chanspec));
+	new_sv_init(&sv, setup->dev,0,ad_chanspec);
 	// read internal calibration source and turn on dithering
-	sv.cr_flags = CR_ALT_FILTER | CR_ALT_SOURCE;
+	//sv.cr_flags = CR_ALT_FILTER | CR_ALT_SOURCE;
+	//sv.cr_flags = CR_ALT_FILTER;
 
 	setup->caldacs[cdac].current=0;
 	update_caldac( setup, cdac );
@@ -607,12 +606,10 @@ double check_gain_chan_fine( calibration_setup_t *setup, linear_fit_t *l,unsigne
 
 	orig = setup->caldacs[cdac].current;
 
-	new_sv_init(&sv, setup->dev,0,
-		CR_CHAN(ad_chanspec),
-		CR_RANGE(ad_chanspec),
-		CR_AREF(ad_chanspec));
+	new_sv_init(&sv, setup->dev,0,ad_chanspec);
 	// read internal calibration source and turn on dithering
-	sv.cr_flags = CR_ALT_FILTER | CR_ALT_SOURCE;
+	//sv.cr_flags = CR_ALT_FILTER | CR_ALT_SOURCE;
+	//sv.cr_flags = CR_ALT_FILTER;
 
 	setup->caldacs[cdac].current=0;
 	update_caldac( setup, cdac );
@@ -741,9 +738,9 @@ double read_chan( calibration_setup_t *setup, int adc,int range)
 	new_sv_t sv;
 	char str[20];
 
-	new_sv_init(&sv, setup->dev, 0,adc,range,AREF_OTHER);
+	new_sv_init(&sv, setup->dev, 0,CR_PACK(adc,range,AREF_OTHER));
 	sv.order=7;
-	sv.cr_flags = CR_ALT_FILTER;
+	//sv.cr_flags = CR_ALT_FILTER;
 
 	n=new_sv_measure( setup->dev, &sv);
 
@@ -758,10 +755,10 @@ int read_chan2( calibration_setup_t *setup, char *s,int adc,int range)
 	int n;
 	new_sv_t sv;
 
-	new_sv_init(&sv, setup->dev,0,adc,range,AREF_OTHER);
+	new_sv_init(&sv, setup->dev,0,CR_PACK(adc,range,AREF_OTHER));
 	sv.order=7;
 	// turn on dithering
-	sv.cr_flags = CR_ALT_FILTER;
+	//sv.cr_flags = CR_ALT_FILTER;
 
 	n=new_sv_measure( setup->dev, &sv);
 
@@ -782,20 +779,19 @@ void set_ao(comedi_t *dev,int subdev,int chan,int range,double value)
 #endif
 
 
-int new_sv_init(new_sv_t *sv,comedi_t *dev,int subdev,int chan,int range,int aref)
+int new_sv_init(new_sv_t *sv,comedi_t *dev,int subdev,unsigned int chanspec)
 {
 	memset(sv,0,sizeof(*sv));
 
 	sv->subd=subdev;
 	//sv->t.flags=TRIG_DITHER;
-	sv->chan=chan;
-	sv->range=range;
-	sv->aref=aref;
+	sv->chanspec = chanspec;
 
 	//sv->chanlist[0]=CR_PACK(chan,range,aref);
 
-	sv->maxdata=comedi_get_maxdata(dev,subdev,chan);
-	sv->rng=comedi_get_range(dev,subdev,chan,range);
+	sv->maxdata=comedi_get_maxdata(dev,subdev,CR_CHAN(chanspec));
+	sv->rng=comedi_get_range(dev,subdev,
+		CR_CHAN(chanspec), CR_RANGE(chanspec));
 
 	sv->order=7;
 
@@ -818,16 +814,15 @@ int new_sv_measure( comedi_t *dev, new_sv_t *sv)
 		exit(1);
 	}
 
-	ret = comedi_data_read_hint(dev, sv->subd, sv->chan | sv->cr_flags, sv->range,
-		sv->aref);
+	ret = comedi_data_read_hint(dev, sv->subd, sv->chanspec, 0, 0);
 	if(ret<0){
 		printf("hint barf\n");
 		goto out;
 	}
-	usleep( 1000 );
+	comedi_nanodelay(dev, 1000*99);
+	//usleep( 1000 );
 
-	ret = comedi_data_read_n(dev, sv->subd, sv->chan | sv->cr_flags, sv->range,
-		sv->aref, data, n);
+	ret = comedi_data_read_n(dev, sv->subd, sv->chanspec, 0, 0, data, n);
 	if(ret<0){
 		printf("barf\n");
 		goto out;
@@ -868,8 +863,7 @@ int new_sv_measure_order( comedi_t *dev, new_sv_t *sv,int order)
 		exit(1);
 	}
 
-	ret = comedi_data_read_n(dev, sv->subd, sv->chan | sv->cr_flags, sv->range,
-		sv->aref, data, n);
+	ret = comedi_data_read_n(dev, sv->subd, sv->chanspec, 0, 0, data, n);
 	if(ret<0){
 		printf("barf order\n");
 		goto out;
@@ -1050,4 +1044,5 @@ int sci_sprint_alt(char *s,double x,double y)
 	}
 	return sprintf(s,"%0.*f(%2.0f)e%d",sigfigs-1,mantissa,error,maxsig);
 }
+
 

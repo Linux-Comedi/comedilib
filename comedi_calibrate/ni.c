@@ -143,6 +143,7 @@ int ni_setup_board( calibration_setup_t *setup, const char *device_name )
 void ni_setup_observables( calibration_setup_t *setup )
 {
 	comedi_insn tmpl;
+	comedi_insn po_tmpl2;
 	int bipolar_lowgain;
 	int bipolar_highgain;
 	int unipolar_lowgain;
@@ -160,11 +161,20 @@ void ni_setup_observables( calibration_setup_t *setup )
 	tmpl.n = 1;
 	tmpl.subdev = ad_subdev;
 
+	memset(&po_tmpl2,0,sizeof(tmpl));
+	po_tmpl2.insn = INSN_CONFIG;
+	po_tmpl2.n = 2;
+	po_tmpl2.subdev = ad_subdev;
+
 	/* 0 offset, low gain */
 	o = setup->observables + ni_zero_offset_low;
 	o->name = "ai, bipolar zero offset, low gain";
+	o->preobserve_insn = po_tmpl2;
+	o->preobserve_insn.data = o->preobserve_data;
+	o->preobserve_insn.data[0] = INSN_CONFIG_ALT_SOURCE;
+	o->preobserve_insn.data[1] = CR_PACK(0,0,0);
 	o->observe_insn = tmpl;
-	o->observe_insn.chanspec = CR_PACK(0,bipolar_lowgain,AREF_OTHER);
+	o->observe_insn.chanspec = CR_ALT_SOURCE;
 	o->target = 0;
 
 	/* 0 offset, high gain */
@@ -231,7 +241,7 @@ void ni_setup_observables( calibration_setup_t *setup )
 		o->preobserve_insn.chanspec = CR_PACK(0,0,0);
 		o->preobserve_insn.data = o->preobserve_data;
 		o->observe_insn = tmpl;
-		o->observe_insn.chanspec =
+		o->observe_insn.chanspec = 
 			CR_PACK(6,bipolar_lowgain,AREF_OTHER);
 		set_target( setup, ni_ao0_reference,5.0);
 		o->target -= voltage_reference;

@@ -122,6 +122,10 @@ int get_bipolar_lowgain(comedi_t *dev,int subdev);
 int get_bipolar_highgain(comedi_t *dev,int subdev);
 int get_unipolar_lowgain(comedi_t *dev,int subdev);
 
+/* other */
+
+void comedi_nanodelay(comedi_t *dev, unsigned int delay);
+
 /* printing scientific numbers */
 
 int sci_sprint(char *s,double x,double y);
@@ -169,11 +173,8 @@ typedef struct{
 
 	int maxdata;
 	int order;
-	int aref;
-	int range;
 	int subd;
-	int chan;
-	int cr_flags;
+	unsigned int chanspec;
 
 	comedi_range *rng;
 
@@ -184,7 +185,7 @@ typedef struct{
 }new_sv_t;
 
 int new_sv_measure(comedi_t *dev, new_sv_t *sv);
-int new_sv_init(new_sv_t *sv,comedi_t *dev,int subdev,int chan,int range,int aref);
+int new_sv_init(new_sv_t *sv,comedi_t *dev,int subdev,unsigned int chanspec);
 
 
 #endif
