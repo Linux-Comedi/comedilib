@@ -43,10 +43,6 @@
 #include "calib.h"
 
 /* global variables */
-
-char *drivername = NULL;
-char *devicename = NULL;
-
 int verbose = 0;
 
 /* */
@@ -73,27 +69,6 @@ static int do_calibrate = 1;
 static int do_results = 0;
 static int do_output = 1;
 
-struct option options[] = {
-	{ "verbose", 0, 0, 'v' },
-	{ "quiet", 0, 0, 'q' },
-	{ "file", 1, 0, 'f' },
-	{ "save-file", 1, 0, 's' },
-	{ "help", 0, 0, 'h' },
-	{ "driver-name", 1, 0, 0x1000 },
-	{ "device-name", 1, 0, 0x1001 },
-	{ "reset", 0, &do_reset, 1 },
-	{ "no-reset", 0, &do_reset, 0 },
-	{ "calibrate", 0, &do_calibrate, 1 },
-	{ "no-calibrate", 0, &do_calibrate, 0 },
-	{ "dump", 0, &do_dump, 1 },
-	{ "no-dump", 0, &do_dump, 0 },
-	{ "results", 0, &do_results, 1 },
-	{ "no-results", 0, &do_results, 0 },
-	{ "output", 0, &do_output, 1 },
-	{ "no-output", 0, &do_output, 0 },
-	{ 0 },
-};
-
 void help(void)
 {
 	printf("comedi_calibrate [options] - autocalibrates a Comedi device\n");
@@ -101,7 +76,7 @@ void help(void)
 	printf("  --quiet, -q  \n");
 	printf("  --help, -h  \n");
 	printf("  --file, -f [/dev/comediN] \n");
-	printf("  --save-file, -s [filepath] \n");
+	printf("  --save-file, -S [filepath] \n");
 	printf("  --driver-name [driver]  \n");
 	printf("  --device-name [device]  \n");
 	printf("  --[no-]reset  \n");
@@ -111,27 +86,63 @@ void help(void)
 	printf("  --[no-]output  \n");
 }
 
-int main(int argc, char *argv[])
+typedef struct
 {
-	char *fn = NULL;
-	int c;
-	int i;
-	struct board_struct *this_board;
-	int index;
-	int device_status = STATUS_UNKNOWN;
-	calibration_setup_t setup;
-	comedi_t *dev;
-	int ad_subdev;
-	int da_subdev;
-	int eeprom_subdev;
-	int caldac_subdev;
-	int retval;
+	int verbose;
+	char *file_path;
+	char *save_file_path;
+	char *driver_name;
+	char *device_name;
+	int do_reset;
+	int do_dump;
+	int do_calibrate;
+	int do_results;
+	int do_output;
+	unsigned int subdevice;
+	unsigned int channel;
+	unsigned int range;
+	unsigned int aref;
+} parsed_options_t;
 
-	memset( &setup, 0, sizeof( setup ) );
+void parse_options( int argc, char *argv[], parsed_options_t *settings )
+{
+	int c, index;
 
-	fn = "/dev/comedi0";
+	struct option options[] = {
+		{ "verbose", 0, 0, 'v' },
+		{ "quiet", 0, 0, 'q' },
+		{ "file", 1, 0, 'f' },
+		{ "save-file", 1, 0, 'S' },
+		{ "help", 0, 0, 'h' },
+		{ "driver-name", 1, 0, 0x1000 },
+		{ "device-name", 1, 0, 0x1001 },
+		{ "reset", 0, &settings->do_reset, 1 },
+		{ "no-reset", 0, &settings->do_reset, 0 },
+		{ "calibrate", 0, &settings->do_calibrate, 1 },
+		{ "no-calibrate", 0, &settings->do_calibrate, 0 },
+		{ "dump", 0, &settings->do_dump, 1 },
+		{ "no-dump", 0, &settings->do_dump, 0 },
+		{ "results", 0, &settings->do_results, 1 },
+		{ "no-results", 0, &settings->do_results, 0 },
+		{ "output", 0, &settings->do_output, 1 },
+		{ "no-output", 0, &settings->do_output, 0 },
+		{ "subdevice", 1, 0, 's' },
+		{ "channel", 1, 0, 'c' },
+		{ "range", 1, 0, 'r' },
+		{ "aref", 1, 0, 'a' },
+		{ 0 },
+	};
+
+	memset( settings, 0, sizeof( *settings ) );
+	settings->do_dump = 0;
+	settings->do_reset = 1;
+	settings->do_calibrate = 1;
+	settings->do_results = 0;
+	settings->do_output = 1;
+
+	settings->file_path = "/dev/comedi0";
 	while (1) {
-		c = getopt_long(argc, argv, "f:s:vq", options, &index);
+		c = getopt_long(argc, argv, "f:S:vqs:c:r:a:", options, &index);
 		if (c == -1)break;
 		switch (c) {
 		case 0:
@@ -141,66 +152,94 @@ int main(int argc, char *argv[])
 			exit(0);
 			break;
 		case 'f':
-			fn = optarg;
+			settings->file_path = optarg;
 			break;
-		case 's':
-			setup.cal_save_file_path = optarg;
+		case 'S':
+			settings->save_file_path = optarg;
 			break;
 		case 'v':
-			verbose++;
+			settings->verbose++;
 			break;
 		case 'q':
-			verbose--;
+			settings->verbose--;
 			break;
 		case 0x1000:
-			drivername = optarg;
+			settings->driver_name = optarg;
 			break;
 		case 0x1001:
-			devicename = optarg;
+			settings->device_name = optarg;
+			break;
+		case 's':
+			settings->subdevice = strtoul( optarg, NULL, 0 );
+			break;
+		case 'c':
+			settings->channel = strtoul( optarg, NULL, 0 );
+			break;
+		case 'r':
+			settings->range = strtoul( optarg, NULL, 0 );
+			break;
+		case 'a':
+			settings->aref = strtoul( optarg, NULL, 0 );
 			break;
 		default:
 			help();
 			exit(1);
 		}
 	}
+}
 
-	dev = comedi_open(fn);
-	if (dev == NULL ) {
-		fprintf( stderr, "comedi_open() failed, with device file name: %s\n", fn );
+int main(int argc, char *argv[])
+{
+	int i;
+	struct board_struct *this_board;
+	int device_status = STATUS_UNKNOWN;
+	calibration_setup_t setup;
+	int retval;
+	parsed_options_t options;
+
+	memset( &setup, 0, sizeof( setup ) );
+	setup.settling_time_ns = 99999;
+
+	parse_options( argc, argv, &options );
+	setup.cal_save_file_path = options.save_file_path;
+	do_reset = options.do_reset;
+	do_dump = options.do_dump;
+	do_calibrate = options.do_calibrate;
+	do_results = options.do_results;
+	do_output = options.do_output;
+
+	setup.dev = comedi_open( options.file_path );
+	if( setup.dev == NULL ) {
+		fprintf( stderr, "comedi_open() failed, with device file name: %s\n",
+			options.file_path );
 		comedi_perror("comedi_open");
 		exit(0);
 	}
 
-	if(!drivername)
-		drivername=comedi_get_driver_name(dev);
-	if(!devicename)
-		devicename=comedi_get_board_name(dev);
+	if(!options.driver_name)
+		options.driver_name=comedi_get_driver_name( setup.dev );
+	if(!options.device_name)
+		options.device_name=comedi_get_board_name( setup.dev );
 
-	ad_subdev=comedi_find_subdevice_by_type(dev,COMEDI_SUBD_AI,0);
-	da_subdev=comedi_find_subdevice_by_type(dev,COMEDI_SUBD_AO,0);
-	caldac_subdev=comedi_find_subdevice_by_type(dev,COMEDI_SUBD_CALIB,0);
-	eeprom_subdev=comedi_find_subdevice_by_type(dev,COMEDI_SUBD_MEMORY,0);
+	setup.ad_subdev=comedi_find_subdevice_by_type( setup.dev,COMEDI_SUBD_AI,0);
+	setup.da_subdev=comedi_find_subdevice_by_type( setup.dev,COMEDI_SUBD_AO,0);
+	setup.caldac_subdev=comedi_find_subdevice_by_type( setup.dev,COMEDI_SUBD_CALIB,0);
+	setup.eeprom_subdev=comedi_find_subdevice_by_type( setup.dev,COMEDI_SUBD_MEMORY,0);
 
 	for(i=0;i<n_drivers;i++){
-		if(!strcmp(drivers[i].name,drivername)){
+		if(!strcmp(drivers[i].name,options.driver_name)){
 			this_board = drivers+i;
 			goto ok;
 		}
 	}
-	fprintf(stderr, "Driver %s unknown\n",drivername);
+	fprintf(stderr, "Driver %s unknown\n", options.driver_name);
 	return 1;
 
 ok:
-	setup.dev = dev;
-	setup.ad_subdev = ad_subdev;
-	setup.da_subdev = da_subdev;
-	setup.eeprom_subdev = eeprom_subdev;
-	setup.caldac_subdev = caldac_subdev;
-	setup.settling_time_ns = 99999;
 
-	retval = this_board->init_setup( &setup, devicename );
+	retval = this_board->init_setup( &setup, options.device_name );
 	if( retval < 0 ){
-		fprintf(stderr, "init_setup() failed for %s\n", devicename );
+		fprintf(stderr, "init_setup() failed for %s\n", options.device_name );
 		return 1;
 	}
 	device_status = setup.status;
@@ -235,18 +274,18 @@ ok:
 		char *s = "$Id$";
 
 		printf("%.*s\n",(int)strlen(s)-2,s+1);
-		printf("Driver name: %s\n",drivername);
-		printf("Device name: %s\n",devicename);
+		printf("Driver name: %s\n", options.driver_name);
+		printf("Device name: %s\n", options.device_name);
 		printf("%.*s\n",(int)strlen(this_board->id)-2,this_board->id+1);
 		printf("Comedi version: %d.%d.%d\n",
-			(comedi_get_version_code(dev)>>16)&0xff,
-			(comedi_get_version_code(dev)>>8)&0xff,
-			(comedi_get_version_code(dev))&0xff);
+			(comedi_get_version_code(setup.dev)>>16)&0xff,
+			(comedi_get_version_code(setup.dev)>>8)&0xff,
+			(comedi_get_version_code(setup.dev))&0xff);
 	}
 
 	setup.do_reset = do_reset;
 	setup.do_output = do_output;
-	
+
 	if(do_reset)reset_caldacs( &setup );
 	if(do_dump) observe( &setup );
 	if(do_calibrate && setup.do_cal)
@@ -260,9 +299,20 @@ ok:
 	}
 	if(do_results) observe( &setup );
 
-	comedi_close(dev);
+	retval = comedi_apply_calibration( setup.dev, options.subdevice,
+		options.channel, options.range, options.aref, setup.cal_save_file_path );
+	if( retval < 0 )
+	{
+		DPRINT( 0, "Failed to apply " );
+	}else
+	{
+		DPRINT( 0, "Applied " );
+	}
+	DPRINT( 0, "calibration for subdevice %i, channel %i, range %i, aref %i\n",
+		options.subdevice, options.channel, options.range, options.aref );
+	comedi_close(setup.dev);
 
-	return 0;
+	return retval;
 }
 
 void set_target( calibration_setup_t *setup, int obs,double target)

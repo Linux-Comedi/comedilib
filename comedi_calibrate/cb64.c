@@ -133,7 +133,7 @@ int cb64_setup( calibration_setup_t *setup, const char *device_name )
 
 	for( i = 0; i < num_boards; i++ )
 	{
-		if( !strcmp( devicename, boards[i].name ) )
+		if( !strcmp( device_name, boards[i].name ) )
 		{
 			setup->status = boards[i].status;
 			return boards[i].setup( setup );

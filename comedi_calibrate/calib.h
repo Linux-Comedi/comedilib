@@ -75,9 +75,6 @@ struct calibration_setup_struct {
 	void *private_data;
 };
 
-extern char *devicename;
-extern char *drivername;
-
 extern int verbose;
 
 enum {

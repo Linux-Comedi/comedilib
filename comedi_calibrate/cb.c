@@ -97,7 +97,7 @@ int cb_setup( calibration_setup_t *setup, const char *device_name )
 
 	for( i = 0; i < num_boards; i++ )
 	{
-		if( !strcmp( devicename, boards[i].name ) )
+		if( !strcmp( device_name, boards[i].name ) )
 		{
 			setup->status = boards[i].status;
 			return boards[i].setup( setup );
@@ -348,6 +348,7 @@ static int init_observables_1xxx( calibration_setup_t *setup )
 	return 0;
 }
 
+#if 0
 static int init_observables_1602_16( calibration_setup_t *setup )
 {
 	comedi_insn tmpl;//, po_tmpl;
@@ -409,6 +410,7 @@ static int init_observables_1602_16( calibration_setup_t *setup )
 
 	return 0;
 }
+#endif
 
 enum cal_knobs_1xxx
 {
@@ -523,6 +525,12 @@ static int adc_postgain_offset_1602_16( unsigned int channel )
 static int cal_cb_pci_1602_16( calibration_setup_t *setup )
 {
 	generic_layout_t layout;
+
+	if( comedi_get_version_code( setup->dev ) <= COMEDI_VERSION_CODE( 0, 7, 66 ) )
+	{
+		DPRINT(0, "WARNING: you need comedi driver version 0.7.67 or later\n"
+		 "for this calibration to work properly\n" );
+	}
 
 	init_generic_layout( &layout );
 	layout.adc_gain = adc_gain_1602_16;
