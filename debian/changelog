@@ -1,3 +1,9 @@
+comedilib (0.7.14-1) unstable; urgency=low
+
+  * Upstream version change
+
+ -- David Schleef <ds@schleef.org>  Thu, 30 Nov 2000 15:13:08 -0800
+
 comedilib (0.7.12-1) unstable; urgency=low
 
   * Upstream version change
