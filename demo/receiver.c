@@ -23,7 +23,6 @@
 #include <errno.h>
 #include <getopt.h>
 #include <ctype.h>
-#include <sched.h>
 #include <signal.h>
 #include <string.h>
 #include <sys/time.h>
