@@ -58,7 +58,7 @@ void do_help(int i)
 
 struct option options[] = {
 	{ "verbose", 0, 0, 'v' },
-	{ "quite", 0, 0, 'q' },
+	{ "quiet", 0, 0, 'q' },
 	{ "version", 0, 0, 'V' },
 	{ "init-data", 1, 0, 'i' },
 	{ "remove", 0, 0, 'r' },
