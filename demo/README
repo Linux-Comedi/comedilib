@@ -9,7 +9,7 @@ ao_waveform:
 	E series.  Creates a sine wave on an analog output channel.
 
 cmd:
-	Example of how to use the new 0.8 command structure.  Not functional.
+	Example of how to use the new 0.8 command structure.
 
 eeprom_dump:
 	Dumps the EEPROM of a card, if it has one.  Useful for debugging
@@ -25,6 +25,9 @@ inpn:
 	Slightly more complicated input demo.  (It has a for() loop.)
 	Reads each channel on a subdevice, at every possible input
 	range, and converts the data to a voltage.
+
+insn:
+	Example showing how to use instructions directly.
 
 mode1:
 	Doesn't work.
