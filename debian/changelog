@@ -1,3 +1,9 @@
+comedilib (0.7.11-2) unstable; urgency=low
+
+  * Lintian fixes
+
+ -- David Schleef <ds@schleef.org>  Fri, 29 Sep 2000 13:07:55 -0800
+
 comedilib (0.7.11-1) unstable; urgency=low
 
   * Upstream version change

@@ -1,6 +1,8 @@
 #!/bin/sh
 
 if [ "$1" = "configure" ]; then
-	echo /sbin/ldconfig
+	/sbin/ldconfig
 fi
+
+#DEBHELPER#
 
