@@ -83,6 +83,7 @@ void observe( calibration_setup_t *setup );
 int preobserve( calibration_setup_t *setup, int obs);
 void observable_dependence( calibration_setup_t *setup, int obs);
 void measure_observable( calibration_setup_t *setup, int obs);
+void reset_caldac( calibration_setup_t *setup, unsigned int caldac_index );
 void reset_caldacs( calibration_setup_t *setup);
 
 /* drivers */
@@ -96,7 +97,7 @@ int cb_setup( calibration_setup_t*, const char *device_name );
 /* low level */
 
 void set_target( calibration_setup_t *setup, int obs,double target);
-void update_caldac( calibration_setup_t *setup, unsigned int caldac_index );
+void update_caldac( calibration_setup_t *setup, unsigned int caldac_index, int value );
 void setup_caldacs( calibration_setup_t *setup, int caldac_subdev);
 void postgain_cal( calibration_setup_t *setup, int obs1, int obs2, int dac);
 void cal1( calibration_setup_t *setup, int obs, int dac);

@@ -32,6 +32,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "calib.h"
 
@@ -375,8 +376,7 @@ void postgain_cal( calibration_setup_t *setup, int obs1, int obs2, int dac)
 	a = (offset1-offset2)/(slope1-slope2);
 	a=setup->caldacs[dac].current-a;
 
-	setup->caldacs[dac].current=rint(a);
-	update_caldac( setup, dac );
+	update_caldac( setup, dac, rint(a) );
 	usleep(100000);
 
 	DPRINT(0,"caldac[%d] set to %g (%g)\n",dac,rint(a),a);
@@ -399,8 +399,7 @@ void cal1( calibration_setup_t *setup, int obs, int dac)
 	check_gain_chan_x( setup, &l, setup->observables[obs].observe_insn.chanspec,dac);
 	a=linear_fit_func_x(&l, setup->observables[obs].target);
 
-	setup->caldacs[dac].current=rint(a);
-	update_caldac( setup, dac );
+	update_caldac( setup, dac, rint(a) );
 	usleep(100000);
 
 	DPRINT(0,"caldac[%d] set to %g (%g)\n",dac,rint(a),a);
@@ -419,8 +418,7 @@ void cal1_fine( calibration_setup_t *setup, int obs, int dac )
 	check_gain_chan_fine( setup, &l, setup->observables[obs].observe_insn.chanspec,dac);
 	a=linear_fit_func_x(&l,setup->observables[obs].target);
 
-	setup->caldacs[dac].current=rint(a);
-	update_caldac( setup, dac );
+	update_caldac( setup, dac, rint(a) );
 	usleep(100000);
 
 	DPRINT(0,"caldac[%d] set to %g (%g)\n",dac,rint(a),a);
@@ -445,16 +443,14 @@ void cal_binary( calibration_setup_t *setup, int obs, int dac)
 
 	new_sv_init(&sv, setup->dev,0,chanspec);
 	sv.settling_time_ns = setup->settling_time_ns;
-	setup->caldacs[dac].current = x1;
-	update_caldac( setup, dac );
+	update_caldac( setup, dac, x1 );
 	usleep(100000);
 	new_sv_measure( setup->dev, &sv);
 	y1 = sv.average;
 
 	new_sv_init(&sv, setup->dev,0,chanspec);
 	sv.settling_time_ns = setup->settling_time_ns;
-	setup->caldacs[dac].current = x2;
-	update_caldac( setup, dac );
+	update_caldac( setup, dac, x2 );
 	usleep(100000);
 	new_sv_measure( setup->dev, &sv);
 	y2 = sv.average;
@@ -466,8 +462,7 @@ void cal_binary( calibration_setup_t *setup, int obs, int dac)
 
 		new_sv_init(&sv, setup->dev,0,chanspec);
 		sv.settling_time_ns = setup->settling_time_ns;
-		setup->caldacs[dac].current = x;
-		update_caldac( setup, dac );
+		update_caldac( setup, dac, x );
 		usleep(100000);
 
 		new_sv_measure( setup->dev, &sv);
@@ -507,8 +502,7 @@ void cal_postgain_binary( calibration_setup_t *setup, int obs1, int obs2, int da
 	x1 = 0;
 	x2 = setup->caldacs[dac].maxdata;
 
-	setup->caldacs[dac].current = x1;
-	update_caldac( setup, dac );
+	update_caldac( setup, dac, x1 );
 	usleep(100000);
 	preobserve( setup, obs1);
 	new_sv_init(&sv1, setup->dev,0,chanspec1);
@@ -521,8 +515,7 @@ void cal_postgain_binary( calibration_setup_t *setup, int obs1, int obs2, int da
 	new_sv_measure( setup->dev, &sv2);
 	y1 -= sv2.average;
 
-	setup->caldacs[dac].current = x2;
-	update_caldac( setup, dac );
+	update_caldac( setup, dac, x2 );
 	usleep(100000);
 	preobserve( setup, obs1);
 	new_sv_init(&sv1, setup->dev,0,chanspec1);
@@ -540,8 +533,7 @@ void cal_postgain_binary( calibration_setup_t *setup, int obs1, int obs2, int da
 		x = (x1 + x2 + 1)/2;
 		DPRINT(3,"trying %d\n",x);
 
-		setup->caldacs[dac].current = x;
-		update_caldac( setup, dac );
+		update_caldac( setup, dac, x );
 		usleep(100000);
 
 		preobserve( setup, obs1);
@@ -595,8 +587,7 @@ void chan_cal(int adc,int cdac,int range,double target)
 	
 	a=caldacs[cdac].current+(target-offset)/gain;
 
-	caldacs[cdac].current=rint(a);
-	update_caldac( setup, cdac);
+	update_caldac( setup, cdac, rint(a));
 
 	read_chan2(s,adc,range);
 	DPRINT(1,"caldac[%d] set to %g, offset=%s\n",cdac,a,s);
@@ -653,26 +644,34 @@ void setup_caldacs( calibration_setup_t *setup, int caldac_subdev )
 	setup->n_caldacs += n_chan;
 }
 
+void reset_caldac( calibration_setup_t *setup, unsigned int caldac_index )
+{
+	assert( caldac_index < setup->n_caldacs );
+	update_caldac( setup, caldac_index, setup->caldacs[ caldac_index ].maxdata / 2 );
+}
+
 void reset_caldacs( calibration_setup_t *setup )
 {
 	int i;
 
 	for( i = 0; i < setup->n_caldacs; i++){
-		setup->caldacs[i].current = setup->caldacs[i].maxdata / 2;
-		update_caldac( setup, i );
+		reset_caldac( setup, i );
 	}
 }
 
-void update_caldac( calibration_setup_t *setup, unsigned int caldac_index )
+void update_caldac( calibration_setup_t *setup, unsigned int caldac_index,
+	int value )
 {
 	int ret;
-	caldac_t *dac = &setup->caldacs[ caldac_index ];
+	caldac_t *dac;
 
 	if( caldac_index > setup->n_caldacs )
 	{
 		fprintf( stderr, "invalid caldac index\n" );
 		return;
 	}
+	dac = &setup->caldacs[ caldac_index ];
+	dac->current = value;
 	DPRINT(4,"update %d %d %d\n", dac->subdev, dac->chan, dac->current);
 	if( dac->current < 0 ){
 		DPRINT(1,"caldac set out of range (%d<0)\n", dac->current);
@@ -738,16 +737,14 @@ double check_gain_chan_x( calibration_setup_t *setup, linear_fit_t *l,unsigned i
 	new_sv_init(&sv, setup->dev,0,ad_chanspec);
 	sv.settling_time_ns = setup->settling_time_ns;
 
-	setup->caldacs[cdac].current=0;
-	update_caldac( setup, cdac );
+	update_caldac( setup, cdac, 0 );
 	usleep(100000);
 
 	new_sv_measure( setup->dev, &sv);
 
 	sum_err=0;
 	for(i=0;i*step<n;i++){
-		setup->caldacs[cdac].current=i*step;
-		update_caldac( setup, cdac );
+		update_caldac( setup, cdac, i*step );
 		//usleep(100000);
 
 		new_sv_measure( setup->dev, &sv);
@@ -760,8 +757,7 @@ double check_gain_chan_x( calibration_setup_t *setup, linear_fit_t *l,unsigned i
 		l->n++;
 	}
 
-	setup->caldacs[cdac].current=orig;
-	update_caldac( setup, cdac );
+	update_caldac( setup, cdac, orig );
 
 	l->yerr=sum_err/sum_err_count;
 	l->dx=step;
@@ -812,16 +808,14 @@ double check_gain_chan_fine( calibration_setup_t *setup, linear_fit_t *l,unsigne
 	new_sv_init(&sv, setup->dev,0,ad_chanspec);
 	sv.settling_time_ns = setup->settling_time_ns;
 
-	setup->caldacs[cdac].current=0;
-	update_caldac( setup, cdac );
+	update_caldac( setup, cdac, 0 );
 	usleep(100000);
 
 	new_sv_measure( setup->dev, &sv);
 
 	sum_err=0;
 	for(i=0;i<n;i++){
-		setup->caldacs[cdac].current=i+orig-fine_size;
-		update_caldac( setup, cdac );
+		update_caldac( setup, cdac, i+orig-fine_size );
 		usleep(100000);
 
 		new_sv_measure( setup->dev, &sv);
@@ -834,8 +828,7 @@ double check_gain_chan_fine( calibration_setup_t *setup, linear_fit_t *l,unsigne
 		l->n++;
 	}
 
-	setup->caldacs[cdac].current=orig;
-	update_caldac( setup, cdac );
+	update_caldac( setup, cdac, orig );
 
 	l->yerr=sum_err/sum_err_count;
 	l->dx=1;

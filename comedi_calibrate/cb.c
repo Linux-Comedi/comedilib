@@ -269,14 +269,36 @@ int init_observables_64xx( calibration_setup_t *setup )
 	return 0;
 }
 
-unsigned int high_observable_index_60xx( unsigned int ai_range )
+unsigned int ai_high_observable_index_60xx( unsigned int ai_range )
 {
 	return ai_range * 2 + 1;
 }
 
-unsigned int ground_observable_index_60xx( unsigned int ai_range )
+unsigned int ai_ground_observable_index_60xx( unsigned int ai_range )
 {
 	return ai_range * 2;
+}
+
+unsigned int ao_high_observable_index_60xx( const calibration_setup_t *setup,
+	unsigned int channel, unsigned int ao_range )
+{
+	int num_ai_ranges;
+
+	num_ai_ranges = comedi_get_n_ranges( setup->dev, setup->ad_subdev, 0 );
+	assert( num_ai_ranges >= 0 );
+
+	return 2 * num_ai_ranges + 2 * channel + 4 * ao_range + 1;
+}
+
+unsigned int ao_low_observable_index_60xx( const calibration_setup_t *setup,
+	unsigned int channel, unsigned int ao_range )
+{
+	int num_ai_ranges;
+
+	num_ai_ranges = comedi_get_n_ranges( setup->dev, setup->ad_subdev, 0 );
+	assert( num_ai_ranges >= 0 );
+
+	return 2 * num_ai_ranges + 2 * channel + 4 * ao_range;
 }
 
 int ai_cal_src_voltage_60xx( calibration_setup_t *setup,
@@ -341,23 +363,38 @@ int high_ai_cal_src_60xx( calibration_setup_t *setup, unsigned int ai_range )
 	return -1;
 }
 
+int ao_cal_src_60xx( unsigned int channel )
+{
+	switch( channel )
+	{
+	case 0:
+		return 6;
+		break;
+	case 1:
+		return 7;
+		break;
+	default:
+		return -1;
+		break;
+	}
+}
+
 int init_observables_60xx( calibration_setup_t *setup )
 {
-	comedi_insn tmpl;//, po_tmpl;
+	comedi_insn tmpl;
 	observable *o;
 	int retval, num_ranges, i;
 	float target;
-	static const int CAL_SRC_GROUND = 0;
-#if 0
-	memset( &po_tmpl, 0, sizeof(po_tmpl) );
-	po_tmpl.insn = INSN_CONFIG;
-	po_tmpl.n = 2;
-	po_tmpl.subdev = setup->ad_subdev;
-#endif
+	enum
+	{
+		CAL_SRC_GROUND = 0,
+	};
+
 	memset( &tmpl, 0, sizeof(tmpl) );
 	tmpl.insn = INSN_READ;
 	tmpl.n = 1;
 	tmpl.subdev = setup->ad_subdev;
+
 	setup->n_observables = 0;
 
 	num_ranges = comedi_get_n_ranges( setup->dev, setup->ad_subdev, 0 );
@@ -365,7 +402,7 @@ int init_observables_60xx( calibration_setup_t *setup )
 
 	for( i = 0; i < num_ranges; i++ )
 	{
-		o = setup->observables + ground_observable_index_60xx( i );
+		o = setup->observables + ai_ground_observable_index_60xx( i );
 		o->reference_source = CAL_SRC_GROUND;
 		assert( o->name == NULL );
 		asprintf( &o->name, "calibration source %i, range %i, ground referenced",
@@ -374,10 +411,8 @@ int init_observables_60xx( calibration_setup_t *setup )
 		o->observe_insn.chanspec = CR_PACK( 0, 0, AREF_GROUND) | CR_ALT_SOURCE | CR_ALT_FILTER;
 		o->target = 0.0;
 		setup->n_observables++;
-		DPRINT( 0, "cal src %i, range %i, target %g\n",
-			o->reference_source, i, o->target );
 
-		o = setup->observables + high_observable_index_60xx( i );
+		o = setup->observables + ai_high_observable_index_60xx( i );
 		retval = high_ai_cal_src_60xx( setup, i );
 		if( retval < 0 ) return -1;
 		o->reference_source = retval;
@@ -390,8 +425,51 @@ int init_observables_60xx( calibration_setup_t *setup )
 		if( retval < 0 ) return -1;
 		o->target = target;
 		setup->n_observables++;
-		DPRINT( 0, "cal src %i, range %i, target %g\n",
-			o->reference_source, i, o->target );
+	}
+
+	if( setup->da_subdev >= 0 )
+	{
+		comedi_insn po_tmpl;
+
+		memset( &po_tmpl, 0, sizeof(po_tmpl) );
+		po_tmpl.insn = INSN_WRITE;
+		po_tmpl.n = 1;
+		po_tmpl.subdev = setup->da_subdev;
+
+		num_ranges = comedi_get_n_ranges( setup->dev, setup->da_subdev, 0 );
+		if( num_ranges < 0 ) return -1;
+
+		for( i = 0; i < num_ranges; i++ )
+		{
+			int dac_chan;
+			for( dac_chan = 0; dac_chan < 2; dac_chan++ )
+			{
+				o = setup->observables + ao_low_observable_index_60xx( setup,
+					dac_chan, i );
+				o->reference_source = ao_cal_src_60xx( dac_chan );
+				assert( o->name == NULL );
+				asprintf( &o->name, "dac%i low, range %i, ground referenced", dac_chan, i );
+				o->preobserve_insn = po_tmpl;
+				o->preobserve_insn.chanspec = CR_PACK( dac_chan, i, AREF_GROUND );
+				o->preobserve_insn.data = o->preobserve_data;
+				o->observe_insn = tmpl;
+				o->observe_insn.chanspec = CR_PACK( 0, 0, AREF_GROUND) | CR_ALT_SOURCE | CR_ALT_FILTER;
+				set_target( setup, ao_low_observable_index_60xx( setup, dac_chan, i ), 0.0 );
+				setup->n_observables++;
+
+				o = setup->observables + ao_high_observable_index_60xx( setup, dac_chan, i );
+				o->reference_source = ao_cal_src_60xx( dac_chan );
+				assert( o->name == NULL );
+				asprintf( &o->name, "dac%i high, range %i, ground referenced", dac_chan, i );
+				o->preobserve_insn = po_tmpl;
+				o->preobserve_insn.chanspec = CR_PACK( dac_chan, i, AREF_GROUND );
+				o->preobserve_insn.data = o->preobserve_data;
+				o->observe_insn = tmpl;
+				o->observe_insn.chanspec = CR_PACK( 0, 0, AREF_GROUND) | CR_ALT_SOURCE | CR_ALT_FILTER;
+				set_target( setup, ao_high_observable_index_60xx( setup, dac_chan, i ), 9.0 );
+				setup->n_observables++;
+			}
+		}
 	}
 
 	return 0;
@@ -828,7 +906,7 @@ int cal_cb_pci_64xx( calibration_setup_t *setup )
 
 int cal_cb_pci_60xx( calibration_setup_t *setup )
 {
-	saved_calibration_t *saved_cals;
+	saved_calibration_t *saved_cals, *current_cal;
 	enum cal_knobs_60xx
 	{
 		DAC0_OFFSET = 0,
@@ -840,38 +918,102 @@ int cal_cb_pci_60xx( calibration_setup_t *setup )
 		ADC_GAIN_COARSE,
 		ADC_GAIN_FINE,
 	};
-	int i, num_ranges, retval;
+	int i, num_ai_ranges, num_ao_ranges, num_calibrations, retval;
+	int adc_offset_fine_for_ao = -1, adc_offset_coarse_for_ao = -1,
+		adc_gain_fine_for_ao = -1, adc_gain_coarse_for_ao = -1;
+	static const int ai_range_for_ao = 0;
 
 	comedi_set_global_oor_behavior( COMEDI_OOR_NUMBER );
 
-	num_ranges = comedi_get_n_ranges( setup->dev, setup->ad_subdev, 0 );
-	if( num_ranges < 1 ) return -1;
+	num_ai_ranges = comedi_get_n_ranges( setup->dev, setup->ad_subdev, 0 );
+	if( num_ai_ranges < 1 ) return -1;
+	if( setup->da_subdev >= 0 )
+	{
+		num_ao_ranges = comedi_get_n_ranges( setup->dev, setup->da_subdev, 0 );
+		if( num_ai_ranges < 1 ) return -1;
+	}else
+		num_ao_ranges = 0;
 
-	saved_cals = malloc( num_ranges * sizeof( saved_calibration_t ) );
+	num_calibrations = num_ai_ranges + 2 * num_ao_ranges;
+
+	saved_cals = malloc( num_calibrations * sizeof( saved_calibration_t ) );
 	if( saved_cals == NULL ) return -1;
 
-	for( i = num_ranges - 1; i >= 0; i-- )
+	current_cal = saved_cals;
+	for( i = 0; i < num_ai_ranges ; i++ )
 	{
-		reset_caldacs( setup );
+		reset_caldac( setup, ADC_OFFSET_COARSE );
+		reset_caldac( setup, ADC_OFFSET_FINE );
+		reset_caldac( setup, ADC_GAIN_COARSE );
+		reset_caldac( setup, ADC_GAIN_FINE );
 
-		cal_binary( setup, ground_observable_index_60xx( i ), ADC_OFFSET_COARSE );
-		cal_binary( setup, ground_observable_index_60xx( i ), ADC_OFFSET_FINE );
-		cal_binary( setup, high_observable_index_60xx( i ), ADC_GAIN_COARSE );
-		cal_binary( setup, high_observable_index_60xx( i ), ADC_GAIN_FINE );
+		cal_binary( setup, ai_ground_observable_index_60xx( i ), ADC_OFFSET_COARSE );
+		cal_binary( setup, ai_ground_observable_index_60xx( i ), ADC_OFFSET_FINE );
+		cal_binary( setup, ai_high_observable_index_60xx( i ), ADC_GAIN_COARSE );
+		cal_binary( setup, ai_high_observable_index_60xx( i ), ADC_GAIN_FINE );
 
-		memset( &saved_cals[ i ], 0, sizeof( saved_calibration_t ) );
-		saved_cals[ i ].subdevice = setup->ad_subdev;
-		sc_push_caldac( &saved_cals[ i ], setup->caldacs[ ADC_OFFSET_FINE ] );
-		sc_push_caldac( &saved_cals[ i ], setup->caldacs[ ADC_OFFSET_COARSE ] );
-		sc_push_caldac( &saved_cals[ i ], setup->caldacs[ ADC_GAIN_FINE ] );
-		sc_push_caldac( &saved_cals[ i ], setup->caldacs[ ADC_GAIN_COARSE ] );
-		sc_push_channel( &saved_cals[ i ], SC_ALL_CHANNELS );
-		sc_push_range( &saved_cals[ i ], i );
-		sc_push_aref( &saved_cals[ i ], SC_ALL_AREFS );
+		memset( current_cal, 0, sizeof( saved_calibration_t ) );
+		current_cal->subdevice = setup->ad_subdev;
+		sc_push_caldac( current_cal, setup->caldacs[ ADC_OFFSET_FINE ] );
+		sc_push_caldac( current_cal, setup->caldacs[ ADC_OFFSET_COARSE ] );
+		sc_push_caldac( current_cal, setup->caldacs[ ADC_GAIN_FINE ] );
+		sc_push_caldac( current_cal, setup->caldacs[ ADC_GAIN_COARSE ] );
+		sc_push_channel( current_cal, SC_ALL_CHANNELS );
+		sc_push_range( current_cal, i );
+		sc_push_aref( current_cal, SC_ALL_AREFS );
+
+		current_cal++;
+
+		if( i == ai_range_for_ao )
+		{
+			adc_offset_fine_for_ao = setup->caldacs[ ADC_OFFSET_FINE ].current;
+			adc_offset_coarse_for_ao = setup->caldacs[ ADC_OFFSET_COARSE ].current;
+			adc_gain_fine_for_ao = setup->caldacs[ ADC_GAIN_FINE ].current;
+			adc_gain_coarse_for_ao = setup->caldacs[ ADC_GAIN_COARSE ].current;
+		}
 	}
 
-	retval = write_calibration_file( setup, saved_cals, num_ranges );
-	for( i = 0; i < num_ranges; i++ )
+	update_caldac( setup, ADC_OFFSET_FINE, adc_offset_fine_for_ao );
+	update_caldac( setup, ADC_OFFSET_COARSE, adc_offset_coarse_for_ao );
+	update_caldac( setup, ADC_GAIN_FINE, adc_gain_fine_for_ao );
+	update_caldac( setup, ADC_GAIN_COARSE, adc_gain_coarse_for_ao );
+	for( i = 0; i < num_ao_ranges ; i++ )
+	{
+		reset_caldac( setup, DAC0_OFFSET );
+		reset_caldac( setup, DAC0_GAIN );
+
+		cal_binary( setup, ao_low_observable_index_60xx( setup, 0, i ), DAC0_OFFSET );
+		cal_binary( setup, ao_high_observable_index_60xx( setup, 0, i ), DAC0_GAIN );
+
+		memset( current_cal, 0, sizeof( saved_calibration_t ) );
+		current_cal->subdevice = setup->da_subdev;
+		sc_push_caldac( current_cal, setup->caldacs[ DAC0_OFFSET ] );
+		sc_push_caldac( current_cal, setup->caldacs[ DAC0_GAIN ] );
+		sc_push_channel( current_cal, 0 );
+		sc_push_range( current_cal, i );
+		sc_push_aref( current_cal, SC_ALL_AREFS );
+
+		current_cal++;
+
+		reset_caldac( setup, DAC1_OFFSET );
+		reset_caldac( setup, DAC1_GAIN );
+
+		cal_binary( setup, ao_low_observable_index_60xx( setup, 1, i ), DAC1_OFFSET );
+		cal_binary( setup, ao_high_observable_index_60xx( setup, 1, i ), DAC1_GAIN );
+
+		memset( current_cal, 0, sizeof( saved_calibration_t ) );
+		current_cal->subdevice = setup->da_subdev;
+		sc_push_caldac( current_cal, setup->caldacs[ DAC1_OFFSET ] );
+		sc_push_caldac( current_cal, setup->caldacs[ DAC1_GAIN ] );
+		sc_push_channel( current_cal, 1 );
+		sc_push_range( current_cal, i );
+		sc_push_aref( current_cal, SC_ALL_AREFS );
+
+		current_cal++;
+	}
+
+	retval = write_calibration_file( setup, saved_cals, num_calibrations);
+	for( i = 0; i < num_calibrations; i++ )
 		clear_saved_calibration( &saved_cals[ i ] );
 	free( saved_cals );
 	return retval;
