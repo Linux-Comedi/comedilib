@@ -1,3 +1,6 @@
+I: version 0.7.57
+I: driver ni_atmio
+I: device at-mio-16e-10
 I:
 I: subdevice 0
 I: testing info...
@@ -16,7 +19,7 @@ comedi_do_insn: 1
 I: testing insn_read_time...
 rev 1
 comedi_do_insn: 3
-read time: 23 us
+read time: 26 us
 I: testing cmd_probe_src_mask...
 rev 1
 command source mask:
@@ -44,9 +47,14 @@ I: testing cmd_fifo_depth_check...
 2048, 8
 4096, 16
 8192, 32
-16384, 64
+16384, 63
 32768, 128
 I: testing mmap...
+0x40018000 ok
+0x40019000 ok
+0x4001a000 ok
+0x4001b000 ok
+0x4001c000 ok
 read 512 512
 read 512 1024
 read 512 1536
@@ -87,7 +95,22 @@ read 512 18944
 read 512 19456
 read 544 20000
 compare ok
+0x40018000 segfaulted (ok)
+0x40019000 segfaulted (ok)
+0x4001a000 segfaulted (ok)
+0x4001b000 segfaulted (ok)
+0x4001c000 segfaulted (ok)
 I: testing read_select...
+I: testing bufconfig...
+joe
+buffer size 65536
+max buffer size 65536
+setting buffer size to 4096
+buffer size set to 4096
+buffer size now at 4096
+setting buffer size past limit, 69632
+setting buffer size to max, 65536
+buffer size now at 65536
 I:
 I: subdevice 1
 I: testing info...
@@ -106,7 +129,7 @@ comedi_do_insn: 1
 I: testing insn_read_time...
 rev 1
 comedi_do_insn: 3
-read time: 6 us
+read time: 13 us
 I: testing cmd_probe_src_mask...
 rev 1
 command source mask:
@@ -159,6 +182,16 @@ can't do timed?!?
 I: testing read_select...
 can't do timed?!?
   not supported
+I: testing bufconfig...
+joe
+buffer size 65536
+max buffer size 65536
+setting buffer size to 4096
+buffer size set to 4096
+buffer size now at 4096
+setting buffer size past limit, 69632
+setting buffer size to max, 65536
+buffer size now at 65536
 I:
 I: subdevice 2
 I: testing info...
@@ -177,7 +210,7 @@ comedi_do_insn: 1
 I: testing insn_read_time...
 rev 1
 comedi_do_insn: 3
-read time: 7 us
+read time: 14 us
 I: testing cmd_probe_src_mask...
 rev 1
 not supported
@@ -211,6 +244,17 @@ I: testing mmap...
   not supported
 I: testing read_select...
   not supported
+I: testing bufconfig...
+joe
+buffer size 0
+max buffer size 0
+setting buffer size to 4096
+buffer size set to 0
+buffer size now at 0
+setting buffer size past limit, 4096
+buffer size now at 0
+setting buffer size to max, 0
+buffer size now at 0
 I:
 I: subdevice 3
 I: testing info...
@@ -228,7 +272,7 @@ I: testing insn_read_time...
 rev 1
 comedi_do_insn: 1
 W: comedi_do_insn: returned 1 (expected 3)
-read time: 345273378 us
+read time: 1934231350 us
 I: testing cmd_probe_src_mask...
 rev 1
 not supported
@@ -262,6 +306,17 @@ I: testing mmap...
   not supported
 I: testing read_select...
   not supported
+I: testing bufconfig...
+joe
+buffer size 0
+max buffer size 0
+setting buffer size to 4096
+buffer size set to 0
+buffer size now at 0
+setting buffer size past limit, 4096
+buffer size now at 0
+setting buffer size to max, 0
+buffer size now at 0
 I:
 I: subdevice 4
 I: testing info...
@@ -283,7 +338,7 @@ I: testing insn_read_time...
 rev 1
 comedi_do_insn: 1
 W: comedi_do_insn: returned 1 (expected 3)
-read time: 345259121 us
+read time: 1934228375 us
 I: testing cmd_probe_src_mask...
 rev 1
 not supported
@@ -317,6 +372,17 @@ I: testing mmap...
   not supported
 I: testing read_select...
   not supported
+I: testing bufconfig...
+joe
+buffer size 0
+max buffer size 0
+setting buffer size to 4096
+buffer size set to 0
+buffer size now at 0
+setting buffer size past limit, 4096
+buffer size now at 0
+setting buffer size to max, 0
+buffer size now at 0
 I:
 I: subdevice 5
 I: testing info...
@@ -335,7 +401,7 @@ comedi_do_insn: 1
 I: testing insn_read_time...
 rev 1
 comedi_do_insn: 3
-read time: 8 us
+read time: 12 us
 I: testing cmd_probe_src_mask...
 rev 1
 not supported
@@ -369,6 +435,17 @@ I: testing mmap...
   not supported
 I: testing read_select...
   not supported
+I: testing bufconfig...
+joe
+buffer size 0
+max buffer size 0
+setting buffer size to 4096
+buffer size set to 0
+buffer size now at 0
+setting buffer size past limit, 4096
+buffer size now at 0
+setting buffer size to max, 0
+buffer size now at 0
 I:
 I: subdevice 6
 I: testing info...
@@ -387,7 +464,7 @@ comedi_do_insn: 1
 I: testing insn_read_time...
 rev 1
 comedi_do_insn: 3
-read time: 152 us
+read time: 141 us
 I: testing cmd_probe_src_mask...
 rev 1
 not supported
@@ -421,3 +498,14 @@ I: testing mmap...
   not supported
 I: testing read_select...
   not supported
+I: testing bufconfig...
+joe
+buffer size 0
+max buffer size 0
+setting buffer size to 4096
+buffer size set to 0
+buffer size now at 0
+setting buffer size past limit, 4096
+buffer size now at 0
+setting buffer size to max, 0
+buffer size now at 0
