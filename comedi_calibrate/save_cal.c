@@ -118,32 +118,10 @@ int write_calibration_file( calibration_setup_t *setup )
 {
 	FILE *file;
 	int retval;
-	static const char *save_dir = "/etc/comedi/calibrations";
-	char command[ 100 ];
-	struct stat file_stats;
-	comedi_t *dev = setup->dev;
 
 	assert( setup->new_calibration != NULL );
+	assert( setup->cal_save_file_path );
 
-	if( setup->cal_save_file_path == NULL )
-	{
-		if( fstat( comedi_fileno( dev ), &file_stats ) < 0 )
-		{
-			fprintf( stderr, "failed to get file stats of comedi device file\n" );
-			return -1;
-		}
-
-		snprintf( command, sizeof( command ), "install -d %s", save_dir );
-		if( system( command ) )
-		{
-			fprintf( stderr, "failed to create directory %s\n", save_dir );
-			return -1;
-		}
-
-		asprintf( &setup->cal_save_file_path, "%s/%s_comedi%li",
-			save_dir, comedi_get_board_name( dev ),
-			( unsigned long ) minor( file_stats.st_rdev ) );
-	}
 	file = fopen( setup->cal_save_file_path, "w" );
 	if( file == NULL )
 	{

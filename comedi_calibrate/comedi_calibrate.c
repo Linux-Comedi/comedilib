@@ -194,7 +194,6 @@ int main(int argc, char *argv[])
 	options.do_output = 1;
 	options.file_path = "/dev/comedi0";
 	parse_options( argc, argv, &options );
-	setup.cal_save_file_path = options.save_file_path;
 
 	setup.dev = comedi_open( options.file_path );
 	if( setup.dev == NULL ) {
@@ -204,6 +203,8 @@ int main(int argc, char *argv[])
 		exit(0);
 	}
 
+	if( options.save_file_path == NULL )
+		options.save_file_path = comedi_get_default_calibration_path( setup.dev );
 	if(!options.driver_name)
 		options.driver_name=comedi_get_driver_name( setup.dev );
 	if(!options.device_name)
@@ -281,6 +282,7 @@ ok:
 		else options.do_calibrate = 1;
 	}
 	setup.do_output = options.do_output;
+	setup.cal_save_file_path = options.save_file_path;
 
 	if(options.do_dump) observe( &setup );
 	if(options.do_calibrate && setup.do_cal)
