@@ -30,7 +30,6 @@ int main(int argc, char *argv[])
 {
 	int ret;
 	int stype;
-	int i;
 
 	parse_options(argc,argv);
 
