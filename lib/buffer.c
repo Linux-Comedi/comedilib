@@ -11,6 +11,7 @@ int comedi_set_buffer_size(comedi_t *it, unsigned int subdev, unsigned int size)
 	bc.subdevice = subdev;
 	bc.size = size;
 	ret = ioctl_bufconfig(it->fd, &bc);
+	__comedi_errno = errno;
 	if(ret < 0) return ret;
 
 	return bc.size;
@@ -25,6 +26,7 @@ int comedi_set_max_buffer_size(comedi_t *it, unsigned int subdev, unsigned int m
 	bc.subdevice = subdev;
 	bc.maximum_size = max_size;
 	ret = ioctl_bufconfig(it->fd, &bc);
+	__comedi_errno = errno;
 	if(ret < 0) return ret;
 
 	return bc.maximum_size;
@@ -53,7 +55,8 @@ int comedi_mark_buffer_read(comedi_t *it, unsigned int subdev, unsigned int byte
 	memset(&bi, 0, sizeof(bi));
 	bi.bytes_read = bytes;
 	ret = ioctl_bufinfo(it->fd, &bi);
-	if(ret < 0) return ret;
+	__comedi_errno = errno;
+	if(__comedi_errno == EINVAL)__comedi_errno = EBUF_OVR;
 	return bi.buf_int_count - bi.buf_user_count;
 }
 
@@ -67,3 +70,15 @@ int comedi_get_buffer_offset(comedi_t *it, unsigned int subdev)
 	if(ret < 0) return ret;
 	return bi.buf_user_ptr;
 }
+
+int comedi_get_front_count(comedi_t *it, unsigned int subdev)
+{
+	int ret;
+	comedi_bufinfo bi;
+
+	memset(&bi, 0, sizeof(bi));
+	ret = ioctl_bufinfo(it->fd, &bi);
+	if(ret < 0) return ret;
+	return bi.buf_int_count;
+}
+

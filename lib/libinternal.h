@@ -32,12 +32,20 @@
 #include <fcntl.h>
 #include <stdio.h>
 
+#include <comedi_errno.h>
+
+
+/* This indicates a symbol that should not be exported as part of
+ * the library.  But I don't know how to make it useful yet. */
+#define INTERNAL
+
 
 #define debug_ptr(a)    if(!(a))fprintf(stderr," ** NULL pointer: " __FILE__ ", line %d\n",__LINE__);
 #define debug_int(a)    if((a)<0)fprintf(stderr," ** error: " __FILE__ ", line %d\n",__LINE__);
 
-#define COMEDILIB_MAGIC 0xc001dafe
+#define DEBUG(level,format,args...) do{if(__comedi_loglevel>=(level))fprintf(stderr,__FUNCTION__ ": " format, ## args);}while(0)
 
+#define COMEDILIB_MAGIC 0xc001dafe
 
 extern int __comedi_init;
 extern int __comedi_loglevel;
@@ -92,6 +100,11 @@ struct subdevice_struct{
 
 	unsigned int has_cmd;
 	unsigned int has_insn_bits;
+
+	int cmd_mask_errno;
+	comedi_cmd *cmd_mask;
+	int cmd_timed_errno;
+	comedi_cmd *cmd_timed;
 };
 
 

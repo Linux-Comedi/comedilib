@@ -35,17 +35,17 @@
 
 #include <libinternal.h>
 
-int __comedi_init=0;
+INTERNAL int __comedi_init=0;
 
-void initialize(void)
+INTERNAL void initialize(void)
 {
 	char *s;
 	
 	__comedi_init=1;
 
 	if( (s=getenv("COMEDILIB_LOGLEVEL")) ){
-		__comedi_loglevel=strtol(s,NULL,10);
-		fprintf(stderr,"setting loglevel to %d\n",__comedi_loglevel);
+		__comedi_loglevel=strtol(s,NULL,0);
+		DEBUG(3,"setting loglevel to %d\n",__comedi_loglevel);
 	}
 }
   
@@ -111,6 +111,8 @@ int comedi_close(comedi_t *it)
 		}else{
 			free(s->rangeinfo);
 		}
+		if(s->cmd_mask)free(s->cmd_mask);
+		if(s->cmd_timed)free(s->cmd_timed);
 	}
 	if(it->subdevices){
 		free(it->subdevices);
@@ -151,6 +153,11 @@ int comedi_command(comedi_t *it,comedi_cmd *t)
 	int ret;
 	ret = ioctl(it->fd,COMEDI_CMD,t);
 	__comedi_errno = errno;
+	switch(__comedi_errno){
+	case EIO:
+		__comedi_errno = ECMDNOTSUPP;
+		break;
+	}
 	return ret;
 }
 
@@ -159,6 +166,11 @@ int comedi_command_test(comedi_t *it,comedi_cmd *t)
 	int ret;
 	ret = ioctl(it->fd,COMEDI_CMDTEST,t);
 	__comedi_errno = errno;
+	switch(__comedi_errno){
+	case EIO:
+		__comedi_errno = ECMDNOTSUPP;
+		break;
+	}
 	return ret;
 }
 

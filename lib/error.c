@@ -35,7 +35,10 @@ char *__comedilib_error_strings[]={
 	"Invalid channel",
 	"Buffer overflow",
 	"Buffer underflow",
+	"Command not supported",
+	"Not supported",
 };
+#define n_errors (sizeof(__comedilib_error_strings)/sizeof(void *))
 
 int __comedi_loglevel=1;
 int __comedi_errno=0;
@@ -56,9 +59,7 @@ int comedi_errno(void)
 
 char *comedi_strerror(int errnum)
 {
-	if(errnum<COMEDI_NOERROR ||
-	   errnum>=COMEDI_NOERROR+sizeof(__comedilib_error_strings)
-	   /sizeof(__comedilib_error_strings[0]))
+	if(errnum<COMEDI_NOERROR || errnum>=COMEDI_NOERROR+n_errors)
 		return strerror(errnum);
 
 	return __comedilib_error_strings[errnum-COMEDI_NOERROR];
