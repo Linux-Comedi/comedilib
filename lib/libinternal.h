@@ -126,6 +126,8 @@ enum{
 	COMEDILIB_BADCHAN,
 };
 
+// used by range.c, was in comedilib.h but apparently deprecated so I put it here - fmhess
+int comedi_get_rangetype(comedi_t *it,unsigned int subdevice,unsigned int chan);
 
 #endif
 
