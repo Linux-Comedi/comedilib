@@ -1,3 +1,4 @@
+usr/lib/libcomedi.so
 usr/lib/libcomedi.a
 usr/include/*
 usr/share/man/man3/*

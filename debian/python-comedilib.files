@@ -1,2 +1,2 @@
-usr/lib/python2.2/site-packages/*.so
-usr/lib/python2.2/site-packages/comedi.py
+usr/lib/python*/site-packages/*.so
+usr/lib/python*/site-packages/comedi.py

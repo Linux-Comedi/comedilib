@@ -1,4 +1,3 @@
-usr/lib/libcomedi*.so
 usr/lib/libcomedi.so.*
 usr/sbin/*
 usr/bin/comedi_calibrate
