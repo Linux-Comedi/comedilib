@@ -15,8 +15,8 @@ all: $(BINS) $(MBINS)
 $(BINS): % : %.o
 	$(CC) $(LDFLAGS) -o $@ $<
 
-$(MBINS): % : %.o main.o
-	$(CC) $(LDFLAGS) -o $@ main.o $<
+$(MBINS): % : %.o common.o
+	$(CC) $(LDFLAGS) -o $@ common.o $<
 
 clean:
 	-rm -f *.o $(BINS) $(MBINS)

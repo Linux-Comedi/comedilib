@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 	parse_options(argc,argv);
 
 	/* The following global variables used in this demo are
-	 * defined in main.c, and can be modified by command line
+	 * defined in common.c, and can be modified by command line
 	 * options.  When modifying this demo, you may want to
 	 * change them here. */
 	//filename = "/dev/comedi0";
