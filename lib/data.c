@@ -186,7 +186,8 @@ int comedi_data_read_delayed( comedi_t *it, unsigned int subdev, unsigned int ch
 
 	s = it->subdevices + subdev;
 
-	memset(&insn,0,sizeof(insn));
+	memset( insn, 0, sizeof(insn) );
+	memset( ilist, 0, sizeof(ilist) );
 
 	// setup, no conversions
 	insn[0].insn = INSN_READ;
