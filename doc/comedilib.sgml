@@ -994,8 +994,7 @@ The return value has the following meaning:
 <item>3: argument invalid.  One or more argument is invalid, for example
 	a timing argument might be in excess of the card's maximum speed.  The
 	command test will correct the arguments by modifying the command pointed
-	at by <tt/cmd/.  This error might also be returned if the driver is
-	unable to deal with the complexity of the command's <tt/chanlist/.
+	at by <tt/cmd/.
 <item>4: argument fix up.  The command underwent minor adjustment and should
 	now be valid.  For example, a timing argument might not be exactly achievable
 	by the card so the timing argument will be adjusted to the actual timing
