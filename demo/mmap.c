@@ -20,241 +20,146 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
-#include <getopt.h>
-#include <ctype.h>
-#include <string.h>
 #include <unistd.h>
 #include <sys/mman.h>
 #include "examples.h"
 
-#define N_SCANS		10
-#define N_CHANS		16
+int comedi_get_front_count(comedi_t *it, unsigned int subdev);
 
-#define BUFSZ 1000
-char buf[BUFSZ];
+unsigned int chanlist[256];
 
-sampl_t *map;
+void *map;
 
-void do_cmd_1(comedi_t *dev);
-void do_cmd_2(comedi_t *dev);
-void do_cmd(comedi_t *dev,comedi_cmd *cmd);
+int prepare_cmd_lib(comedi_t *dev,int subdevice,comedi_cmd *cmd);
+int prepare_cmd(comedi_t *dev,int subdevice,comedi_cmd *cmd);
+
 
 int main(int argc, char *argv[])
 {
-	char *fn = NULL;
 	comedi_t *dev;
+	comedi_cmd c,*cmd=&c;
+	int size;
+	int front, back;
+	int ret;
+	int i;
 
-	fn = "/dev/comedi0";
+	parse_options(argc,argv);
 
-	dev = comedi_open(fn);
+	dev = comedi_open(filename);
 	if(!dev){
-		perror(fn);
+		comedi_perror(filename);
 		exit(1);
 	}
 
-	fcntl(comedi_fileno(dev),F_SETFL,O_NONBLOCK);
+	size = comedi_get_buffer_size(dev,subdevice);
+	fprintf(stderr,"buffer size is %d\n",size);
 
-	map=mmap(NULL,0x1000,PROT_READ,MAP_SHARED,comedi_fileno(dev),0);
-	printf("map=%p\n",map);
+	map=mmap(NULL,size,PROT_READ,MAP_SHARED,comedi_fileno(dev),0);
+	fprintf(stderr,"map=%p\n",map);
 
-	do_cmd_1(dev);
+	for(i=0;i<n_chan;i++){
+		chanlist[i]=CR_PACK(channel+i,range,aref);
+	}
+
+	//prepare_cmd_lib(dev,subdevice,cmd);
+	prepare_cmd(dev,subdevice,cmd);
+	
+	ret = comedi_command_test(dev,cmd);
+
+	ret = comedi_command_test(dev,cmd);
+
+	if(ret!=0){
+		fprintf(stderr,"command_test failed\n");
+		exit(1);
+	}
+
+	dump_cmd(stderr,cmd);
+
+	ret = comedi_command(dev,cmd);
+	if(ret<0){
+		comedi_perror("comedi_command");
+		exit(1);
+	}
+
+	back = 0;
+	while(1){
+		front = comedi_get_front_count(dev,subdevice);
+		if(verbose)fprintf(stderr,"front = %d, back = %d\n",front,back);
+		if(front<back)break;
+		if(front==back){
+			//comedi_poll(dev,subdevice);
+			usleep(10000);
+			continue;
+		}
+
+		for(i=back;i<front;i+=sizeof(sampl_t)){
+			static int col = 0;
+			printf("%d ",*(sampl_t *)(map+(i&(size-1))));
+			col++;
+			if(col==n_chan){
+				printf("\n");
+				col=0;
+			}
+		}
+
+		ret = comedi_mark_buffer_read(dev,subdevice,front-back);
+		if(ret<0){
+			comedi_perror("comedi_mark_buffer_read");
+			break;
+		}
+		back = front;
+	}
 
 	return 0;
 }
 
-void do_cmd(comedi_t *dev,comedi_cmd *cmd)
+int prepare_cmd_lib(comedi_t *dev,int subdevice,comedi_cmd *cmd)
 {
-	int total=0;
 	int ret;
-	int go;
-	int i;
 
-	ret = comedi_command_test(dev,cmd);
-
-	printf("test ret=%d\n",ret);
+	ret = comedi_get_cmd_generic_timed(dev,subdevice,cmd);
 	if(ret<0){
-		printf("errno=%d\n",errno);
-		comedi_perror("comedi_command_test");
-		return;
+		comedi_perror("comedi_get_cmd_generic_timed\n");
+		return ret;
 	}
 
-	dump_cmd(stdout,cmd);
+	cmd->chanlist = chanlist;
+	cmd->chanlist_len = n_chan;
+	cmd->scan_end_arg = n_chan;
 
-	ret = comedi_command_test(dev,cmd);
+	if(cmd->stop_src==TRIG_COUNT)cmd->stop_arg = n_scan;
 
-	printf("test ret=%d\n",ret);
-	if(ret<0){
-		printf("errno=%d\n",errno);
-		comedi_perror("comedi_command_test");
-		return;
-	}
-
-	dump_cmd(stdout,cmd);
-
-	ret = comedi_command(dev,cmd);
-
-	printf("ret=%d\n",ret);
-	if(ret<0){
-		printf("errno=%d\n",errno);
-		comedi_perror("comedi_command");
-		return;
-	}
-
-	go=1;
-	while(go){
-		ret=read(comedi_fileno(dev),buf,BUFSZ);
-		if(ret<0){
-			if(errno==EAGAIN){
-				usleep(10000);
-			}else{
-				go = 0;
-				perror("read");
-			}
-		}else if(ret==0){
-			go = 0;
-		}else{
-			total+=ret;
-			printf("read %d %d\n",ret,total);
-		}
-	}
-
-	for(i=0;i<100;i++){
-		printf("%d\n",map[i]);
-	}
+	return 0;
 }
 
-/*
- * This part of the demo measures channels 1, 2, 3, 4 at a rate of
- * 10 khz, with the inter-sample time at 10 us (100 khz).  The number
- * of scans measured is 10.  This is analogous to the old mode2
- * acquisition.
- */
-void do_cmd_1(comedi_t *dev)
+int prepare_cmd(comedi_t *dev,int subdevice,comedi_cmd *cmd)
 {
-	comedi_cmd cmd;
-	unsigned int chanlist[4];
+	memset(cmd,0,sizeof(*cmd));
 
-	memset(&cmd,0,sizeof(cmd));
+	cmd->subdev = subdevice;
 
-	/* the subdevice that the command is sent to */
-	cmd.subdev =	subdevice;
+	cmd->flags = 0;
 
-	/* flags */
-	cmd.flags =	0;
+	cmd->start_src = TRIG_NOW;
+	cmd->start_arg = 0;
 
-	/* each event requires a trigger, which is specified
-	   by a source and an argument.  For example, to specify
-	   an external digital line 3 as a source, you would use
-	   src=TRIG_EXT and arg=3. */
+	cmd->scan_begin_src = TRIG_TIMER;
+	cmd->scan_begin_arg = 1e9/freq;
 
-	/* In this case, we specify using TRIG_NOW to start
-	 * acquisition immediately when the command is issued.  
-	 * The argument of TRIG_NOW is "number of nsec after
-	 * NOW", but no driver supports it yet.  Also, no driver
-	 * currently supports using a start_src other than
-	 * TRIG_NOW.  */
-	cmd.start_src =		TRIG_NOW;
-	cmd.start_arg =		0;
+	cmd->convert_src = TRIG_TIMER;
+	cmd->convert_arg = 1;
 
-	/* The timing of the beginning of each scan is controlled
-	 * by scan_begin.  TRIG_TIMER specifies that scan_start
-	 * events occur periodically at a rate of scan_begin_arg
-	 * nanoseconds between scans. */
-	cmd.scan_begin_src =	TRIG_TIMER;
-	cmd.scan_begin_arg =	100000;	/* in ns */
+	cmd->scan_end_src = TRIG_COUNT;
+	cmd->scan_end_arg = n_chan;
 
-	/* The timing between each sample in a scan is controlled
-	 * by convert.  Like above, TRIG_TIMER specifies that
-	 * convert events occur periodically at a rate of convert_arg
-	 * nanoseconds between scans. */
-	cmd.convert_src =	TRIG_TIMER;
-	cmd.convert_arg =	10000;		/* in ns */
+	cmd->stop_src = TRIG_COUNT;
+	cmd->stop_arg = n_scan;
 
-	/* The end of each scan is almost always specified using
-	 * TRIG_COUNT, with the argument being the same as the
-	 * number of channels in the chanlist.  You could probably
-	 * find a device that allows something else, but it would
-	 * be strange. */
-	cmd.scan_end_src =	TRIG_COUNT;
-	cmd.scan_end_arg =	4;		/* number of channels */
+	cmd->chanlist = chanlist;
+	cmd->chanlist_len = n_chan;
 
-	/* The end of acquisition is controlled by stop_src and
-	 * stop_arg.  The src will typically be TRIG_COUNT or
-	 * TRIG_NONE.  Specifying TRIG_COUNT will stop acquisition
-	 * after stop_arg number of scans, or TRIG_NONE will
-	 * cause acquisition to continue until stopped using
-	 * comedi_cancel(). */
-#if 1
-	cmd.stop_src =		TRIG_COUNT;
-	cmd.stop_arg =		100;
-#else
-	cmd.stop_src =		TRIG_NONE;
-	cmd.stop_arg =		0;
-#endif
-
-	/* the channel list determined which channels are sampled.
-	   In general, chanlist_len is the same as scan_end_arg.  Most
-	   boards require this.  */
-	cmd.chanlist =		chanlist;
-	cmd.chanlist_len =	4;
-
-	chanlist[0]=CR_PACK(0,range,aref);
-	chanlist[1]=CR_PACK(1,range,aref);
-	chanlist[2]=CR_PACK(2,range,aref);
-	chanlist[3]=CR_PACK(3,range,aref);
-
-	do_cmd(dev,&cmd);
+	return 0;
 }
 
-void do_cmd_2(comedi_t *dev)
-{
-	comedi_cmd cmd;
-	unsigned int chanlist[4];
 
-	memset(&cmd,0,sizeof(cmd));
-
-	/* the subdevice that the command is sent to */
-	cmd.subdev =	subdevice;
-
-	/* flags */
-	cmd.flags =	0;
-
-	/* each event requires a trigger, which is specified
-	   by a source and an argument.  For example, to specify
-	   an external digital line 3 as a source, you would use
-	   src=TRIG_EXT and arg=3. */
-
-	cmd.start_src =		TRIG_NOW;
-	cmd.start_arg =		0;
-
-	cmd.scan_begin_src =	TRIG_TIMER;
-	cmd.scan_begin_arg =	1;	/* in ns */
-
-	cmd.convert_src =	TRIG_TIMER;
-	cmd.convert_arg =	1;		/* in ns */
-
-	cmd.scan_end_src =	TRIG_COUNT;
-	cmd.scan_end_arg =	4;		/* number of channels */
-
-#if 1
-	cmd.stop_src =		TRIG_COUNT;
-	cmd.stop_arg =		100;
-#else
-	cmd.stop_src =		TRIG_NONE;
-	cmd.stop_arg =		0;
-#endif
-
-	/* the channel list determined which channels are sampled.
-	   In general, chanlist_len is the same as scan_end_arg.  Most
-	   boards require this.  */
-	cmd.chanlist =		chanlist;
-	cmd.chanlist_len =	4;
-
-	chanlist[0]=CR_PACK(0,range,aref);
-	chanlist[1]=CR_PACK(1,range,aref);
-	chanlist[2]=CR_PACK(2,range,aref);
-	chanlist[3]=CR_PACK(3,range,aref);
-
-	do_cmd(dev,&cmd);
-}
 
