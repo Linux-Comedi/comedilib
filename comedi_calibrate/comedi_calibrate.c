@@ -538,7 +538,7 @@ void cal_relative_binary( calibration_setup_t *setup, int obs1, int obs2, int da
 	unsigned int chanspec2 = setup->observables[obs2].observe_insn.chanspec;
 	unsigned int bit;
 
-	DPRINT(0,"postgain binary: %s, %s\n", setup->observables[obs1].name,
+	DPRINT(0,"relative binary: %s, %s\n", setup->observables[obs1].name,
 		setup->observables[obs2].name);
 
 	x0 = x1 = x2 = 0;
@@ -642,7 +642,7 @@ void cal_linearity_binary( calibration_setup_t *setup, int obs1, int obs2, int o
 	sv3.settling_time_ns = setup->settling_time_ns;
 	new_sv_measure( setup->dev, &sv3);
 
-	y0 = sv1.average - sv2.average;
+	y0 = ( sv3.average - sv2.average ) / ( sv2.average - sv1.average );
 	y1 = y2 = y0;
 
 	bit = 1;
