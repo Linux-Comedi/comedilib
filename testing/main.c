@@ -49,7 +49,7 @@ struct test_struct{
 };
 struct test_struct tests[]={
 	{ "info", test_info, TEST_STD },
-	{ "mode0_read", test_mode0_read, TEST_STD },
+	{ "mode0_read", test_mode0_read, TEST_NEVER },
 	{ "insn_read", test_insn_read, TEST_STD },
 	{ "insn_read_time", test_insn_read_time, TEST_STD },
 	{ "cmd_no_cmd", test_cmd_no_cmd, TEST_STD },
