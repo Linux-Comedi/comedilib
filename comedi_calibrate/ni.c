@@ -495,12 +495,13 @@ static void ni_setup_observables( calibration_setup_t *setup )
  * to 50V instead of 0V to 5V */
 static unsigned int cal_gain_register_bits_611x( double reference, double *voltage )
 {
-	unsigned int bits;
+	int bits;
 
-	bits = 200.0 * ( *voltage / reference );
+	bits = 201.0 * ( *voltage / reference ) - 1.0;
 	if( bits > 200 ) bits = 200;
+	if( bits < 0 ) bits = 0;
 
-	*voltage = reference * ( bits / 200.0 );
+	*voltage = reference * ( ( bits + 1 ) / 201.0 );
 	return bits;
 }
 
@@ -600,7 +601,7 @@ static void ni_setup_observables_611x( calibration_setup_t *setup )
 		o->observe_insn = tmpl;
 		o->observe_insn.chanspec = CR_PACK( 0, ai_range_for_ao, AREF_DIFF )
 			| CR_ALT_SOURCE | CR_ALT_FILTER;
-		o->reference_source = REF_DAC0_GND;
+		o->reference_source = REF_DAC_GND( channel );
 		set_target( setup, ni_ao_zero_offset_611x( setup, channel, 0 ), 0.0 );
 
 		/* ao gain */
@@ -613,7 +614,7 @@ static void ni_setup_observables_611x( calibration_setup_t *setup )
 		o->observe_insn = tmpl;
 		o->observe_insn.chanspec = CR_PACK( 0, ai_range_for_ao, AREF_DIFF )
 			| CR_ALT_SOURCE | CR_ALT_FILTER;
-		o->reference_source = REF_DAC0_GND;
+		o->reference_source = REF_DAC_GND( channel );
 		set_target( setup, ni_ao_reference_611x( setup, channel, 0 ), 5.0 );
 	}
 
