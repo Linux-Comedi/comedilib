@@ -33,8 +33,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define DPRINT(level,fmt,args...) do{if(verbose>=level)printf(fmt,args);}while(0)
 
 #define N_CALDACS 32
+#define N_OBSERVABLES 32
 
 typedef struct{
 	int subdev;
@@ -47,20 +49,49 @@ typedef struct{
 	double gain;
 }caldac;
 
+typedef struct{
+	char *name;
+
+	comedi_insn preobserve_insn;
+	lsampl_t preobserve_data;
+
+	comedi_insn observe_insn;
+
+	//comedi_range *range;
+	//int maxdata;
+
+	double target;
+}observable;
+
 static caldac caldacs[N_CALDACS];
+static observable observables[N_OBSERVABLES];
+
 static int n_caldacs;
+static int n_observables;
+
 static comedi_t *dev;
 
 static int ad_subdev;
+static int da_subdev;
 static int eeprom_subdev;
+static int caldac_subdev;
 
 double read_chan(int adc,int range);
-void write_caldac(comedi_t *dev,int subdev,int addr,int val);
+int read_chan2(char *s,int adc,int range);
+void set_ao(comedi_t *dev,int subdev,int chan,int range,double value);
 void check_gain(int ad_chan,int range);
 double check_gain_chan(int ad_chan,int range,int cdac);
 
 int verbose = 0;
 
+void observe(void);
+void preobserve(int obs);
+void observable_dependence(int obs);
+void measure_observable(int obs);
+void ni_setup(void);
+void set_target(int obs,double target);
+
+void cal_ni_results(void);
 
 void update_caldac(int i);
 void reset_caldacs(void);
@@ -110,7 +141,7 @@ typedef struct {
 }linear_fit_t;
 int linear_fit_monotonic(linear_fit_t *l);
 double linear_fit_func_y(linear_fit_t *l,double x);
-double check_gain_chan_x(linear_fit_t *l,int ad_chan,int range,int cdac);
+double check_gain_chan_x(linear_fit_t *l,unsigned int ad_chanspec,int cdac);
 
 typedef struct{
 	comedi_t *dev;
@@ -151,42 +182,63 @@ struct board_struct boards[]={
 	{ "at-mio-16e-1",	cal_ni_16e_1 },
 	{ "at-mio-16e-2",	cal_ni_16e_1 },
 	{ "at-mio-16e-10",	cal_ni_16e_10 },
-	{ "at-mio-16de-10",	cal_ni_unknown },
+//	{ "at-mio-16de-10",	cal_ni_unknown },
 	{ "at-mio-64e-3",	cal_ni_16e_1 },
-	{ "at-mio-16xe-50",	cal_ni_unknown },
-	{ "at-mio-16xe-10",	cal_ni_unknown },
-	{ "at-ai-16xe-10",	cal_ni_unknown },
+//	{ "at-mio-16xe-50",	cal_ni_unknown },
+//	{ "at-mio-16xe-10",	cal_ni_unknown },
+//	{ "at-ai-16xe-10",	cal_ni_unknown },
 	{ "pci-mio-16xe-50",	cal_ni_16xe_50 },
 	{ "pci-mio-16xe-10",	cal_ni_16xe_10 },
-	{ "pxi-6030e",		cal_ni_unknown },
+//	{ "pxi-6030e",		cal_ni_unknown },
 	{ "pci-mio-16e-1",	cal_ni_16e_1 },
-	{ "pci-mio-16e-4",	cal_ni_unknown },
-	{ "pxi-6040e",		cal_ni_unknown },
-	{ "pci-6031e",		cal_ni_unknown },
-	{ "pci-6032e",		cal_ni_unknown },
-	{ "pci-6033e",		cal_ni_unknown },
-	{ "pci-6071e",		cal_ni_unknown },
+//	{ "pci-mio-16e-4",	cal_ni_unknown },
+//	{ "pxi-6040e",		cal_ni_unknown },
+//	{ "pci-6031e",		cal_ni_unknown },
+//	{ "pci-6032e",		cal_ni_unknown },
+//	{ "pci-6033e",		cal_ni_unknown },
+//	{ "pci-6071e",		cal_ni_unknown },
 	{ "pci-6023e",		cal_ni_6023e },
 	{ "pci-6024e",		cal_ni_6023e }, // guess
 	{ "pci-6025e",		cal_ni_6023e }, // guess
 	{ "pxi-6025e",		cal_ni_6023e }, // guess
 	{ "pci-6034e",		cal_ni_6023e }, // guess
 	{ "pci-6035e",		cal_ni_6023e },
-	{ "pci-6052e",		cal_ni_unknown },
-	{ "pci-6110e",		cal_ni_unknown },
-	{ "pci-6111e",		cal_ni_unknown },
+//	{ "pci-6052e",		cal_ni_unknown },
+//	{ "pci-6110e",		cal_ni_unknown },
+//	{ "pci-6111e",		cal_ni_unknown },
 //	{ "pci-6711",		cal_ni_unknown },
 //	{ "pci-6713",		cal_ni_unknown },
 	{ "pxi-6071e",		cal_ni_6071e },
-	{ "pxi-6070e",		cal_ni_unknown },
-	{ "pxi-6052e",		cal_ni_unknown },
-//	{ "DAQCard-ai-16xe-50",	cal_ni_daqcard_ai_16xe_50 },
-	{ "DAQCard-ai-16xe-50",	cal_ni_unknown },
-	{ "DAQCard-ai-16e-4",	cal_ni_unknown },
-	{ "DAQCard-6062e",	cal_ni_unknown },
-	{ "DAQCard-6024e",	cal_ni_unknown },
+//	{ "pxi-6070e",		cal_ni_unknown },
+//	{ "pxi-6052e",		cal_ni_unknown },
+	{ "DAQCard-ai-16xe-50",	cal_ni_daqcard_ai_16xe_50 },
+//	{ "DAQCard-ai-16e-4",	cal_ni_unknown },
+//	{ "DAQCard-6062e",	cal_ni_unknown },
+//	{ "DAQCard-6024e",	cal_ni_unknown },
 };
 #define n_boards (sizeof(boards)/sizeof(boards[0]))
+
+struct board_struct drivers[] = {
+	{ "ni_pcimio",		cal_ni_unknown },
+	{ "ni_atmio",		cal_ni_unknown },
+	{ "ni_mio_cs",		cal_ni_unknown },
+};
+#define n_drivers (sizeof(drivers)/sizeof(drivers[0]))
+
+int do_dump = 0;
+int do_reset = 1;
+int do_calibrate = 1;
+int do_show = 1;
+
+struct option options[] = {
+	{ "verbose", 0, 0, 'v' },
+	{ "quiet", 0, 0, 'q' },
+	{ "file", 0, 0, 'f' },
+	{ "dump", 0, 0, 'd' },
+	{ "reset", 0, 0, 'r' },
+	{ "show", 0, 0, 's' },
+	{ 0 },
+};
 
 int main(int argc, char *argv[])
 {
@@ -194,13 +246,14 @@ int main(int argc, char *argv[])
 	int c;
 	char *drivername;
 	char *devicename;
-	int i;
+	//int i;
+	//struct board_struct *this_board;
+	int index;
 
 	fn = "/dev/comedi0";
 	while (1) {
-		c = getopt(argc, argv, "f:vq");
-		if (c == -1)
-			break;
+		c = getopt_long(argc, argv, "f:vqdr", options, &index);
+		if (c == -1)break;
 		switch (c) {
 		case 'f':
 			fn = optarg;
@@ -210,6 +263,15 @@ int main(int argc, char *argv[])
 			break;
 		case 'q':
 			verbose--;
+			break;
+		case 'd':
+			do_dump = 1;
+			break;
+		case 'r':
+			do_reset = 1;
+			break;
+		case 's':
+			do_show = 1;
 			break;
 		default:
 			printf("bad option\n");
@@ -223,24 +285,221 @@ int main(int argc, char *argv[])
 		exit(0);
 	}
 
-	ad_subdev=0;
-	setup_caldacs();
-
+	ad_subdev=comedi_find_subdevice_by_type(dev,COMEDI_SUBD_AI,0);
+	da_subdev=comedi_find_subdevice_by_type(dev,COMEDI_SUBD_AO,0);
+	caldac_subdev=comedi_find_subdevice_by_type(dev,COMEDI_SUBD_CALIB,0);
 	eeprom_subdev=comedi_find_subdevice_by_type(dev,COMEDI_SUBD_MEMORY,0);
 
 	drivername=comedi_get_driver_name(dev);
 	devicename=comedi_get_board_name(dev);
 
+	ni_setup();
+
+	reset_caldacs();
+
+	observe();
+#if 0
 	for(i=0;i<n_boards;i++){
 		if(!strcmp(boards[i].name,devicename)){
-			boards[i].calibrate();
-			return 0;
+			this_board = boards+i;
+			goto ok;
+		}
+	}
+	for(i=0;i<n_drivers;i++){
+		if(!strcmp(drivers[i].name,drivername)){
+			this_board = drivers+i;
+			goto ok;
 		}
 	}
 
 	printf("device %s unknown\n",devicename);
+	return 0;
+ok:
+	this_board->calibrate();
+#endif
 
 	return 0;
+}
+
+void ni_setup(void)
+{
+	comedi_insn tmpl;
+	int bipolar_lowgain;
+	int bipolar_highgain;
+	int unipolar_lowgain;
+	int i;
+	double voltage_reference;
+
+	bipolar_lowgain = get_bipolar_lowgain(dev,ad_subdev);
+	bipolar_highgain = get_bipolar_highgain(dev,ad_subdev);
+	unipolar_lowgain = get_unipolar_lowgain(dev,ad_subdev);
+
+	voltage_reference = 5.000;
+
+	memset(&tmpl,0,sizeof(tmpl));
+	tmpl.insn = INSN_READ;
+	tmpl.n = 1;
+	tmpl.subdev = ad_subdev;
+
+	i = 0;
+	/* 0 offset, low gain */
+	observables[i].name = "ai, bipolar zero offset, low gain";
+	observables[i].observe_insn = tmpl;
+	observables[i].observe_insn.chanspec =
+		CR_PACK(0,bipolar_lowgain,AREF_OTHER);
+	observables[i].target = 0;
+	i++;
+
+	/* 0 offset, high gain */
+	observables[i].name = "ai, bipolar zero offset, high gain";
+	observables[i].observe_insn = tmpl;
+	observables[i].observe_insn.chanspec =
+		CR_PACK(0,bipolar_highgain,AREF_OTHER);
+	observables[i].target = 0;
+	i++;
+
+	/* voltage reference */
+	observables[i].name = "ai, bipolar voltage reference, low gain";
+	observables[i].observe_insn = tmpl;
+	observables[i].observe_insn.chanspec =
+		CR_PACK(5,bipolar_lowgain,AREF_OTHER);
+	observables[i].target = voltage_reference;
+	i++;
+
+	if(unipolar_lowgain>=0){
+		/* unip/bip offset */
+		observables[i].name = "ai, unipolar zero offset, low gain";
+		observables[i].observe_insn = tmpl;
+		observables[i].observe_insn.chanspec =
+			CR_PACK(0,unipolar_lowgain,AREF_OTHER);
+		observables[i].target = 0;
+		i++;
+	}
+
+	if(da_subdev>=0){
+		comedi_insn po_tmpl;
+
+		memset(&po_tmpl,0,sizeof(po_tmpl));
+		po_tmpl.insn = INSN_WRITE;
+		po_tmpl.n = 1;
+		po_tmpl.subdev = da_subdev;
+
+		/* ao 0, zero offset */
+		observables[i].name = "ao 0, zero offset, low gain";
+		observables[i].preobserve_insn = po_tmpl;
+		observables[i].preobserve_insn.chanspec = CR_PACK(0,0,0);
+		observables[i].preobserve_insn.data = &observables[i].preobserve_data;
+		observables[i].observe_insn = tmpl;
+		observables[i].observe_insn.chanspec =
+			CR_PACK(2,bipolar_lowgain,AREF_OTHER);
+		set_target(i,0.0);
+		i++;
+
+		/* ao 0, gain */
+		observables[i].name = "ao 0, reference voltage, low gain";
+		observables[i].preobserve_insn = po_tmpl;
+		observables[i].preobserve_insn.chanspec = CR_PACK(0,0,0);
+		observables[i].preobserve_insn.data = &observables[i].preobserve_data;
+		observables[i].observe_insn = tmpl;
+		observables[i].observe_insn.chanspec =
+			CR_PACK(6,bipolar_lowgain,AREF_OTHER);
+		set_target(i,5.0);
+		observables[i].target -= voltage_reference;
+		i++;
+
+		/* ao 1, zero offset */
+		observables[i].name = "ao 1, zero offset, low gain";
+		observables[i].preobserve_insn = po_tmpl;
+		observables[i].preobserve_insn.chanspec = CR_PACK(1,0,0);
+		observables[i].preobserve_insn.data = &observables[i].preobserve_data;
+		observables[i].observe_insn = tmpl;
+		observables[i].observe_insn.chanspec =
+			CR_PACK(3,bipolar_lowgain,AREF_OTHER);
+		set_target(i,0.0);
+		i++;
+
+		/* ao 1, gain */
+		observables[i].name = "ao 1, reference voltage, low gain";
+		observables[i].preobserve_insn = po_tmpl;
+		observables[i].preobserve_insn.chanspec = CR_PACK(1,0,0);
+		observables[i].preobserve_insn.data = &observables[i].preobserve_data;
+		observables[i].observe_insn = tmpl;
+		observables[i].observe_insn.chanspec =
+			CR_PACK(7,bipolar_lowgain,AREF_OTHER);
+		set_target(i,5.0);
+		observables[i].target -= voltage_reference;
+		i++;
+	}
+	n_observables = i;
+
+	setup_caldacs();
+}
+
+void set_target(int obs,double target)
+{
+	comedi_range *range;
+	lsampl_t maxdata, data;
+
+	range = comedi_get_range(dev,observables[obs].preobserve_insn.subdev,
+		CR_CHAN(observables[obs].preobserve_insn.chanspec),
+		CR_RANGE(observables[obs].preobserve_insn.chanspec));
+	maxdata = comedi_get_maxdata(dev,observables[obs].preobserve_insn.subdev,
+		CR_CHAN(observables[obs].preobserve_insn.chanspec));
+
+	data = comedi_from_phys(target,range,maxdata);
+
+	observables[obs].preobserve_data = data;
+	observables[obs].target = comedi_to_phys(data,range,maxdata);
+}
+
+void observe(void)
+{
+	int i;
+
+	for(i=0;i<n_observables;i++){
+		preobserve(i);
+		DPRINT(0,"%s\n",observables[i].name);
+		measure_observable(i);
+		observable_dependence(i);
+	}
+
+}
+
+void preobserve(int obs)
+{
+	if(observables[obs].preobserve_insn.n!=0){
+		comedi_do_insn(dev,&observables[obs].preobserve_insn);
+	}
+}
+
+void measure_observable(int obs)
+{
+	char s[32];
+	int n;
+	new_sv_t sv;
+
+	new_sv_init(&sv,dev,
+		observables[obs].observe_insn.subdev,
+		CR_CHAN(observables[obs].observe_insn.chanspec),
+		CR_RANGE(observables[obs].observe_insn.chanspec),
+		CR_AREF(observables[obs].observe_insn.chanspec));
+	sv.order=7;
+	n=new_sv_measure(&sv);
+
+	sci_sprint_alt(s,sv.average,sv.error);
+	printf("offset %s, target %g\n",s,observables[obs].target);
+}
+
+void observable_dependence(int obs)
+{
+	int i;
+	linear_fit_t l;
+
+	for(i=0;i<n_caldacs;i++){
+		check_gain_chan_x(&l,
+			observables[obs].observe_insn.chanspec,i);
+	}
+
 }
 
 double ni_get_reference(int lsb_loc,int msb_loc)
@@ -267,6 +526,24 @@ void cal_ni_16e_1(void)
 
 	reset_caldacs();
 
+/* Device name: at-mio-16e-2
+ * bipolar zero offset, low gain [-10,10]
+ * caldac[0] gain=-88.5(21)e-7 V/bit S_min=190.407 dof=254
+ * caldac[1] gain=-8158.8(22)e-7 V/bit S_min=1238.12 dof=254
+ * caldac[3] gain=-26.8(21)e-7 V/bit S_min=240.556 dof=254
+ * bipolar zero offset, high gain [-0.05,0.05]
+ * caldac[0] gain=-8866.2(13)e-9 V/bit S_min=1300.15 dof=254
+ * caldac[1] gain=-4094.0(13)e-9 V/bit S_min=990.392 dof=254
+ * unipolar zero offset, low gain [0,20]
+ * caldac[0] gain=-85.0(22)e-7 V/bit S_min=255.978 dof=254
+ * caldac[1] gain=-8074.9(50)e-7 V/bit S_min=198.098 dof=144
+ * caldac[2] gain=-9560.0(51)e-7 V/bit S_min=255.782 dof=141
+ * caldac[3] gain=-9.3(22)e-7 V/bit S_min=226.69 dof=254
+ * bipolar voltage reference, low gain [-10,10]
+ * caldac[0] gain=-88.2(21)e-7 V/bit S_min=264.253 dof=254
+ * caldac[1] gain=-8104.5(21)e-7 V/bit S_min=640.274 dof=254
+ * caldac[3] gain=-4838.9(22)e-7 V/bit S_min=808.443 dof=254
+ */
 /*
    layout
 
@@ -313,6 +590,8 @@ void cal_ni_16e_1(void)
 	chan_cal(6,6,0,0.0);
 	chan_cal(6,6,0,0.0);
 	comedi_data_write(dev,1,0,0,0,2048);
+
+	cal_ni_results();
 }
 
 
@@ -678,8 +957,10 @@ void cal_ni_unknown(void)
 	int bipolar_lowgain;
 	int bipolar_highgain;
 	int unipolar_lowgain;
+	int have_ao = 1;
 
 	reset_caldacs();
+	printf("Warning: device not calibrated due to insufficient information\n");
 	printf("Please send this output to <ds@schleef.org>\n");
 	printf("$Id$\n");
 	printf("Device name: %s\n",comedi_get_board_name(dev));
@@ -694,38 +975,100 @@ void cal_ni_unknown(void)
 
 	/* 0 offset, low gain */
 	range = comedi_get_range(dev,ad_subdev,0,bipolar_lowgain);
-	if(verbose>=0){
-		printf("bipolar zero offset, low gain [%g,%g]\n",
-			range->min,range->max);
-	}
+	DPRINT(0,"bipolar zero offset, low gain [%g,%g]\n",
+		range->min,range->max);
 	channel_dependence(0,bipolar_lowgain);
 
 	/* 0 offset, high gain */
 	range = comedi_get_range(dev,ad_subdev,0,bipolar_highgain);
-	if(verbose>=0){
-		printf("bipolar zero offset, high gain [%g,%g]\n",
-			range->min,range->max);
-	}
+	DPRINT(0,"bipolar zero offset, high gain [%g,%g]\n",
+		range->min,range->max);
 	channel_dependence(0,bipolar_highgain);
 
 	/* unip/bip offset */
 	range = comedi_get_range(dev,ad_subdev,0,unipolar_lowgain);
-	if(verbose>=0){
-		printf("unipolar zero offset, low gain [%g,%g]\n",
-			range->min,range->max);
-	}
+	DPRINT(0,"unipolar zero offset, low gain [%g,%g]\n",
+		range->min,range->max);
 	channel_dependence(0,unipolar_lowgain);
 
 	/* voltage reference */
 	range = comedi_get_range(dev,ad_subdev,0,bipolar_lowgain);
-	if(verbose>=0){
-		printf("bipolar voltage reference, low gain [%g,%g]\n",
-			range->min,range->max);
-	}
+	DPRINT(0,"bipolar voltage reference, low gain [%g,%g]\n",
+		range->min,range->max);
 	channel_dependence(5,bipolar_lowgain);
 
+	have_ao = (comedi_get_subdevice_type(dev,da_subdev)==COMEDI_SUBD_AO);
+	if(have_ao){
+		int ao_chan;
+
+		/* ao 0, zero offset */
+		ao_chan = 0;
+		set_ao(dev,da_subdev,ao_chan,0,0.0);
+		range = comedi_get_range(dev,ad_subdev,0,bipolar_lowgain);
+		DPRINT(0,"ao 0, zero offset, low gain [%g,%g]\n",
+			range->min,range->max);
+		channel_dependence(2,bipolar_lowgain);
+
+		/* ao 0, gain */
+		ao_chan = 0;
+		set_ao(dev,da_subdev,ao_chan,0,5.0);
+		range = comedi_get_range(dev,ad_subdev,0,bipolar_lowgain);
+		DPRINT(0,"ao 0, gain, low gain [%g,%g]\n",
+			range->min,range->max);
+		channel_dependence(6,bipolar_lowgain);
+
+		/* ao 1, zero offset */
+		ao_chan = 1;
+		set_ao(dev,da_subdev,ao_chan,0,0.0);
+		range = comedi_get_range(dev,ad_subdev,0,bipolar_lowgain);
+		DPRINT(0,"ao 1, zero offset, low gain [%g,%g]\n",
+			range->min,range->max);
+		channel_dependence(3,bipolar_lowgain);
+
+		/* ao 1, gain */
+		ao_chan = 1;
+		set_ao(dev,da_subdev,ao_chan,0,5.0);
+		range = comedi_get_range(dev,ad_subdev,0,bipolar_lowgain);
+		DPRINT(0,"ao 1, gain, low gain [%g,%g]\n",
+			range->min,range->max);
+		channel_dependence(7,bipolar_lowgain);
+	}
+
+	cal_ni_results();
 }
 
+void cal_ni_results(void)
+{
+	comedi_range *range;
+	int bipolar_lowgain;
+	int bipolar_highgain;
+	int unipolar_lowgain;
+	//int have_ao;
+	char s[32];
+
+	bipolar_lowgain = get_bipolar_lowgain(dev,ad_subdev);
+	bipolar_highgain = get_bipolar_highgain(dev,ad_subdev);
+	unipolar_lowgain = get_unipolar_lowgain(dev,ad_subdev);
+
+	/* 0 offset, low gain */
+	range = comedi_get_range(dev,ad_subdev,0,bipolar_lowgain);
+	read_chan2(s,0,bipolar_lowgain);
+	DPRINT(0,"bipolar zero offset, low gain [%g,%g]: %s\n",
+		range->min,range->max,s);
+
+	/* 0 offset, high gain */
+	range = comedi_get_range(dev,ad_subdev,0,bipolar_highgain);
+	read_chan2(s,0,bipolar_highgain);
+	DPRINT(0,"bipolar zero offset, high gain [%g,%g]: %s\n",
+		range->min,range->max,s);
+
+	/* unip/bip offset */
+	range = comedi_get_range(dev,ad_subdev,0,unipolar_lowgain);
+	read_chan2(s,0,unipolar_lowgain);
+	DPRINT(0,"unipolar zero offset, low gain [%g,%g]: %s\n",
+		range->min,range->max,s);
+
+}
 
 void ni_mio_ai_postgain_cal(void)
 {
@@ -735,11 +1078,11 @@ void ni_mio_ai_postgain_cal(void)
 	double gain;
 	double a;
 
-	check_gain_chan_x(&l,0,0,1);
+	check_gain_chan_x(&l,CR_PACK(0,0,AREF_OTHER),1);
 	offset_r0=linear_fit_func_y(&l,caldacs[1].current);
 	printf("offset r0 %g\n",offset_r0);
 
-	check_gain_chan_x(&l,0,7,1);
+	check_gain_chan_x(&l,CR_PACK(0,7,AREF_OTHER),1);
 	offset_r7=linear_fit_func_y(&l,caldacs[1].current);
 	printf("offset r7 %g\n",offset_r7);
 
@@ -761,11 +1104,11 @@ void ni_mio_ai_postgain_cal_2(int chan,int dac,int range_lo,int range_hi,double 
 	double slope;
 	double a;
 
-	check_gain_chan_x(&l,chan,range_lo,dac);
+	check_gain_chan_x(&l,CR_PACK(chan,range_lo,AREF_OTHER),dac);
 	offset_lo=linear_fit_func_y(&l,caldacs[dac].current);
 	printf("offset lo %g\n",offset_lo);
 
-	check_gain_chan_x(&l,chan,range_hi,dac);
+	check_gain_chan_x(&l,CR_PACK(chan,range_hi,AREF_OTHER),dac);
 	offset_hi=linear_fit_func_y(&l,caldacs[dac].current);
 	printf("offset hi %g\n",offset_hi);
 
@@ -786,17 +1129,19 @@ void chan_cal(int adc,int cdac,int range,double target)
 	double offset;
 	double gain;
 	double a;
+	char s[32];
 
-	check_gain_chan_x(&l,adc,range,cdac);
+	check_gain_chan_x(&l,CR_PACK(adc,range,AREF_OTHER),cdac);
 	offset=linear_fit_func_y(&l,caldacs[cdac].current);
-	printf("offset %g\n",offset);
 	gain=l.slope;
 	
 	a=caldacs[cdac].current+(target-offset)/gain;
-	printf("%g\n",a);
 
 	caldacs[cdac].current=rint(a);
 	update_caldac(cdac);
+
+	read_chan2(s,adc,range);
+	DPRINT(0,"caldac[%d] set to %g, offset=%s\n",cdac,a,s);
 }
 
 
@@ -825,29 +1170,26 @@ void dump_curve(int adc,int caldac)
 {
 	linear_fit_t l;
 
-	check_gain_chan_x(&l,adc,0,caldac);
+	check_gain_chan_x(&l,CR_PACK(adc,0,AREF_OTHER),caldac);
 }
 
 
 void setup_caldacs(void)
 {
-	int s,n_chan,i;
+	int n_chan,i;
 
-	s=comedi_find_subdevice_by_type(dev,COMEDI_SUBD_CALIB,0);
-	if(s<0){
+	if(caldac_subdev<0){
 		printf("no calibration subdevice\n");
 		return;
 	}
-	//printf("calibration subdevice is %d\n",s);
 
-	n_chan=comedi_get_n_channels(dev,s);
+	n_chan=comedi_get_n_channels(dev,caldac_subdev);
 
 	for(i=0;i<n_chan;i++){
-		caldacs[i].subdev=s;
+		caldacs[i].subdev=caldac_subdev;
 		caldacs[i].chan=i;
-		caldacs[i].maxdata=comedi_get_maxdata(dev,s,i);
+		caldacs[i].maxdata=comedi_get_maxdata(dev,caldac_subdev,i);
 		caldacs[i].current=0;
-		//printf("caldac %d, %d\n",i,caldacs[i].maxdata);
 	}
 
 	n_caldacs=n_chan;
@@ -867,12 +1209,10 @@ void update_caldac(int i)
 {
 	int ret;
 	
-	//printf("update %d %d %d\n",caldacs[i].subdev,caldacs[i].chan,caldacs[i].current);
-	//ret=comedi_data_write(dev,caldacs[i].subdev,caldacs[i].chan,0,0,caldacs[i].current);
-	write_caldac(dev,caldacs[i].subdev,caldacs[i].chan,caldacs[i].current);
-	ret=0;
-	if(ret<0)
-		printf("comedi_data_write() error\n");
+	DPRINT(3,"update %d %d %d\n",caldacs[i].subdev,caldacs[i].chan,caldacs[i].current);
+	ret = comedi_data_write(dev,caldacs[i].subdev,caldacs[i].chan,0,0,
+		caldacs[i].current);
+	if(ret<0)perror("update_caldac()");
 }
 
 
@@ -889,10 +1229,10 @@ double check_gain_chan(int ad_chan,int range,int cdac)
 {
 	linear_fit_t l;
 
-	return check_gain_chan_x(&l,ad_chan,range,cdac);
+	return check_gain_chan_x(&l,CR_PACK(ad_chan,range,AREF_OTHER),cdac);
 }
 
-double check_gain_chan_x(linear_fit_t *l,int ad_chan,int range,int cdac)
+double check_gain_chan_x(linear_fit_t *l,unsigned int ad_chanspec,int cdac)
 {
 	int orig,i,n;
 	int step;
@@ -917,7 +1257,10 @@ double check_gain_chan_x(linear_fit_t *l,int ad_chan,int range,int cdac)
 
 	orig=caldacs[cdac].current;
 
-	new_sv_init(&sv,dev,0,ad_chan,range,AREF_OTHER);
+	new_sv_init(&sv,dev,0,
+		CR_CHAN(ad_chanspec),
+		CR_RANGE(ad_chanspec),
+		CR_AREF(ad_chanspec));
 
 	caldacs[cdac].current=0;
 	update_caldac(cdac);
@@ -1069,11 +1412,28 @@ double read_chan(int adc,int range)
 	return sv.average;
 }
 
-void write_caldac(comedi_t *dev,int subdev,int addr,int val)
+int read_chan2(char *s,int adc,int range)
 {
-	comedi_data_write(dev,subdev,addr,0,0,val);
+	int n;
+	new_sv_t sv;
+
+	new_sv_init(&sv,dev,0,adc,range,AREF_OTHER);
+	sv.order=7;
+	n=new_sv_measure(&sv);
+
+	return sci_sprint_alt(s,sv.average,sv.error);
 }
 
+void set_ao(comedi_t *dev,int subdev,int chan,int range,double value)
+{
+	comedi_range *r = comedi_get_range(dev,subdev,chan,range);
+	lsampl_t maxdata = comedi_get_maxdata(dev,subdev,chan);
+	lsampl_t data;
+
+	data = comedi_from_phys(value,r,maxdata);
+
+	comedi_data_write(dev,subdev,chan,range,AREF_GROUND,data);
+}
 
 
 int new_sv_init(new_sv_t *sv,comedi_t *dev,int subdev,int chan,int range,int aref)
@@ -1323,8 +1683,8 @@ int sci_sprint_alt(char *s,double x,double y)
 	double error;
 	double mindigit;
 
-	errsig = floor(log10(y));
-	maxsig = floor(log10(x));
+	errsig = floor(log10(fabs(y)));
+	maxsig = floor(log10(fabs(x)));
 	mindigit = pow(10,errsig);
 
 	if(maxsig<errsig)maxsig=errsig;
@@ -1334,12 +1694,14 @@ int sci_sprint_alt(char *s,double x,double y)
 	mantissa = x*pow(10,-maxsig);
 	error = y*pow(10,-errsig+1);
 
-
+	if(isnan(x)){
+		return sprintf(s,"%g",x);
+	}
 	if(errsig==1 && maxsig<4 && maxsig>1){
 		return sprintf(s,"%0.0f(%2.0f)",x,error);
 	}
 	if(maxsig<=0 && maxsig>=-2){
-		return sprintf(s,"altnum %0.*f(%2.0f)",sigfigs-1-maxsig,
+		return sprintf(s,"%0.*f(%2.0f)",sigfigs-1-maxsig,
 			mantissa*pow(10,maxsig),error);
 	}
 	return sprintf(s,"%0.*f(%2.0f)e%d",sigfigs-1,mantissa,error,maxsig);
