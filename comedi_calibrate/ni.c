@@ -1628,7 +1628,12 @@ static void ni67xx_setup_observables( calibration_setup_t *setup )
 static int cal_ni_pci_6711(calibration_setup_t *setup)
 {
 	generic_layout_t layout;
-
+	
+	if( comedi_get_version_code( setup->dev ) <= COMEDI_VERSION_CODE(0, 7, 69))
+	{
+		DPRINT(0, "WARNING: you need comedi driver version 0.7.69 or later\n"
+		 "for this calibration to work properly\n" );
+	}
 	init_generic_layout( &layout );
 	layout.dac_gain = ni67xx_ao_gain_caldac;
 	layout.dac_linearity = ni67xx_ao_linearity_caldac;
