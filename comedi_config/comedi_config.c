@@ -73,6 +73,8 @@ void do_help(int i)
 			"\t\tprint program version\n"
 		"\t-i --init-data <filename>\n"
 			"\t\tI don't know what this does\n"
+		"\t-r --remove\n"
+			"\t\tremove previously configured driver\n"
 		"\t--read-buffer <size>\n"
 			"\t\tset buffer size in kilobytes used for reads from the <device file>\n"
 		"\t--write-buffer <size>\n"
