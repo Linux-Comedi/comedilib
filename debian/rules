@@ -61,11 +61,11 @@ binary-arch: build install
 	#
 	# build libcomedi${major} package by moving files from comedilib-dev
 	#
-	dh_movefiles -plibcomedi$(major)             \
-               usr/lib/libcomedi.so.$(version)	\
-               usr/lib/libcomedi.so.$(major)	\
-	       usr/sbin/comedi_config		\
-	       usr/bin/comedi_calibrate
+	dh_movefiles -plibcomedi$(major)		\
+		usr/lib/libcomedi.so.$(version)		\
+		usr/lib/libcomedi.so.$(major)		\
+		usr/bin/comedi_config			\
+		usr/bin/comedi_calibrate
 
 #	dh_installdebconf	
 	dh_installdocs
@@ -76,6 +76,9 @@ binary-arch: build install
 #	dh_installinit
 	dh_installcron
 	dh_installmanpages -plibcomedi0
+
+	(cd debian/tmp/usr/share && rm -rf man)
+
 	dh_installinfo
 #	dh_undocumented
 	dh_installchangelogs 
