@@ -102,46 +102,6 @@ void generic_prep_dac_caldacs( calibration_setup_t *setup,
 		}
 	}
 }
-static void generic_do_dac_channel( calibration_setup_t *setup, const generic_layout_t *layout ,
-	saved_calibration_t *current_cal, unsigned int channel, unsigned int range )
-{
-	generic_prep_dac_caldacs( setup, layout, channel, range );
-
-	generic_do_relative( setup, current_cal, layout->dac_ground_observable( setup, channel, range ),
-		layout->dac_high_observable( setup, channel, range ), layout->dac_gain( channel ) );
-
-	generic_do_cal( setup, current_cal, layout->dac_ground_observable( setup, channel, range ),
-		layout->dac_offset( channel ) );
-
-	current_cal->subdevice = setup->da_subdev;
-	sc_push_channel( current_cal, channel );
-	sc_push_range( current_cal, range );
-	sc_push_aref( current_cal, SC_ALL_AREFS );
-}
-
-static void generic_do_adc_channel( calibration_setup_t *setup, const generic_layout_t *layout ,
-	saved_calibration_t *current_cal, unsigned int channel, unsigned int range )
-{
-	generic_prep_adc_caldacs( setup, layout, channel, range );
-
-	generic_do_relative( setup, current_cal, layout->adc_high_observable( setup, channel, range ),
-		layout->adc_ground_observable( setup, channel, range ), layout->adc_gain( channel ) );
-
-	generic_do_cal( setup, current_cal, layout->adc_ground_observable( setup, channel, range ),
-		layout->adc_offset( channel ) );
-
-	generic_do_relative( setup, current_cal, layout->adc_high_observable( setup, channel, range ),
-		layout->adc_ground_observable( setup, channel, range ), layout->adc_gain_fine( channel ) );
-
-	generic_do_cal( setup, current_cal, layout->adc_ground_observable( setup, channel, range ),
-		layout->adc_offset_fine( channel ) );
-
-	current_cal->subdevice = setup->ad_subdev;
-	sc_push_channel( current_cal, channel );
-	sc_push_range( current_cal, range );
-	sc_push_aref( current_cal, SC_ALL_AREFS );
-}
-
 static int calibration_is_valid( const saved_calibration_t *saved_cal,
 	unsigned int subdevice, unsigned int channel, unsigned int range )
 {
@@ -196,25 +156,63 @@ static void apply_calibration(  calibration_setup_t *setup, saved_calibration_t 
 
 static void generic_prep_adc_for_dac( calibration_setup_t *setup, const generic_layout_t *layout,
 	saved_calibration_t *saved_cals, unsigned int saved_cals_length,
-	unsigned int dac_channel, unsigned int dac_range )
+	int observable )
 {
 	unsigned int adc_channel, adc_range;
-	int i;
 	int chanspec;
 
-	for( i = 0; i < setup->n_observables; i++ )
-	{
-		chanspec = setup->observables[ i ].preobserve_insn.chanspec;
-		if( CR_CHAN( chanspec ) == dac_channel && CR_RANGE( chanspec ) == dac_range )
-			break;
-	}
-	assert( i < setup->n_observables );
-	chanspec = setup->observables[ i ].observe_insn.chanspec;
+	if( observable < 0 ) return;
+
+	chanspec = setup->observables[ observable ].observe_insn.chanspec;
 	adc_channel = CR_CHAN( chanspec );
 	adc_range = CR_RANGE( chanspec );
 
 	apply_calibration( setup, saved_cals, saved_cals_length, setup->ad_subdev,
 		adc_channel, adc_range );
+}
+
+static void generic_do_dac_channel( calibration_setup_t *setup, const generic_layout_t *layout ,
+	saved_calibration_t *saved_cals, unsigned int saved_cals_length, saved_calibration_t *current_cal,
+	unsigned int channel, unsigned int range )
+{
+	generic_prep_dac_caldacs( setup, layout, channel, range );
+
+	generic_prep_adc_for_dac( setup, layout, saved_cals, saved_cals_length,
+		layout->dac_ground_observable( setup, channel, range ) );
+		
+	generic_do_relative( setup, current_cal, layout->dac_ground_observable( setup, channel, range ),
+		layout->dac_high_observable( setup, channel, range ), layout->dac_gain( channel ) );
+
+	generic_do_cal( setup, current_cal, layout->dac_ground_observable( setup, channel, range ),
+		layout->dac_offset( channel ) );
+
+	current_cal->subdevice = setup->da_subdev;
+	sc_push_channel( current_cal, channel );
+	sc_push_range( current_cal, range );
+	sc_push_aref( current_cal, SC_ALL_AREFS );
+}
+
+static void generic_do_adc_channel( calibration_setup_t *setup, const generic_layout_t *layout ,
+	saved_calibration_t *current_cal, unsigned int channel, unsigned int range )
+{
+	generic_prep_adc_caldacs( setup, layout, channel, range );
+
+	generic_do_relative( setup, current_cal, layout->adc_high_observable( setup, channel, range ),
+		layout->adc_ground_observable( setup, channel, range ), layout->adc_gain( channel ) );
+
+	generic_do_cal( setup, current_cal, layout->adc_ground_observable( setup, channel, range ),
+		layout->adc_offset( channel ) );
+
+	generic_do_relative( setup, current_cal, layout->adc_high_observable( setup, channel, range ),
+		layout->adc_ground_observable( setup, channel, range ), layout->adc_gain_fine( channel ) );
+
+	generic_do_cal( setup, current_cal, layout->adc_ground_observable( setup, channel, range ),
+		layout->adc_offset_fine( channel ) );
+
+	current_cal->subdevice = setup->ad_subdev;
+	sc_push_channel( current_cal, channel );
+	sc_push_range( current_cal, range );
+	sc_push_aref( current_cal, SC_ALL_AREFS );
 }
 
 int generic_cal_by_channel_and_range( calibration_setup_t *setup,
@@ -264,9 +262,8 @@ int generic_cal_by_channel_and_range( calibration_setup_t *setup,
 	{
 		for( range = 0; range < num_ao_ranges; range++ )
 		{
-			generic_prep_adc_for_dac( setup, layout, saved_cals, num_ai_calibrations,
-				channel, range );
-			generic_do_dac_channel( setup, layout, current_cal, channel, range );
+			generic_do_dac_channel( setup, layout, saved_cals, num_ai_calibrations,
+				current_cal, channel, range );
 			current_cal++;
 		}
 	}
@@ -319,9 +316,8 @@ int generic_cal_by_range( calibration_setup_t *setup,
 	{
 		for( range = 0; range < num_ao_ranges; range++ )
 		{
-			generic_prep_adc_for_dac( setup, layout, saved_cals, num_ai_ranges,
-				channel, range );
-			generic_do_dac_channel( setup, layout, current_cal, channel, range );
+			generic_do_dac_channel( setup, layout, saved_cals, num_ai_ranges,
+				current_cal, channel, range );
 			current_cal++;
 		}
 	}
