@@ -7,6 +7,10 @@ EXTRA_DIST=$(SGML) funcref mkref drivers.txt mkdr
 
 all-local: html $(DOC).pdf man
 
+clean-local:
+	rm -rf comedilib.pdf drivers.sgml funcref.sgml
+	rm -rf html man
+
 locales = de
 
 $(DOC).pdf: $(DOC).sgml
