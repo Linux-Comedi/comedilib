@@ -48,7 +48,7 @@ char *string_buf_ptr;
 <STRING>\" {
 		*string_buf_ptr = 0;
 		BEGIN(INITIAL);
-		calib_yylval.sval = string_buf;
+		calib_lvalp->sval = string_buf;
 		return ( T_STRING );
 	}
 <STRING>[^\n\"]+ {
@@ -70,7 +70,7 @@ channel	{ return ( T_CHANNEL ); }
 value	{ return ( T_VALUE ); }
 =>	{ return ( T_ASSIGN ); };
 
-(0x)?(00)?[0-9a-fA-F]+ { calib_yylval.ival = strtol( calib_yytext, NULL, 0 );
+(0x)?(00)?[0-9a-fA-F]+ { calib_lvalp->ival = strtol( calib_yytext, NULL, 0 );
 	return( T_NUMBER ); }
 
 [ \t]

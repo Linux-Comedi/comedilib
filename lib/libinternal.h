@@ -183,9 +183,9 @@ struct calibration_file_contents
 	unsigned int num_calibrations;
 };
 
-int calib_yylex( void );
+#define YY_DECL int calib_yylex( YYSTYPE *calib_lvalp, YYLTYPE *calib_llocp )
 void calib_yyerror( char *s );
-int calib_yyparse( void );
+int calib_yyparse( void *parse_arg );
 struct calibration_file_contents* parse_calibration_file( FILE *file );
 void cleanup_calibration_parse( struct calibration_file_contents *parsed_file );
 

@@ -25,13 +25,25 @@
 #include "libinternal.h"
 #include <string.h>
 #include <stdlib.h>
+#include "calib_yacc.h"
 
 #define YYERROR_VERBOSE
+#define YYPARSE_PARAM parse_arg
 
-struct calibration_file_contents *parsed_file;
-static struct caldac_setting caldac;
-static int cal_index;
+typedef struct
+{
+	struct calibration_file_contents *parsed_file;
+	struct caldac_setting caldac;
+	int cal_index;
+} calib_yyparse_private_t;
+
 FILE *calib_yyin;
+YY_DECL;
+
+static inline calib_yyparse_private_t* priv( calib_yyparse_private_t *parse_arg)
+{
+	return parse_arg;
+}
 
 static void free_calibration_setting( struct calibration_setting *setting )
 {
@@ -84,24 +96,24 @@ static int add_calibration_setting( struct calibration_file_contents *file_conte
 	return 0;
 }
 
-static struct calibration_setting* current_setting( struct calibration_file_contents *file_contents )
+static struct calibration_setting* current_setting( calib_yyparse_private_t *priv )
 {
 	int retval;
 
-	while( cal_index >= file_contents->num_calibrations )
+	while( priv->cal_index >= priv->parsed_file->num_calibrations )
 	{
-		retval = add_calibration_setting( file_contents );
+		retval = add_calibration_setting( priv->parsed_file );
 		if( retval < 0 ) return NULL;
 	}
-	return &file_contents->calibrations[ cal_index ];
+	return &priv->parsed_file->calibrations[ priv->cal_index ];
 }
 
-static int add_channel( struct calibration_file_contents *file_contents, int channel )
+static int add_channel( calib_yyparse_private_t *priv, int channel )
 {
 	int *temp;
 	struct calibration_setting *setting;
 
-	setting = current_setting( file_contents );
+	setting = current_setting( priv );
 	if( setting == NULL ) return -1;
 
 	temp = realloc( setting->channels, ( setting->num_channels + 1 ) * sizeof( int ) );
@@ -111,12 +123,12 @@ static int add_channel( struct calibration_file_contents *file_contents, int cha
 	return 0;
 }
 
-static int add_range( struct calibration_file_contents *file_contents, int range )
+static int add_range( calib_yyparse_private_t *priv, int range )
 {
 	int *temp;
 	struct calibration_setting *setting;
 
-	setting = current_setting( file_contents );
+	setting = current_setting( priv );
 	if( setting == NULL ) return -1;
 
 	temp = realloc( setting->ranges, ( setting->num_ranges + 1 ) * sizeof( int ) );
@@ -126,11 +138,11 @@ static int add_range( struct calibration_file_contents *file_contents, int range
 	return 0;
 }
 
-static int add_aref( struct calibration_file_contents *file_contents, int aref )
+static int add_aref( calib_yyparse_private_t *priv, int aref )
 {
 	struct calibration_setting *setting;
 
-	setting = current_setting( file_contents );
+	setting = current_setting( priv );
 	if( setting == NULL ) return -1;
 
 	if( setting->num_arefs >= sizeof( setting->arefs ) /
@@ -140,13 +152,13 @@ static int add_aref( struct calibration_file_contents *file_contents, int aref )
 	return 0;
 }
 
-static int add_caldac( struct calibration_file_contents *file_contents,
+static int add_caldac( calib_yyparse_private_t *priv,
 	struct caldac_setting caldac )
 {
 	struct caldac_setting *temp;
 	struct calibration_setting *setting;
 
-	setting = current_setting( file_contents );
+	setting = current_setting( priv );
 	if( setting == NULL ) return -1;
 
 	temp = realloc( setting->caldacs, ( setting->num_caldacs + 1 ) *
@@ -160,6 +172,7 @@ static int add_caldac( struct calibration_file_contents *file_contents,
 static struct calibration_file_contents* alloc_calib_parse( void )
 {
 	struct calibration_file_contents *file_contents;
+
 	file_contents = malloc( sizeof( *file_contents ) );
 	if( file_contents == NULL ) return file_contents;
 	memset( file_contents, 0, sizeof( *file_contents ) );
@@ -185,19 +198,23 @@ extern void cleanup_calibration_parse( struct calibration_file_contents *file_co
 
 extern struct calibration_file_contents* parse_calibration_file( FILE *file )
 {
+	calib_yyparse_private_t priv;
+
 	calib_yyin = file;
-	parsed_file = alloc_calib_parse();
-	if( parsed_file == NULL ) return parsed_file;
-	cal_index = 0;
-	if( calib_yyparse() )
+	priv.parsed_file = alloc_calib_parse();
+	if( priv.parsed_file == NULL ) return priv.parsed_file;
+	priv.cal_index = 0;
+	if( calib_yyparse( &priv ) )
 	{
-		cleanup_calibration_parse( parsed_file );
+		cleanup_calibration_parse( priv.parsed_file );
 		return NULL;
 	}
-	return parsed_file;
+	return priv.parsed_file;
 }
 
 %}
+
+%pure_parser
 
 %union
 {
@@ -229,13 +246,13 @@ extern struct calibration_file_contents* parse_calibration_file( FILE *file )
 
 	hash_element: T_DRIVER_NAME T_ASSIGN T_STRING
 		{
-			if( parsed_file->driver_name != NULL ) YYABORT;
-			parsed_file->driver_name = strdup( $3 );
+			if( priv(parse_arg)->parsed_file->driver_name != NULL ) YYABORT;
+			priv(parse_arg)->parsed_file->driver_name = strdup( $3 );
 		}
 		| T_BOARD_NAME T_ASSIGN T_STRING
 		{
-			if( parsed_file->board_name != NULL ) YYABORT;
-			parsed_file->board_name = strdup( $3 );
+			if( priv(parse_arg)->parsed_file->board_name != NULL ) YYABORT;
+			priv(parse_arg)->parsed_file->board_name = strdup( $3 );
 		}
 		| T_CALIBRATIONS T_ASSIGN '[' calibrations_array ']'
 		;
@@ -245,15 +262,15 @@ extern struct calibration_file_contents* parse_calibration_file( FILE *file )
 		| '{' calibration_setting '}' ',' calibrations_array
 		;
 
-	calibration_setting: /* empty */ { cal_index++; }
-		| calibration_setting_element { cal_index++; }
+	calibration_setting: /* empty */ { priv(parse_arg)->cal_index++; }
+		| calibration_setting_element { priv(parse_arg)->cal_index++; }
 		| calibration_setting_element ',' calibration_setting
 		;
 
 	calibration_setting_element: T_SUBDEVICE T_ASSIGN T_NUMBER
 		{
 			struct calibration_setting *setting;
-			setting = current_setting( parsed_file );
+			setting = current_setting( parse_arg );
 			if( setting == NULL ) YYABORT;
 			setting->subdevice = $3;
 		}
@@ -268,7 +285,7 @@ extern struct calibration_file_contents* parse_calibration_file( FILE *file )
 		| channel ',' channels_array
 		;
 
-	channel: T_NUMBER { add_channel( parsed_file, $1 ); }
+	channel: T_NUMBER { add_channel( parse_arg, $1 ); }
 		;
 
 	ranges_array: /* empty */
@@ -276,7 +293,7 @@ extern struct calibration_file_contents* parse_calibration_file( FILE *file )
 		| range ',' ranges_array
 		;
 
-	range: T_NUMBER { add_range( parsed_file, $1 ); }
+	range: T_NUMBER { add_range( parse_arg, $1 ); }
 		;
 
 	arefs_array: /* empty */
@@ -284,7 +301,7 @@ extern struct calibration_file_contents* parse_calibration_file( FILE *file )
 		| aref ',' arefs_array
 		;
 
-	aref: T_NUMBER { add_aref( parsed_file, $1 ); }
+	aref: T_NUMBER { add_aref( parse_arg, $1 ); }
 		;
 
 	caldacs_array: /* empty */
@@ -292,14 +309,14 @@ extern struct calibration_file_contents* parse_calibration_file( FILE *file )
 		| '{' caldac '}' ',' caldacs_array
 		;
 
-	caldac: /* empty */ { add_caldac( parsed_file, caldac ); }
-		| caldac_element { add_caldac( parsed_file, caldac ); }
+	caldac: /* empty */ { add_caldac( parse_arg, priv(parse_arg)->caldac ); }
+		| caldac_element { add_caldac( parse_arg, priv(parse_arg)->caldac ); }
 		| caldac_element ',' caldac
 		;
 
-	caldac_element: T_SUBDEVICE T_ASSIGN T_NUMBER { caldac.subdevice = $3; }
-		| T_CHANNEL T_ASSIGN T_NUMBER { caldac.channel = $3; }
-		| T_VALUE T_ASSIGN T_NUMBER { caldac.value = $3; }
+	caldac_element: T_SUBDEVICE T_ASSIGN T_NUMBER { priv(parse_arg)->caldac.subdevice = $3; }
+		| T_CHANNEL T_ASSIGN T_NUMBER { priv(parse_arg)->caldac.channel = $3; }
+		| T_VALUE T_ASSIGN T_NUMBER { priv(parse_arg)->caldac.value = $3; }
 		;
 
 %%
