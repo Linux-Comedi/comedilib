@@ -85,46 +85,15 @@ int comedi_data_write(comedi_t *it,unsigned int subdev,unsigned int chan,unsigne
 	}
 }
 
-
-int comedi_data_read_n(comedi_t *it,unsigned int subdev,unsigned int chan,
-		unsigned int range, unsigned int aref,lsampl_t *data,
-		unsigned int n)
-{
-	subdevice *s;
-	comedi_insn insn;
-
-	if(!valid_chan(it,subdev,chan))
-		return -1;
-
-	s=it->subdevices+subdev;
-
-	if(it->has_insnlist_ioctl){
-
-		memset(&insn,0,sizeof(insn));
-
-		insn.insn = INSN_READ;
-		insn.n = 1;
-		insn.data = data;
-		insn.subdev = subdev;
-		insn.chanspec = CR_PACK(chan,range,aref);
-
-		return comedi_do_insn(it,&insn);
-	}else{
-		/* There's no need to be fast for a case that is
-		 * obsolete. */
-		return comedi_data_read(it,subdev,chan,range,aref,data);
-	}
-}
-
-int comedi_data_read(comedi_t *it,unsigned int subdev,unsigned int chan,unsigned int range,
-		unsigned int aref,lsampl_t *data)
+int comedi_data_read_n(comedi_t *it, unsigned int subdev, unsigned int chan, unsigned int range,
+		unsigned int aref, lsampl_t *data, unsigned int n)
 {
 	subdevice *s;
 
 	if(!valid_chan(it,subdev,chan))
 		return -1;
 
-	s=it->subdevices+subdev;
+	s = it->subdevices + subdev;
 
 	if(it->has_insnlist_ioctl){
 		comedi_insn insn;
@@ -132,7 +101,7 @@ int comedi_data_read(comedi_t *it,unsigned int subdev,unsigned int chan,unsigned
 		memset(&insn,0,sizeof(insn));
 
 		insn.insn = INSN_READ;
-		insn.n = 1;
+		insn.n = n;
 		insn.data = data;
 		insn.subdev = subdev;
 		insn.chanspec = CR_PACK(chan,range,aref);
@@ -143,22 +112,23 @@ int comedi_data_read(comedi_t *it,unsigned int subdev,unsigned int chan,unsigned
 			mode:		0,
 			flags:		0,
 			n_chan:		1,
-			n:		1,
+			n:		n,
 			trigsrc:	0,
 			trigvar:	0,
 			trigvar1:	0,
 		};
 		int ret;
-		sampl_t sdata;
+		sampl_t sdata[n];
+		unsigned int i;
 
 		chan=CR_PACK(chan,range,aref);
-	
+
 		cmd.subdev=subdev;
 		cmd.chanlist=&chan;
 		if(s->subd_flags & SDF_LSAMPL){
 			cmd.data=(sampl_t *)data;
 		}else{
-			cmd.data=&sdata;
+			cmd.data=sdata;
 		}
 
 		ret=ioctl_trigger(it->fd,&cmd);
@@ -166,11 +136,25 @@ int comedi_data_read(comedi_t *it,unsigned int subdev,unsigned int chan,unsigned
 			return ret;
 
 		if(!(s->subd_flags & SDF_LSAMPL)){
-			*data=sdata;
+			for( i = 0; i < n; i++)
+				data[i] = sdata[i];
 		}
 
 		return 0;
 	}
+}
+
+int comedi_data_read(comedi_t *it, unsigned int subdev, unsigned int chan, unsigned int range,
+	unsigned int aref, lsampl_t *data)
+{
+	return comedi_data_read_n(it, subdev, chan, range, aref, data, 1);
+}
+
+int comedi_data_read_hint(comedi_t *it,unsigned int subdev,unsigned int chan,unsigned int range,
+unsigned int aref)
+{
+	lsampl_t dummy_data;
+	return comedi_data_read_n(it, subdev, chan, range, aref, &dummy_data, 0);
 }
 
 int comedi_data_read_delayed( comedi_t *it, unsigned int subdev, unsigned int chan, unsigned int range,
@@ -187,7 +171,7 @@ int comedi_data_read_delayed( comedi_t *it, unsigned int subdev, unsigned int ch
 	s = it->subdevices + subdev;
 
 	memset( insn, 0, sizeof(insn) );
-	memset( ilist, 0, sizeof(ilist) );
+	memset( &ilist, 0, sizeof(ilist) );
 
 	// setup, no conversions
 	insn[0].insn = INSN_READ;
