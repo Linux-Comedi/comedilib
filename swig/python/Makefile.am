@@ -15,6 +15,6 @@ BUILT_SOURCES = comedi_python_wrap.c
 
 EXTRA_DIST = README.txt comedi.py setup.py test_comedi.py
 
-comedi_pythong_wrap.c: ../comedi.i
+comedi_python_wrap.c: ../comedi.i
 	$(SWIG) -python -o ./comedi_python_wrap.c ../comedi.i
 
