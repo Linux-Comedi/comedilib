@@ -169,7 +169,8 @@ static int setup_cb_pci_64xx( calibration_setup_t *setup )
 static int setup_cb_pci_60xx( calibration_setup_t *setup )
 {
 	static const int caldac_subdev = 6;
-
+	//extra delay not needed by 6023 and 6024, but is needed by 6034
+	setup->sv_settling_time_ns = 10000000;
 	init_observables_60xx( setup );
 	setup_caldacs( setup, caldac_subdev );
 	setup->do_cal = cal_cb_pci_60xx;
