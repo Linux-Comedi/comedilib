@@ -143,12 +143,7 @@ int comedi_do_insnlist(comedi_t *it,comedi_insnlist *il)
 
 int comedi_do_insn(comedi_t *it,comedi_insn *insn)
 {
-	comedi_insnlist il;
-
-	il.insns = insn;
-	il.n_insns = 1;
-
-	return comedi_do_insnlist(it,&il);
+	return ioctl(it->fd,COMEDI_INSN,insn);
 }
 
 int comedi_lock(comedi_t *it,unsigned int subdevice)

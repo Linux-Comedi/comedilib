@@ -28,7 +28,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <sys/ioctl.h>
 #include <errno.h>
 #include <comedi.h>
 #include <string.h>
@@ -53,12 +52,8 @@ int comedi_dio_config(comedi_t *it,unsigned int subdev,unsigned int chan,unsigne
 #if 0
 	if(s->has_insn){
 		comedi_insn insn;
-		comedi_insnlist il;
 		lsampl_t data;
 		
-		il.n_insns = 1;
-		il.insns = &insn;
-
 		memset(&insn,0,sizeof(insn));
 		insn.insn = INSN_CONFIG;
 		insn.n = 1;
@@ -67,7 +62,7 @@ int comedi_dio_config(comedi_t *it,unsigned int subdev,unsigned int chan,unsigne
 		insn.chanspec = CR_PACK(chan,0,0);
 		data=io;
 
-		return ioctl(it->fd,COMEDI_INSN,&il);
+		return comedi_do_insn(it,&insn);
 	}else
 #endif
 	{
@@ -82,7 +77,7 @@ int comedi_dio_config(comedi_t *it,unsigned int subdev,unsigned int chan,unsigne
 		trig.chanlist=&chan;
 		trig.data=(sampl_t *)&data;
 
-		return ioctl_trigger(it->fd,&trig);
+		return comedi_trigger(it,&trig);
 	}
 }
 
@@ -103,12 +98,8 @@ int comedi_dio_read(comedi_t *it,unsigned int subdev,unsigned int chan,
 
 	if(s->has_insn){
 		comedi_insn insn;
-		comedi_insnlist il;
 		lsampl_t data;
 		
-		il.n_insns = 1;
-		il.insns = &insn;
-
 		memset(&insn,0,sizeof(insn));
 		insn.insn = INSN_READ;
 		insn.n = 1;
@@ -116,7 +107,7 @@ int comedi_dio_read(comedi_t *it,unsigned int subdev,unsigned int chan,
 		insn.subdev = subdev;
 		insn.chanspec = CR_PACK(chan,0,0);
 
-		ret = ioctl(it->fd,COMEDI_INSN,&il);
+		ret = comedi_do_insn(it,&insn);
 
 		*val = data;
 
@@ -132,7 +123,7 @@ int comedi_dio_read(comedi_t *it,unsigned int subdev,unsigned int chan,
 		trig.chanlist=&chan;
 		trig.data=(sampl_t *)&data;
 
-		ret=ioctl_trigger(it->fd,&trig);
+		ret=comedi_trigger(it,&trig);
 
 		if(ret>=0 && val)*val=data;
 
@@ -155,12 +146,8 @@ int comedi_dio_write(comedi_t *it,unsigned int subdev,unsigned int chan,
 
 	if(s->has_insn){
 		comedi_insn insn;
-		comedi_insnlist il;
 		lsampl_t data;
 		
-		il.n_insns = 1;
-		il.insns = &insn;
-
 		memset(&insn,0,sizeof(insn));
 		insn.insn = INSN_WRITE;
 		insn.n = 1;
@@ -170,7 +157,7 @@ int comedi_dio_write(comedi_t *it,unsigned int subdev,unsigned int chan,
 
 		data = val;
 
-		return ioctl(it->fd,COMEDI_INSN,&il);
+		return comedi_do_insn(it,&insn);
 	}else{
 		comedi_trig trig;
 		lsampl_t data;
@@ -185,7 +172,7 @@ int comedi_dio_write(comedi_t *it,unsigned int subdev,unsigned int chan,
 		trig.chanlist=&chan;
 		trig.data=(sampl_t *)&data;
 
-		return ioctl_trigger(it->fd,&trig);
+		return comedi_trigger(it,&trig);
 	}
 }
 
@@ -218,7 +205,7 @@ int comedi_dio_bitfield(comedi_t *it,unsigned int subdev,unsigned int mask,unsig
 		data[0]=mask;
 		data[1]=*bits;
 
-		ret = ioctl(it->fd,COMEDI_INSN,&insn);
+		ret = comedi_do_insn(it,&insn);
 
 		if(ret<0)return ret;
 

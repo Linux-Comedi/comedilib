@@ -185,10 +185,12 @@ static int do_test_for_insn(comedi_t *dev,unsigned int subdevice)
 	if(ret<0 && errno==EIO){
 		return 0;
 	}
+#if 0
 	if(ret<0){
 		fprintf(stderr,"BUG in do_test_for_insn()\n");
 		return 0;
 	}
+#endif
 	return 1;
 }
 
@@ -217,10 +219,12 @@ static int do_test_for_insn_bits(comedi_t *dev,unsigned int subdevice)
 	if(ret<0 && (errno==EINVAL || errno==EIO)){
 		return 0;
 	}
+#if 0
 	if(ret<0){
 		fprintf(stderr,"BUG in do_test_for_insn_bits()\n");
 		return 0;
 	}
+#endif
 	return 1;
 }
 
