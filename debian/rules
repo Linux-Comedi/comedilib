@@ -65,7 +65,8 @@ binary-arch: build install
 		usr/lib/libcomedi.so.$(version)		\
 		usr/lib/libcomedi.so.$(major)		\
 		usr/sbin/comedi_config			\
-		usr/bin/comedi_calibrate
+		usr/bin/comedi_calibrate		\
+		etc
 
 #	dh_installdebconf	
 	dh_installdocs
