@@ -25,6 +25,7 @@ static comedi_t *compy_it[maxcards];
 static comedi_trig trig;
 static int trigchan[2];
 static printstats=1;
+static int debug = 1;
 
 /*******************************/
 static PyObject *
@@ -45,16 +46,32 @@ compy_open(self, args)
 
 	compy_it[card]=comedi_open(filen);
 
-	trig.data=&trigdata;
-	trig.mode=0;
-	trig.flags=0;
-	trig.n_chan=1;
-	trig.chanlist=trigchan;
-	trig.n=1;
-	trig.trigsrc=TRIG_NOW;
-	trig.data_len=1;
+	if(debug)
+		printf("open returned %p\n",compy_it[card]);
 
 	return Py_BuildValue("i", 1);
+}
+
+static PyObject *
+compy_read_data(PyObject *self, PyObject *args)
+{
+	int subd, chan;
+	int card;
+	lsampl_t data;
+
+	if (!PyArg_ParseTuple(args, "(iii)", &card, &subd, &chan))
+		return NULL;
+	if ((card < 0) || (card >= maxcards))
+		return NULL;
+	if(debug)
+		printf("compy trig dev %d subd %d chan %d\n",card,subd,chan);
+
+	comedi_data_read(compy_it[card],subd,chan,0,0,&data);
+
+	if(debug)
+		printf("comedi_data_read value %d\n",data);
+
+	return Py_BuildValue("i", data);
 }
 
 static PyObject *
@@ -115,9 +132,10 @@ compy_version(self, args)
 
 /* List of functions defined in the module */
 
-static PyMethodDef compy_methods[] = {
+static PyMethodDef comedi_methods[] = {
         {"open",	compy_open,	METH_VARARGS},
         {"trig",	compy_trig,	METH_VARARGS},
+        {"data_read",	compy_data_read,	METH_VARARGS},
         {"close",	compy_close,	METH_VARARGS},
         {"__version__",	compy_version,	METH_VARARGS},
         {NULL,		NULL}           /* sentinel */
@@ -126,10 +144,10 @@ static PyMethodDef compy_methods[] = {
 /* Initialization function for the module (*must* be called initxx) */
 
 DL_EXPORT(void)
-initcompy()
+initcomedi()
 {
         /* Create the module and add the functions */
-        (void) Py_InitModule("compy", compy_methods);
+        (void) Py_InitModule("comedi", comedi_methods);
 }
 
 
