@@ -29,19 +29,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 #include "calib.h"
 
-int get_inode( comedi_t *dev, ino_t *inode )
-{
-	struct stat file_stats;
-	int retval;
-
-	retval = fstat( comedi_fileno( dev ), &file_stats );
-	if( retval < 0 )
-		return -1;
-
-	*inode = file_stats.st_ino;
-	return 0;
-}
-
 void write_caldac( FILE *file, caldac_t caldac )
 {
 	static const char *indent = "\t\t\t\t";
@@ -98,12 +85,7 @@ void write_calibration_setting( FILE *file, saved_calibration_t setting )
 int write_calibration_perl_hash( FILE *file, comedi_t *dev,
 	saved_calibration_t settings[], unsigned int num_settings )
 {
-	ino_t inode;
-	int retval;
 	int i;
-
-	retval = get_inode( dev, &inode );
-	if( retval < 0 ) return retval;
 
 	fprintf( file, "{\n" );
 	fprintf( file, "\tboard_name => \"%s\",\n", comedi_get_board_name( dev ) );
