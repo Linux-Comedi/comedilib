@@ -1,0 +1,38 @@
+Warning: device not fully calibrated due to insufficient information
+Please send this output to <ds@schleef.org>
+Id: comedi_calibrate.c,v 1.36 2002/06/12 23:19:39 ds Exp
+Driver name: ni_pcimio
+Device name: pci-6036e
+Id: ni.c,v 1.30 2002/06/12 23:19:39 ds Exp
+Comedi version: 0.7.66
+ai, bipolar zero offset, low gain
+offset -0.011978(22), target 0
+caldac[0] gain=-1.17(19)e-7 V/bit S_min=533.047 dof=254
+caldac[1] gain=-6.13410(18)e-4 V/bit S_min=4014.47 dof=254
+caldac[3] gain=-1.090(19)e-6 V/bit S_min=730.363 dof=254
+caldac[4] gain=2.70(19)e-7 V/bit S_min=1056.24 dof=254
+caldac[5] gain=10.0(19)e-8 V/bit S_min=668.936 dof=254
+caldac[6] gain=1.17(19)e-7 V/bit S_min=797.726 dof=254
+caldac[7] gain=1.04(19)e-7 V/bit S_min=726.254 dof=254
+caldac[9] gain=7.7(19)e-8 V/bit S_min=614.876 dof=254
+caldac[10] gain=8.4(19)e-8 V/bit S_min=704.941 dof=254
+ai, bipolar zero offset, high gain
+offset 1.26899(73)e-3, target 0
+caldac[0] gain=-2.0357(65)e-7 V/bit S_min=285.925 dof=254
+caldac[1] gain=-3.06738(65)e-6 V/bit S_min=391.194 dof=254
+caldac[2] gain=2.84(65)e-9 V/bit S_min=293.228 dof=254
+caldac[3] gain=8.979(64)e-8 V/bit S_min=290.55 dof=254
+caldac[4] gain=5.06(65)e-9 V/bit S_min=309.508 dof=254
+caldac[7] gain=2.81(64)e-9 V/bit S_min=355.184 dof=254
+caldac[8] gain=5.12(65)e-9 V/bit S_min=322.544 dof=254
+caldac[10] gain=3.59(65)e-9 V/bit S_min=275.011 dof=254
+caldac[11] gain=2.93(64)e-9 V/bit S_min=358.106 dof=254
+ai, bipolar voltage reference, low gain
+offset 4.981463(21), target 5
+caldac[0] gain=-1.24(18)e-7 V/bit S_min=627.07 dof=254
+caldac[1] gain=-6.13011(18)e-4 V/bit S_min=4470.42 dof=254
+caldac[2] gain=9.6(19)e-8 V/bit S_min=692.256 dof=254
+caldac[3] gain=3.54345(19)e-4 V/bit S_min=7598.4 dof=254
+caldac[5] gain=9.4(18)e-8 V/bit S_min=815.086 dof=254
+caldac[7] gain=1.07(18)e-7 V/bit S_min=701.928 dof=254
+Segmentation fault
