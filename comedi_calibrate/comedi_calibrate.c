@@ -154,7 +154,10 @@ int main(int argc, char *argv[])
 
 	drivername=comedi_get_driver_name(dev);
 
-	if(!strcmp(drivername,"atmio-E") || !strcmp(drivername,"pcimio-E") 
+	if(   !strcmp(drivername,"atmio-E")
+	   || !strcmp(drivername,"ni_atmio") 
+	   || !strcmp(drivername,"pcimio-E") 
+	   || !strcmp(drivername,"ni_pcimio") 
 	   || !strcmp(drivername,"ni_mio_cs"))
 		cal_ni_mio_E();
 
