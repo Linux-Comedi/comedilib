@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
 	int ret;
 	comedi_cmd cmd;
 
-	fn = "/dev/comedi0";
+	fn = "/dev/comedi1";
 
 	device = comedi_open(fn);
 	if(!device){
@@ -136,8 +136,8 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	subdevice = 0;
-	out_subd = 2;
+	subdevice = 3;
+	out_subd = 0;
 
 	config_output();
 
@@ -258,9 +258,9 @@ void prepare_cmd(comedi_t *dev,comedi_cmd *cmd)
 	cmd->start_arg =	0;
 
 	cmd->scan_begin_src =	TRIG_EXT;
-	cmd->scan_begin_arg =	(1<<31);
+	cmd->scan_begin_arg =	0;
 
-#if 1
+#if 0
 	cmd->convert_src =	TRIG_TIMER;
 	cmd->convert_arg =	1;
 #else
