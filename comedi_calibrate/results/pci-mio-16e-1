@@ -1,6 +1,6 @@
 Warning: device not fully calibrated due to insufficient information
 Please send this output to <ds@schleef.org>
-$Id$
+Id: comedi_calibrate.c,v 1.21 2001/10/10 22:07:53 ds Exp 
 Driver name: ni_pcimio
 Device name: pci-mio-16e-1
 Comedi version: 0.7.61
