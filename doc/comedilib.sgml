@@ -2111,10 +2111,10 @@ structure.  The possible values are an OR'd mask of the following:
 <p>Chanspec: ignored
 
 <itemize>
-<item>data[1] - trigger and combining machine configuration
-<item>data[2] - analog triggering signal chanspec
-<item>data[3] - primary analog level
-<item>data[4] - secondary analog level
+<item>data 1  - trigger and combining machine configuration
+<item>data 2  - analog triggering signal chanspec
+<item>data 3  - primary analog level
+<item>data 4  - secondary analog level
 </itemize>
 
 <p>
@@ -2154,10 +2154,11 @@ has to be true before the state machine is reset.
 <p>ID: not assigned
 <p>Chanspec: ignored
 
+<p>
 <itemize>
-<item>data[1] - trigger flags
-<item>data[2] - mask
-<item>data[3] - pattern
+<item>data 1  - trigger flags
+<item>data 2  - mask
+<item>data 3  - pattern
 </itemize>
 
 <p>
@@ -2186,13 +2187,14 @@ to all 1's.  The driver must modify this value and return -EAGAIN.
 <p>ID: not assigned
 <p>Chanspec: used to specify counter
 
+<p>
 <itemize>
-<item>data[1] - trigger configuration
-<item>data[2] - primary input chanspec
-<item>data[3] - primary combining machine configuration
-<item>data[4] - secondary input chanspec
-<item>data[5] - secondary combining machine configuration
-<item>data[6] - latch configuration
+<item>data 1  - trigger configuration
+<item>data 2  - primary input chanspec
+<item>data 3  - primary combining machine configuration
+<item>data 4  - secondary input chanspec
+<item>data 5  - secondary combining machine configuration
+<item>data 6  - latch configuration
 </itemize>
 
 <p>
