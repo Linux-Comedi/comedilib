@@ -3,20 +3,20 @@ include ../Config
 
 
 CFLAGS += -I ../include -I .
-LDFLAGS += -L../lib/ -lcomedi -lm
+LIBS += ../lib/libcomedi.a -lm
 
 
-BINS=tut1 tut2
-MBINS=inp inpn sv eeprom_dump info outp insn antialias ao_waveform \
+BINS=tut1 tut2 # sv
+MBINS=inp inpn eeprom_dump info outp insn antialias ao_waveform \
 	dio mmap ledclock receiver sigio select sender cmd poll
 
 all: $(BINS) $(MBINS)
 
 $(BINS): % : %.o
-	$(CC) $(LDFLAGS) -o $@ $<
+	$(CC) -o $@ $< $(LIBS)
 
 $(MBINS): % : %.o common.o
-	$(CC) $(LDFLAGS) -o $@ common.o $<
+	$(CC) -o $@ common.o $< $(LIBS)
 
 clean:
 	-rm -f *.o $(BINS) $(MBINS)
