@@ -256,12 +256,11 @@ int aref = AREF_GROUND;	/* more on this later */
 int main(int argc,char *argv[])
 {
 	comedi_t *it;
-	int chan=0;
 	lsampl_t data;
 
 	it=comedi_open("/dev/comedi0");
 	
-	comedi_data_read(it,subdev,chan,range,aref,& data);
+	comedi_data_read(it,subdev,chan,range,aref,&amp;data);
 	
 	printf("%d\n",data);
 	
@@ -270,7 +269,7 @@ int main(int argc,char *argv[])
 </verb></tscreen>
 
 
-Should be understandable.  Open the device, get the data,
+Should be understandable: open the device, get the data,
 print it out.  This is basically the guts of <tt>demo/inp.c</tt>,
 without error checking or fancy options.
 Compile it using
@@ -290,7 +289,7 @@ aref, which determines the analog reference used.
 <sect1>Converting samples to voltages
 <p>
 
-If you selected an analog input subdevice, you should notice
+If you selected an analog input subdevice, you probably noticed
 that the output of <tt>tut1</tt> is a number between
 0 and 4095, or 0 and 65535, depending on the number of bits
 in the A/D converter.  Comedi samples are <bf>always</bf> unsigned,
@@ -306,7 +305,7 @@ Most devices give you a choice of gain and unipolar/bipolar
 input, and Comedi allows you to select which of these to
 use.  This parameter is called the "range parameter", since
 it specifies the "input range" for analog input (or "output range"
-analog output.)  The range parameter represents both the gain
+for analog output.)  The range parameter represents both the gain
 and the unipolar/bipolar aspects.
 
 Comedi keeps the number of available ranges and the largest
@@ -416,7 +415,7 @@ that we've added what we've learned.
 <tscreen><verb>
 #include <stdio.h>      /* for printf() */
 #include <comedi.h>     /* also included by comedilib.h */
-#include <comedilib.h>  /* for comedi_get() */
+#include <comedilib.h>  /* 'cuz we're using comedilib */
 
 int subdev = 0;         /* change this to your input subdevice */
 int chan = 0;           /* change this to your channel */
@@ -427,7 +426,7 @@ int main(int argc,char *argv[])
 {
         comedi_t *cf;
         int chan=0;
-        int data;
+        lsampl_t data;
 	int maxdata,rangetype;
 	double volts;
 
@@ -437,7 +436,7 @@ int main(int argc,char *argv[])
 
 	rangetype=comedi_get_rangetype(cf,subdev,chan);
 
-        data=comedi_get(cf->fd,subdev,chan,range,aref);
+        comedi_data_read(cf->fd,subdev,chan,range,aref,&amp;data);
 
 	volts=comedi_to_phys(data,rangetype,range,maxdata);
 
@@ -446,15 +445,6 @@ int main(int argc,char *argv[])
         return 0;
 }
 </verb></tscreen>
-
-
-By now, the <tt>comedi_read_data()</tt> line looks a little archaic, using
-the UNIX file descriptor cf->fd instead of just cf.  (By the
-way, somewhere in the heart of <tt>comedi_open()</tt> is the line
-<tt>cf->fd=open(filename,O_RDWR)</tt>.)  Well, there isn't one good
-replacement, since it highly depends on your application
-what additional features you might want in a <tt>comedi_get()</tt>
-replacement.  But this is the topic of a different section.
 
 
 <p>
@@ -584,21 +574,15 @@ source, specified through the *_src members of the
 <ref id="comedi_cmd" name="comedi_cmd"> structure.  The source types are:
 
 <itemize>
-<item>TRIG_NONE: 	don't ever cause an event, sometimes used as a stop_src.
-<item>TRIG_NOW: 	cause event to occur immediately, the most common start_src.
-It is also used sometimes as a convert_src for 'burst mode' aquisition where
-the individual channels in a scan are scanned through as quickly as possible.
-<item>TRIG_FOLLOW:	see notes below, usually used as a scan_begin_src.
+<item>TRIG_NONE: 	don't ever cause an event
+<item>TRIG_NOW: 	cause event to occur immediately
+<item>TRIG_FOLLOW:	see notes below
 <item>TRIG_TIME:	cause event to occur at a particular time
-<item>TRIG_TIMER:	cause event to occur repeatedly at a specific rate, often
-used as a scan_begin_src or convert_src.
-<item>TRIG_COUNT:	cause event when count reaches specific value, almost always
-used as the scan_end_src and often for stop_src.
-<item>TRIG_EXT:	external signal causes event, used as start_src for externally
-triggered conversions, and as scan_begin_src or convert_src for externally paced
-conversions.
-<item>TRIG_INT:	internal signal causes event, will probably be used as start_src
-for output commands in the future.
+<item>TRIG_TIMER:	cause event to occur repeatedly at a specific rate
+<item>TRIG_COUNT:	cause event when count reaches specific value
+<item>TRIG_EXT: 	external signal causes event
+<item>TRIG_INT: 	internal signal causes event
+<item>TRIG_OTHER:	driver-specific meaning
 </itemize>
 
 For every trigger, there is a corresponding
@@ -606,28 +590,61 @@ argument (the *_arg members of the <ref id="comedi_cmd" name="comedi_cmd">
 structure) whose meaning depends on the type of trigger.  The meanings
 of the arguments are as follows:
 
-<itemize>
-<item>trigger src = TRIG_NONE: argument has no meaning
-<item>trigger src = TRIG_NOW: argument is the delay in nanoseconds before triggering
-<item>trigger src = TRIG_FOLLOW: argument has no meaning
-<item>trigger src = TRIG_TIME: argument is the time at which to trigger (in what units??),
-but no drivers support this yet.
-<item>trigger src = TRIG_TIMER: argument is the period in nanoseconds between triggers
-<item>trigger src = TRIG_COUNT: argument is the number of 'counts' per trigger.
-For comedi_cmd.stop_arg, this is the number of scans to perform before ending aquisition.
-For comedi_cmd.scan_end_arg, this is the number of conversions to perform per scan.
-<item>trigger src = TRIG_EXT: argument is the digital input channel to trigger on.
-<item>trigger src = TRIG_INT: argument meaning is unknown??
-</itemize>
 
 Not all triggers are applicable to all events.  Supported triggers
 for specific events depends significantly on your particular
 device.
 
-TRIG_FOLLOW is a special type of trigger for scan_begin events that
-triggers on the next lower level trigger, in this case, the trigger
-for convert events.  It may or may not be supported.  Later, it may
-also be used for start events if you want to chain multiple commands.
+TRIG_NONE is typically used only as a stop_src.  The arg for TRIG_NONE
+is reserved and should be set to 0.
+
+TRIG_NOW is most often used as a start_src.  The arg for TRIG_NOW is
+the number of nanoseconds between when the command is issued and when
+the event should occur.  In the case of using TRIG now as a start_src,
+it indicates a delay between issuing the command and the start of
+acquisition.  Most drivers only support a delay of 0.
+
+TRIG_FOLLOW is a special type of trigger for events that trigger on
+the completion of some other, logically connected event.  The argument
+is reserved and should be set to 0.  When used
+as a scan_begin_src, it indicates that a trigger should occur as a
+logical continuation of convert events.  This is done in order to
+properly describe boards that do not have separate timers for
+convert and scan_begin events.  When used as a start_src for analog
+output subdevices, it indicates that conversion of output samples
+should begin when samples are written to the buffer.
+
+TRIG_TIME is reserved for future use.
+
+TRIG_TIMER is most often used as a convert_src, a scan_begin_src, or
+both.  It indicates that triggers should occur at a specific rate.
+The argument specifies the interval between triggers in nanoseconds.
+
+TRIG_COUNT is used for scan_end_src and stop_src.  It indicates that
+a trigger should occur when the specified number of corresponding
+lower-level triggers (convert and scan_begin, respectively) occur.
+The argument is the count of lower-level triggers.
+
+TRIG_EXT can be useful as any of the trigger sources.  It indicates
+that an external digital line should be used to trigger the event.
+The exact meaning of digital line is device-dependent.  Some devices
+have one dedicated line, others may allow generic digital input
+lines to be used.  The argument indicates the particular external
+line to use as the trigger.
+
+TRIG_INT is typically used as a start_src.  This trigger occurs when
+the application performs an INSN_INTTRIG instruction.  Using TRIG_INT
+is a method by which the application can accurately record the time of
+the start of acquisition, since the parsing and setup time of a
+particular command may be significant.  The argument associated with
+TRIG_INT is reserved and should be set to 0.
+
+TRIG_OTHER can be useful as any of the trigger sources.  The exact
+meaning of TRIG_OTHER is driver-specific, and implements a feature
+that otherwise does not fit into the command interface.  Configuration
+of TRIG_OTHER features are done by INSN_CONFIG insns.  The argument
+is reserved and should be set to 0.
+
 
 The chanlist member of the <ref id="comedi_cmd" name="comedi_cmd">
 structure should point to an array whose number of elements is specificed by chanlist_len
