@@ -2,7 +2,7 @@ Source: comedilib
 Section: devel
 Priority: optional
 Maintainer: David Schleef <ds@schleef.org>
-Build-Depends: debhelper, python-dev, flex, bison, docbook-utils
+Build-Depends: debhelper, python-dev, docbook-utils
 Standards-Version: 3.5.6
 
 Package: libcomedi-dev
@@ -26,7 +26,7 @@ Description: Library for Comedi
 Package: python-comedilib
 Section: python
 Architecture: any
-Depends: makedev (>=2.3.1-56), ${shlibs:Depends}
+Depends: ${shlibs:Depends}
 Description: Python wrapper for Comedilib
  Comedilib is a library for using Comedi, a driver interface for data
  acquisition hardware.
