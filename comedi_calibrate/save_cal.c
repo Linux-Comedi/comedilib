@@ -140,9 +140,9 @@ int write_calibration_file( calibration_setup_t *setup, saved_calibration_t sett
 			return -1;
 		}
 
-		asprintf( &setup->cal_save_file_path, "%s/%s_0x%lx",
+		asprintf( &setup->cal_save_file_path, "%s/%s_comedi%li",
 			save_dir, comedi_get_board_name( dev ),
-			( unsigned long ) file_stats.st_ino );
+			( unsigned long ) minor( file_stats.st_rdev ) );
 	}
 	file = fopen( setup->cal_save_file_path, "w" );
 	if( file == NULL )

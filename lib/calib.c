@@ -169,9 +169,9 @@ int comedi_apply_calibration( comedi_t *dev, unsigned int subdev, unsigned int c
 			return -1;
 		}
 
-		snprintf( file_path, sizeof( file_path ), "/etc/comedi/calibrations/%s_0x%lx",
+		snprintf( file_path, sizeof( file_path ), "/etc/comedi/calibrations/%s_comedi%li",
 			comedi_get_board_name( dev ),
-			( unsigned long ) file_stats.st_ino );
+			( unsigned long ) minor( file_stats.st_rdev ) );
 	}
 
 	cal_file = fopen( file_path, "r" );
