@@ -7,7 +7,7 @@ CLEANFILES = grammar.output
 
 EXTRA_DIST = calib_lex.l calib_yacc.y version_script
 
-BUILT_SOURCES = calib_lex.c calib_yacc.c
+BUILT_SOURCES = calib_lex.c calib_yacc.c calib_yacc.h
 
 libcomedi_la_SOURCES = \
 	buffer.c calib.c cmd.c comedi.c data.c dio.c error.c \
@@ -17,7 +17,7 @@ libcomedi_la_SOURCES = \
 libcomedi_la_CFLAGS = $(COMEDILIB_CFLAGS) -D_REENTRANT -DLOCALSTATEDIR=\"\$(localstatedir)\"
 libcomedi_la_LDFLAGS = -Wl,--version-script=$(srcdir)/version_script
 
-calib_yacc.c: $(srcdir)/calib_yacc.y
+calib_yacc.c + calib_yacc.h: $(srcdir)/calib_yacc.y
 	$(YACC) -d -p calib_yy -o $@ $<
 
 calib_lex.c: $(srcdir)/calib_lex.l
