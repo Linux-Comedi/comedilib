@@ -759,12 +759,13 @@ static int cal_ni_pci_6036e(calibration_setup_t *setup)
 
 	/* this is for the ad8804_debug caldac */
 	init_ni_caldac_layout( &layout );
-	layout.adc_pregain_offset = 0; /* guess */
+	layout.adc_pregain_offset = 0;
 	layout.adc_postgain_offset = 4;
+	layout.adc_pregain_offset_fine = 8;
 	layout.adc_gain = 2;
 	layout.dac_offset[ 0 ] = 6;
-	layout.dac_gain[ 0 ] = 7; /* guess */
-	layout.dac_gain_fine[ 0 ] = 11; /* guess */
+	layout.dac_gain[ 0 ] = 7;
+	layout.dac_gain_fine[ 0 ] = 11;
 	layout.dac_linearity[ 0 ] = 10;
 	layout.dac_offset[ 1 ] = 9;
 	layout.dac_gain[ 1 ] = 3;
