@@ -96,7 +96,7 @@ static int __generic_timed(comedi_t *it,unsigned int s,
 		cmd->start_src=TRIG_INT;
 		cmd->start_arg=0;
 	}else{
-		DEBUG(3,"can't find good start_src\n");
+		COMEDILIB_DEBUG(3,"can't find good start_src\n");
 		return -1;
 	}
 
@@ -123,7 +123,7 @@ static int __generic_timed(comedi_t *it,unsigned int s,
 		cmd->scan_begin_src = TRIG_TIMER;
 		cmd->scan_begin_arg = ns;
 	}else{
-		DEBUG(3,"comedi_get_cmd_generic_timed: can't do timed?\n");
+		COMEDILIB_DEBUG(3,"comedi_get_cmd_generic_timed: can't do timed?\n");
 		return -1;
 	}
 
@@ -137,18 +137,18 @@ static int __generic_timed(comedi_t *it,unsigned int s,
 		cmd->stop_src=TRIG_NONE;
 		cmd->stop_arg=0;
 	}else{
-		DEBUG(3,"comedi_get_cmd_generic_timed: can't find a good stop_src\n");
+		COMEDILIB_DEBUG(3,"comedi_get_cmd_generic_timed: can't find a good stop_src\n");
 		return -1;
 	}
 
 	cmd->chanlist_len = 1;
 
 	ret=comedi_command_test(it,cmd);
-	DEBUG(3,"comedi_get_cmd_generic_timed: test 1 returned %d\n",ret);
+	COMEDILIB_DEBUG(3,"comedi_get_cmd_generic_timed: test 1 returned %d\n",ret);
 	if(ret==3){
 		/* good */
 		ret=comedi_command_test(it,cmd);
-		DEBUG(3,"comedi_get_cmd_generic_timed: test 2 returned %d\n",ret);
+		COMEDILIB_DEBUG(3,"comedi_get_cmd_generic_timed: test 2 returned %d\n",ret);
 	}
 	if(ret==4 || ret==0){
 		__comedi_errno = 0;

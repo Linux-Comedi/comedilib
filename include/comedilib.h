@@ -193,7 +193,7 @@ int comedi_get_rangetype(comedi_t *it,unsigned int subdevice,
    compatibility.  In practice, this is a holding place for the next
    library ABI version change.
  */
-int comedi_set_calibration( comedi_t *dev, unsigned int subdev, unsigned int channel,
+int comedi_apply_calibration( comedi_t *dev, unsigned int subdev, unsigned int channel,
 	unsigned int range, unsigned int aref, const char *cal_file_path);
 
 

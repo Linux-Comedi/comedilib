@@ -65,7 +65,7 @@ char *comedi_strerror(int errnum)
 	if(errnum<COMEDI_NOERROR || errnum>=COMEDI_NOERROR+n_errors)
 		return strerror(errnum);
 
-	return _(__comedilib_error_strings[errnum-COMEDI_NOERROR]);
+	return GETTEXT(__comedilib_error_strings[errnum-COMEDI_NOERROR]);
 }
 
 EXPORT_SYMBOL(comedi_perror,0.7.18);

@@ -45,7 +45,7 @@ INTERNAL void initialize(void)
 
 	if( (s=getenv("COMEDILIB_LOGLEVEL")) ){
 		__comedi_loglevel=strtol(s,NULL,0);
-		DEBUG(3,"setting loglevel to %d\n",__comedi_loglevel);
+		COMEDILIB_DEBUG(3,"setting loglevel to %d\n",__comedi_loglevel);
 	}
 }
   

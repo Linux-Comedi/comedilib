@@ -43,9 +43,9 @@
 /* gettext()ization */
 
 #ifdef I18N
-#define _(a) gettext((a))
+#define GETTEXT(a) gettext((a))
 #else
-#define _(a) (a)
+#define GETTEXT(a) (a)
 #endif
 #define _s(a) (a)
 
@@ -53,7 +53,7 @@
 #define debug_ptr(a)    if(!(a))fprintf(stderr," ** NULL pointer: " __FILE__ ", line %d\n",__LINE__);
 #define debug_int(a)    if((a)<0)fprintf(stderr," ** error: " __FILE__ ", line %d\n",__LINE__);
 
-#define DEBUG(level,format,args...) do{if(__comedi_loglevel>=(level))fprintf(stderr,__FUNCTION__ ": " format, ## args);}while(0)
+#define COMEDILIB_DEBUG(level,format,args...) do{if(__comedi_loglevel>=(level))fprintf(stderr,__FUNCTION__ ": " format, ## args);}while(0)
 
 #define COMEDI_VERSION_CODE(a,b,c) (((a)<<16) | ((b)<<8) | (c))
 

@@ -27,67 +27,36 @@
 #include <string.h>
 #include <comedilib.h>
 #include <libinternal.h>
+#include <EXTERN.h>
+#include <perl.h>
 
-static int extract_ph_string( const char *file_path, const char *hash_ref,
-	const char *element, char *result, unsigned int result_size )
+static int extract_ph_string( PerlInterpreter *my_perl, const char *perl_statement,
+	char *result, unsigned int result_size )
 {
-	char perl_prog[ 1024 ];
-	FILE *perl_stdout;
-	int retval;
+	SV *perl_retval;
+	STRLEN len;
 
-	snprintf( perl_prog, sizeof( perl_prog ),
-		"perl -e '
-		use strict;
-		use warnings;
-		my $hash;
-		my $%s;
-		$hash = `cat %s`;
-		eval \"\\$%s = $hash;\";
-		print %s;
-		'",
-		hash_ref, file_path, hash_ref, element );
-
-	perl_stdout = popen( perl_prog, "r");
-	if( perl_stdout == NULL )
-	{
-		fprintf( stderr, "popen() failed in ph_extract_element()\n" );
-		return -1;
-	}
-
-	if( fgets( result, result_size, perl_stdout ) == NULL )
-	{
-		fprintf( stderr, "fgets() returned NULL in ph_extract_element()\n" );
-		return -1;
-	}
-
-	retval = pclose( perl_stdout );
-	if( retval )
-	{
-		fprintf( stderr, "perl returned error %i\n in ph_extract_element()", retval );
-		return -1;
-	}
-
+	perl_retval = eval_pv( perl_statement, FALSE );
+	strncpy( result, SvPV( perl_retval, len ), result_size );
 	return 0;
 }
 
-static int extract_ph_integer( const char *file_path, const char *hash_ref,
-	const char *element )
+static int extract_ph_integer( PerlInterpreter *my_perl, const char *perl_statement )
 {
-	char result[ 100 ];
-	int retval;
+	SV *perl_retval;
+	int result;
 
-	retval = extract_ph_string( file_path, hash_ref, element, result, sizeof( result ) );
-	if( retval < 0 ) return retval;
-
-	return strtol( result, NULL, 0 );
+	perl_retval = eval_pv( perl_statement, FALSE );
+	result = SvIV( perl_retval );
+	return result;
 }
 
-static int check_cal_file( comedi_t *dev, const char *file_path )
+static int check_cal_file( comedi_t *dev, PerlInterpreter *my_perl )
 {
 	char result[ 100 ];
 	int retval;
 
-	retval = extract_ph_string( file_path, "cal", "$cal->{driver_name}",
+	retval = extract_ph_string( my_perl, "$cal->{driver_name};",
 		result, sizeof( result ) );
 	if( retval < 0 ) return retval;
 
@@ -97,7 +66,7 @@ static int check_cal_file( comedi_t *dev, const char *file_path )
 		return -1;
 	}
 
-	retval = extract_ph_string( file_path, "cal", "$cal->{board_name}",
+	retval = extract_ph_string( my_perl, "$cal->{board_name};",
 		result, sizeof( result ) );
 	if( retval < 0 ) return retval;
 
@@ -110,89 +79,89 @@ static int check_cal_file( comedi_t *dev, const char *file_path )
 	return 0;
 }
 
-static inline int num_calibrations( const char *file_path )
+static inline int num_calibrations( PerlInterpreter *my_perl )
 {
-	return extract_ph_integer( file_path, "cal", "scalar( @{$cal->{calibrations}} )" );
+	return extract_ph_integer( my_perl, "scalar( @{$cal->{calibrations}} );" );
 }
 
-static int extract_array_element( const char *file_path, unsigned int cal_index,
+static int extract_array_element( PerlInterpreter *my_perl, unsigned int cal_index,
 	const char *array_name, unsigned int array_index )
 {
 	char element[ 100 ];
 
 	snprintf( element, sizeof( element ),
-		"$cal->{ calibrations }[ %i ]->{ %s }[ %i ]", cal_index, array_name, array_index );
-	return extract_ph_integer( file_path, "cal", element );
+		"$cal->{ calibrations }[ %i ]->{ %s }[ %i ];", cal_index, array_name, array_index );
+	return extract_ph_integer( my_perl, element );
 }
 
-static int extract_array_length( const char *file_path, unsigned int cal_index,
+static int extract_array_length( PerlInterpreter *my_perl, unsigned int cal_index,
 	const char *array_name )
 {
 	char element[ 100 ];
 
 	snprintf( element, sizeof( element ),
-		"scalar( @{ $cal->{ calibrations }[ %i ]->{ %s } } )", cal_index, array_name );
-	return extract_ph_integer( file_path, "cal", element );
+		"scalar( @{ $cal->{ calibrations }[ %i ]->{ %s } } );", cal_index, array_name );
+	return extract_ph_integer( my_perl, element );
 }
 
-static int extract_subdevice( const char *file_path, unsigned int cal_index )
+static int extract_subdevice( PerlInterpreter *my_perl, unsigned int cal_index )
 {
 	char element[ 100 ];
 
 	snprintf( element, sizeof( element ),
-		"$cal->{ calibrations }[ %i ]->{ subdevice }", cal_index );
-	return extract_ph_integer( file_path, "cal", element );
+		"$cal->{ calibrations }[ %i ]->{ subdevice };", cal_index );
+	return extract_ph_integer( my_perl, element );
 }
 
-static int valid_item( const char *file_path, unsigned int cal_index,
+static int valid_item( PerlInterpreter *my_perl, unsigned int cal_index,
 	const char *item_type, unsigned int item )
 {
 	int num_items, i;
 
-	num_items = extract_array_length( file_path, cal_index, item_type );
+	num_items = extract_array_length( my_perl, cal_index, item_type );
 	if( num_items < 0 ) return 0;
 	if( num_items == 0 ) return 1;
 	for( i = 0; i < num_items; i++ )
 	{
-		if( extract_array_element( file_path, cal_index, item_type, i ) == item )
+		if( extract_array_element( my_perl, cal_index, item_type, i ) == item )
 			return 1;
 	}
 
 	return 0;
 }
 
-static inline int valid_range( const char *file_path, unsigned int cal_index,
+static inline int valid_range( PerlInterpreter *my_perl, unsigned int cal_index,
 	unsigned int range )
 {
-	return valid_item( file_path, cal_index, "ranges", range );
+	return valid_item( my_perl, cal_index, "ranges", range );
 }
 
-static inline int valid_channel( const char *file_path, unsigned int cal_index,
+static inline int valid_channel( PerlInterpreter *my_perl, unsigned int cal_index,
 	unsigned int channel )
 {
-	return valid_item( file_path, cal_index, "channels", channel );
+	return valid_item( my_perl, cal_index, "channels", channel );
 }
 
-static inline int valid_aref( const char *file_path, unsigned int cal_index,
+static inline int valid_aref( PerlInterpreter *my_perl, unsigned int cal_index,
 	unsigned int aref )
 {
-	return valid_item( file_path, cal_index, "arefs", aref );
+	return valid_item( my_perl, cal_index, "arefs", aref );
 }
 
-static int find_calibration( const char *file_path, unsigned int subdev,
+static int find_calibration( PerlInterpreter *my_perl, unsigned int subdev,
 	unsigned int channel, unsigned int range, unsigned int aref )
 {
 	int num_cals, i;
 
-	num_cals = num_calibrations( file_path );
+	num_cals = num_calibrations( my_perl );
 	if( num_cals < 0 ) return num_cals;
 
 	for( i = 0; i < num_cals; i++ )
 	{
-		if( extract_subdevice( file_path, i ) != subdev ) continue;
-		if( valid_range( file_path, i, range ) == 0 ) continue;
-		if( valid_channel( file_path, i, channel ) == 0 ) continue;
-		if( valid_aref( file_path, i, aref ) == 0 ) continue;
+		if( extract_subdevice( my_perl, i ) != subdev ) continue;
+		if( valid_range( my_perl, i, range ) == 0 ) continue;
+		if( valid_channel( my_perl, i, channel ) == 0 ) continue;
+		if( valid_aref( my_perl, i, aref ) == 0 ) continue;
 		break;
 	}
 	if( i == num_cals ) return -1;
@@ -200,12 +169,12 @@ static int find_calibration( const char *file_path, unsigned int subdev,
 	return i;
 }
 
-static int set_calibration( comedi_t *dev, const char *file_path,
+static int set_calibration( comedi_t *dev, PerlInterpreter *my_perl,
 	unsigned int cal_index )
 {
 	int i, retval, num_caldacs;
 
-	num_caldacs = extract_array_length( file_path, cal_index, "caldacs" );
+	num_caldacs = extract_array_length( my_perl, cal_index, "caldacs" );
 	if( num_caldacs < 0 ) return num_caldacs;
 
 	for( i = 0; i < num_caldacs; i++ )
@@ -213,9 +182,9 @@ static int set_calibration( comedi_t *dev, const char *file_path,
 		int subdev, channel, value;
 		char *element;
 
-		asprintf( &element, "$cal->{calibrations}[ %i ]->{caldacs}[ %i ]->{subdevice}",
+		asprintf( &element, "$cal->{calibrations}[ %i ]->{caldacs}[ %i ]->{subdevice};",
 			cal_index, i );
-		subdev = extract_ph_integer( file_path, "cal", element );
+		subdev = extract_ph_integer( my_perl, element );
 		free( element );
 		if( subdev < 0 )
 		{
@@ -223,9 +192,9 @@ static int set_calibration( comedi_t *dev, const char *file_path,
 			return subdev;
 		}
 
-		asprintf( &element, "$cal->{calibrations}[ %i ]->{caldacs}[ %i ]->{channel}",
+		asprintf( &element, "$cal->{calibrations}[ %i ]->{caldacs}[ %i ]->{channel};",
 			cal_index, i );
-		channel = extract_ph_integer( file_path, "cal", element );
+		channel = extract_ph_integer( my_perl, element );
 		free( element );
 		if( channel < 0 )
 		{
@@ -233,9 +202,9 @@ static int set_calibration( comedi_t *dev, const char *file_path,
 			return channel;
 		}
 
-		asprintf( &element, "$cal->{calibrations}[ %i ]->{caldacs}[ %i ]->{value}",
+		asprintf( &element, "$cal->{calibrations}[ %i ]->{caldacs}[ %i ]->{value};",
 			cal_index, i );
-		value = extract_ph_integer( file_path, "cal", element );
+		value = extract_ph_integer( my_perl, element );
 		free( element );
 		if( value < 0 )
 		{
@@ -250,14 +219,60 @@ static int set_calibration( comedi_t *dev, const char *file_path,
 	return 0;
 }
 
-EXPORT_SYMBOL(comedi_set_calibration,0.7.20);
-int comedi_set_calibration( comedi_t *dev, unsigned int subdev, unsigned int channel,
+static PerlInterpreter* alloc_my_perl( void )
+{
+	PerlInterpreter *my_perl;
+	char *embedding[] = { "", "-e", "0" };
+
+	my_perl = perl_alloc();
+	if( my_perl == NULL )
+	{
+		fprintf( stderr, "failed to alloc perl interpreter\n");
+		return my_perl;
+	}
+	perl_construct( my_perl );
+	perl_parse(my_perl, NULL, 3, embedding, NULL);
+
+	return my_perl;
+}
+
+static int startup_my_perl( PerlInterpreter *my_perl, const char *file_path )
+{
+	int retval;
+	char perl_prog[ 1024 ];
+
+	snprintf( perl_prog, sizeof( perl_prog ),
+		"
+		my $hash = `cat '%s'`;
+		eval \"\\$cal = $hash;\";
+		", file_path );
+
+	retval = perl_run( my_perl );
+	if( retval )
+	{
+		fprintf( stderr, "nonzero exit from perl_run\n");
+		return -1;
+	}
+	eval_pv( perl_prog, FALSE );
+
+	return 0;
+}
+
+static void cleanup_my_perl( PerlInterpreter *my_perl )
+{
+	perl_destruct( my_perl );
+	perl_free( my_perl );
+}
+
+EXPORT_SYMBOL(comedi_apply_calibration,0.7.20);
+int comedi_apply_calibration( comedi_t *dev, unsigned int subdev, unsigned int channel,
 	unsigned int range, unsigned int aref, const char *cal_file_path )
 {
 	struct stat file_stats;
 	char file_path[ 1024 ];
 	int retval;
 	int cal_index;
+	PerlInterpreter *my_perl;
 
 	if( cal_file_path )
 	{
@@ -275,14 +290,37 @@ int comedi_set_calibration( comedi_t *dev, unsigned int subdev, unsigned int cha
 			( unsigned long ) file_stats.st_ino );
 	}
 
-	retval = check_cal_file( dev, file_path );
-	if( retval < 0 ) return retval;
+	my_perl = alloc_my_perl();
+	if( my_perl == NULL )
+		return -1;
 
-	cal_index = find_calibration( file_path, subdev, channel, range, aref );
-	if( cal_index < 0 ) return cal_index;
-	
-	retval = set_calibration( dev, file_path, cal_index );
-	if( retval < 0 ) return retval;
+	retval = startup_my_perl( my_perl, file_path );
+	if( retval < 0 )
+	{
+		cleanup_my_perl( my_perl );
+		return retval;
+	}
+
+	retval = check_cal_file( dev, my_perl );
+	if( retval < 0 )
+	{
+		cleanup_my_perl( my_perl );
+		return retval;
+	}
+
+	cal_index = find_calibration( my_perl, subdev, channel, range, aref );
+	if( cal_index < 0 )
+	{
+		cleanup_my_perl( my_perl );
+		return cal_index;
+	}
+
+	retval = set_calibration( dev, my_perl, cal_index );
+	if( retval < 0 );
+	{
+		cleanup_my_perl( my_perl );
+		return retval;
+	}
 
 	return 0;
 }

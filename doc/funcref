@@ -831,7 +831,7 @@ Description:
 
  The previous out-of-range behavior is returned.
 
-Function: comedi_set_calibration -- set calibration
+Function: comedi_apply_calibration -- set calibration
 Retval: int
 Param: comedi_t * device
 Param: unsigned int subdevice
