@@ -20,6 +20,8 @@
     - more portable
  */
 
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <comedilib.h>
 #include <fcntl.h>
@@ -57,7 +59,7 @@ void write_caldac(comedi_t *dev,int subdev,int addr,int val);
 void check_gain(int ad_chan,int range);
 double check_gain_chan(int ad_chan,int range,int cdac);
 
-int dump_flag;
+int dump_flag = 1;
 
 
 void update_caldac(int i);
@@ -85,6 +87,8 @@ typedef struct {
 
 	/* stats */
 	double s1,sx,sy,sxy,sxx;
+
+	double min,max;
 
 	/* results */
 	double ave_x;
@@ -190,6 +194,8 @@ void cal_ni_mio_E(void)
 
 	boardname=comedi_get_board_name(dev);
 
+	reset_caldacs();
+
 	if(!strcmp(boardname,"at-mio-16e-1") ||
 	   !strcmp(boardname,"at-mio-16e-2") ||
 	   !strcmp(boardname,"at-mio-64e-3") ||
@@ -294,7 +300,7 @@ void cal_ni_mio_E(void)
 	}
 	if(!strcmp(boardname,"pci-mio-16xe-10")){
 /*
- * results of channel dependence test:
+ * results of channel dependency test:
  *
  * 		[0]	[1]	[2]	[3]	[8]
  * offset, lo			1.9e-4*	2.2e-6	2.4e-7
@@ -353,7 +359,7 @@ void cal_ni_mio_E(void)
 	}
 	if(!strcmp(boardname,"DAQCard-ai-16xe-50")){
 /*
- * results of channel dependence test:
+ * results of channel dependency test:
  *
  * 		[0]	[1]	[2]	[3]	[8]
  * offset, lo	-2.2e-6		1.5e-4*		2.5e-7
@@ -386,19 +392,19 @@ void cal_ni_mio_E(void)
 		reset_caldacs();
 
 		printf("postgain offset\n");
-		ni_mio_ai_postgain_cal_2(0,2,0,7,200.0);
+		ni_mio_ai_postgain_cal_2(0,2,0,3,100.0);
 
 		printf("pregain offset\n");
-		chan_cal(0,8,7,0.0);
-		chan_cal(0,8,7,0.0);
+		chan_cal(0,8,3,0.0);
+		chan_cal(0,8,3,0.0);
 
 		printf("unipolar offset\n");
-		chan_cal(0,0,8,0.0);
-		chan_cal(0,0,8,0.0);
+		chan_cal(0,0,4,0.0);
+		chan_cal(0,0,4,0.0);
 
 		printf("gain offset\n");
-		chan_cal(5,1,0,5.0);
-		chan_cal(5,1,0,5.0);
+		chan_cal(5,1,0,ref);
+		chan_cal(5,1,0,ref);
 
 		printf("results (offset)\n");
 		for(i=0;i<16;i++){
@@ -409,7 +415,7 @@ void cal_ni_mio_E(void)
 	}
 	if(!strcmp(boardname,"pci-mio-16xe-50")){
 /*
- * results of channel dependence test:
+ * results of channel dependency test:
  *
  * 		[0]	[1]	[2]	[3]	[8]
  * offset, lo			1.6e-5		2.0e-7
@@ -466,8 +472,69 @@ void cal_ni_mio_E(void)
 
 		return;
 	}
+	if(!strcmp(boardname,"pci-6023e")){
+/*
+ * results of channel dependency test:
+ *
+ * 		[0]	[1]	[3]	[10]
+ * offset, lo	-2.8e-9	-7.6e-4		
+ * offset, hi	-2.0e-6	-3.8e-6	-1.4e-6
+ * offset, unip		1.0e-1*		
+ * ref		-7.6e-7	-7.6e-4	-5.6e-4	-6.2e-8
+ * ref2		-6.3e-8	-7.5e-4	-5.6e-4	-1.5e-8
+ *
+ * 0 is pregain offset
+ * 1 is postgain offset
+ * 3 is gain
+ * 
+ * layout
+ *
+ * 0	AI pregain offset	-2.0e-6
+ * 1	AI postgain offset	-7.6e-4
+ * 2	unknown
+ * 3	AI gain			-5.6e-4
+ * 4	AO
+ * 5	AO
+ * 6	AO
+ * 7	AO
+ * 8	unknown
+ * 9	unknown
+ * 10	AI			?
+ * 11	unknown
+ */
+		int offset_ad = 0;
+		int unipolar_offset_ad = 1;
+		int gain_ad = 5;
+		int pregain_offset_dac = 0;
+		int postgain_offset_dac = 1;
+		int gain_dac = 3;
 
-#if 0
+		printf("last factory calibration %02d/%02d/%02d\n",
+			read_eeprom(508),read_eeprom(507),read_eeprom(506));
+
+		ref=ni_get_reference(444,443);
+
+		reset_caldacs();
+
+		printf("postgain offset\n");
+		ni_mio_ai_postgain_cal_2(offset_ad,postgain_offset_dac,0,3,200.0);
+
+		printf("pregain offset\n");
+		chan_cal(offset_ad,pregain_offset_dac,3,0.0);
+		chan_cal(offset_ad,pregain_offset_dac,3,0.0);
+
+		printf("gain offset\n");
+		chan_cal(gain_ad,gain_dac,0,5.0);
+		chan_cal(gain_ad,gain_dac,0,5.0);
+
+		printf("results (offset)\n");
+		for(i=0;i<16;i++){
+			read_chan(0,i);
+		}
+
+		//return;
+	}
+
 	{
 		int n_ranges;
 
@@ -494,12 +561,11 @@ void cal_ni_mio_E(void)
 	channel_dependence(5,0);
 
 	}
-#endif
 #if 0
 	{
 		int n_ranges;
 
-	printf("please send this output to <ds@stm.lbl.gov>\n");
+	printf("please send this output to <ds@schleef.org>\n");
 	printf("%s\n",comedi_get_board_name(dev));
 
 	n_ranges=comedi_get_n_ranges(dev,ad_subdev,0);
@@ -710,20 +776,22 @@ double check_gain_chan_x(linear_fit_t *l,int ad_chan,int range,int cdac)
 
 	n=caldacs[cdac].maxdata+1;
 	memset(l,0,sizeof(*l));
-	l->y_data=malloc(n*sizeof(double));
-
-	orig=caldacs[cdac].current;
-
-	new_sv_init(&sv,dev,0,ad_chan,range,AREF_OTHER);
 
 	step=n/256;
 	if(step<1)step=1;
 	l->n=0;
 
+	l->y_data=malloc(n*sizeof(double)/step);
+
+	orig=caldacs[cdac].current;
+
+	new_sv_init(&sv,dev,0,ad_chan,range,AREF_OTHER);
+
 	caldacs[cdac].current=0;
 	update_caldac(cdac);
 
 	new_sv_measure(&sv);
+	usleep(100000);
 
 	sum_err=0;
 	for(i=0;i*step<n;i++){
@@ -749,14 +817,24 @@ double check_gain_chan_x(linear_fit_t *l,int ad_chan,int range,int cdac)
 
 	linear_fit_monotonic(l);
 
-	printf("caldac[%d] gain=%g V/bit err=%g S_min=%g dof=%g\n",
-		cdac,l->slope,l->err_slope,l->S_min,l->dof);
+	printf("caldac[%d] gain=%g V/bit err=%g S_min=%g dof=%g min=%g max=%g\n",
+		cdac,l->slope,l->err_slope,l->S_min,l->dof,l->min,l->max);
 	//printf("--> %g\n",fabs(l.slope/l.err_slope));
 
 	if(dump_flag){
-		for(i=0;i<n;i++){
-			printf("%d %g\n",i,l->y_data[i]);
+		static int dump_number=0;
+		double x,y;
+
+		printf("start dump %d\n",dump_number);
+		for(i=0;i<l->n;i++){
+			x=l->x0+i*l->dx-l->ave_x;
+			y=l->y_data[i];
+			printf("D%d: %d %g %g %g\n",dump_number,i,y,
+				l->ave_y+l->slope*x,
+				l->ave_y+l->slope*x-y);
 		}
+		printf("end dump\n");
+		dump_number++;
 	}
 
 
@@ -924,6 +1002,8 @@ int linear_fit_monotonic(linear_fit_t *l)
 	double sxp;
 	int i;
 
+	l->min=INFINITY;
+	l->max=-INFINITY;
 	l->s1=0;
 	l->sx=0;
 	l->sy=0;
@@ -935,6 +1015,8 @@ int linear_fit_monotonic(linear_fit_t *l)
 
 		if(isnan(y))continue;
 
+		if(l->y_data[i]<l->min)l->min=l->y_data[i];
+		if(l->y_data[i]>l->max)l->max=l->y_data[i];
 		l->s1+=1;
 		l->sx+=x;
 		l->sy+=y;
