@@ -284,7 +284,7 @@ int generic_cal_by_channel_and_range( calibration_setup_t *setup,
 	num_ai_channels = comedi_get_n_channels( setup->dev, setup->ad_subdev );
 	if( num_ai_channels < 0 ) return -1;
 
-	if( setup->da_subdev && setup->do_output )
+	if(setup->da_subdev >= 0 && setup->do_output )
 	{
 		assert( comedi_range_is_chan_specific( setup->dev, setup->da_subdev ) == 0 );
 
@@ -363,7 +363,7 @@ int generic_cal_by_range( calibration_setup_t *setup,
 	num_ai_ranges = comedi_get_n_ranges( setup->dev, setup->ad_subdev, 0 );
 	if( num_ai_ranges < 0 ) return -1;
 
-	if( setup->da_subdev && setup->do_output )
+	if(setup->da_subdev >= 0 && setup->do_output )
 	{
 		assert( comedi_range_is_chan_specific( setup->dev, setup->da_subdev ) == 0 );
 
@@ -432,7 +432,7 @@ int generic_cal_ao(calibration_setup_t *setup,
 	comedi_calibration_setting_t *current_cal;
 
 
-	if(setup->da_subdev && setup->do_output)
+	if(setup->da_subdev >= 0 && setup->do_output)
 	{
 		assert( comedi_range_is_chan_specific( setup->dev, setup->da_subdev ) == 0 );
 
