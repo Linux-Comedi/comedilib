@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
 
 	fn = "/dev/comedi0";
 	while (1) {
-		c = getopt_long(argc, argv, "fs:vq", options, &index);
+		c = getopt_long(argc, argv, "f:s:vq", options, &index);
 		if (c == -1)break;
 		switch (c) {
 		case 0:
