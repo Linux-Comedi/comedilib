@@ -1,6 +1,7 @@
 /*
-   A little input demo for commands
-
+   An example for directly using Comedi commands.  Comedi commands
+   are used for asynchronous acquisition, with the timing controlled
+   by on-board timers or external events.
  */
 
 #include <stdio.h>
@@ -133,18 +134,43 @@ static void do_cmd_1(comedi_t *dev)
 	   an external digital line 3 as a source, you would use
 	   src=TRIG_EXT and arg=3. */
 
+	/* In this case, we specify using TRIG_NOW to start
+	 * acquisition immediately when the command is issued.  
+	 * The argument of TRIG_NOW is "number of nsec after
+	 * NOW", but no driver supports it yet.  Also, no driver
+	 * currently supports using a start_src other than
+	 * TRIG_NOW.  */
 	cmd.start_src =		TRIG_NOW;
 	cmd.start_arg =		0;
 
+	/* The timing of the beginning of each scan is controlled
+	 * by scan_begin.  TRIG_TIMER specifies that scan_start
+	 * events occur periodically at a rate of scan_begin_arg
+	 * nanoseconds between scans. */
 	cmd.scan_begin_src =	TRIG_TIMER;
 	cmd.scan_begin_arg =	1000000;	/* in ns */
 
+	/* The timing between each sample in a scan is controlled
+	 * by convert.  Like above, TRIG_TIMER specifies that
+	 * convert events occur periodically at a rate of convert_arg
+	 * nanoseconds between scans. */
 	cmd.convert_src =	TRIG_TIMER;
 	cmd.convert_arg =	100000;		/* in ns */
 
+	/* The end of each scan is almost always specified using
+	 * TRIG_COUNT, with the argument being the same as the
+	 * number of channels in the chanlist.  You could probably
+	 * find a device that allows something else, but it would
+	 * be strange. */
 	cmd.scan_end_src =	TRIG_COUNT;
 	cmd.scan_end_arg =	4;		/* number of channels */
 
+	/* The end of acquisition is controlled by stop_src and
+	 * stop_arg.  The src will typically be TRIG_COUNT or
+	 * TRIG_NONE.  Specifying TRIG_COUNT will stop acquisition
+	 * after stop_arg number of scans, or TRIG_NONE will
+	 * cause acquisition to continue until stopped using
+	 * comedi_cancel(). */
 #if 1
 	cmd.stop_src =		TRIG_COUNT;
 	cmd.stop_arg =		100;
