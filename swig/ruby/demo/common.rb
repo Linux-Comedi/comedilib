@@ -1,6 +1,7 @@
-def parse_options(argv)
+def parse_options
 
     $filename = "/dev/comedi0"
+    $value = 0
     $subdevice = 0
     $channel = 0
     $range = 0
@@ -8,6 +9,7 @@ def parse_options(argv)
     $n_chan = 4
     $n_scan = 1000
     $freq = 1000.0
+    $verbose = false
 
     opts = GetoptLong.new(
 	[ "--filename",		"-f",	GetoptLong::REQUIRED_ARGUMENT ],
@@ -41,6 +43,8 @@ def parse_options(argv)
 		$n_scan = arg.to_i
 	    when "--freq"
 		$freq = arg.to_i
+	    when "--verbose"
+		$verbose = true
 	    when "--diff"
 		$aref = AREF_DIFF
 	    when "--ground"
@@ -53,6 +57,10 @@ def parse_options(argv)
 		usage
 		exit 0
 	end
+    end
+
+    if ARGV.length > 0
+	$value = ARGV.shift.to_i
     end
 end
 

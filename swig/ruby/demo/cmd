@@ -13,12 +13,12 @@ cmdtest_messages = [ "success", "invalid source", "source conflict",
 class SWIG::TYPE_p_comedi_t
 
     def prepare_cmd_lib(subdevice, freq, cmd)
-	ret, cmd = get_cmd_generic_timed(subdevice, cmd,
-	    1000000000.0 / freq)
-
-	if ret < 0
+	begin
+	    cmd = get_cmd_generic_timed(subdevice, cmd,
+		1000000000.0 / freq)
+	rescue ComediError
 	    printf("comedi_get_cmd_generic_timed failed\n")
-	    return ret, cmd
+	    return cmd
 	end
 
 	cmd.chanlist = $chanlist
@@ -27,12 +27,12 @@ class SWIG::TYPE_p_comedi_t
 	cmd.scan_end_arg = $n_chan
 	cmd.stop_arg = $n_scan if cmd.stop_src == TRIG_COUNT
 
-	return 0, cmd
+	return cmd
     end
 
 end
 
-parse_options($ARGV)
+parse_options
 
 begin
     dev = Comedi::open($filename)
@@ -46,7 +46,7 @@ $chanlist = Chanlist.new($n_chan)
     $chanlist[i] = cr_pack($channel + i, $range, $aref)
 end
 
-ret, cmd = dev.prepare_cmd_lib($subdevice, $freq, Comedi_cmd_struct.new)
+cmd = dev.prepare_cmd_lib($subdevice, $freq, Comedi_cmd_struct.new)
 
 $stderr.printf("command before testing:\n")
 dump_cmd($stderr, cmd)
