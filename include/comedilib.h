@@ -85,11 +85,19 @@ comedi_range * comedi_get_range(comedi_t *it,unsigned int subdevice,unsigned int
 int comedi_find_range(comedi_t *it,unsigned int subd,unsigned int chan,unsigned int unit,double min,double max);
 int comedi_get_n_ranges(comedi_t *it,unsigned int subdevice,unsigned int chan);
 
+int comedi_range_is_chan_specific(comedi_t *it,unsigned int subdevice);
+int comedi_maxdata_is_chan_specific(comedi_t *it,unsigned int subdevice);
+
 /* triggers and commands */
 
 int comedi_cancel(comedi_t *it,unsigned int subdevice);
 int comedi_trigger(comedi_t *it,comedi_trig *trig);
 int comedi_command(comedi_t *it,comedi_cmd *cmd);
+int comedi_command_test(comedi_t *it,comedi_cmd *cmd);
+int comedi_do_insnlist(comedi_t *it,comedi_insnlist *il);
+int comedi_do_insn(comedi_t *it,comedi_insn *insn);
+int comedi_lock(comedi_t *it,unsigned int subdevice);
+int comedi_unlock(comedi_t *it,unsigned int subdevice);
 
 /* physical units */
 
