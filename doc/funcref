@@ -480,8 +480,8 @@ Description:
  input channel at an earlier time with
  comedi_data_read_hint().
 
- On sucess, comedi_data_read() returns 0.  If there is an
- error, -1 is returned.
+ On sucess, comedi_data_read() returns 1 (the number of samples
+ read).  If there is an error, -1 is returned.
 
  Data values returned by this function are unsigned integers
  less than or equal to the maximum sample value of the channel,
@@ -554,8 +554,8 @@ Description:
  The function comedi_data_write() writes the data value specified
  by the parameter data to the specified channel.
 
- On sucess, comedi_data_write() returns 0.  If there is an error, -1 is
- returned.
+ On sucess, comedi_data_write() returns 1 (the number of samples
+ written).  If there is an error, -1 is returned.
 
 Function: comedi_dio_config -- change input/output properties of channel
 Retval: int
