@@ -10,7 +10,7 @@ CFLAGS = -Wall -O2
 
 all:	comedilib
 
-SUBDIRS= lib demo comedi_calibrate testing
+SUBDIRS= lib demo comedi_calibrate testing comedi_config
 
 DOCFILES= README INSTALL `find doc -type f`
 
