@@ -25,7 +25,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <errno.h>
+#include <comedi_errno.h>
 
 char *__comedilib_error_strings[]={
 	"No error",
@@ -33,6 +33,8 @@ char *__comedilib_error_strings[]={
 	"Bad comedi_t structure",
 	"Invalid subdevice",
 	"Invalid channel",
+	"Buffer overflow",
+	"Buffer underflow",
 };
 
 int __comedi_loglevel=1;
@@ -54,12 +56,12 @@ int comedi_errno(void)
 
 char *comedi_strerror(int errnum)
 {
-	if(errnum<COMEDILIB_NOERROR ||
-	   errnum>=COMEDILIB_NOERROR+sizeof(__comedilib_error_strings)
+	if(errnum<COMEDI_NOERROR ||
+	   errnum>=COMEDI_NOERROR+sizeof(__comedilib_error_strings)
 	   /sizeof(__comedilib_error_strings[0]))
 		return strerror(errnum);
 
-	return __comedilib_error_strings[errnum-COMEDILIB_NOERROR];
+	return __comedilib_error_strings[errnum-COMEDI_NOERROR];
 }
 
 void comedi_perror(const char *s)
