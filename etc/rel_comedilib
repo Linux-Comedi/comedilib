@@ -18,14 +18,6 @@ lasttag=r0_7_$lastminor
 
 export CVSROOT=oss.lineo.com:/var/cvs
 
-echo 'removing export_tmp'
-rm -rf export_tmp
-
-mkdir export_tmp
-exportdir=${topdir}/export_tmp
-
-cd export_tmp
-
 echo "deleting tag $tag"
 cvs rtag -d $tag comedilib
 
@@ -33,12 +25,10 @@ echo "tagging $tag"
 cvs rtag $tag comedilib
 
 echo "exporting"
-cvs export -r $tag comedilib
+cvs export -r $tag -d comedilib-${version} comedilib
 
 echo "diffing"
-cvs rdiff -u -r $lasttag -r $tag comedilib >../patch-comedilib-$version
-
-mv comedilib comedilib-$version
+cvs rdiff -u -r $lasttag -r $tag comedilib >patch-comedilib-$version
 
 cd comedilib-$version
 
@@ -47,18 +37,7 @@ rm etc/rel_comedilib
 rm todo
 make -C doc
 
-cd ${exportdir}
+cd ${topdir}
 
-echo "version=$version" >comedilib-$version/version
-
-tar -czf ../comedilib-$version.tgz comedilib-$version
-
-exit
-
-cd comedi-$version
-
-yes "" | make
-make
-make
-
+tar -czf comedilib-$version.tgz comedilib-$version
 
