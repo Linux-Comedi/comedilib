@@ -83,7 +83,7 @@ static struct board_struct boards[]={
 	{ "pci-6034e", STATUS_UNKNOWN, NULL, ni_setup_observables, -1, -1 },
 	{ "pci-6035e", STATUS_DONE, cal_ni_pci_6035e, ni_setup_observables, 0x1af, 0x1b0 },
 	{ "pci-6036e", STATUS_GUESS, cal_ni_pci_6036e, ni_setup_observables, -1, -1 },
-	{ "pci-6071e", STATUS_SOME, cal_ni_pci_6071e, ni_setup_observables, 0x1a9, 0x1aa },
+	{ "pci-6071e", STATUS_DONE, cal_ni_pci_6071e, ni_setup_observables, 0x1a9, 0x1aa },
 	{ "pxi-6071e", STATUS_GUESS, cal_ni_pxi_6071e, ni_setup_observables, -1, -1 },
 	{ "at-mio-16e-10", STATUS_GUESS, cal_ni_at_mio_16e_10, ni_setup_observables, 0x1a7, 0x1a8 },
 	{ "pci-mio-16xe-50", STATUS_SOME, cal_ni_pci_mio_16xe_50, ni_setup_observables, 0x1b5, 0x1b6 },
@@ -786,9 +786,9 @@ static int cal_ni_pci_6071e(calibration_setup_t *setup)
 	}
 
 	init_ni_caldac_layout( &layout );
-	layout.adc_pregain_offset = 0;
-	layout.adc_pregain_offset_fine = 8;
+	layout.adc_pregain_offset = 8;
 	layout.adc_postgain_offset = 4;
+	layout.adc_unip_offset = 7;
 	layout.adc_gain = 2;
 	layout.dac_offset[ 0 ] = 6;
 	layout.dac_gain[ 0 ] = 11;
