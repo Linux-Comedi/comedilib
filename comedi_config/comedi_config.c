@@ -21,7 +21,7 @@
 
 */
 
-#define CC_VERSION	"0.7.13"
+#define CC_VERSION	"0.7.16"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -61,31 +61,31 @@ struct option options[] = {
 void do_help(int i)
 {
 	fputs(
-		"comedi_config version " CC_VERSION "\n"
-		"usage:  comedi_config [OPTIONS] <device file> [<driver> <opt1>,<opt2>,...]\n"
-		"\n"
-		"OPTIONS:\n"
-		"\t-v --verbose\n"
-			"\t\tverbose output\n"
-		"\t-q --quiet\n"
-			"\t\tquiet output\n"
-		"\t-V --version\n"
-			"\t\tprint program version\n"
-		"\t-i --init-data <filename>\n"
-			"\t\tI don't know what this does\n"
-		"\t-r --remove\n"
-			"\t\tremove previously configured driver\n"
-		"\t--read-buffer <size>\n"
-			"\t\tset buffer size in kilobytes used for reads from the <device file>\n"
-		"\t--write-buffer <size>\n"
-			"\t\tset buffer size in kilobytes used for writes to the <device file>\n"
-		"\n"
-		"<optN> are integers whose interpretation depends on\n"
-		"the driver.  In general, however, for non-plug-and-play boards\n"
-		"opt1 refers to the I/O port address and opt2 refers to IRQ number\n"
-		"to be used by the driver.  For plug-and-play boards, opt1 and opt2\n"
-		"are optional and allow you to specify the bus and slot of the card\n"
-		"(in case you have two identical cards).\n"
+"comedi_config version " CC_VERSION "\n"
+"usage:  comedi_config [OPTIONS] <device file> [<driver> <opt1>,<opt2>,...]\n"
+"\n"
+"OPTIONS:\n"
+"  -v --verbose\n"
+"      verbose output\n"
+"  -q --quiet\n"
+"      quiet output\n"
+"  -V --version\n"
+"      print program version\n"
+"  -i --init-data <filename>\n"
+"      Use file for driver initialization data, typically firmware code.\n"
+"  -r --remove\n"
+"      remove previously configured driver\n"
+"  --read-buffer <size>\n"
+"      set buffer size in kilobytes used for reading\n"
+"  --write-buffer <size>\n"
+"      set buffer size in kilobytes used for writing\n"
+"\n"
+"  <optN> are integers whose interpretation is driver dependent."
+"  In general, for PCI boards, <opt1> and <opt2> refer to the bus/slot\n"
+"  indices of the board.  If not specified, a board will automatically\n"
+"  be chosen.  For non-PCI boards, <opt1> specifies the I/O port base\n"
+"  address and, if applicable, <opt2> specifies the IRQ.  Additional\n"
+"  options may be useful, see the Comedi documentation for details.\n"
 		,stderr);
 	exit(i);
 }
@@ -104,12 +104,8 @@ int main(int argc,char *argv[])
 	int remove=0;
 	int index;
 
-	if(getuid() != 0)
-	{
-		errno = EPERM;
-		perror(argv[0]);
-		exit(1);
-	}
+	if(geteuid() != 0)
+		fprintf(stderr,"comedi_config should be run as root.  Attempting to continue anyway.\n");
 
 	while(1){
 		c=getopt_long(argc, argv, "rvVqi:", options, &index);
@@ -164,6 +160,12 @@ int main(int argc,char *argv[])
 		switch(errno){
 		case ENODEV:
 			fprintf(stderr,"comedi.o not loaded\n");
+			break;
+		case ENXIO:
+			fprintf(stderr,"device not configured\n");
+			break;
+		case EPERM:
+			fprintf(stderr,"modprobe problem\n");
 			break;
 		default:
 			perror(fn);
