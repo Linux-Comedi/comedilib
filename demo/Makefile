@@ -1,9 +1,9 @@
 
+include ../Config
 
 
-CFLAGS += -I ../include -I . -O2 -Wall -Wstrict-prototypes -g
-#CFLAGS += -I ../include -I . -Wall -Wstrict-prototypes -g
-LDFLAGS = -L../lib/ -lcomedi -lm
+CFLAGS += -I ../include -I .
+LDFLAGS += -L../lib/ -lcomedi -lm
 
 
 BINS=tut1 tut2
