@@ -903,9 +903,9 @@ static int cal_ni_pci_6024e(calibration_setup_t *setup)
 	ni_caldac_layout_t layout;
 
 	init_ni_caldac_layout( &layout );
-	layout.adc_pregain_offset = 8;
+	layout.adc_pregain_offset = 0;
 	layout.adc_postgain_offset = 4;
-	layout.adc_pregain_offset_fine = 0;
+	layout.adc_pregain_offset_fine = 8;
 	layout.adc_gain = 2;
 	layout.dac_offset[ 0 ] = 6;
 	layout.dac_gain[ 0 ] = 11;
