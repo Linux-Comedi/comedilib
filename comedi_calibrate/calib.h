@@ -169,6 +169,7 @@ typedef struct{
 	int range;
 	int subd;
 	int chan;
+	int cr_flags;
 
 	comedi_range *rng;
 

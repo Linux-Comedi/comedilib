@@ -257,7 +257,9 @@ void measure_observable(int obs)
 		CR_RANGE(observables[obs].observe_insn.chanspec),
 		CR_AREF(observables[obs].observe_insn.chanspec));
 	sv.order=7;
-	n=new_sv_measure(&sv);
+	// read internal calibration source and turn on dithering
+	sv.cr_flags = CR_ALT_FILTER | CR_ALT_SOURCE;
+	n = new_sv_measure(&sv);
 
 	sci_sprint_alt(s,sv.average,sv.error);
 	DPRINT(0,"offset %s, target %g\n",s,observables[obs].target);
@@ -519,6 +521,8 @@ double check_gain_chan_x(linear_fit_t *l,unsigned int ad_chanspec,int cdac)
 		CR_CHAN(ad_chanspec),
 		CR_RANGE(ad_chanspec),
 		CR_AREF(ad_chanspec));
+	// read internal calibration source and turn on dithering
+	sv.cr_flags = CR_ALT_FILTER | CR_ALT_SOURCE;
 
 	caldacs[cdac].current=0;
 	update_caldac(cdac);
@@ -595,6 +599,8 @@ double check_gain_chan_fine(linear_fit_t *l,unsigned int ad_chanspec,int cdac)
 		CR_CHAN(ad_chanspec),
 		CR_RANGE(ad_chanspec),
 		CR_AREF(ad_chanspec));
+	// read internal calibration source and turn on dithering
+	sv.cr_flags = CR_ALT_FILTER | CR_ALT_SOURCE;
 
 	caldacs[cdac].current=0;
 	update_caldac(cdac);
@@ -725,6 +731,8 @@ double read_chan(int adc,int range)
 
 	new_sv_init(&sv,dev,0,adc,range,AREF_OTHER);
 	sv.order=7;
+	sv.cr_flags = CR_ALT_FILTER;
+
 	n=new_sv_measure(&sv);
 
 	sci_sprint_alt(str,sv.average,sv.error);
@@ -740,6 +748,9 @@ int read_chan2(char *s,int adc,int range)
 
 	new_sv_init(&sv,dev,0,adc,range,AREF_OTHER);
 	sv.order=7;
+	// turn on dithering
+	sv.cr_flags = CR_ALT_FILTER;
+
 	n=new_sv_measure(&sv);
 
 	return sci_sprint_alt(s,sv.average,sv.error);
@@ -779,35 +790,6 @@ int new_sv_init(new_sv_t *sv,comedi_t *dev,int subdev,int chan,int range,int are
 	return 0;
 }
 
-int comedi_data_read_n(comedi_t *it,unsigned int subdev,unsigned int chan,
-	unsigned int range,unsigned int aref,lsampl_t *data,unsigned int n)
-{
-	comedi_insn insn;
-	int ret;
-
-	if(n==0)return 0;
-
-	insn.insn = INSN_READ;
-	insn.n = n;
-	insn.data = data;
-	insn.subdev = subdev;
-	insn.chanspec = CR_PACK(chan,range,aref);
-	/* enable dithering */
-	insn.chanspec |= (1<<26);
-	
-	ret = comedi_do_insn(it,&insn);
-
-	if(ret>0)return n;
-
-	printf("insn barfed: subdev=%d, chan=%d, range=%d, aref=%d, "
-		"n=%d, ret=%d, %s\n",subdev,chan,range,aref,n,ret,
-		strerror(errno));
-	printf("please report this error\n");
-	exit(1);
-
-	return ret;
-}
-
 int new_sv_measure(new_sv_t *sv)
 {
 	lsampl_t *data;
@@ -824,14 +806,11 @@ int new_sv_measure(new_sv_t *sv)
 		exit(1);
 	}
 
-	for(i=0;i<n;){
-		ret = comedi_data_read_n(dev,sv->subd,sv->chan,sv->range,
-			sv->aref,data+i,n-i);
-		if(ret<0){
-			printf("barf\n");
-			goto out;
-		}
-		i+=ret;
+	ret = comedi_data_read_n(dev, sv->subd, sv->chan | sv->cr_flags, sv->range,
+		sv->aref, data, n);
+	if(ret<0){
+		printf("barf\n");
+		goto out;
 	}
 
 	s=0;
@@ -869,14 +848,11 @@ int new_sv_measure_order(new_sv_t *sv,int order)
 		exit(1);
 	}
 
-	for(i=0;i<n;){
-		ret = comedi_data_read_n(dev,sv->subd,sv->chan,sv->range,
-			sv->aref,data+i,n-i);
-		if(ret<0){
-			printf("barf order\n");
-			goto out;
-		}
-		i+=ret;
+	ret = comedi_data_read_n(dev, sv->subd, sv->chan | sv->cr_flags, sv->range,
+		sv->aref, data, n);
+	if(ret<0){
+		printf("barf order\n");
+		goto out;
 	}
 
 	s=0;
