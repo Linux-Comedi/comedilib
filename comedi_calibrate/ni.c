@@ -103,7 +103,7 @@ static struct board_struct boards[]={
 	{ "DAQCard-ai-16e-4",	STATUS_DONE,	cal_ni_daqcard_ai_16e_4,	ni_setup_observables },
 	{ "pci-6110",	STATUS_DONE,	cal_ni_pci_611x,	ni_setup_observables_611x },
 	{ "pci-6111",	STATUS_DONE,	cal_ni_pci_611x,	ni_setup_observables_611x },
-	{ "DAQCard-6062e",	STATUS_SOME, cal_ni_daqcard_6062e, ni_setup_observables },
+	{ "DAQCard-6062e", STATUS_SOME, cal_ni_daqcard_6062e, ni_setup_observables },
 #if 0
 //	{ "at-mio-16de-10",	cal_ni_unknown },
 	{ "at-mio-64e-3",	cal_ni_16e_1 },
@@ -204,6 +204,8 @@ static void ni_setup_observables( calibration_setup_t *setup )
 	tmpl.n = 1;
 	tmpl.subdev = setup->ad_subdev;
 
+	setup->n_observables = 0;
+
 	/* 0 offset, low gain */
 	o = setup->observables + ni_zero_offset_low;
 	o->name = "ai, bipolar zero offset, low gain";
@@ -212,6 +214,7 @@ static void ni_setup_observables( calibration_setup_t *setup )
 		| CR_ALT_SOURCE | CR_ALT_FILTER;
 	o->reference_source = REF_GND_GND;
 	o->target = 0;
+	setup->n_observables++;
 
 	/* 0 offset, high gain */
 	o = setup->observables + ni_zero_offset_high;
@@ -221,6 +224,7 @@ static void ni_setup_observables( calibration_setup_t *setup )
 		| CR_ALT_SOURCE | CR_ALT_FILTER;
 	o->reference_source = REF_GND_GND;
 	o->target = 0;
+	setup->n_observables++;
 
 	/* voltage reference */
 	o = setup->observables + ni_reference_low;
@@ -230,8 +234,7 @@ static void ni_setup_observables( calibration_setup_t *setup )
 		| CR_ALT_SOURCE | CR_ALT_FILTER;
 	o->reference_source = REF_CALSRC_GND;
 	o->target = voltage_reference;
-
-	setup->n_observables = ni_reference_low + 1;
+	setup->n_observables++;
 
 	if(unipolar_lowgain>=0){
 		/* unip/bip offset */
@@ -244,6 +247,7 @@ static void ni_setup_observables( calibration_setup_t *setup )
 
 		o->reference_source = REF_GND_GND;
 		o->target = 0.0;
+		setup->n_observables++;
 
 #if 0
 		/* unip gain */
@@ -280,6 +284,7 @@ static void ni_setup_observables( calibration_setup_t *setup )
 			| CR_ALT_SOURCE | CR_ALT_FILTER;
 		o->reference_source = REF_DAC0_GND;
 		set_target( setup, ni_ao0_zero_offset,0.0);
+		setup->n_observables++;
 
 		/* ao 0, gain */
 		o = setup->observables + ni_ao0_reference;
@@ -294,6 +299,7 @@ static void ni_setup_observables( calibration_setup_t *setup )
 		o->reference_source = REF_DAC0_CALSRC;
 		set_target( setup, ni_ao0_reference,5.0);
 		o->target -= voltage_reference;
+		setup->n_observables++;
 
 		/* ao 1, zero offset */
 		o = setup->observables + ni_ao1_zero_offset;
@@ -307,6 +313,7 @@ static void ni_setup_observables( calibration_setup_t *setup )
 			| CR_ALT_SOURCE | CR_ALT_FILTER;
 		o->reference_source = REF_DAC1_GND;
 		set_target( setup, ni_ao1_zero_offset,0.0);
+		setup->n_observables++;
 
 		/* ao 1, gain */
 		o = setup->observables + ni_ao1_reference;
@@ -321,8 +328,7 @@ static void ni_setup_observables( calibration_setup_t *setup )
 		o->reference_source = REF_DAC1_CALSRC;
 		set_target( setup, ni_ao1_reference,5.0);
 		o->target -= voltage_reference;
-
-		setup->n_observables = ni_ao1_reference + 1;
+		setup->n_observables++;
 	}
 }
 
@@ -835,42 +841,52 @@ static int cal_ni_daqcard_6062e( calibration_setup_t *setup )
 	saved_calibration_t saved_cals[ 3 ], *current_cal;
 	static const int num_calibrations = sizeof( saved_cals ) / sizeof( saved_cals[0] );
 	int i, retval;
+	enum caldacs
+	{
+		ADC_PREGAIN_OFFSET = 0,	/* guess */
+		DAC1_OFFSET = 1,
+		ADC_GAIN = 2,
+		DAC0_GAIN = 3,
+		ADC_POSTGAIN_OFFSET = 4,	/* guess */
+		DAC1_GAIN = 5,
+		DAC0_OFFSET = 6,
+	};
 
 	comedi_set_global_oor_behavior( COMEDI_OOR_NUMBER );
 
 	current_cal = saved_cals;
 
-	cal_postgain_binary( setup, ni_zero_offset_low, ni_zero_offset_high, 4 );
-	cal_binary( setup, ni_zero_offset_high,0 );
-	cal_binary( setup, ni_reference_low,2 );
+	cal_postgain_binary( setup, ni_zero_offset_low, ni_zero_offset_high, ADC_PREGAIN_OFFSET );
+	cal_binary( setup, ni_zero_offset_high, ADC_POSTGAIN_OFFSET );
+	cal_binary( setup, ni_reference_low, ADC_GAIN );
 
 	current_cal->subdevice = setup->ad_subdev;
-	sc_push_caldac( current_cal, setup->caldacs[ 0 ] );
-	sc_push_caldac( current_cal, setup->caldacs[ 2 ] );
-	sc_push_caldac( current_cal, setup->caldacs[ 4 ] );
+	sc_push_caldac( current_cal, setup->caldacs[ ADC_PREGAIN_OFFSET ] );
+	sc_push_caldac( current_cal, setup->caldacs[ ADC_GAIN ] );
+	sc_push_caldac( current_cal, setup->caldacs[ ADC_POSTGAIN_OFFSET ] );
 	sc_push_channel( current_cal, SC_ALL_CHANNELS );
 	sc_push_range( current_cal, SC_ALL_RANGES );
 	sc_push_aref( current_cal, SC_ALL_AREFS );
 	current_cal++;
 
 	if(setup->do_output){
-		cal_binary( setup, ni_ao0_zero_offset, 6 );
-		cal_binary( setup, ni_ao0_reference, 3 );
+		cal_binary( setup, ni_ao0_zero_offset, DAC0_OFFSET );
+		cal_binary( setup, ni_ao0_reference, DAC0_GAIN );
 
 		current_cal->subdevice = setup->da_subdev;
-		sc_push_caldac( current_cal, setup->caldacs[ 6 ] );
-		sc_push_caldac( current_cal, setup->caldacs[ 3 ] );
+		sc_push_caldac( current_cal, setup->caldacs[ DAC0_OFFSET ] );
+		sc_push_caldac( current_cal, setup->caldacs[ DAC0_GAIN ] );
 		sc_push_channel( current_cal, 0 );
 		sc_push_range( current_cal, SC_ALL_RANGES );
 		sc_push_aref( current_cal, SC_ALL_AREFS );
 		current_cal++;
 
-		cal_binary( setup, ni_ao1_zero_offset, 1 );
-		cal_binary( setup, ni_ao1_reference, 5 );
+		cal_binary( setup, ni_ao1_zero_offset, DAC1_OFFSET );
+		cal_binary( setup, ni_ao1_reference, DAC1_GAIN );
 
 		current_cal->subdevice = setup->da_subdev;
-		sc_push_caldac( current_cal, setup->caldacs[ 1 ] );
-		sc_push_caldac( current_cal, setup->caldacs[ 5 ] );
+		sc_push_caldac( current_cal, setup->caldacs[ DAC1_OFFSET ] );
+		sc_push_caldac( current_cal, setup->caldacs[ DAC1_GAIN ] );
 		sc_push_channel( current_cal, 1 );
 		sc_push_range( current_cal, SC_ALL_RANGES );
 		sc_push_aref( current_cal, SC_ALL_AREFS );
