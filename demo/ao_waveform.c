@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
 	cmd.start_arg = 0;
 	cmd.scan_begin_src = TRIG_TIMER;
 	cmd.scan_begin_arg = 1e9/update_frequency;
-	cmd.convert_src = TRIG_TIMER;
+	cmd.convert_src = TRIG_NOW;
 	cmd.convert_arg = 0;
 	cmd.scan_end_src = TRIG_COUNT;
 	cmd.scan_end_arg = 1;
