@@ -2,6 +2,8 @@ Driver: 8255.o
 Description: generic 8255 support
 Devices: [standard] 8255 (8255)
 Author: ds
+Status: works
+Updated: Fri,  7 Jun 2002 12:56:45 -0700
 
 The classic in digital I/O.  The 8255 appears in Comedi as a single
 digital I/O subdevice with 24 channels.  The channel 0 corresponds
@@ -14,13 +16,17 @@ You should enable compilation this driver if you plan to use a board
 that has an 8255 chip.  For multifunction boards, the main driver will
 configure the 8255 subdevice automatically.
 
-This driver also works independently with ISA cards that directly
-map the 8255 registers to I/O ports, including cards with multiple
-8255 chips.  To configure the driver for such a card, the option
-list should be a list of the I/O port bases for each of the 8255
-chips.  For example,
+This driver also works independently with ISA and PCI cards that
+directly map the 8255 registers to I/O ports, including cards with
+multiple 8255 chips.  To configure the driver for such a card, the
+option list should be a list of the I/O port bases for each of the
+8255 chips.  For example,
 
   comedi_config /dev/comedi0 8255 0x200,0x204,0x208,0x20c
+
+Note that most PCI 8255 boards do NOT work with this driver, and
+need a separate driver as a wrapper.  For those that do work, the
+I/O port base address can be found in the output of 'lspci -v'.
 
 
 
@@ -139,11 +145,65 @@ Configuration options:
 
 
 
+Driver: amplc_pc236.o
+Description: Driver for Amplicon PC36AT and PCI236 DIO boards
+Author: Ian Abbott <abbotti@mev.co.uk>
+Devices: [Amplicon] PC36AT (pc36at), PCI236 (pci236)
+Updated: Fri, 23 Aug 2002 11:41:11 +0100
+Status: works
+
+Configuration options - PC36AT:
+  [0] - I/O port base address
+  [1] - IRQ (optional)
+
+Configuration options - PCI236:
+  [0] - PCI bus of device (optional)
+  [1] - PCI slot of device (optional)
+  If bus/slot is not specified, the first available PCI device will be
+  used.
+
+The PC36AT ISA board and PCI236 PCI board have a single 8255 appearing
+as subdevice 0.
+
+Subdevice 1 pretends to be a digital input device, but it always returns
+0 when read. However, if you run a command with scan_begin_src=TRIG_EXT,
+a rising edge on port C bit 7 acts as an external trigger, which can be
+used to wake up tasks.  This is like the comedi_parport device, but the
+only way to physically disable the interrupt on the PC36AT is to remove
+the IRQ jumper.  If no interrupt is connected, then subdevice 1 is
+unused.
+
+
+
+Driver: amplc_pc263.o
+Description: Driver for Amplicon PC263 and PCI263 Relay boards
+Author: Ian Abbott <abbotti@mev.co.uk>
+Devices: [Amplicon] PC263 (pc263), PCI263 (pci263)
+Updated: Tue, 20 Aug 2002 11:41:01 +0100
+Status: works
+
+Configuration options - PC263:
+  [0] - I/O port base address
+
+Configuration options - PCI263:
+  [0] - PCI bus of device (optional)
+  [1] - PCI slot of device (optional)
+  If bus/slot is not specified, the first available PCI device will be
+  used.
+
+Each board appears as one subdevice, with 16 digital outputs, each
+connected to a reed-relay. Relay contacts are closed when output is 1.
+The state of the outputs can be read.
+
+
+
 Driver: amplc_pci230.o
 Description: Driver for Amplicom PCI230 and PCI260 Multifunction I/O boards
 Author: Allan Willcox <allanwillcox@ozemail.com.au>
 Updated: Mon,  3 Sep 2001 17:37:12 -0700
 Devices: [Amplicon] PCI230 (amplc_pci230), PCI260
+Status: unknown
+
 
 
 
@@ -184,23 +244,25 @@ Driver: cb_pcidas64.o
 Description: Driver for the ComputerBoards/MeasurementComputing
    PCI-DAS64xx, 60XX, and 4020 series with the PLX 9080 PCI controller.
 Author: Frank Mori Hess <fmhess@users.sourceforge.net>
-Status: in development, pci-das6025e analog input works
-Updated: 2002-03-30
+Status: works, but no streaming analog output yet
+Updated: 2002-07-18
 Devices: [Measurement Computing] PCI-DAS6402/16 (cb_pcidas64),
   PCI-DAS6402/12, PCI-DAS64/M1/16, PCI-DAS64/M2/16,
   PCI-DAS64/M3/16, PCI-DAS6402/16/JR, PCI-DAS64/M1/16/JR,
   PCI-DAS64/M2/16/JR, PCI-DAS64/M3/16/JR, PCI-DAS64/M1/14,
-  PCI-DAS64/M2/14, PCI-DAS64/M3/14, PCI-DAS6025E, PCI-DAS6034E,
+  PCI-DAS64/M2/14, PCI-DAS64/M3/14, PCI-DAS6023E, PCI-DAS6025E, PCI-DAS6034E,
   PCI-DAS6035E, PCI-DAS4020/12
 
 Configuration options:
    [0] - PCI bus of device (optional)
    [1] - PCI slot of device (optional)
 
-Calibration is not yet supported!
 Feel free to send and success/failure reports to Frank Hess.
 
-Some devices are not identified because the PCI device IDs are not known.
+Some devices are not identified because the PCI device IDs are not yet
+known. If you have such a board, contact Frank Hess and the ID can be
+easily added.
+
 
 
 
@@ -223,6 +285,49 @@ So far it has only been tested with:
   - PCI-DDA08/12
 Please report sucess/failure with other different cards to
 <comedi@comedi.org>.
+
+
+
+Driver: cb_pcimdda.o
+Description: A driver for this relatively new and uniquely designed board
+Devices: [Computer Boards] PCIM-DDA06-16 (pcimdda06-16)
+Author: Calin Culianu <calin@ajvar.org>
+Updated: Thu, 20 Jun 2002 16:19:41 -0500
+Status: works
+
+All features of the PCIM-DDA06-16 board are supported.  This board
+has 6 16-bit AO channels, and the usual 8255 DIO setup.  (24 channels, 
+configurable in banks of 8 and 4, etc.).  This board does not support commands.
+
+The board has a peculiar way of specifying AO gain/range settings -- You have
+1 jumper bank on the card, which either makes all 6 AO channels either
+5 Volt unipolar, 5V bipolar, 10 Volt unipolar or 10V bipolar. 
+  
+Since there is absolutely _no_ way to tell in software how this jumper is set
+(well, at least according  to the rather thin spec. from Measurement Computing
+ that comes with the board), the driver assumes the jumper is at its factory 
+default setting of +/-5V.
+
+Also of note is the fact that this board features another jumper, whose
+state is also completely invisible to software.  It toggles two possible AO
+output modes on the board:
+
+  - Update Mode: Writing to an AO channel instantaneously updates the actual
+    signal output by the DAC on the board (this is the factory default).
+  - Simultaneous XFER Mode: Writing to an AO channel has no effect until
+    you read from any one of the AO channels.  This is useful for loading
+    all 6 AO values, and then reading from any one of the AO channels on the 
+    device to instantly update all 6 AO values in unison.  Useful for some
+    control apps, I would assume?  If your jumper is in this setting, then you 
+    need to issue your comedi_data_write()s to load all the values you want,
+    then issue one comedi_data_read() on any channel on the AO subdevice
+    to initiate the simultaneous XFER.
+ 
+
+Configuration Options:
+  Just tell comedi_config that you want to use the cb_pcimdda driver as so:
+
+  comedi_config /dev/comedi0 cb_pcimdda
 
 
 
@@ -266,9 +371,9 @@ pin     subdev  chan    aka
 
 Notes:
 
-Subdevices 0 and 2 are digital output, subdevice 1 is digital
-input.  I know that it is possible to change this with ECP/EPP
-parallel ports, but this driver is a cheap hack.
+Subdevices 0 is digital I/O, subdevice 1 is digital input, and
+subdevice 2 is digital output.  Unlike other Comedi devices,
+subdevice 0 defaults to output.
 
 Pins 13 and 14 are inverted once by Comedi and once by the
 hardware, thus cancelling the effect.
@@ -278,8 +383,8 @@ to change this, at least on a standard parallel port.
 
 Subdevice 3 pretends to be a digital input subdevice, but it always
 returns 0 when read.  However, if you run a command with
-scan_begin_src=TRIG_EXT, it uses pin 13 as a external triggering
-pin, which can be used to wake up tasks.  (or is that pin 10. --ds)
+scan_begin_src=TRIG_EXT, it uses pin 10 as a external triggering
+pin, which can be used to wake up tasks.
 
 
 
@@ -328,9 +433,9 @@ zero volts).
 
 
 
-Driver: pio1616l.o
+Driver: contec_pci_dio.o
 Description: Driver for Contec PIO1616L digital io board
-Devices: [Contec] PIO1616L
+Devices: [Contec] PIO1616L (contec_pci_dio)
 Author: Stefano Rivoir <s.rivoir@gts.it>
 Updated: Mon, 18 Mar 2002 15:34:01 -0800
 Status: works
@@ -425,13 +530,13 @@ Options:
 		gain)
 	[6] - analog output range lowest voltage in microvolts (optional)
 	[7] - analog output range highest voltage in microvolts (optional)
-	[8] - use timer mode for DMA, needed e.g. for buggy DMA controller 
-		in NS CS5530A (Geode Companion).  If set, also allows 
+	[8] - use timer mode for DMA, needed e.g. for buggy DMA controller
+		in NS CS5530A (Geode Companion).  If set, also allows
 		comedi_command() to be run without an irq.
 
 Passing a zero for an option is the same as leaving it unspecified.
 
-Both a dma channel and an irq (or use of 'timer mode', option 8) are required 
+Both a dma channel and an irq (or use of 'timer mode', option 8) are required
 for timed or externally triggered conversions.
 
 
@@ -706,6 +811,7 @@ Driver: fl512.o
 Description: unknown
 Author: unknown
 Devices: [unknown] FL512 (fl512)
+Status: unknown
 
 Digital I/O is not supported.
 
@@ -715,6 +821,7 @@ Configuration options:
 
 
 Driver: icp_multi.o
+Description: Inova ICP_MULTI
 Author: Anne Smorthit <anne.smorthit@sfwte.ch>
 Devices: [Inova] ICP_MULTI (icp_multi)
 Status: unknown
@@ -761,6 +868,38 @@ options for PCI-20341M:
              1  10
              2  100
              3  200
+
+
+
+Driver: ke_counter.o
+Description: Driver for Kolter Electronic Counter Card
+Devices: (Kolter Electronic) PCI Counter Card [ke_counter]
+Author: mh
+Updated: 11.4.2002
+Status: tested
+
+This driver is a simple driver to read the counter values from
+Kolter Electronic PCI Counter Card.
+
+
+
+Driver: me_daq.o
+Description: Driver for the Meilhaus PCI data acquisition cards.
+Author: Michael Hillmann <hillmann@syscongroup.de>
+Devices: [Meilhaus] ME-2600i, ME-2000i (me_daq)
+Status: experimental
+
+Supports:
+
+    Analog Output
+
+Configuration options:
+
+    [0] - PCI bus number (optional)
+    [1] - PCI slot number (optional)
+
+    If bus/slot is not specified, the first available PCI
+    device will be used.
 
 
 
@@ -820,9 +959,12 @@ Configuration options:
 Driver: ni_at_ao.o
 Description: National Instruments AT-AO-6/10
 Devices: [National Instruments] AT-AO-6 (at-ao-6), AT-AO-10 (at-ao-10)
+Status: untested
 Author: ds
+Updated: Fri,  7 Jun 2002 13:20:30 -0700
 
-20
+This driver has not been tested, but should work.
+
 
 
 
@@ -844,6 +986,9 @@ Comedilib includes a utility to autocalibrate these boards.  The
 boards seem to boot into a state where the all calibration DACs
 are at one extreme of their range, thus the default calibration
 is terrible.  Calibration at boot is strongly encouraged.
+
+To use the extended digital I/O on some of the boards, enable the
+8255 driver when configuring the Comedi source tree.
 
 External triggering is supported for some events.  The channel index
 (scan_begin_arg, etc.) maps to PFI0 - PFI9.
@@ -1190,6 +1335,7 @@ Driver: pcm3730.o
 Description: PCM3730
 Author: Blaine Lee
 Devices: [Advantech] PCM-3730 (pcm3730)
+Status: unknown
 
 Configuration options:
   [0] - I/O port base
@@ -1250,6 +1396,7 @@ Description: Real Time Devices PCI4520/DM7520
 Author: Dan Christian
 Devices: [Real Time Devices] DM7520HR-1 (DM7520), DM7520HR-8 (DM7520-8),
   PCI4520 (PCI4520), PCI4520-8 (PCI4520-8)
+Status: Works.  Only tested on DM7520-8.  Not SMP safe.
 
 Configuration options:
   [0] - PCI bus of device (optional)
@@ -1307,6 +1454,16 @@ Configuration Options:
 
 
 
+Driver: serial2002.o
+Description: Driver for serial connected hardware
+Devices:
+Author: Anders Blomdell
+Updated: Fri,  7 Jun 2002 12:56:45 -0700
+Status: in development
+
+
+
+
 Driver: skel.o
 Description: Skeleton driver, an example for driver writers
 Devices:
@@ -1326,6 +1483,7 @@ Driver: ssv_dnp.o
 Description: SSV Embedded Systems DIL/Net-PC
 Author: Robert Schwebel <robert@schwebel.de>
 Devices: [SSV Embedded Systems] DIL/Net-PC 1486 (dnp-1486)
+Status: unknown
 
 
 
