@@ -1591,12 +1591,15 @@ double fractional_offset( calibration_setup_t *setup, int subdevice,
 	unsigned int channel, unsigned int range, int obs )
 {
 	comedi_range *range_ptr;
-	double target = setup->observables[obs].target;
+	double target;
 	double reading;
-	unsigned int chanspec = setup->observables[obs].observe_insn.chanspec;
+	unsigned int chanspec;
 	new_sv_t sv;
 
 	if( subdevice < 0 || obs < 0 ) return 0.0;
+
+	chanspec = setup->observables[obs].observe_insn.chanspec;
+	target = setup->observables[obs].target;
 
 	range_ptr = comedi_get_range( setup->dev, subdevice, channel, range );
 	assert( range_ptr != NULL );
