@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Policy says that the user should be asked before we do this.
-MAKEDEV comedi
+cd /dev && MAKEDEV comedi
 
 #DEBHELPER#
 
