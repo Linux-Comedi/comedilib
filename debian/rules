@@ -10,20 +10,13 @@ export DH_COMPAT=1
 
 # shared library versions, option 1
 include version
-#version=0.7.8
 major=0
-# option 2, assuming the library is created as src/.libs/libfoo.so.2.0.5 or so
-#version=`ls lib/lib*.so.* | \
-# awk '{if (match($$0,/[0-9]+\.[0-9]+\.[0-9]+$$/)) print substr($$0,RSTART)}'`
-#major=`ls lib/lib*.so.* | \
-# awk '{if (match($$0,/\.so\.[0-9]+$$/)) print substr($$0,RSTART+4)}'`
 
 build: build-stamp
 build-stamp:
 	dh_testdir
 
-	
-	# Add here commands to compile the package.
+	./configure --prefix=/usr
 	$(MAKE)
 
 	touch build-stamp
@@ -33,7 +26,6 @@ clean:
 	dh_testroot
 	rm -f build-stamp
 
-	# Add here commands to clean up after the build process.
 	-$(MAKE) distclean
 
 	dh_clean
@@ -44,9 +36,7 @@ install: build
 	dh_clean -k
 	dh_installdirs
 
-	# Add here commands to install the package into debian/tmp.
-	$(MAKE) install_distro DESTDIR=`pwd`/debian/tmp
-	#(cd debian/tmp;mv usr/doc/libcomedi usr/share/doc/libcomedi-dev;rmdir usr/doc)
+	$(MAKE) install prefix=`pwd`/debian/tmp/usr
 
 
 # Build architecture-independent files here.
