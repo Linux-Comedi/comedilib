@@ -10,7 +10,7 @@ cmdtest_messages = [ "success", "invalid source", "source conflict",
 		    "invalid argument", "argument conflict",
 		    "invalid chanlist" ]
 
-class Comedi_t
+class SWIG::TYPE_p_comedi_t
 
     def prepare_cmd_lib(subdevice, freq, cmd)
 	ret, cmd = get_cmd_generic_timed(subdevice, cmd,
@@ -35,7 +35,7 @@ end
 parse_options($ARGV)
 
 begin
-    dev = Comedi_t.new($filename)
+    dev = Comedi::open($filename)
 rescue
     comedi_perror($filename)
     exit 1

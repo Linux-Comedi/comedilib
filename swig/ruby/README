@@ -1,0 +1,47 @@
+This directory contains files for building a Ruby extension library
+for Comedi.
+
+Instructions for building:
+
+    1.  Type 'ruby setup.rb config'. This configures for the local
+	environment.
+
+    2.  Type 'ruby setup.rb setup'. This builds the extension library.
+
+    3.  Type 'ruby setup.rb install'. This installs the extension
+	library and the file lib/comedi.rb, which provides more
+	Ruby-like method syntax.
+
+The file 'lib/comedi.rb' provides syntactic sugar in three forms:
+
+1.  Method names without the 'comedi_' prefix. The Comedi module
+    disambiguates the namespace. For example, you can say
+    'dev = Comedi::open()' instead of 'dev = Comedi::comedi_open()'.
+
+2.  Instance methods that take an explicit receiver instead of
+    expecting the target object as an initial argument. For example:
+    'comedi_close(dev)' can be written as 'dev.close'.
+
+3.  A pre-defined IO object and an accessor method to simplify
+    reading from the file descriptor associated with the comedi device.
+    Data from comedi device 'dev' can be read by 'dev.ios.read'.
+
+The file 'demo/cmd' is a straight port of 'cmd.c' from the
+Comedilib 'demo' directory. It illustrates the basics of programming
+Comedi commands using Ruby.
+
+If a Comedilib function returns a value through a pointer passed as an
+input parameter, its Ruby counterpart returns the value as an element
+of an Array.
+
+    ret, cmd = dev.command_test(cmd)
+
+Because the command object is used by command_test() it appears as an
+input parameter as well.  If the pointer is used only for output, it is
+omitted from the parameter list. For example:
+
+    data = dev.data_read(subdevice, channel, range, aref);
+
+Steven Jenkins
+steven.jenkins@ieee.org
+2004-01-12
