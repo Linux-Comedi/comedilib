@@ -26,7 +26,18 @@ AC_SUBST(COMEDILIB_CFLAGS)
 AC_SUBST(COMEDILIB_LIBS)
 
 AM_PATH_PYTHON
-AM_CHECK_PYTHON_HEADERS(,[AC_MSG_ERROR(could not find Python headers)])
+AM_CHECK_PYTHON_HEADERS(HAVE_PYTHON=yes,HAVE_PYTHON=no)
+AM_CONDITIONAL(HAVE_PYTHON, test "x$HAVE_PYTHON" = xyes)
+
+AS_COMPILER_FLAG(-fno-strict-aliasing,PYTHON_QUIET="$PYTHON_QUIET -fno-strict-aliasing", true )
+AS_COMPILER_FLAG(-Wno-unused-function,PYTHON_QUIET="$PYTHON_QUIET -Wno-unused-function", true )
+AC_SUBST(PYTHON_QUIET)
+
+AC_PATH_PROG(JW_PATH, jw, no)
+if test x$JW_PATH = xno ; then
+  AC_MSG_WARN(docbook-tools (jw) not found, disabling documentation)
+fi
+AM_CONDITIONAL(HAVE_DOCBOOK, test "x$JW_PATH" != xno)
 
 
 AC_CONFIG_FILES(
