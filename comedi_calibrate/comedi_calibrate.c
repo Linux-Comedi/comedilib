@@ -267,16 +267,15 @@ void observe( calibration_setup_t *setup )
 			observable_dependence( setup, i);
 		}
 	}
-
 }
 
 int preobserve( calibration_setup_t *setup, int obs)
 {
-	int retval = 0;
+	int retval;
 	comedi_insn reference_source_config;
 	lsampl_t ref_data[ 2 ];
-	// setup reference source
 
+	// setup reference source
 	memset( &reference_source_config, 0, sizeof(reference_source_config) );
 	reference_source_config.insn = INSN_CONFIG;
 	reference_source_config.n = 2;
@@ -289,7 +288,6 @@ int preobserve( calibration_setup_t *setup, int obs)
 	/* ignore errors for now since older ni driver doesn't
 	 * support reference config insn */
 	if( retval < 0 )
-
 		perror("preobserve() ignoring reference config error" );
 	retval = 0;
 
@@ -553,14 +551,18 @@ void cal_postgain_binary( calibration_setup_t *setup, int obs1, int obs2, int da
 		}
 
 		if(verbose>=3){
+			preobserve( setup, obs1);
 			measure_observable( setup, obs1);
+			preobserve( setup, obs2);
 			measure_observable( setup, obs2);
 		}
 	}
 
 	DPRINT(0,"caldac[%d] set to %d\n",dac,x);
 	if(verbose>=3){
+		preobserve( setup, obs1);
 		measure_observable( setup, obs1);
+		preobserve( setup, obs2);
 		measure_observable( setup, obs2);
 	}
 }
@@ -714,7 +716,7 @@ double check_gain_chan_x( calibration_setup_t *setup, linear_fit_t *l,unsigned i
 	l->y_data=malloc(n*sizeof(double)/step);
 	if(l->y_data == NULL)
 	{
-		perror("comedi_calibrate");
+		perror("check_gain_chan_x");
 		exit(1);
 	}
 
