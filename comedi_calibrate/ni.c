@@ -98,7 +98,7 @@ static struct board_struct boards[]={
 	{ "pci-6034e", STATUS_UNKNOWN, NULL, ni_setup_observables, -1, -1 },
 	{ "pci-6035e", STATUS_DONE, cal_ni_pci_6035e, ni_setup_observables, 0x1af, 0x1b0 },
 	{ "pci-6036e", STATUS_DONE, cal_ni_pci_6036e, ni_setup_observables, 0x1ab, 0x1ac },
-	{ "pci-6052e", STATUS_GUESS, cal_ni_pci_6052e, ni_setup_observables, 0x19f, 0x1a0 },
+	{ "pci-6052e", STATUS_DONE, cal_ni_pci_6052e, ni_setup_observables, 0x19f, 0x1a0 },
 	{ "pci-6071e", STATUS_DONE, cal_ni_pci_6071e, ni_setup_observables, 0x1a9, 0x1aa },
 	{ "pci-6110", STATUS_DONE, cal_ni_pci_611x, ni_setup_observables_611x, 0x1d4, 0x1d5 },
 	{ "pci-6111", STATUS_DONE, cal_ni_pci_611x, ni_setup_observables_611x, 0x1d4, 0x1d5 },
@@ -231,6 +231,7 @@ typedef struct
 	int adc_postgain_offset_fine;
 	int adc_gain_fine;
 	int adc_unip_offset;
+	int adc_unip_offset_fine;
 	int dac_offset[ 2 ];
 	int dac_gain[ 2 ];
 	int dac_gain_fine[ 2 ];
@@ -248,6 +249,7 @@ static inline void init_ni_caldac_layout( ni_caldac_layout_t *layout )
 	layout->adc_postgain_offset = -1;
 	layout->adc_gain = -1;
 	layout->adc_unip_offset = -1;
+	layout->adc_unip_offset_fine = -1;
 	layout->adc_pregain_offset_fine = -1;
 	layout->adc_postgain_offset_fine = -1;
 	layout->adc_gain_fine = -1;
@@ -982,22 +984,14 @@ static int cal_ni_pci_6052e(calibration_setup_t *setup)
 	layout.adc_postgain_offset = 2;
 	layout.adc_gain = 4;
 	layout.adc_unip_offset = 6;
+	layout.adc_unip_offset_fine = 7;
 	layout.adc_pregain_offset_fine = 1;
 	layout.adc_postgain_offset_fine = 3;
 	layout.adc_gain_fine = 5;
-#if 0
-/* this seems broken, i think we need to change
- * second caldac in driver to ad8804_debug */
-	layout.dac_offset[ 0 ] = 12 + 11;
-	layout.dac_gain[ 0 ] = 12 + 7;
-	layout.dac_gain_fine[ 0 ] = 12 + 3;
-	layout.dac_offset[ 1 ] = 12 + 1;
-	layout.dac_gain[ 1 ] = 12 + 9;
-	layout.dac_gain_fine[ 1 ] = 12 + 5;
-#else
+
 	DPRINT(0, "WARNING: you need comedi driver version 0.7.67 or later\n"
 	 "for this calibration to work properly\n" );
-/* this should work if the first two caldacs were ad8804_debug */
+/* this works when the first two caldacs are ad8804_debug */
 	layout.dac_offset[ 0 ] = 16 + 3;
 	layout.dac_gain[ 0 ] = 16 + 1;
 	layout.dac_gain_fine[ 0 ] = 16 + 2;
@@ -1006,7 +1000,7 @@ static int cal_ni_pci_6052e(calibration_setup_t *setup)
 	layout.dac_gain[ 1 ] = 16 + 5;
 	layout.dac_gain_fine[ 1 ] = 16 + 6;
 	layout.dac_linearity[ 1 ] = 16 + 4;
-#endif
+
 	return cal_ni_generic( setup, &layout );
 }
 
@@ -1133,6 +1127,7 @@ static void prep_adc_caldacs_generic( calibration_setup_t *setup,
 		reset_caldac( setup, layout->adc_postgain_offset_fine );
 		reset_caldac( setup, layout->adc_gain_fine );
 		reset_caldac( setup, layout->adc_unip_offset );
+		reset_caldac( setup, layout->adc_unip_offset_fine );
 	}else
 	{
 		retval = comedi_apply_parsed_calibration( setup->dev, setup->ad_subdev,
@@ -1147,6 +1142,7 @@ static void prep_adc_caldacs_generic( calibration_setup_t *setup,
 			reset_caldac( setup, layout->adc_postgain_offset_fine );
 			reset_caldac( setup, layout->adc_gain_fine );
 			reset_caldac( setup, layout->adc_unip_offset );
+			reset_caldac( setup, layout->adc_unip_offset_fine );
 		}
 	}
 }
@@ -1246,8 +1242,11 @@ static int cal_ni_generic( calibration_setup_t *setup, const ni_caldac_layout_t 
 		current_cal->subdevice = setup->ad_subdev;
 		if( layout->adc_unip_offset >= 0 )
 		{
+			reset_caldac( setup, layout->adc_unip_offset_fine );
 			generic_do_cal( setup, current_cal, ni_unip_zero_offset_high,
 				layout->adc_unip_offset );
+			generic_do_cal( setup, current_cal, ni_unip_zero_offset_high,
+				layout->adc_unip_offset_fine );
 		}else
 		{
 			prep_adc_caldacs_generic( setup, layout, ai_unipolar_lowgain );
