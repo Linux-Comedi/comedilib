@@ -7,11 +7,12 @@ LDFLAGS += -L../lib/ -lcomedi -lm
 
 
 BINS=comedi_calibrate
+objs = comedi_calibrate.o ni.o
 
 all: $(BINS)
 
-comedi_calibrate: comedi_calibrate.o
-	$(CC) -o comedi_calibrate comedi_calibrate.o $(LDFLAGS)
+comedi_calibrate: $(objs)
+	$(CC) -o $@ $(objs) $(LDFLAGS)
 
 clean:
 	-rm -f *.o $(BINS)
