@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
 
 		for(i=back;i<front;i+=sizeof(sampl_t)){
 			static int col = 0;
-			printf("%d ",*(sampl_t *)(map+(i&(size-1))));
+			printf("%d ",*(sampl_t *)(map+(i%size)));
 			col++;
 			if(col==n_chan){
 				printf("\n");
