@@ -1,3 +1,4 @@
+#!/usr/bin/perl -w
 # Copyright (c) 1999 Joseph E. Smith <jes@presto.med.upenn.edu>
 #
 # See the 'COPYRIGHT' section below for complete copyright information.
