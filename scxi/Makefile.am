@@ -1,4 +1,6 @@
 
+EXTRA_DIST = README
+
 if BUILD_SCXI
 lib_LTLIBRARIES = libscxi.la
 else
