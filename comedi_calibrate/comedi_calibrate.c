@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
 
 	fn = "/dev/comedi0";
 	while (1) {
-		c = getopt(argc, argv, "rf");
+		c = getopt(argc, argv, "f");
 		if (c == -1)
 			break;
 		switch (c) {
@@ -287,7 +287,7 @@ void cal_ni_mio_E(void)
 
 		printf("results (offset)\n");
 		for(i=0;i<16;i++){
-			read_chan(0,i);
+			read_chan(i,0);
 		}
 
 		return;
@@ -346,7 +346,7 @@ void cal_ni_mio_E(void)
 
 		printf("results (offset)\n");
 		for(i=0;i<16;i++){
-			read_chan(0,i);
+			read_chan(i,0);
 		}
 
 		return;
