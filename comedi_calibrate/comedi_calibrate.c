@@ -34,7 +34,7 @@
 #include <string.h>
 
 
-#define N_CALDACS 16
+#define N_CALDACS 32
 
 typedef struct{
 	int subdev;
@@ -132,12 +132,12 @@ int main(int argc, char *argv[])
 
 	fn = "/dev/comedi0";
 	while (1) {
-		c = getopt(argc, argv, "f");
+		c = getopt(argc, argv, "f:");
 		if (c == -1)
 			break;
 		switch (c) {
 		case 'f':
-			fn = argv[optind];
+			fn = optarg;
 			break;
 		default:
 			printf("bad option\n");
