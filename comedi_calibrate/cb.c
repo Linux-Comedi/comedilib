@@ -158,23 +158,23 @@ int init_observables_60xx( calibration_setup_t *setup )
 	tmpl.subdev = ai_subdev;
 
 	o = setup->observables + 0;
-	o->name = "ground calibration source, 10V bipolar range, differential referenced";
+	o->name = "ground calibration source, 10V bipolar range, ground referenced";
 	o->preobserve_insn = po_tmpl;
 	o->preobserve_insn.data = o->preobserve_data;
 	o->preobserve_insn.data[0] = INSN_CONFIG_ALT_SOURCE;
 	o->preobserve_insn.data[1] = 0;
 	o->observe_insn = tmpl;
-	o->observe_insn.chanspec = CR_PACK( 0, 0, AREF_DIFF);
+	o->observe_insn.chanspec = CR_PACK( 0, 0, AREF_GROUND);
 	o->target = 0.0;
 
 	o = setup->observables + 1;
-	o->name = "5V calibration source, 10V bipolar range, differential referenced";
+	o->name = "5V calibration source, 10V bipolar range, ground referenced";
 	o->preobserve_insn = po_tmpl;
 	o->preobserve_insn.data = o->preobserve_data;
 	o->preobserve_insn.data[0] = INSN_CONFIG_ALT_SOURCE;
 	o->preobserve_insn.data[1] = 2;
 	o->observe_insn = tmpl;
-	o->observe_insn.chanspec = CR_PACK( 0, 0, AREF_DIFF);
+	o->observe_insn.chanspec = CR_PACK( 0, 0, AREF_GROUND);
 	o->target = 5.0;
 
 	setup->n_observables = 2;
