@@ -16,7 +16,7 @@ int comedi_set_buffer_size(comedi_t *it, unsigned int subdev, unsigned int size)
 	return bc.size;
 }
 
-int comedi_set_buffer_max_size(comedi_t *it, unsigned int subdev, unsigned int max_size)
+int comedi_set_max_buffer_size(comedi_t *it, unsigned int subdev, unsigned int max_size)
 {
 	int ret;
 	comedi_bufconfig bc;
@@ -28,6 +28,11 @@ int comedi_set_buffer_max_size(comedi_t *it, unsigned int subdev, unsigned int m
 	if(ret < 0) return ret;
 
 	return bc.maximum_size;
+}
+
+int comedi_get_max_buffer_size(comedi_t *it, unsigned int subdevice)
+{
+	return comedi_set_max_buffer_size(it, subdevice, 0);
 }
 
 int comedi_get_buffer_size(comedi_t *it, unsigned int subdev)
