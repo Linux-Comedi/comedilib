@@ -38,8 +38,11 @@ extern char *filename;
 
 int main(int argc,char *argv[])
 {
-	int i;
+	int i,j;
 	int n_subdevices,type;
+	int chan,n_chans;
+	int n_ranges;
+	comedi_range *rng;
 	
 	parse_options(argc,argv);
 
@@ -59,8 +62,22 @@ int main(int argc,char *argv[])
 		printf("subdevice %d:\n",i);
 		type=comedi_get_subdevice_type(it,i);
 		printf("  type: %d (%s)\n",type,subdevice_types[type]);
-		printf("  number of channels: %d\n",comedi_get_n_channels(it,i));
+		n_chans=comedi_get_n_channels(it,i);
+		printf("  number of channels: %d\n",n_chans);
 		printf("  max data value: %d\n",comedi_get_maxdata(it,i,0));
+		n_ranges=comedi_get_n_ranges(it,i,0);
+		printf("  number of ranges: %d\n",n_ranges);
+		printf("  ranges:\n");
+		for(chan=0;chan<n_chans;chan++){
+			printf("    chan%d:",chan);
+			//printf(" (0x%08x)",comedi_get_rangetype(it,i,chan));
+			for(j=0;j<n_ranges;j++){
+				rng=comedi_get_range(it,i,chan,j);
+				//printf(" %p",rng);
+				printf(" [%g,%g]",rng->min,rng->max);
+			}
+			printf("\n");
+		}
 	}
 	
 	return 0;

@@ -52,7 +52,7 @@ double waveform_frequency	= 100.0;
 
 /* update rate for the DAC, typically much higher than
    the frequency of the sine wave. */
-double update_frequency		= 200000.0;
+double update_frequency		= 50000.0;
 
 /* peak-to-peak amplitude, in DAC units (i.e., 0-4095) */
 double amplitude		= 4000;

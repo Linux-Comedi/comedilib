@@ -102,12 +102,16 @@ comedi_range *get_rangeinfo(int fd,unsigned int range_type)
 {
 	comedi_krange *kr;
 	comedi_range *r;
+	int ret;
 	int i;
 
 	kr=malloc(sizeof(comedi_krange)*RANGE_LENGTH(range_type));
 	r=malloc(sizeof(comedi_range)*RANGE_LENGTH(range_type));
 
-	ioctl_rangeinfo(fd,range_type,kr);
+	ret=ioctl_rangeinfo(fd,range_type,kr);
+	if(ret<0){
+		fprintf(stderr,"ioctl_rangeinfo(%d,0x%08x,%p)\n",fd,range_type,kr);
+	}
 
 	for(i=0;i<RANGE_LENGTH(range_type);i++){
 		r[i].min=kr[i].min*1e-6;

@@ -62,7 +62,7 @@ static void do_cmd(comedi_t *dev)
 	cmd.start_src =		TRIG_NOW;
 	cmd.start_arg =		0;
 
-	cmd.scan_begin_src =	TRIG_TIMER;
+	cmd.scan_begin_src =	TRIG_FOLLOW;
 	cmd.scan_begin_arg =	1;	/* in ns */
 
 	cmd.convert_src =	TRIG_TIMER;
