@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 		exit(0);
 	}
 
-	if(verbose_flag){
+	if(verbose){
 		printf("measuring device=%s subdevice=%d channel=%d range=%d analog reference=%d\n",
 			filename,subdevice,channel,range,aref);
 	}

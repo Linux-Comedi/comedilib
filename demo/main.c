@@ -12,17 +12,21 @@
 #include <ctype.h>
 #include <malloc.h>
 #include <string.h>
+#include <stdlib.h>
 #include "examples.h"
 
 
 char *filename="/dev/comedi0";
-int verbose_flag;
+int verbose;
 
 int value=0;
 int subdevice=0;
 int channel=0;
-int aref=0;
+int aref=AREF_GROUND;
 int range=0;
+int n_chan=4;
+int n_scan=1000;
+double freq=1000.0;
 
 
 int parse_options(int argc, char *argv[])
@@ -30,37 +34,46 @@ int parse_options(int argc, char *argv[])
 	int c;
 
 
-	while (-1 != (c = getopt(argc, argv, "a:c:s:r:f:vdgom"))) {
+	while (-1 != (c = getopt(argc, argv, "a:c:s:r:f:n:N:F:vdgom"))) {
 		switch (c) {
 		case 'f':
 			filename = optarg;
 			break;
 		case 's':
-			sscanf(optarg,"%d",&subdevice);
+			subdevice = strtoul(optarg,NULL,0);
 			break;
 		case 'c':
-			sscanf(optarg,"%d",&channel);
+			channel = strtoul(optarg,NULL,0);
 			break;
 		case 'a':
-			sscanf(optarg,"%d",&aref);
+			aref = strtoul(optarg,NULL,0);
 			break;
 		case 'r':
-			sscanf(optarg,"%d",&range);
+			range = strtoul(optarg,NULL,0);
+			break;
+		case 'n':
+			n_chan = strtoul(optarg,NULL,0);
+			break;
+		case 'N':
+			n_scan = strtoul(optarg,NULL,0);
+			break;
+		case 'F':
+			freq = strtoul(optarg,NULL,0);
 			break;
 		case 'v':
-			verbose_flag = 1;
+			verbose = 1;
 			break;
 		case 'd':
-			aref=AREF_DIFF;
+			aref = AREF_DIFF;
 			break;
 		case 'g':
-			aref=AREF_GROUND;
+			aref = AREF_GROUND;
 			break;
 		case 'o':
-			aref=AREF_OTHER;
+			aref = AREF_OTHER;
 			break;
 		case 'm':
-			aref=AREF_COMMON;
+			aref = AREF_COMMON;
 			break;
 		default:
 			printf("bad option\n");
@@ -87,9 +100,12 @@ char *cmd_src(int src,char *buf)
 	if(src&TRIG_COUNT)strcat(buf, "count|");
 	if(src&TRIG_EXT)strcat(buf, "ext|");
 	if(src&TRIG_INT)strcat(buf, "int|");
+#ifdef TRIG_OTHER
+	if(src&TRIG_OTHER)strcat(buf, "other|");
+#endif
 
 	if(strlen(buf)==0){
-		sprintf(buf,"unknown(0x%02x)",src);
+		sprintf(buf,"unknown(0x%08x)",src);
 	}else{
 		buf[strlen(buf)-1]=0;
 	}
@@ -97,27 +113,27 @@ char *cmd_src(int src,char *buf)
 	return buf;
 }
 
-void dump_cmd(comedi_cmd *cmd)
+void dump_cmd(FILE *out,comedi_cmd *cmd)
 {
 	char buf[100];
 
-	printf("start: %s %d\n",
+	fprintf(out,"start:      %-8s %d\n",
 		cmd_src(cmd->start_src,buf),
 		cmd->start_arg);
 
-	printf("scan_begin: %s %d\n",
+	fprintf(out,"scan_begin: %-8s %d\n",
 		cmd_src(cmd->scan_begin_src,buf),
 		cmd->scan_begin_arg);
 
-	printf("convert: %s %d\n",
+	fprintf(out,"convert:    %-8s %d\n",
 		cmd_src(cmd->convert_src,buf),
 		cmd->convert_arg);
 
-	printf("scan_end: %s %d\n",
+	fprintf(out,"scan_end:   %-8s %d\n",
 		cmd_src(cmd->scan_end_src,buf),
 		cmd->scan_end_arg);
 
-	printf("stop: %s %d\n",
+	fprintf(out,"stop:       %-8s %d\n",
 		cmd_src(cmd->stop_src,buf),
 		cmd->stop_arg);
 }

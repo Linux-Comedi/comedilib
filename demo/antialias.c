@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 	}
 
 	data = value; 
-	if(verbose_flag){
+	if(verbose){
 		printf("writing %d to device=%s subdevice=%d channel=%d range=%d analog reference=%d\n",
 			data,filename,subdevice,channel,range,aref);
 	}

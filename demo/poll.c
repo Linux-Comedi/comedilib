@@ -29,8 +29,6 @@
 #define N_SCANS		10
 #define N_CHANS		16
 
-double freq = 1000;
-
 #define BUFSZ 1000
 sampl_t buf[BUFSZ];
 
@@ -99,7 +97,7 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 		return;
 	}
 
-	dump_cmd(cmd);
+	dump_cmd(stdout,cmd);
 
 	ret=comedi_command_test(dev,cmd);
 
@@ -110,7 +108,7 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 		return;
 	}
 
-	dump_cmd(cmd);
+	dump_cmd(stdout,cmd);
 
 	ret=comedi_command(dev,cmd);
 

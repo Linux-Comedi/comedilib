@@ -97,7 +97,7 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 		return;
 	}
 
-	dump_cmd(cmd);
+	dump_cmd(stdout,cmd);
 
 	cmd->chanlist =		chanlist;
 	cmd->chanlist_len =	n_chans;
@@ -111,7 +111,7 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 		return;
 	}
 
-	dump_cmd(cmd);
+	dump_cmd(stdout,cmd);
 
 	cmd->chanlist =		chanlist;
 	cmd->chanlist_len =	n_chans;

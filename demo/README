@@ -110,14 +110,17 @@ Many of these demos are linked with the file main.c, which parses
 command line options.  Some options don't make sense with all programs.
 The options are:
 
--a <aref>	use analog reference <aref> (default: 0 == ground)
--c <chan>	use channel <chan> (default: 0)
--s <subd>	use subdevice <subd> (default: 0)
--r <index>	use voltage range <index> (default: 0)
--f <file>	use device file <file> (default: /dev/comedi0)
--v		verbose
--d		set analog reference to differential
--g		set analog reference to ground
--o		set analog reference to other
--m		set analog reference to common
+  -a <aref>	use analog reference <aref> (default: 0 == ground)
+  -c <chan>	use channel <chan> (default: 0)
+  -s <subd>	use subdevice <subd> (default: 0)
+  -r <index>	use voltage range <index> (default: 0)
+  -f <file>	use device file <file> (default: /dev/comedi0)
+  -n <value>	use <value> for the number of channels in a scan
+  -N <value>	use <value> for the number of scans
+  -F <freq>	use <freq> as the scan frequency
+  -v		verbose
+  -d		set analog reference to differential
+  -g		set analog reference to ground
+  -o		set analog reference to other
+  -m		set analog reference to common
 
