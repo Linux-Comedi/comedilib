@@ -32,8 +32,8 @@
 
 typedef struct
 {
-	struct calibration_file_contents *parsed_file;
-	struct caldac_setting caldac;
+	comedi_calibration_t *parsed_file;
+	comedi_caldac_t caldac;
 	int cal_index;
 } calib_yyparse_private_t;
 
@@ -67,7 +67,7 @@ static void free_calibration_setting( struct calibration_setting *setting )
 	}
 }
 
-static void free_calibrations( struct calibration_file_contents *file_contents )
+static void free_calibrations( comedi_calibration_t *file_contents )
 {
 	int i;
 
@@ -80,7 +80,7 @@ static void free_calibrations( struct calibration_file_contents *file_contents )
 	file_contents->calibrations = NULL;
 }
 
-static int add_calibration_setting( struct calibration_file_contents *file_contents )
+static int add_calibration_setting( comedi_calibration_t *file_contents )
 {
 	struct calibration_setting *temp;
 
@@ -152,25 +152,25 @@ static int add_aref( calib_yyparse_private_t *priv, int aref )
 }
 
 static int add_caldac( calib_yyparse_private_t *priv,
-	struct caldac_setting caldac )
+	comedi_caldac_t caldac )
 {
-	struct caldac_setting *temp;
+	comedi_caldac_t *temp;
 	struct calibration_setting *setting;
 
 	setting = current_setting( priv );
 	if( setting == NULL ) return -1;
 
 	temp = realloc( setting->caldacs, ( setting->num_caldacs + 1 ) *
-		sizeof( struct caldac_setting ) );
+		sizeof( comedi_caldac_t ) );
 	if( temp == NULL ) return -1;
 	setting->caldacs = temp;
 	setting->caldacs[ setting->num_caldacs++ ] = caldac;
 	return 0;
 }
 
-static struct calibration_file_contents* alloc_calib_parse( void )
+static comedi_calibration_t* alloc_calib_parse( void )
 {
-	struct calibration_file_contents *file_contents;
+	comedi_calibration_t *file_contents;
 
 	file_contents = malloc( sizeof( *file_contents ) );
 	if( file_contents == NULL ) return file_contents;
@@ -178,7 +178,8 @@ static struct calibration_file_contents* alloc_calib_parse( void )
 	return file_contents;
 }
 
-extern void cleanup_calibration_parse( struct calibration_file_contents *file_contents )
+EXPORT_SYMBOL(comedi_cleanup_calibration,0.7.20);
+extern void comedi_cleanup_calibration( comedi_calibration_t *file_contents )
 {
 	if( file_contents->driver_name )
 	{
@@ -195,19 +196,29 @@ extern void cleanup_calibration_parse( struct calibration_file_contents *file_co
 	file_contents = NULL;
 }
 
-extern struct calibration_file_contents* parse_calibration_file( FILE *file )
+EXPORT_SYMBOL(comedi_parse_calibration_file,0.7.20);
+extern comedi_calibration_t* comedi_parse_calibration_file( const char *cal_file_path )
 {
 	calib_yyparse_private_t priv;
+	FILE *file;
 
 	priv.parsed_file = alloc_calib_parse();
-	if( priv.parsed_file == NULL ) return priv.parsed_file;
+	if( priv.parsed_file == NULL ) return NULL;
 	priv.cal_index = 0;
+
+	file = fopen( cal_file_path, "r" );
+	if( file == NULL )
+	{
+		COMEDILIB_DEBUG( 3, "failed to open file\n" );
+		return NULL;
+	}
 	calib_yyrestart( file );
 	if( calib_yyparse( &priv ) )
 	{
-		cleanup_calibration_parse( priv.parsed_file );
-		return NULL;
+		comedi_cleanup_calibration( priv.parsed_file );
+		priv.parsed_file = NULL;
 	}
+	fclose( file );
 	return priv.parsed_file;
 }
 

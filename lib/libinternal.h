@@ -152,41 +152,10 @@ enum{
 /* used by range.c, was in comedilib.h but apparently deprecated so I put it here - fmhess */
 int comedi_get_rangetype(comedi_t *it,unsigned int subdevice,unsigned int chan);
 
-/* structs and functions used for parsing calibration files */
-struct caldac_setting
-{
-	unsigned int subdevice;
-	unsigned int channel;
-	unsigned int value;
-};
-
-struct calibration_setting
-{
-	unsigned int subdevice;
-	unsigned int *channels;
-	unsigned int num_channels;
-	unsigned int *ranges;
-	unsigned int num_ranges;
-	unsigned int arefs[ 4 ];
-	unsigned int num_arefs;
-	struct caldac_setting *caldacs;
-	unsigned int num_caldacs;
-};
-
-struct calibration_file_contents
-{
-	char *driver_name;
-	char *board_name;
-	struct calibration_setting *calibrations;
-	unsigned int num_calibrations;
-};
-
 #define YY_DECL int calib_yylex( YYSTYPE *calib_lvalp, YYLTYPE *calib_llocp )
 void calib_yyerror( char *s );
 int calib_yyparse( void *parse_arg );
 void calib_yyrestart( FILE *input );
-struct calibration_file_contents* parse_calibration_file( FILE *file );
-void cleanup_calibration_parse( struct calibration_file_contents *parsed_file );
 
 #endif
 

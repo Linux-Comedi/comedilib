@@ -194,8 +194,43 @@ int comedi_get_rangetype(comedi_t *it,unsigned int subdevice,
    compatibility.  In practice, this is a holding place for the next
    library ABI version change.
  */
+/* structs and functions used for parsing calibration files */
+typedef struct
+{
+	unsigned int subdevice;
+	unsigned int channel;
+	unsigned int value;
+} comedi_caldac_t;
+
+typedef struct calibration_setting
+{
+	unsigned int subdevice;
+	unsigned int *channels;
+	unsigned int num_channels;
+	unsigned int *ranges;
+	unsigned int num_ranges;
+	unsigned int arefs[ 4 ];
+	unsigned int num_arefs;
+	comedi_caldac_t *caldacs;
+	unsigned int num_caldacs;
+} comedi_calibration_setting_t;
+
+typedef struct
+{
+	char *driver_name;
+	char *board_name;
+	comedi_calibration_setting_t *calibrations;
+	unsigned int num_calibrations;
+} comedi_calibration_t;
+
+comedi_calibration_t* comedi_parse_calibration_file( const char *cal_file_path );
+int comedi_apply_parsed_calibration( comedi_t *dev, unsigned int subdev, unsigned int channel,
+	unsigned int range, unsigned int aref, const comedi_calibration_t *calibration );
+char* comedi_get_default_calibration_path( comedi_t *dev );
+void comedi_cleanup_calibration( comedi_calibration_t *calibration );
 int comedi_apply_calibration( comedi_t *dev, unsigned int subdev, unsigned int channel,
 	unsigned int range, unsigned int aref, const char *cal_file_path);
+
 
 
 #endif

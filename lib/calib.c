@@ -27,10 +27,10 @@
 #include <string.h>
 #include "libinternal.h"
 
-static int set_calibration( comedi_t *dev, struct calibration_file_contents *parsed_file,
+static int set_calibration( comedi_t *dev, const comedi_calibration_t *parsed_file,
 	unsigned int cal_index );
 
-static int check_cal_file( comedi_t *dev, struct calibration_file_contents *parsed_file )
+static int check_cal_file( comedi_t *dev, const comedi_calibration_t *parsed_file )
 {
 	if( strcmp( comedi_get_driver_name( dev ), parsed_file->driver_name ) )
 	{
@@ -49,7 +49,7 @@ static int check_cal_file( comedi_t *dev, struct calibration_file_contents *pars
 	return 0;
 }
 
-static inline int valid_channel( struct calibration_file_contents *parsed_file,
+static inline int valid_channel( const comedi_calibration_t *parsed_file,
 	unsigned int cal_index, unsigned int channel )
 {
 	int num_channels, i;
@@ -65,7 +65,7 @@ static inline int valid_channel( struct calibration_file_contents *parsed_file,
 	return 0;
 }
 
-static inline int valid_range( struct calibration_file_contents *parsed_file,
+static inline int valid_range( const comedi_calibration_t *parsed_file,
 	unsigned int cal_index, unsigned int range )
 {
 	int num_ranges, i;
@@ -81,7 +81,7 @@ static inline int valid_range( struct calibration_file_contents *parsed_file,
 	return 0;
 }
 
-static inline int valid_aref( struct calibration_file_contents *parsed_file,
+static inline int valid_aref( const comedi_calibration_t *parsed_file,
 	unsigned int cal_index, unsigned int aref )
 {
 	int num_arefs, i;
@@ -97,7 +97,7 @@ static inline int valid_aref( struct calibration_file_contents *parsed_file,
 	return 0;
 }
 
-static int apply_calibration( comedi_t *dev, struct calibration_file_contents *parsed_file,
+static int apply_calibration( comedi_t *dev, const comedi_calibration_t *parsed_file,
 	unsigned int subdev, unsigned int channel, unsigned int range, unsigned int aref )
 {
 	int num_cals, i, retval;
@@ -125,7 +125,7 @@ static int apply_calibration( comedi_t *dev, struct calibration_file_contents *p
 	return 0;
 }
 
-static int set_calibration( comedi_t *dev, struct calibration_file_contents *parsed_file,
+static int set_calibration( comedi_t *dev, const comedi_calibration_t *parsed_file,
 	unsigned int cal_index )
 {
 	int i, retval, num_caldacs;
@@ -135,7 +135,7 @@ static int set_calibration( comedi_t *dev, struct calibration_file_contents *par
 
 	for( i = 0; i < num_caldacs; i++ )
 	{
-		struct caldac_setting caldac;
+		comedi_caldac_t caldac;
 
 		caldac = parsed_file->calibrations[ cal_index ].caldacs[ i ];
 		COMEDILIB_DEBUG( 4, "subdev %i, ch %i, val %i\n", caldac.subdevice,
@@ -149,58 +149,73 @@ static int set_calibration( comedi_t *dev, struct calibration_file_contents *par
 }
 
 EXPORT_SYMBOL(comedi_apply_calibration,0.7.20);
+int comedi_apply_parsed_calibration( comedi_t *dev, unsigned int subdev, unsigned int channel,
+	unsigned int range, unsigned int aref, const comedi_calibration_t *calibration )
+{
+	int retval;
+
+	retval = check_cal_file( dev, calibration );
+	if( retval < 0 ) return retval;
+
+	retval = apply_calibration( dev, calibration, subdev, channel, range, aref );
+	return retval;
+}
+
+EXPORT_SYMBOL(comedi_get_default_calibration_path,0.7.20);
+char* comedi_get_default_calibration_path( comedi_t *dev )
+{
+	struct stat file_stats;
+	char *file_path;
+	char *board_name;
+
+	if( fstat( comedi_fileno( dev ), &file_stats ) < 0 )
+	{
+		COMEDILIB_DEBUG( 3, "failed to get file stats of comedi device file\n" );
+		return NULL;
+	}
+
+	board_name = comedi_get_board_name( dev );
+	if( board_name == NULL )
+	{
+		return NULL;
+	}
+	asprintf( &file_path, "/etc/comedi/calibrations/%s_comedi%li",
+		board_name, ( unsigned long ) minor( file_stats.st_rdev ) );
+
+	return file_path;
+}
+
+EXPORT_SYMBOL(comedi_apply_calibration,0.7.20);
 int comedi_apply_calibration( comedi_t *dev, unsigned int subdev, unsigned int channel,
 	unsigned int range, unsigned int aref, const char *cal_file_path )
 {
-	struct stat file_stats;
 	char file_path[ 1024 ];
 	int retval;
-	FILE *cal_file;
-	struct calibration_file_contents *parsed_file;
+	comedi_calibration_t *parsed_file;
 
 	if( cal_file_path )
 	{
 		strncpy( file_path, cal_file_path, sizeof( file_path ) );
 	}else
 	{
-		if( fstat( comedi_fileno( dev ), &file_stats ) < 0 )
-		{
-			COMEDILIB_DEBUG( 3, "failed to get file stats of comedi device file\n" );
-			return -1;
-		}
+		char *temp;
 
-		snprintf( file_path, sizeof( file_path ), "/etc/comedi/calibrations/%s_comedi%li",
-			comedi_get_board_name( dev ),
-			( unsigned long ) minor( file_stats.st_rdev ) );
+		temp = comedi_get_default_calibration_path( dev );
+		if( temp == NULL ) return -1;
+		strncpy( file_path, temp, sizeof( file_path ) );
+		free( temp );
 	}
 
-	cal_file = fopen( file_path, "r" );
-	if( cal_file == NULL )
-	{
-		COMEDILIB_DEBUG( 3, "failed to open file\n" );
-		return -1;
-	}
-
-	parsed_file = parse_calibration_file( cal_file );
+	parsed_file = comedi_parse_calibration_file( file_path );
 	if( parsed_file == NULL )
 	{
 		COMEDILIB_DEBUG( 3, "failed to parse calibration file\n" );
 		return -1;
 	}
 
-	fclose( cal_file );
+	retval = comedi_apply_parsed_calibration( dev, subdev, channel, range, aref, parsed_file );
 
-	retval = check_cal_file( dev, parsed_file );
-	if( retval < 0 )
-	{
-		cleanup_calibration_parse( parsed_file );
-		return retval;
-	}
+	comedi_cleanup_calibration( parsed_file );
 
-	retval = apply_calibration( dev, parsed_file, subdev, channel, range, aref );
-	if( retval < 0 ) return retval;
-
-	cleanup_calibration_parse( parsed_file );
-
-	return 0;
+	return retval;
 }
