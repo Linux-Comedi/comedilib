@@ -25,7 +25,6 @@ messages: .phony
 	done
 
 distclean: clean
-	rm -f *.html *.txt
 	rm -rf locale
 	rm -rf html
 	rm -rf man
