@@ -234,6 +234,7 @@ ok:
 			(comedi_get_version_code(dev))&0xff);
 	}
 
+	setup.do_reset = do_reset;
 	if(do_reset)reset_caldacs( &setup );
 	if(do_dump) observe( &setup );
 	if(do_calibrate && setup.do_cal) setup.do_cal( &setup );

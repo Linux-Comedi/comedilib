@@ -74,7 +74,7 @@ static struct board_struct boards[]={
 	{ "pci-das64/m2/16",	STATUS_GUESS,	setup_cb_pci_64xx },
 	{ "pci-das64/m3/16",	STATUS_GUESS,	setup_cb_pci_64xx },
 	{ "pci-das6023",	STATUS_DONE,	setup_cb_pci_60xx },
-	{ "pci-das6025",	STATUS_SOME,	setup_cb_pci_60xx },
+	{ "pci-das6025",	STATUS_DONE,	setup_cb_pci_60xx },
 	{ "pci-das6034",	STATUS_GUESS,	setup_cb_pci_60xx },
 	{ "pci-das6035",	STATUS_GUESS,	setup_cb_pci_60xx },
 	{ "pci-das4020/12",	STATUS_DONE,	setup_cb_pci_4020 },
@@ -119,6 +119,18 @@ enum calibration_source_60xx
 	CS_60XX_UNUSED = 5,	// 0V
 	CS_60XX_DAC0 = 6,
 	CS_60XX_DAC1 = 7,
+};
+
+enum cal_knobs_60xx
+{
+	DAC0_OFFSET = 0,
+	DAC0_GAIN,
+	DAC1_OFFSET,
+	DAC1_GAIN,
+	ADC_OFFSET_FINE,
+	ADC_OFFSET_COARSE,
+	ADC_GAIN_COARSE,
+	ADC_GAIN_FINE,
 };
 
 int cb_setup( calibration_setup_t *setup, const char *device_name )
@@ -904,20 +916,68 @@ static int cal_cb_pci_64xx( calibration_setup_t *setup )
 	return 0;
 }
 
+static void prep_adc_caldacs_60xx( calibration_setup_t *setup, unsigned int range )
+{
+	int retval;
+
+	if( setup->do_reset )
+	{
+		reset_caldac( setup, ADC_OFFSET_COARSE );
+		reset_caldac( setup, ADC_OFFSET_FINE );
+		reset_caldac( setup, ADC_GAIN_COARSE );
+		reset_caldac( setup, ADC_GAIN_FINE );
+	}else
+	{
+		retval = comedi_apply_calibration( setup->dev, setup->ad_subdev,
+			0, range, AREF_GROUND, setup->cal_save_file_path);
+		if( retval < 0 )
+		{
+			reset_caldac( setup, ADC_OFFSET_COARSE );
+			reset_caldac( setup, ADC_OFFSET_FINE );
+			reset_caldac( setup, ADC_GAIN_COARSE );
+			reset_caldac( setup, ADC_GAIN_FINE );
+		}
+	}
+}
+
+static void prep_dac_caldacs_60xx( calibration_setup_t *setup,
+	unsigned int channel, unsigned int range )
+{
+	int retval;
+
+	if( setup->do_reset )
+	{
+		if( channel == 0 )
+		{
+			reset_caldac( setup, DAC0_OFFSET );
+			reset_caldac( setup, DAC0_GAIN );
+		}else
+		{
+			reset_caldac( setup, DAC1_OFFSET );
+			reset_caldac( setup, DAC1_GAIN );
+		}
+	}else
+	{
+		retval = comedi_apply_calibration( setup->dev, setup->da_subdev,
+			channel, range, AREF_GROUND, setup->cal_save_file_path);
+		if( retval < 0 )
+		{
+			if( channel == 0 )
+			{
+				reset_caldac( setup, DAC0_OFFSET );
+				reset_caldac( setup, DAC0_GAIN );
+			}else
+			{
+				reset_caldac( setup, DAC1_OFFSET );
+				reset_caldac( setup, DAC1_GAIN );
+			}
+		}
+	}
+}
+
 static int cal_cb_pci_60xx( calibration_setup_t *setup )
 {
 	saved_calibration_t *saved_cals, *current_cal;
-	enum cal_knobs_60xx
-	{
-		DAC0_OFFSET = 0,
-		DAC0_GAIN,
-		DAC1_OFFSET,
-		DAC1_GAIN,
-		ADC_OFFSET_FINE,
-		ADC_OFFSET_COARSE,
-		ADC_GAIN_COARSE,
-		ADC_GAIN_FINE,
-	};
 	int i, num_ai_ranges, num_ao_ranges, num_calibrations, retval;
 	int adc_offset_fine_for_ao = -1, adc_offset_coarse_for_ao = -1,
 		adc_gain_fine_for_ao = -1, adc_gain_coarse_for_ao = -1;
@@ -942,10 +1002,7 @@ static int cal_cb_pci_60xx( calibration_setup_t *setup )
 	current_cal = saved_cals;
 	for( i = 0; i < num_ai_ranges ; i++ )
 	{
-		reset_caldac( setup, ADC_OFFSET_COARSE );
-		reset_caldac( setup, ADC_OFFSET_FINE );
-		reset_caldac( setup, ADC_GAIN_COARSE );
-		reset_caldac( setup, ADC_GAIN_FINE );
+		prep_adc_caldacs_60xx( setup, i );
 
 		cal_binary( setup, ai_ground_observable_index_60xx( i ), ADC_OFFSET_COARSE );
 		cal_binary( setup, ai_ground_observable_index_60xx( i ), ADC_OFFSET_FINE );
@@ -979,8 +1036,7 @@ static int cal_cb_pci_60xx( calibration_setup_t *setup )
 	update_caldac( setup, ADC_GAIN_COARSE, adc_gain_coarse_for_ao );
 	for( i = 0; i < num_ao_ranges ; i++ )
 	{
-		reset_caldac( setup, DAC0_OFFSET );
-		reset_caldac( setup, DAC0_GAIN );
+		prep_dac_caldacs_60xx( setup, 0, i );
 
 		cal_binary( setup, ao_low_observable_index_60xx( setup, 0, i ), DAC0_OFFSET );
 		cal_binary( setup, ao_high_observable_index_60xx( setup, 0, i ), DAC0_GAIN );
@@ -995,8 +1051,7 @@ static int cal_cb_pci_60xx( calibration_setup_t *setup )
 
 		current_cal++;
 
-		reset_caldac( setup, DAC1_OFFSET );
-		reset_caldac( setup, DAC1_GAIN );
+		prep_dac_caldacs_60xx( setup, 1, i );
 
 		cal_binary( setup, ao_low_observable_index_60xx( setup, 1, i ), DAC1_OFFSET );
 		cal_binary( setup, ao_high_observable_index_60xx( setup, 1, i ), DAC1_GAIN );
