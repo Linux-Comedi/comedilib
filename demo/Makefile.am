@@ -1,9 +1,10 @@
 
-bin_PROGRAMS = \
+noinst_PROGRAMS = \
 	antialias ao_waveform apply_cal cmd dio eeprom_dump info \
 	inp inpn insn ledclock mmap outp poll receiver select \
 	sender sigio sv tut1 tut2
 
+noinst_HEADERS = examples.h
 
 antialias_SOURCES = antialias.c common.c
 antialias_CFLAGS = $(COMEDILIB_CFLAGS)
