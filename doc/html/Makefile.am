@@ -13,7 +13,7 @@ endif
 
 all-local: $(all_html)
 
-dummy: $(srcdir)/../comedilib.sgml $(SGML)
+dummy: $(srcdir)/../comedilib.sgml
 	$(DOCBOOK2HTML) $(srcdir)/../comedilib.sgml
 	touch $(srcdir)/dummy
 

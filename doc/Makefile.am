@@ -1,9 +1,9 @@
 
-SUBDIRS = html man
+SUBDIRS = . html man
 
 SGML= drivers.sgml funcref.sgml glossary.sgml \
 	install.sgml intro.sgml other.sgml reference.sgml tutorial.sgml \
-	driverwriting.sgml 
+	driverwriting.sgml
 
 BUILT_SOURCES = funcref.sgml drivers.sgml
 
@@ -12,7 +12,7 @@ EXTRA_DIST=$(SGML) comedilib.sgml funcref mkref drivers.txt mkdr
 if HAVE_DOCBOOK2PDF
 pkgdata_DATA = comedilib.pdf
 else
-pkgdata_DATA = 
+pkgdata_DATA =
 endif
 
 CLEANFILES = comedilib.pdf
@@ -26,6 +26,11 @@ funcref.sgml: funcref mkref
 drivers.sgml: drivers.txt mkdr
 	$(srcdir)/mkdr drivers.txt >drivers.sgml
 
+#touch comedilib.sgml if any of the source files have changed,
+# so subdirs know they need to regenerate files
+comedilib.sgml: $(SGML)
+	touch $(srcdir)/comedilib.sgml
+
 locales = de
 
 messages: .phony
@@ -35,4 +40,5 @@ messages: .phony
 	  mkdir -p locale/$$i/LC_MESSAGES; \
 	  msgfmt $$i.po -o locale/$$i/LC_MESSAGES/comedilib.mo; \
 	done
+
 

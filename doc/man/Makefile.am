@@ -11,7 +11,7 @@ endif
 
 all-local: $(all_man)
 
-dummy: $(srcdir)/../comedilib.sgml $(SGML)
+dummy: $(srcdir)/../comedilib.sgml
 	$(DOCBOOK2MAN) $(srcdir)/../comedilib.sgml
 	touch $(srcdir)/dummy
 
