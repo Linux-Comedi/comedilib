@@ -41,8 +41,8 @@ int main(int argc, char *argv[])
 
 int read_eeprom(comedi_t *it,unsigned int **eeprom)
 {
-	unsigned int subd;
-	unsigned int n,i,ret;
+	int subd;
+	int n,i,ret;
 	lsampl_t data;
 	unsigned int *ptr;
 	lsampl_t maxdata;
