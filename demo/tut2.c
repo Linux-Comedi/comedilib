@@ -13,15 +13,13 @@ int main(int argc,char *argv[])
         comedi_t *cf;
         int chan=0;
         int data;
-        int maxdata,rangetype;
+        int maxdata;
         double volts;
 	comedi_range *cr;
 
         cf=comedi_open("/dev/comedi0");
 
         maxdata=comedi_get_maxdata(cf,subdev,chan);
-
-        rangetype=comedi_get_rangetype(cf,subdev,chan);
 
 	cr=comedi_get_range(cf,subdev,chan,range);
 

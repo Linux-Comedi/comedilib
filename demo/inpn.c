@@ -30,7 +30,6 @@ int main(int argc, char *argv[])
 	int n_chans,chan;
 	int n_ranges;
 	int range;
-	int rangetype;
 	int maxdata;
 	lsampl_t data;
 	double voltage;
@@ -53,9 +52,7 @@ int main(int argc, char *argv[])
 	for(chan=0;chan<n_chans;chan++){
 		printf("%d: ",chan);
 
-		//n_ranges=comedi_get_n_ranges(device,subdevice,chan);
-		rangetype=comedi_get_rangetype(device,subdevice,chan);
-		n_ranges=RANGE_LENGTH(rangetype);
+		n_ranges=comedi_get_n_ranges(device,subdevice,chan);
 
 		maxdata=comedi_get_maxdata(device,subdevice,chan);
 		for(range=0;range<n_ranges;range++){
