@@ -1,21 +1,14 @@
 
 # Makefile for comedi
 
-with_python = no
-with_perl = no
+TOPDIR=`pwd`
+
+include Config
+include version
 
 .EXPORT_ALL_VARIABLES:
 
-include version
 MAJOR=0
-
-CFLAGS = -Wall -O2
-
-CROSS   := 
-CC      := $(CROSS)gcc
-AR      := $(CROSS)ar
-LD      := $(CROSS)ld
-INSTALL := install
 
 TARGETS = comedilib
 ifeq ($(with_python),yes)
@@ -31,19 +24,19 @@ SUBDIRS= lib demo comedi_calibrate testing comedi_config
 
 DOCFILES= README `find doc -type f`
 
-INSTALLDIR=$(DESTDIR)/usr
-INSTALLDIR_LIB=$(DESTDIR)/usr/lib
+INSTALLDIR=$(DESTDIR)$(PREFIX)
+INSTALLDIR_LIB=$(DESTDIR)$(PREFIX)/lib
 ifneq ($(DEB_BUILD_ARCH),)
-INSTALLDIR_DOC=$(DESTDIR)/usr/share/doc/libcomedi
-INSTALLDIR_MAN=$(DESTDIR)/usr/share/man
-INSTALLDIR_PERL=$(DESTDIR)/usr/lib/perl5/
+INSTALLDIR_DOC=$(DESTDIR)$(PREFIX)/share/doc/libcomedi
+INSTALLDIR_MAN=$(DESTDIR)$(PREFIX)/share/man
+INSTALLDIR_PERL=$(DESTDIR)$(PREFIX)/lib/perl5/
 else
-INSTALLDIR_DOC=$(DESTDIR)/usr/doc/libcomedi
-INSTALLDIR_MAN=$(DESTDIR)/usr/man
-INSTALLDIR_PERL=$(DESTDIR)/usr/lib/perl/
+INSTALLDIR_DOC=$(DESTDIR)$(PREFIX)/doc/libcomedi
+INSTALLDIR_MAN=$(DESTDIR)$(PREFIX)/man
+INSTALLDIR_PERL=$(DESTDIR)$(PREFIX)/lib/perl/
 endif
-INSTALLDIR_BIN=$(DESTDIR)/usr/bin
-INSTALLDIR_SBIN=$(DESTDIR)/usr/sbin
+INSTALLDIR_BIN=$(DESTDIR)$(PREFIX)/bin
+INSTALLDIR_SBIN=$(DESTDIR)$(PREFIX)/sbin
 
 comedilib:	subdirs
 
