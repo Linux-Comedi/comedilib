@@ -975,7 +975,7 @@ double check_gain_chan_x( calibration_setup_t *setup, linear_fit_t *l,unsigned i
 	sum_err=0;
 	for(i=0;i*step<n;i++){
 		update_caldac( setup, cdac, i*step );
-		//usleep(caldac_settle_usec);
+		usleep(caldac_settle_usec);
 
 		new_sv_measure( setup->dev, &sv);
 
