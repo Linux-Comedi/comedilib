@@ -56,6 +56,8 @@ void write_calibration_setting( FILE *file, saved_calibration_t setting )
 	fprintf( file, "%s", indent );
 	fprintf( file, "{\n" );
 	fprintf( file, "%s", indent );
+	fprintf( file, "\tsubdevice => %i,\n", setting.subdevice );
+	fprintf( file, "%s", indent );
 	fprintf( file, "\tchannels => [" );
 	for( i = 0; i < setting.channels_length; i++ )
 		fprintf( file, "%i,", setting.channels[ i ] );
