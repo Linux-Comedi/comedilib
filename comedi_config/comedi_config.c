@@ -145,7 +145,7 @@ int main(int argc,char *argv[])
 	}
 
 	if((argc-optind) < 1 || (argc-optind) > 3 ||
-		((argc-optind) == 1 && read_buf_size == 0 && write_buf_size == 0)){
+		((argc-optind) == 1 && read_buf_size == 0 && write_buf_size == 0 && remove == 0)){
 		do_help(1);
 	}
 
@@ -157,10 +157,13 @@ int main(int argc,char *argv[])
 		exit(1);
 	}
 
-	// if we are attaching a device and not just changing buffer size
-	if((argc-optind) > 1)
+	// if we are attaching or detaching a device
+	if((argc-optind) > 1 || ((argc-optind) == 1 && remove))
 	{
-		driver=argv[optind+1];
+		if(argc - optind > 1)
+			driver=argv[optind+1];
+		else
+			driver = "none";
 		strncpy(it.board_name,driver,COMEDI_NAMELEN-1);
 
 		for(i=0;i<COMEDI_NDEVCONFOPTS;i++)it.options[i]=0;
@@ -184,6 +187,8 @@ int main(int argc,char *argv[])
 				do_help(1);
 			}
 		}
+		if(argc-optind > 3)
+			do_help(1);
 
 		ret=stat(fn,&statbuf);
 		if(ret<0){
