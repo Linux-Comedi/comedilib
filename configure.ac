@@ -3,7 +3,7 @@ AC_INIT
 AC_CANONICAL_TARGET([])
 
 AC_CONFIG_AUX_DIR([.])
-AS_VERSION(comedilib, COMEDILIB, 0, 7, 21)
+AS_VERSION(comedilib, COMEDILIB, 0, 7, 22)
 #COMEDILIB_DEBUG="-Wall -Werror"
 COMEDILIB_DEBUG="-Wall"
 AM_INIT_AUTOMAKE($PACKAGE,$VERSION)
@@ -120,6 +120,7 @@ swig/python/Makefile
 swig/ruby/Makefile
 testing/Makefile
 comedilib.spec
+comedilib.pc
 )
 
 AC_OUTPUT
