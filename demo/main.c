@@ -28,33 +28,22 @@ int parse_options(int argc, char *argv[])
 	int c;
 
 
-	while (optind<argc) {
-		c = getopt(argc, argv, "acsrfvdgom");
+	while (-1 != (c = getopt(argc, argv, "a:c:s:r:f:vdgom"))) {
 		switch (c) {
-		case -1:
-			/* data value */
-			sscanf(argv[optind],"%d",&value);
-			optind++;
-			break;
 		case 'f':
-			filename = argv[optind];
-			optind++;
+			filename = optarg;
 			break;
 		case 's':
-			sscanf(argv[optind],"%d",&subdevice);
-			optind++;
+			sscanf(optarg,"%d",&subdevice);
 			break;
 		case 'c':
-			sscanf(argv[optind],"%d",&channel);
-			optind++;
+			sscanf(optarg,"%d",&channel);
 			break;
 		case 'a':
-			sscanf(argv[optind],"%d",&aref);
-			optind++;
+			sscanf(optarg,"%d",&aref);
 			break;
 		case 'r':
-			sscanf(argv[optind],"%d",&range);
-			optind++;
+			sscanf(optarg,"%d",&range);
 			break;
 		case 'v':
 			verbose_flag = 1;
@@ -75,6 +64,10 @@ int parse_options(int argc, char *argv[])
 			printf("bad option\n");
 			exit(1);
 		}
+	}
+	if(optind < argc) {
+		/* data value */
+		sscanf(argv[optind++],"%d",&value);
 	}
 
 	return argc;
