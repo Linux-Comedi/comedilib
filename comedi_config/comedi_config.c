@@ -181,6 +181,7 @@ void read_init_files(char* file_names[], int num_files, int *options)
 			exit(1);
 		}
 		offset += sizes[i];
+		fclose(files[i]);
 	}
 	return;
 }
