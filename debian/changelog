@@ -1,3 +1,17 @@
+comedilib (0.7.16-1.1) unstable; urgency=low
+
+  * NMU
+  * debian/control: bumped Standards-Version
+  * debian/ex.doc-base.package: removed dh_make template file
+  * debian/libcomedi0.postinst:
+    - don't try to create device files if they already exist
+    - don't use absolute path to ldconfig
+  * debian/libcomedi0.postrm: new; run ldconfig on remove, per Policy
+  * debian/libcomedi0.shlibs: refer to shared library package's real name
+    and use a legal version number (Closes: #118057)
+
+ -- Branden Robinson <branden@debian.org>  Fri,  2 Nov 2001 14:37:34 -0500
+
 comedilib (0.7.16-1) unstable; urgency=low
 
   * Upstream version change
@@ -45,7 +59,3 @@ comedilib (0.7.9-1) unstable; urgency=low
   * Initial Release.
 
  -- David Schleef <ds@stm.lbl.gov>  Tue, 28 Mar 2000 11:44:42 -0800
-
-Local variables:
-mode: debian-changelog
-End:

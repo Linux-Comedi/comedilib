@@ -1,16 +1,19 @@
 #!/bin/sh
 
-if [ "$1" = "configure" ]; then
-	/sbin/ldconfig
-fi
-
 # Policy says that the user should be asked before we do this.
 for i in 0 1 2 3
 do
-	mknod /dev/comedi$i c 98 $i
-	chown root.root /dev/comedi$i
-	chmod 666 /dev/comedi$i
+	if [ ! -e /dev/comedi$i ]; then
+		mknod /dev/comedi$i c 98 $i
+		chown root.root /dev/comedi$i
+		chmod 666 /dev/comedi$i
+	fi
 done
 
 #DEBHELPER#
 
+if [ "$1" = "configure" ]; then
+	ldconfig
+fi
+
+exit 0
