@@ -1,18 +1,19 @@
 
 if HAVE_DOCBOOK2MAN
-all_man = all_man
+all_man = $(srcdir)/dummy
 install_man = install_man
 uninstall_man = uninstall_man
 else
-all_man = 
-install_man = 
-uninstall_man = 
+all_man =
+install_man =
+uninstall_man =
 endif
 
 all-local: $(all_man)
 
-all_man: $(srcdir)/../comedilib.sgml $(SGML)
+dummy: $(srcdir)/../comedilib.sgml $(SGML)
 	$(DOCBOOK2MAN) $(srcdir)/../comedilib.sgml
+	touch $(srcdir)/dummy
 
 install-data-local: $(install_man)
 
@@ -28,4 +29,5 @@ uninstall_man:
 clean-local:
 	rm -f *.3
 	rm -f manpage.links manpage.refs
+	rm -f dummy
 

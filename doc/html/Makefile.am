@@ -2,19 +2,20 @@
 EXTRA_DIST = acq-seq.gif
 
 if HAVE_DOCBOOK2HTML
-all_html = all_html
+all_html = $(srcdir)/dummy
 install_html = install_html
 uninstall_html = uninstall_html
 else
-all_html = 
-install_html = 
-uninstall_html = 
+all_html =
+install_html =
+uninstall_html =
 endif
 
 all-local: $(all_html)
 
-all_html: $(srcdir)/../comedilib.sgml $(SGML)
+dummy: $(srcdir)/../comedilib.sgml $(SGML)
 	$(DOCBOOK2HTML) $(srcdir)/../comedilib.sgml
+	touch $(srcdir)/dummy
 
 install-data-local: $(install_html)
 
@@ -29,4 +30,4 @@ uninstall_html:
 
 clean-local:
 	rm -rf *.html
-
+	rm -f dummy
