@@ -152,6 +152,90 @@ int test_cmd_read_fast_1chan(void)
 	return 0;
 }
 
+int test_cmd_write_fast_1chan(void)
+{
+	comedi_cmd cmd;
+	char buf[BUFSZ];
+	unsigned int chanlist[1];
+	int go;
+	int total=0;
+	int ret;
+	unsigned int flags = comedi_get_subdevice_flags(device,subdevice);
+
+	if(!(flags&SDF_CMD) || !(flags&SDF_WRITEABLE)){
+		printf("not applicable\n");
+		return 0;
+	}
+
+	if(comedi_get_cmd_generic_timed(device,subdevice,&cmd,1)<0){
+		printf("  not supported\n");
+		return 0;
+	}
+
+	if(realtime)cmd.flags |= TRIG_RT;
+	cmd.chanlist = chanlist;
+	cmd.scan_end_arg = 1;
+	cmd.stop_arg = 1000000;
+	cmd.chanlist_len = 1;
+	chanlist[0] = CR_PACK(0,0,0);
+
+	memset(buf,0,BUFSZ);
+
+	ret = comedi_command(device,&cmd);
+	if(ret<0){
+		perror("comedi_command");
+	}
+
+	go = 1;
+	while(go){
+		ret = write(comedi_fileno(device), buf, BUFSZ);
+		if(ret<0){
+			perror("write");
+			return 0;
+		}
+		if(ret<BUFSZ){
+			go = 0;
+			break;
+		}
+
+		total += ret;
+		if(verbose)printf("write %d %d\n",ret,total);
+	}
+	
+	{
+		comedi_insn insn;
+		memset(&insn, 0, sizeof(comedi_insn));
+		insn.insn = INSN_INTTRIG;
+		insn.subdev = subdevice;
+		ret = comedi_do_insn(device, &insn);
+		if(ret<0){
+			perror("comedi_inttrig");
+			return 0;
+		}
+		if(verbose)printf("inttrig\n");
+	}
+
+	go=1;
+	while(go){
+		ret = write(comedi_fileno(device),buf,BUFSZ);
+		if(ret<0){
+			if(errno==EAGAIN){
+				usleep(10000);
+			}else{
+				go = 0;
+				perror("write");
+			}
+		}else if(ret==0){
+			go = 0;
+		}else{
+			total += ret;
+			if(verbose)printf("write %d %d\n",ret,total);
+		}
+	}
+
+	return 0;
+}
+
 int test_cmd_logic_bug(void)
 {
 	comedi_cmd cmd;

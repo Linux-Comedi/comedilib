@@ -63,6 +63,7 @@ int test_mmap(void)
 	void *b, *adr;
 	sampl_t *map;
 	unsigned int flags;
+	int i;
 
 	flags = comedi_get_subdevice_flags(device,subdevice);
 
@@ -125,11 +126,19 @@ int test_mmap(void)
 			if(verbose) printf("read %d %d\n",ret,total);
 		}
 	}
-	if(memcmp(buf,map,total)){
-		printf("E: mmap compare failed\n");
-	}else{
-		printf("compare ok\n");
+
+	go = 1;
+	for(i=0;i<total;i++){
+		if(buf[i]!=((char *)map)[i]){
+			printf("E: mmap compare failed\n");
+			printf("offset %d (read=%02x mmap=%02x)\n",i,
+				buf[i], ((char *)map)[i]);
+			go = 0;
+			break;
+		}
 	}
+	if(go) printf("compare ok\n");
+
 	munmap(map,MAPLEN);
 
 	/* test if area is really unmapped */

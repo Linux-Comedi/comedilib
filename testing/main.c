@@ -31,6 +31,7 @@ int test_cmd_no_cmd(void);
 int test_cmd_probe_src_mask(void);
 int test_cmd_probe_fast_1chan(void);
 int test_cmd_read_fast_1chan(void);
+int test_cmd_write_fast_1chan(void);
 int test_cmd_logic_bug(void);
 int test_cmd_fifo_depth_check(void);
 int test_cmd_start_inttrig(void);
@@ -56,6 +57,7 @@ struct test_struct tests[]={
 	{ "cmd_probe_src_mask", test_cmd_probe_src_mask, TEST_STD },
 	{ "cmd_probe_fast_1chan", test_cmd_probe_fast_1chan, TEST_STD },
 	{ "cmd_read_fast_1chan", test_cmd_read_fast_1chan, TEST_STD },
+	{ "cmd_write_fast_1chan", test_cmd_write_fast_1chan, TEST_STD },
 	{ "cmd_logic_bug", test_cmd_logic_bug, TEST_STD },
 	{ "cmd_fifo_depth_check", test_cmd_fifo_depth_check, TEST_STD },
 	{ "cmd_start_inttrig", test_cmd_start_inttrig, TEST_STD },
