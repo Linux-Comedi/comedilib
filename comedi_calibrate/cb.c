@@ -164,7 +164,7 @@ int init_observables_60xx( calibration_setup_t *setup )
 	o->preobserve_insn.data[0] = INSN_CONFIG_ALT_SOURCE;
 	o->preobserve_insn.data[1] = 0;
 	o->observe_insn = tmpl;
-	o->observe_insn.chanspec = CR_PACK( 0, 0, AREF_GROUND);
+	o->observe_insn.chanspec = CR_PACK( 0, 0, AREF_GROUND) | CR_ALT_SOURCE | CR_ALT_FILTER;
 	o->target = 0.0;
 
 	o = setup->observables + 1;
@@ -174,7 +174,7 @@ int init_observables_60xx( calibration_setup_t *setup )
 	o->preobserve_insn.data[0] = INSN_CONFIG_ALT_SOURCE;
 	o->preobserve_insn.data[1] = 2;
 	o->observe_insn = tmpl;
-	o->observe_insn.chanspec = CR_PACK( 0, 0, AREF_GROUND);
+	o->observe_insn.chanspec = CR_PACK( 0, 0, AREF_GROUND) | CR_ALT_SOURCE | CR_ALT_FILTER;
 	o->target = 5.0;
 
 	setup->n_observables = 2;
@@ -205,7 +205,7 @@ int init_observables_4020( calibration_setup_t *setup )
 	o->preobserve_insn.data[0] = INSN_CONFIG_ALT_SOURCE;
 	o->preobserve_insn.data[1] = 7;
 	o->observe_insn = tmpl;
-	o->observe_insn.chanspec = CR_PACK( 0, 0, AREF_GROUND);
+	o->observe_insn.chanspec = CR_PACK( 0, 0, AREF_GROUND) | CR_ALT_SOURCE | CR_ALT_FILTER;
 	o->target = 0.0;
 
 	o = setup->observables + 1;
@@ -215,7 +215,7 @@ int init_observables_4020( calibration_setup_t *setup )
 	o->preobserve_insn.data[0] = INSN_CONFIG_ALT_SOURCE;
 	o->preobserve_insn.data[1] = 7;
 	o->observe_insn = tmpl;
-	o->observe_insn.chanspec = CR_PACK( 1, 0, AREF_GROUND);
+	o->observe_insn.chanspec = CR_PACK( 1, 0, AREF_GROUND) | CR_ALT_SOURCE | CR_ALT_FILTER;
 	o->target = 0.0;
 
 	o = setup->observables + 2;
@@ -225,7 +225,7 @@ int init_observables_4020( calibration_setup_t *setup )
 	o->preobserve_insn.data[0] = INSN_CONFIG_ALT_SOURCE;
 	o->preobserve_insn.data[1] = 7;
 	o->observe_insn = tmpl;
-	o->observe_insn.chanspec = CR_PACK( 2, 0, AREF_GROUND);
+	o->observe_insn.chanspec = CR_PACK( 2, 0, AREF_GROUND) | CR_ALT_SOURCE | CR_ALT_FILTER;
 	o->target = 0.0;
 
 	o = setup->observables + 3;
@@ -235,7 +235,7 @@ int init_observables_4020( calibration_setup_t *setup )
 	o->preobserve_insn.data[0] = INSN_CONFIG_ALT_SOURCE;
 	o->preobserve_insn.data[1] = 7;
 	o->observe_insn = tmpl;
-	o->observe_insn.chanspec = CR_PACK( 3, 0, AREF_GROUND);
+	o->observe_insn.chanspec = CR_PACK( 3, 0, AREF_GROUND) | CR_ALT_SOURCE | CR_ALT_FILTER;
 	o->target = 0.0;
 
 	o = setup->observables + 4;
@@ -245,7 +245,7 @@ int init_observables_4020( calibration_setup_t *setup )
 	o->preobserve_insn.data[0] = INSN_CONFIG_ALT_SOURCE;
 	o->preobserve_insn.data[1] = 5;
 	o->observe_insn = tmpl;
-	o->observe_insn.chanspec = CR_PACK( 0, 0, AREF_GROUND);
+	o->observe_insn.chanspec = CR_PACK( 0, 0, AREF_GROUND) | CR_ALT_SOURCE | CR_ALT_FILTER;
 	o->target = 4.375;
 
 	o = setup->observables + 5;
@@ -255,7 +255,7 @@ int init_observables_4020( calibration_setup_t *setup )
 	o->preobserve_insn.data[0] = INSN_CONFIG_ALT_SOURCE;
 	o->preobserve_insn.data[1] = 5;
 	o->observe_insn = tmpl;
-	o->observe_insn.chanspec = CR_PACK( 1, 0, AREF_GROUND);
+	o->observe_insn.chanspec = CR_PACK( 1, 0, AREF_GROUND) | CR_ALT_SOURCE | CR_ALT_FILTER;
 	o->target = 4.375;
 
 	o = setup->observables + 6;
@@ -265,7 +265,7 @@ int init_observables_4020( calibration_setup_t *setup )
 	o->preobserve_insn.data[0] = INSN_CONFIG_ALT_SOURCE;
 	o->preobserve_insn.data[1] = 5;
 	o->observe_insn = tmpl;
-	o->observe_insn.chanspec = CR_PACK( 2, 0, AREF_GROUND);
+	o->observe_insn.chanspec = CR_PACK( 2, 0, AREF_GROUND) | CR_ALT_SOURCE | CR_ALT_FILTER;
 	o->target = 4.375;
 
 	o = setup->observables + 7;
@@ -275,7 +275,7 @@ int init_observables_4020( calibration_setup_t *setup )
 	o->preobserve_insn.data[0] = INSN_CONFIG_ALT_SOURCE;
 	o->preobserve_insn.data[1] = 5;
 	o->observe_insn = tmpl;
-	o->observe_insn.chanspec = CR_PACK( 3, 0, AREF_GROUND);
+	o->observe_insn.chanspec = CR_PACK( 3, 0, AREF_GROUND) | CR_ALT_SOURCE | CR_ALT_FILTER;
 	o->target = 4.375;
 
 	setup->n_observables = 8;
