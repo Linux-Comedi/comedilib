@@ -185,6 +185,9 @@ COMEDI_OUTPUT = _comedi.COMEDI_OUTPUT
 COMEDI_OPENDRAIN = _comedi.COMEDI_OPENDRAIN
 INSN_CONFIG_ANALOG_TRIG = _comedi.INSN_CONFIG_ANALOG_TRIG
 INSN_CONFIG_ALT_SOURCE = _comedi.INSN_CONFIG_ALT_SOURCE
+INSN_CONFIG_DIGITAL_TRIG = _comedi.INSN_CONFIG_DIGITAL_TRIG
+INSN_CONFIG_BLOCK_SIZE = _comedi.INSN_CONFIG_BLOCK_SIZE
+INSN_CONFIG_TIMER_1 = _comedi.INSN_CONFIG_TIMER_1
 CIO = _comedi.CIO
 class comedi_trig_struct(_object):
     __swig_setmethods__ = {}
@@ -507,6 +510,9 @@ class comedi_subdinfo_struct(_object):
     __swig_setmethods__["range_type"] = _comedi.comedi_subdinfo_struct_range_type_set
     __swig_getmethods__["range_type"] = _comedi.comedi_subdinfo_struct_range_type_get
     if _newclass:range_type = property(_comedi.comedi_subdinfo_struct_range_type_get,_comedi.comedi_subdinfo_struct_range_type_set)
+    __swig_setmethods__["settling_time_0"] = _comedi.comedi_subdinfo_struct_settling_time_0_set
+    __swig_getmethods__["settling_time_0"] = _comedi.comedi_subdinfo_struct_settling_time_0_get
+    if _newclass:settling_time_0 = property(_comedi.comedi_subdinfo_struct_settling_time_0_get,_comedi.comedi_subdinfo_struct_settling_time_0_set)
     __swig_setmethods__["unused"] = _comedi.comedi_subdinfo_struct_unused_set
     __swig_getmethods__["unused"] = _comedi.comedi_subdinfo_struct_unused_get
     if _newclass:unused = property(_comedi.comedi_subdinfo_struct_unused_get,_comedi.comedi_subdinfo_struct_unused_set)
@@ -658,6 +664,9 @@ class comedi_bufinfo_struct(_object):
     __swig_setmethods__["buf_user_count"] = _comedi.comedi_bufinfo_struct_buf_user_count_set
     __swig_getmethods__["buf_user_count"] = _comedi.comedi_bufinfo_struct_buf_user_count_get
     if _newclass:buf_user_count = property(_comedi.comedi_bufinfo_struct_buf_user_count_get,_comedi.comedi_bufinfo_struct_buf_user_count_set)
+    __swig_setmethods__["bytes_written"] = _comedi.comedi_bufinfo_struct_bytes_written_set
+    __swig_getmethods__["bytes_written"] = _comedi.comedi_bufinfo_struct_bytes_written_get
+    if _newclass:bytes_written = property(_comedi.comedi_bufinfo_struct_bytes_written_get,_comedi.comedi_bufinfo_struct_bytes_written_set)
     __swig_setmethods__["unused"] = _comedi.comedi_bufinfo_struct_unused_set
     __swig_getmethods__["unused"] = _comedi.comedi_bufinfo_struct_unused_get
     if _newclass:unused = property(_comedi.comedi_bufinfo_struct_unused_get,_comedi.comedi_bufinfo_struct_unused_set)
@@ -687,6 +696,7 @@ COMEDI_CB_EOA = _comedi.COMEDI_CB_EOA
 COMEDI_CB_BLOCK = _comedi.COMEDI_CB_BLOCK
 COMEDI_CB_EOBUF = _comedi.COMEDI_CB_EOBUF
 COMEDI_CB_ERROR = _comedi.COMEDI_CB_ERROR
+COMEDI_CB_OVERFLOW = _comedi.COMEDI_CB_OVERFLOW
 class comedi_range(_object):
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, comedi_range, name, value)
@@ -876,5 +886,130 @@ comedi_get_buffer_contents = _comedi.comedi_get_buffer_contents
 comedi_mark_buffer_read = _comedi.comedi_mark_buffer_read
 
 comedi_get_buffer_offset = _comedi.comedi_get_buffer_offset
+
+class comedi_caldac_t(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, comedi_caldac_t, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, comedi_caldac_t, name)
+    __swig_setmethods__["subdevice"] = _comedi.comedi_caldac_t_subdevice_set
+    __swig_getmethods__["subdevice"] = _comedi.comedi_caldac_t_subdevice_get
+    if _newclass:subdevice = property(_comedi.comedi_caldac_t_subdevice_get,_comedi.comedi_caldac_t_subdevice_set)
+    __swig_setmethods__["channel"] = _comedi.comedi_caldac_t_channel_set
+    __swig_getmethods__["channel"] = _comedi.comedi_caldac_t_channel_get
+    if _newclass:channel = property(_comedi.comedi_caldac_t_channel_get,_comedi.comedi_caldac_t_channel_set)
+    __swig_setmethods__["value"] = _comedi.comedi_caldac_t_value_set
+    __swig_getmethods__["value"] = _comedi.comedi_caldac_t_value_get
+    if _newclass:value = property(_comedi.comedi_caldac_t_value_get,_comedi.comedi_caldac_t_value_set)
+    def __init__(self,*args):
+        _swig_setattr(self, comedi_caldac_t, 'this', apply(_comedi.new_comedi_caldac_t,args))
+        _swig_setattr(self, comedi_caldac_t, 'thisown', 1)
+    def __del__(self, destroy= _comedi.delete_comedi_caldac_t):
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+    def __repr__(self):
+        return "<C comedi_caldac_t instance at %s>" % (self.this,)
+
+class comedi_caldac_tPtr(comedi_caldac_t):
+    def __init__(self,this):
+        _swig_setattr(self, comedi_caldac_t, 'this', this)
+        if not hasattr(self,"thisown"): _swig_setattr(self, comedi_caldac_t, 'thisown', 0)
+        _swig_setattr(self, comedi_caldac_t,self.__class__,comedi_caldac_t)
+_comedi.comedi_caldac_t_swigregister(comedi_caldac_tPtr)
+
+CS_MAX_AREFS_LENGTH = _comedi.CS_MAX_AREFS_LENGTH
+class comedi_calibration_setting_t(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, comedi_calibration_setting_t, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, comedi_calibration_setting_t, name)
+    __swig_setmethods__["subdevice"] = _comedi.comedi_calibration_setting_t_subdevice_set
+    __swig_getmethods__["subdevice"] = _comedi.comedi_calibration_setting_t_subdevice_get
+    if _newclass:subdevice = property(_comedi.comedi_calibration_setting_t_subdevice_get,_comedi.comedi_calibration_setting_t_subdevice_set)
+    __swig_setmethods__["channels"] = _comedi.comedi_calibration_setting_t_channels_set
+    __swig_getmethods__["channels"] = _comedi.comedi_calibration_setting_t_channels_get
+    if _newclass:channels = property(_comedi.comedi_calibration_setting_t_channels_get,_comedi.comedi_calibration_setting_t_channels_set)
+    __swig_setmethods__["num_channels"] = _comedi.comedi_calibration_setting_t_num_channels_set
+    __swig_getmethods__["num_channels"] = _comedi.comedi_calibration_setting_t_num_channels_get
+    if _newclass:num_channels = property(_comedi.comedi_calibration_setting_t_num_channels_get,_comedi.comedi_calibration_setting_t_num_channels_set)
+    __swig_setmethods__["ranges"] = _comedi.comedi_calibration_setting_t_ranges_set
+    __swig_getmethods__["ranges"] = _comedi.comedi_calibration_setting_t_ranges_get
+    if _newclass:ranges = property(_comedi.comedi_calibration_setting_t_ranges_get,_comedi.comedi_calibration_setting_t_ranges_set)
+    __swig_setmethods__["num_ranges"] = _comedi.comedi_calibration_setting_t_num_ranges_set
+    __swig_getmethods__["num_ranges"] = _comedi.comedi_calibration_setting_t_num_ranges_get
+    if _newclass:num_ranges = property(_comedi.comedi_calibration_setting_t_num_ranges_get,_comedi.comedi_calibration_setting_t_num_ranges_set)
+    __swig_setmethods__["arefs"] = _comedi.comedi_calibration_setting_t_arefs_set
+    __swig_getmethods__["arefs"] = _comedi.comedi_calibration_setting_t_arefs_get
+    if _newclass:arefs = property(_comedi.comedi_calibration_setting_t_arefs_get,_comedi.comedi_calibration_setting_t_arefs_set)
+    __swig_setmethods__["num_arefs"] = _comedi.comedi_calibration_setting_t_num_arefs_set
+    __swig_getmethods__["num_arefs"] = _comedi.comedi_calibration_setting_t_num_arefs_get
+    if _newclass:num_arefs = property(_comedi.comedi_calibration_setting_t_num_arefs_get,_comedi.comedi_calibration_setting_t_num_arefs_set)
+    __swig_setmethods__["caldacs"] = _comedi.comedi_calibration_setting_t_caldacs_set
+    __swig_getmethods__["caldacs"] = _comedi.comedi_calibration_setting_t_caldacs_get
+    if _newclass:caldacs = property(_comedi.comedi_calibration_setting_t_caldacs_get,_comedi.comedi_calibration_setting_t_caldacs_set)
+    __swig_setmethods__["num_caldacs"] = _comedi.comedi_calibration_setting_t_num_caldacs_set
+    __swig_getmethods__["num_caldacs"] = _comedi.comedi_calibration_setting_t_num_caldacs_get
+    if _newclass:num_caldacs = property(_comedi.comedi_calibration_setting_t_num_caldacs_get,_comedi.comedi_calibration_setting_t_num_caldacs_set)
+    def __init__(self,*args):
+        _swig_setattr(self, comedi_calibration_setting_t, 'this', apply(_comedi.new_comedi_calibration_setting_t,args))
+        _swig_setattr(self, comedi_calibration_setting_t, 'thisown', 1)
+    def __del__(self, destroy= _comedi.delete_comedi_calibration_setting_t):
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+    def __repr__(self):
+        return "<C comedi_calibration_setting_t instance at %s>" % (self.this,)
+
+class comedi_calibration_setting_tPtr(comedi_calibration_setting_t):
+    def __init__(self,this):
+        _swig_setattr(self, comedi_calibration_setting_t, 'this', this)
+        if not hasattr(self,"thisown"): _swig_setattr(self, comedi_calibration_setting_t, 'thisown', 0)
+        _swig_setattr(self, comedi_calibration_setting_t,self.__class__,comedi_calibration_setting_t)
+_comedi.comedi_calibration_setting_t_swigregister(comedi_calibration_setting_tPtr)
+
+class comedi_calibration_t(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, comedi_calibration_t, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, comedi_calibration_t, name)
+    __swig_setmethods__["driver_name"] = _comedi.comedi_calibration_t_driver_name_set
+    __swig_getmethods__["driver_name"] = _comedi.comedi_calibration_t_driver_name_get
+    if _newclass:driver_name = property(_comedi.comedi_calibration_t_driver_name_get,_comedi.comedi_calibration_t_driver_name_set)
+    __swig_setmethods__["board_name"] = _comedi.comedi_calibration_t_board_name_set
+    __swig_getmethods__["board_name"] = _comedi.comedi_calibration_t_board_name_get
+    if _newclass:board_name = property(_comedi.comedi_calibration_t_board_name_get,_comedi.comedi_calibration_t_board_name_set)
+    __swig_setmethods__["settings"] = _comedi.comedi_calibration_t_settings_set
+    __swig_getmethods__["settings"] = _comedi.comedi_calibration_t_settings_get
+    if _newclass:settings = property(_comedi.comedi_calibration_t_settings_get,_comedi.comedi_calibration_t_settings_set)
+    __swig_setmethods__["num_settings"] = _comedi.comedi_calibration_t_num_settings_set
+    __swig_getmethods__["num_settings"] = _comedi.comedi_calibration_t_num_settings_get
+    if _newclass:num_settings = property(_comedi.comedi_calibration_t_num_settings_get,_comedi.comedi_calibration_t_num_settings_set)
+    def __init__(self,*args):
+        _swig_setattr(self, comedi_calibration_t, 'this', apply(_comedi.new_comedi_calibration_t,args))
+        _swig_setattr(self, comedi_calibration_t, 'thisown', 1)
+    def __del__(self, destroy= _comedi.delete_comedi_calibration_t):
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+    def __repr__(self):
+        return "<C comedi_calibration_t instance at %s>" % (self.this,)
+
+class comedi_calibration_tPtr(comedi_calibration_t):
+    def __init__(self,this):
+        _swig_setattr(self, comedi_calibration_t, 'this', this)
+        if not hasattr(self,"thisown"): _swig_setattr(self, comedi_calibration_t, 'thisown', 0)
+        _swig_setattr(self, comedi_calibration_t,self.__class__,comedi_calibration_t)
+_comedi.comedi_calibration_t_swigregister(comedi_calibration_tPtr)
+
+comedi_parse_calibration_file = _comedi.comedi_parse_calibration_file
+
+comedi_apply_parsed_calibration = _comedi.comedi_apply_parsed_calibration
+
+comedi_get_default_calibration_path = _comedi.comedi_get_default_calibration_path
+
+comedi_cleanup_calibration = _comedi.comedi_cleanup_calibration
+
+comedi_apply_calibration = _comedi.comedi_apply_calibration
 
 

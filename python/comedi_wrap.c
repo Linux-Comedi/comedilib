@@ -643,31 +643,34 @@ SWIG_InstallConstants(PyObject *d, swig_const_info constants[]) {
 
 #define  SWIGTYPE_p_lsampl_t swig_types[0] 
 #define  SWIGTYPE_p_sampl_t swig_types[1] 
-#define  SWIGTYPE_p_double swig_types[2] 
-#define  SWIGTYPE_p_comedi_range swig_types[3] 
-#define  SWIGTYPE_p_unsigned_int swig_types[4] 
-#define  SWIGTYPE_p_void swig_types[5] 
-#define  SWIGTYPE_p_comedi_subdinfo_struct swig_types[6] 
-#define  SWIGTYPE_p_comedi_krange_struct swig_types[7] 
-#define  SWIGTYPE_p_comedi_rangeinfo_struct swig_types[8] 
-#define  SWIGTYPE_p_comedi_chaninfo_struct swig_types[9] 
-#define  SWIGTYPE_p_comedi_cmd_struct swig_types[10] 
-#define  SWIGTYPE_p_comedi_insnlist_struct swig_types[11] 
-#define  SWIGTYPE_p_comedi_insn_struct swig_types[12] 
-#define  SWIGTYPE_p_comedi_trig_struct swig_types[13] 
-#define  SWIGTYPE_p_comedi_devinfo_struct swig_types[14] 
-#define  SWIGTYPE_p_char swig_types[15] 
-#define  SWIGTYPE_p_comedi_devconfig_struct swig_types[16] 
-#define  SWIGTYPE_p_comedi_bufconfig_struct swig_types[17] 
-#define  SWIGTYPE_p_comedi_bufinfo_struct swig_types[18] 
-#define  SWIGTYPE_p_comedi_sv_t swig_types[19] 
-#define  SWIGTYPE_p_chanlist swig_types[20] 
-#define  SWIGTYPE_p_comedi_insn swig_types[21] 
-#define  SWIGTYPE_p_comedi_insnlist swig_types[22] 
-#define  SWIGTYPE_p_comedi_t swig_types[23] 
-#define  SWIGTYPE_p_int swig_types[24] 
-#define  SWIGTYPE_p_comedi_cmd swig_types[25] 
-static swig_type_info *swig_types[27];
+#define  SWIGTYPE_p_comedi_calibration_setting_t swig_types[2] 
+#define  SWIGTYPE_p_double swig_types[3] 
+#define  SWIGTYPE_p_comedi_range swig_types[4] 
+#define  SWIGTYPE_p_unsigned_int swig_types[5] 
+#define  SWIGTYPE_p_void swig_types[6] 
+#define  SWIGTYPE_p_comedi_subdinfo_struct swig_types[7] 
+#define  SWIGTYPE_p_comedi_krange_struct swig_types[8] 
+#define  SWIGTYPE_p_comedi_rangeinfo_struct swig_types[9] 
+#define  SWIGTYPE_p_comedi_chaninfo_struct swig_types[10] 
+#define  SWIGTYPE_p_comedi_cmd_struct swig_types[11] 
+#define  SWIGTYPE_p_comedi_insnlist_struct swig_types[12] 
+#define  SWIGTYPE_p_comedi_insn_struct swig_types[13] 
+#define  SWIGTYPE_p_comedi_trig_struct swig_types[14] 
+#define  SWIGTYPE_p_comedi_devinfo_struct swig_types[15] 
+#define  SWIGTYPE_p_char swig_types[16] 
+#define  SWIGTYPE_p_comedi_devconfig_struct swig_types[17] 
+#define  SWIGTYPE_p_comedi_bufconfig_struct swig_types[18] 
+#define  SWIGTYPE_p_comedi_bufinfo_struct swig_types[19] 
+#define  SWIGTYPE_p_comedi_calibration_t swig_types[20] 
+#define  SWIGTYPE_p_comedi_sv_t swig_types[21] 
+#define  SWIGTYPE_p_chanlist swig_types[22] 
+#define  SWIGTYPE_p_comedi_insn swig_types[23] 
+#define  SWIGTYPE_p_comedi_insnlist swig_types[24] 
+#define  SWIGTYPE_p_comedi_caldac_t swig_types[25] 
+#define  SWIGTYPE_p_comedi_t swig_types[26] 
+#define  SWIGTYPE_p_int swig_types[27] 
+#define  SWIGTYPE_p_comedi_cmd swig_types[28] 
+static swig_type_info *swig_types[30];
 
 /* -------- TYPES TABLE (END) -------- */
 
@@ -3191,6 +3194,43 @@ static PyObject *_wrap_comedi_subdinfo_struct_range_type_get(PyObject *self, PyO
 }
 
 
+static PyObject *_wrap_comedi_subdinfo_struct_settling_time_0_set(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    struct comedi_subdinfo_struct *arg1 = (struct comedi_subdinfo_struct *) 0 ;
+    unsigned int arg2 ;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OO:comedi_subdinfo_struct_settling_time_0_set",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_subdinfo_struct,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    arg2 = (unsigned int) PyInt_AsLong(obj1);
+    if (PyErr_Occurred()) SWIG_fail;
+    if (arg1) (arg1)->settling_time_0 = arg2;
+    
+    Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_subdinfo_struct_settling_time_0_get(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    struct comedi_subdinfo_struct *arg1 = (struct comedi_subdinfo_struct *) 0 ;
+    unsigned int result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:comedi_subdinfo_struct_settling_time_0_get",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_subdinfo_struct,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (unsigned int) ((arg1)->settling_time_0);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
 static PyObject *_wrap_comedi_subdinfo_struct_unused_set(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     struct comedi_subdinfo_struct *arg1 = (struct comedi_subdinfo_struct *) 0 ;
@@ -3204,7 +3244,7 @@ static PyObject *_wrap_comedi_subdinfo_struct_unused_set(PyObject *self, PyObjec
     {
         int ii;
         unsigned int *b = (unsigned int *) arg1->unused;
-        for (ii = 0; ii < 10; ii++) b[ii] = *((unsigned int *) arg2 + ii);
+        for (ii = 0; ii < 9; ii++) b[ii] = *((unsigned int *) arg2 + ii);
     }
     Py_INCREF(Py_None); resultobj = Py_None;
     return resultobj;
@@ -4115,6 +4155,43 @@ static PyObject *_wrap_comedi_bufinfo_struct_buf_user_count_get(PyObject *self, 
 }
 
 
+static PyObject *_wrap_comedi_bufinfo_struct_bytes_written_set(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    struct comedi_bufinfo_struct *arg1 = (struct comedi_bufinfo_struct *) 0 ;
+    unsigned int arg2 ;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OO:comedi_bufinfo_struct_bytes_written_set",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_bufinfo_struct,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    arg2 = (unsigned int) PyInt_AsLong(obj1);
+    if (PyErr_Occurred()) SWIG_fail;
+    if (arg1) (arg1)->bytes_written = arg2;
+    
+    Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_bufinfo_struct_bytes_written_get(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    struct comedi_bufinfo_struct *arg1 = (struct comedi_bufinfo_struct *) 0 ;
+    unsigned int result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:comedi_bufinfo_struct_bytes_written_get",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_bufinfo_struct,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (unsigned int) ((arg1)->bytes_written);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
 static PyObject *_wrap_comedi_bufinfo_struct_unused_set(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     struct comedi_bufinfo_struct *arg1 = (struct comedi_bufinfo_struct *) 0 ;
@@ -4128,7 +4205,7 @@ static PyObject *_wrap_comedi_bufinfo_struct_unused_set(PyObject *self, PyObject
     {
         int ii;
         unsigned int *b = (unsigned int *) arg1->unused;
-        for (ii = 0; ii < 5; ii++) b[ii] = *((unsigned int *) arg2 + ii);
+        for (ii = 0; ii < 4; ii++) b[ii] = *((unsigned int *) arg2 + ii);
     }
     Py_INCREF(Py_None); resultobj = Py_None;
     return resultobj;
@@ -5927,6 +6004,833 @@ static PyObject *_wrap_comedi_get_buffer_offset(PyObject *self, PyObject *args) 
 }
 
 
+static PyObject *_wrap_comedi_caldac_t_subdevice_set(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_caldac_t *arg1 = (comedi_caldac_t *) 0 ;
+    unsigned int arg2 ;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OO:comedi_caldac_t_subdevice_set",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_caldac_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    arg2 = (unsigned int) PyInt_AsLong(obj1);
+    if (PyErr_Occurred()) SWIG_fail;
+    if (arg1) (arg1)->subdevice = arg2;
+    
+    Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_caldac_t_subdevice_get(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_caldac_t *arg1 = (comedi_caldac_t *) 0 ;
+    unsigned int result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:comedi_caldac_t_subdevice_get",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_caldac_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (unsigned int) ((arg1)->subdevice);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_caldac_t_channel_set(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_caldac_t *arg1 = (comedi_caldac_t *) 0 ;
+    unsigned int arg2 ;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OO:comedi_caldac_t_channel_set",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_caldac_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    arg2 = (unsigned int) PyInt_AsLong(obj1);
+    if (PyErr_Occurred()) SWIG_fail;
+    if (arg1) (arg1)->channel = arg2;
+    
+    Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_caldac_t_channel_get(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_caldac_t *arg1 = (comedi_caldac_t *) 0 ;
+    unsigned int result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:comedi_caldac_t_channel_get",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_caldac_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (unsigned int) ((arg1)->channel);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_caldac_t_value_set(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_caldac_t *arg1 = (comedi_caldac_t *) 0 ;
+    unsigned int arg2 ;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OO:comedi_caldac_t_value_set",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_caldac_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    arg2 = (unsigned int) PyInt_AsLong(obj1);
+    if (PyErr_Occurred()) SWIG_fail;
+    if (arg1) (arg1)->value = arg2;
+    
+    Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_caldac_t_value_get(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_caldac_t *arg1 = (comedi_caldac_t *) 0 ;
+    unsigned int result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:comedi_caldac_t_value_get",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_caldac_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (unsigned int) ((arg1)->value);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_new_comedi_caldac_t(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_caldac_t *result;
+    
+    if(!PyArg_ParseTuple(args,(char *)":new_comedi_caldac_t")) goto fail;
+    result = (comedi_caldac_t *)(comedi_caldac_t *) calloc(1, sizeof(comedi_caldac_t));
+    
+    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_comedi_caldac_t, 1);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_delete_comedi_caldac_t(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_caldac_t *arg1 = (comedi_caldac_t *) 0 ;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:delete_comedi_caldac_t",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_caldac_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    free((char *) arg1);
+    
+    Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject * comedi_caldac_t_swigregister(PyObject *self, PyObject *args) {
+    PyObject *obj;
+    if (!PyArg_ParseTuple(args,(char*)"O", &obj)) return NULL;
+    SWIG_TypeClientData(SWIGTYPE_p_comedi_caldac_t, obj);
+    Py_INCREF(obj);
+    return Py_BuildValue((char *)"");
+}
+static PyObject *_wrap_comedi_calibration_setting_t_subdevice_set(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_setting_t *arg1 = (comedi_calibration_setting_t *) 0 ;
+    unsigned int arg2 ;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OO:comedi_calibration_setting_t_subdevice_set",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_setting_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    arg2 = (unsigned int) PyInt_AsLong(obj1);
+    if (PyErr_Occurred()) SWIG_fail;
+    if (arg1) (arg1)->subdevice = arg2;
+    
+    Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_calibration_setting_t_subdevice_get(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_setting_t *arg1 = (comedi_calibration_setting_t *) 0 ;
+    unsigned int result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:comedi_calibration_setting_t_subdevice_get",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_setting_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (unsigned int) ((arg1)->subdevice);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_calibration_setting_t_channels_set(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_setting_t *arg1 = (comedi_calibration_setting_t *) 0 ;
+    unsigned int *arg2 = (unsigned int *) 0 ;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OO:comedi_calibration_setting_t_channels_set",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_setting_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_unsigned_int,SWIG_POINTER_EXCEPTION | SWIG_POINTER_DISOWN )) == -1) SWIG_fail;
+    if (arg1) (arg1)->channels = arg2;
+    
+    Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_calibration_setting_t_channels_get(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_setting_t *arg1 = (comedi_calibration_setting_t *) 0 ;
+    unsigned int *result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:comedi_calibration_setting_t_channels_get",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_setting_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (unsigned int *) ((arg1)->channels);
+    
+    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_unsigned_int, 0);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_calibration_setting_t_num_channels_set(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_setting_t *arg1 = (comedi_calibration_setting_t *) 0 ;
+    unsigned int arg2 ;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OO:comedi_calibration_setting_t_num_channels_set",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_setting_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    arg2 = (unsigned int) PyInt_AsLong(obj1);
+    if (PyErr_Occurred()) SWIG_fail;
+    if (arg1) (arg1)->num_channels = arg2;
+    
+    Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_calibration_setting_t_num_channels_get(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_setting_t *arg1 = (comedi_calibration_setting_t *) 0 ;
+    unsigned int result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:comedi_calibration_setting_t_num_channels_get",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_setting_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (unsigned int) ((arg1)->num_channels);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_calibration_setting_t_ranges_set(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_setting_t *arg1 = (comedi_calibration_setting_t *) 0 ;
+    unsigned int *arg2 = (unsigned int *) 0 ;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OO:comedi_calibration_setting_t_ranges_set",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_setting_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_unsigned_int,SWIG_POINTER_EXCEPTION | SWIG_POINTER_DISOWN )) == -1) SWIG_fail;
+    if (arg1) (arg1)->ranges = arg2;
+    
+    Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_calibration_setting_t_ranges_get(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_setting_t *arg1 = (comedi_calibration_setting_t *) 0 ;
+    unsigned int *result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:comedi_calibration_setting_t_ranges_get",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_setting_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (unsigned int *) ((arg1)->ranges);
+    
+    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_unsigned_int, 0);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_calibration_setting_t_num_ranges_set(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_setting_t *arg1 = (comedi_calibration_setting_t *) 0 ;
+    unsigned int arg2 ;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OO:comedi_calibration_setting_t_num_ranges_set",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_setting_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    arg2 = (unsigned int) PyInt_AsLong(obj1);
+    if (PyErr_Occurred()) SWIG_fail;
+    if (arg1) (arg1)->num_ranges = arg2;
+    
+    Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_calibration_setting_t_num_ranges_get(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_setting_t *arg1 = (comedi_calibration_setting_t *) 0 ;
+    unsigned int result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:comedi_calibration_setting_t_num_ranges_get",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_setting_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (unsigned int) ((arg1)->num_ranges);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_calibration_setting_t_arefs_set(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_setting_t *arg1 = (comedi_calibration_setting_t *) 0 ;
+    unsigned int *arg2 ;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OO:comedi_calibration_setting_t_arefs_set",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_setting_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_unsigned_int,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    {
+        int ii;
+        unsigned int *b = (unsigned int *) arg1->arefs;
+        for (ii = 0; ii < 4; ii++) b[ii] = *((unsigned int *) arg2 + ii);
+    }
+    Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_calibration_setting_t_arefs_get(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_setting_t *arg1 = (comedi_calibration_setting_t *) 0 ;
+    unsigned int *result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:comedi_calibration_setting_t_arefs_get",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_setting_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (unsigned int *)(unsigned int *) ((arg1)->arefs);
+    
+    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_unsigned_int, 0);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_calibration_setting_t_num_arefs_set(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_setting_t *arg1 = (comedi_calibration_setting_t *) 0 ;
+    unsigned int arg2 ;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OO:comedi_calibration_setting_t_num_arefs_set",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_setting_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    arg2 = (unsigned int) PyInt_AsLong(obj1);
+    if (PyErr_Occurred()) SWIG_fail;
+    if (arg1) (arg1)->num_arefs = arg2;
+    
+    Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_calibration_setting_t_num_arefs_get(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_setting_t *arg1 = (comedi_calibration_setting_t *) 0 ;
+    unsigned int result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:comedi_calibration_setting_t_num_arefs_get",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_setting_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (unsigned int) ((arg1)->num_arefs);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_calibration_setting_t_caldacs_set(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_setting_t *arg1 = (comedi_calibration_setting_t *) 0 ;
+    comedi_caldac_t *arg2 = (comedi_caldac_t *) 0 ;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OO:comedi_calibration_setting_t_caldacs_set",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_setting_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_comedi_caldac_t,SWIG_POINTER_EXCEPTION | SWIG_POINTER_DISOWN )) == -1) SWIG_fail;
+    if (arg1) (arg1)->caldacs = arg2;
+    
+    Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_calibration_setting_t_caldacs_get(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_setting_t *arg1 = (comedi_calibration_setting_t *) 0 ;
+    comedi_caldac_t *result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:comedi_calibration_setting_t_caldacs_get",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_setting_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (comedi_caldac_t *) ((arg1)->caldacs);
+    
+    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_comedi_caldac_t, 0);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_calibration_setting_t_num_caldacs_set(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_setting_t *arg1 = (comedi_calibration_setting_t *) 0 ;
+    unsigned int arg2 ;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OO:comedi_calibration_setting_t_num_caldacs_set",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_setting_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    arg2 = (unsigned int) PyInt_AsLong(obj1);
+    if (PyErr_Occurred()) SWIG_fail;
+    if (arg1) (arg1)->num_caldacs = arg2;
+    
+    Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_calibration_setting_t_num_caldacs_get(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_setting_t *arg1 = (comedi_calibration_setting_t *) 0 ;
+    unsigned int result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:comedi_calibration_setting_t_num_caldacs_get",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_setting_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (unsigned int) ((arg1)->num_caldacs);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_new_comedi_calibration_setting_t(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_setting_t *result;
+    
+    if(!PyArg_ParseTuple(args,(char *)":new_comedi_calibration_setting_t")) goto fail;
+    result = (comedi_calibration_setting_t *)(comedi_calibration_setting_t *) calloc(1, sizeof(comedi_calibration_setting_t));
+    
+    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_comedi_calibration_setting_t, 1);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_delete_comedi_calibration_setting_t(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_setting_t *arg1 = (comedi_calibration_setting_t *) 0 ;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:delete_comedi_calibration_setting_t",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_setting_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    free((char *) arg1);
+    
+    Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject * comedi_calibration_setting_t_swigregister(PyObject *self, PyObject *args) {
+    PyObject *obj;
+    if (!PyArg_ParseTuple(args,(char*)"O", &obj)) return NULL;
+    SWIG_TypeClientData(SWIGTYPE_p_comedi_calibration_setting_t, obj);
+    Py_INCREF(obj);
+    return Py_BuildValue((char *)"");
+}
+static PyObject *_wrap_comedi_calibration_t_driver_name_set(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_t *arg1 = (comedi_calibration_t *) 0 ;
+    char *arg2 ;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"Os:comedi_calibration_t_driver_name_set",&obj0,&arg2)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    {
+        if (arg1->driver_name) free((char*)arg1->driver_name);
+        if (arg2) {
+            arg1->driver_name = (char *) malloc(strlen(arg2)+1);
+            strcpy((char*)arg1->driver_name,arg2);
+        }else {
+            arg1->driver_name = 0;
+        }
+    }
+    Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_calibration_t_driver_name_get(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_t *arg1 = (comedi_calibration_t *) 0 ;
+    char *result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:comedi_calibration_t_driver_name_get",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (char *) ((arg1)->driver_name);
+    
+    resultobj = result ? PyString_FromString(result) : Py_BuildValue((char*)"");
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_calibration_t_board_name_set(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_t *arg1 = (comedi_calibration_t *) 0 ;
+    char *arg2 ;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"Os:comedi_calibration_t_board_name_set",&obj0,&arg2)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    {
+        if (arg1->board_name) free((char*)arg1->board_name);
+        if (arg2) {
+            arg1->board_name = (char *) malloc(strlen(arg2)+1);
+            strcpy((char*)arg1->board_name,arg2);
+        }else {
+            arg1->board_name = 0;
+        }
+    }
+    Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_calibration_t_board_name_get(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_t *arg1 = (comedi_calibration_t *) 0 ;
+    char *result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:comedi_calibration_t_board_name_get",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (char *) ((arg1)->board_name);
+    
+    resultobj = result ? PyString_FromString(result) : Py_BuildValue((char*)"");
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_calibration_t_settings_set(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_t *arg1 = (comedi_calibration_t *) 0 ;
+    comedi_calibration_setting_t *arg2 = (comedi_calibration_setting_t *) 0 ;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OO:comedi_calibration_t_settings_set",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_comedi_calibration_setting_t,SWIG_POINTER_EXCEPTION | SWIG_POINTER_DISOWN )) == -1) SWIG_fail;
+    if (arg1) (arg1)->settings = arg2;
+    
+    Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_calibration_t_settings_get(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_t *arg1 = (comedi_calibration_t *) 0 ;
+    comedi_calibration_setting_t *result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:comedi_calibration_t_settings_get",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (comedi_calibration_setting_t *) ((arg1)->settings);
+    
+    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_comedi_calibration_setting_t, 0);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_calibration_t_num_settings_set(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_t *arg1 = (comedi_calibration_t *) 0 ;
+    unsigned int arg2 ;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OO:comedi_calibration_t_num_settings_set",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    arg2 = (unsigned int) PyInt_AsLong(obj1);
+    if (PyErr_Occurred()) SWIG_fail;
+    if (arg1) (arg1)->num_settings = arg2;
+    
+    Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_calibration_t_num_settings_get(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_t *arg1 = (comedi_calibration_t *) 0 ;
+    unsigned int result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:comedi_calibration_t_num_settings_get",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (unsigned int) ((arg1)->num_settings);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_new_comedi_calibration_t(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_t *result;
+    
+    if(!PyArg_ParseTuple(args,(char *)":new_comedi_calibration_t")) goto fail;
+    result = (comedi_calibration_t *)(comedi_calibration_t *) calloc(1, sizeof(comedi_calibration_t));
+    
+    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_comedi_calibration_t, 1);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_delete_comedi_calibration_t(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_t *arg1 = (comedi_calibration_t *) 0 ;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:delete_comedi_calibration_t",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    free((char *) arg1);
+    
+    Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject * comedi_calibration_t_swigregister(PyObject *self, PyObject *args) {
+    PyObject *obj;
+    if (!PyArg_ParseTuple(args,(char*)"O", &obj)) return NULL;
+    SWIG_TypeClientData(SWIGTYPE_p_comedi_calibration_t, obj);
+    Py_INCREF(obj);
+    return Py_BuildValue((char *)"");
+}
+static PyObject *_wrap_comedi_parse_calibration_file(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    char *arg1 ;
+    comedi_calibration_t *result;
+    
+    if(!PyArg_ParseTuple(args,(char *)"s:comedi_parse_calibration_file",&arg1)) goto fail;
+    result = (comedi_calibration_t *)comedi_parse_calibration_file((char const *)arg1);
+    
+    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_comedi_calibration_t, 0);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_apply_parsed_calibration(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_t *arg1 = (comedi_t *) 0 ;
+    unsigned int arg2 ;
+    unsigned int arg3 ;
+    unsigned int arg4 ;
+    unsigned int arg5 ;
+    comedi_calibration_t *arg6 = (comedi_calibration_t *) 0 ;
+    int result;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    PyObject * obj2 = 0 ;
+    PyObject * obj3 = 0 ;
+    PyObject * obj4 = 0 ;
+    PyObject * obj5 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OOOOOO:comedi_apply_parsed_calibration",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    arg2 = (unsigned int) PyInt_AsLong(obj1);
+    if (PyErr_Occurred()) SWIG_fail;
+    arg3 = (unsigned int) PyInt_AsLong(obj2);
+    if (PyErr_Occurred()) SWIG_fail;
+    arg4 = (unsigned int) PyInt_AsLong(obj3);
+    if (PyErr_Occurred()) SWIG_fail;
+    arg5 = (unsigned int) PyInt_AsLong(obj4);
+    if (PyErr_Occurred()) SWIG_fail;
+    if ((SWIG_ConvertPtr(obj5,(void **) &arg6, SWIGTYPE_p_comedi_calibration_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (int)comedi_apply_parsed_calibration(arg1,arg2,arg3,arg4,arg5,(comedi_calibration_t const *)arg6);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_get_default_calibration_path(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_t *arg1 = (comedi_t *) 0 ;
+    char *result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:comedi_get_default_calibration_path",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (char *)comedi_get_default_calibration_path(arg1);
+    
+    resultobj = result ? PyString_FromString(result) : Py_BuildValue((char*)"");
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_cleanup_calibration(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_calibration_t *arg1 = (comedi_calibration_t *) 0 ;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:comedi_cleanup_calibration",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_calibration_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    comedi_cleanup_calibration(arg1);
+    
+    Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_comedi_apply_calibration(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    comedi_t *arg1 = (comedi_t *) 0 ;
+    unsigned int arg2 ;
+    unsigned int arg3 ;
+    unsigned int arg4 ;
+    unsigned int arg5 ;
+    char *arg6 ;
+    int result;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    PyObject * obj2 = 0 ;
+    PyObject * obj3 = 0 ;
+    PyObject * obj4 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OOOOOs:comedi_apply_calibration",&obj0,&obj1,&obj2,&obj3,&obj4,&arg6)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_comedi_t,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    arg2 = (unsigned int) PyInt_AsLong(obj1);
+    if (PyErr_Occurred()) SWIG_fail;
+    arg3 = (unsigned int) PyInt_AsLong(obj2);
+    if (PyErr_Occurred()) SWIG_fail;
+    arg4 = (unsigned int) PyInt_AsLong(obj3);
+    if (PyErr_Occurred()) SWIG_fail;
+    arg5 = (unsigned int) PyInt_AsLong(obj4);
+    if (PyErr_Occurred()) SWIG_fail;
+    result = (int)comedi_apply_calibration(arg1,arg2,arg3,arg4,arg5,(char const *)arg6);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
 static PyMethodDef SwigMethods[] = {
 	 { (char *)"cr_pack", _wrap_cr_pack, METH_VARARGS },
 	 { (char *)"cr_pack_flags", _wrap_cr_pack_flags, METH_VARARGS },
@@ -6069,6 +6973,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"comedi_subdinfo_struct_flags_get", _wrap_comedi_subdinfo_struct_flags_get, METH_VARARGS },
 	 { (char *)"comedi_subdinfo_struct_range_type_set", _wrap_comedi_subdinfo_struct_range_type_set, METH_VARARGS },
 	 { (char *)"comedi_subdinfo_struct_range_type_get", _wrap_comedi_subdinfo_struct_range_type_get, METH_VARARGS },
+	 { (char *)"comedi_subdinfo_struct_settling_time_0_set", _wrap_comedi_subdinfo_struct_settling_time_0_set, METH_VARARGS },
+	 { (char *)"comedi_subdinfo_struct_settling_time_0_get", _wrap_comedi_subdinfo_struct_settling_time_0_get, METH_VARARGS },
 	 { (char *)"comedi_subdinfo_struct_unused_set", _wrap_comedi_subdinfo_struct_unused_set, METH_VARARGS },
 	 { (char *)"comedi_subdinfo_struct_unused_get", _wrap_comedi_subdinfo_struct_unused_get, METH_VARARGS },
 	 { (char *)"new_comedi_subdinfo_struct", _wrap_new_comedi_subdinfo_struct, METH_VARARGS },
@@ -6123,6 +7029,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"comedi_bufinfo_struct_buf_int_count_get", _wrap_comedi_bufinfo_struct_buf_int_count_get, METH_VARARGS },
 	 { (char *)"comedi_bufinfo_struct_buf_user_count_set", _wrap_comedi_bufinfo_struct_buf_user_count_set, METH_VARARGS },
 	 { (char *)"comedi_bufinfo_struct_buf_user_count_get", _wrap_comedi_bufinfo_struct_buf_user_count_get, METH_VARARGS },
+	 { (char *)"comedi_bufinfo_struct_bytes_written_set", _wrap_comedi_bufinfo_struct_bytes_written_set, METH_VARARGS },
+	 { (char *)"comedi_bufinfo_struct_bytes_written_get", _wrap_comedi_bufinfo_struct_bytes_written_get, METH_VARARGS },
 	 { (char *)"comedi_bufinfo_struct_unused_set", _wrap_comedi_bufinfo_struct_unused_set, METH_VARARGS },
 	 { (char *)"comedi_bufinfo_struct_unused_get", _wrap_comedi_bufinfo_struct_unused_get, METH_VARARGS },
 	 { (char *)"new_comedi_bufinfo_struct", _wrap_new_comedi_bufinfo_struct, METH_VARARGS },
@@ -6211,6 +7119,52 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"comedi_get_buffer_contents", _wrap_comedi_get_buffer_contents, METH_VARARGS },
 	 { (char *)"comedi_mark_buffer_read", _wrap_comedi_mark_buffer_read, METH_VARARGS },
 	 { (char *)"comedi_get_buffer_offset", _wrap_comedi_get_buffer_offset, METH_VARARGS },
+	 { (char *)"comedi_caldac_t_subdevice_set", _wrap_comedi_caldac_t_subdevice_set, METH_VARARGS },
+	 { (char *)"comedi_caldac_t_subdevice_get", _wrap_comedi_caldac_t_subdevice_get, METH_VARARGS },
+	 { (char *)"comedi_caldac_t_channel_set", _wrap_comedi_caldac_t_channel_set, METH_VARARGS },
+	 { (char *)"comedi_caldac_t_channel_get", _wrap_comedi_caldac_t_channel_get, METH_VARARGS },
+	 { (char *)"comedi_caldac_t_value_set", _wrap_comedi_caldac_t_value_set, METH_VARARGS },
+	 { (char *)"comedi_caldac_t_value_get", _wrap_comedi_caldac_t_value_get, METH_VARARGS },
+	 { (char *)"new_comedi_caldac_t", _wrap_new_comedi_caldac_t, METH_VARARGS },
+	 { (char *)"delete_comedi_caldac_t", _wrap_delete_comedi_caldac_t, METH_VARARGS },
+	 { (char *)"comedi_caldac_t_swigregister", comedi_caldac_t_swigregister, METH_VARARGS },
+	 { (char *)"comedi_calibration_setting_t_subdevice_set", _wrap_comedi_calibration_setting_t_subdevice_set, METH_VARARGS },
+	 { (char *)"comedi_calibration_setting_t_subdevice_get", _wrap_comedi_calibration_setting_t_subdevice_get, METH_VARARGS },
+	 { (char *)"comedi_calibration_setting_t_channels_set", _wrap_comedi_calibration_setting_t_channels_set, METH_VARARGS },
+	 { (char *)"comedi_calibration_setting_t_channels_get", _wrap_comedi_calibration_setting_t_channels_get, METH_VARARGS },
+	 { (char *)"comedi_calibration_setting_t_num_channels_set", _wrap_comedi_calibration_setting_t_num_channels_set, METH_VARARGS },
+	 { (char *)"comedi_calibration_setting_t_num_channels_get", _wrap_comedi_calibration_setting_t_num_channels_get, METH_VARARGS },
+	 { (char *)"comedi_calibration_setting_t_ranges_set", _wrap_comedi_calibration_setting_t_ranges_set, METH_VARARGS },
+	 { (char *)"comedi_calibration_setting_t_ranges_get", _wrap_comedi_calibration_setting_t_ranges_get, METH_VARARGS },
+	 { (char *)"comedi_calibration_setting_t_num_ranges_set", _wrap_comedi_calibration_setting_t_num_ranges_set, METH_VARARGS },
+	 { (char *)"comedi_calibration_setting_t_num_ranges_get", _wrap_comedi_calibration_setting_t_num_ranges_get, METH_VARARGS },
+	 { (char *)"comedi_calibration_setting_t_arefs_set", _wrap_comedi_calibration_setting_t_arefs_set, METH_VARARGS },
+	 { (char *)"comedi_calibration_setting_t_arefs_get", _wrap_comedi_calibration_setting_t_arefs_get, METH_VARARGS },
+	 { (char *)"comedi_calibration_setting_t_num_arefs_set", _wrap_comedi_calibration_setting_t_num_arefs_set, METH_VARARGS },
+	 { (char *)"comedi_calibration_setting_t_num_arefs_get", _wrap_comedi_calibration_setting_t_num_arefs_get, METH_VARARGS },
+	 { (char *)"comedi_calibration_setting_t_caldacs_set", _wrap_comedi_calibration_setting_t_caldacs_set, METH_VARARGS },
+	 { (char *)"comedi_calibration_setting_t_caldacs_get", _wrap_comedi_calibration_setting_t_caldacs_get, METH_VARARGS },
+	 { (char *)"comedi_calibration_setting_t_num_caldacs_set", _wrap_comedi_calibration_setting_t_num_caldacs_set, METH_VARARGS },
+	 { (char *)"comedi_calibration_setting_t_num_caldacs_get", _wrap_comedi_calibration_setting_t_num_caldacs_get, METH_VARARGS },
+	 { (char *)"new_comedi_calibration_setting_t", _wrap_new_comedi_calibration_setting_t, METH_VARARGS },
+	 { (char *)"delete_comedi_calibration_setting_t", _wrap_delete_comedi_calibration_setting_t, METH_VARARGS },
+	 { (char *)"comedi_calibration_setting_t_swigregister", comedi_calibration_setting_t_swigregister, METH_VARARGS },
+	 { (char *)"comedi_calibration_t_driver_name_set", _wrap_comedi_calibration_t_driver_name_set, METH_VARARGS },
+	 { (char *)"comedi_calibration_t_driver_name_get", _wrap_comedi_calibration_t_driver_name_get, METH_VARARGS },
+	 { (char *)"comedi_calibration_t_board_name_set", _wrap_comedi_calibration_t_board_name_set, METH_VARARGS },
+	 { (char *)"comedi_calibration_t_board_name_get", _wrap_comedi_calibration_t_board_name_get, METH_VARARGS },
+	 { (char *)"comedi_calibration_t_settings_set", _wrap_comedi_calibration_t_settings_set, METH_VARARGS },
+	 { (char *)"comedi_calibration_t_settings_get", _wrap_comedi_calibration_t_settings_get, METH_VARARGS },
+	 { (char *)"comedi_calibration_t_num_settings_set", _wrap_comedi_calibration_t_num_settings_set, METH_VARARGS },
+	 { (char *)"comedi_calibration_t_num_settings_get", _wrap_comedi_calibration_t_num_settings_get, METH_VARARGS },
+	 { (char *)"new_comedi_calibration_t", _wrap_new_comedi_calibration_t, METH_VARARGS },
+	 { (char *)"delete_comedi_calibration_t", _wrap_delete_comedi_calibration_t, METH_VARARGS },
+	 { (char *)"comedi_calibration_t_swigregister", comedi_calibration_t_swigregister, METH_VARARGS },
+	 { (char *)"comedi_parse_calibration_file", _wrap_comedi_parse_calibration_file, METH_VARARGS },
+	 { (char *)"comedi_apply_parsed_calibration", _wrap_comedi_apply_parsed_calibration, METH_VARARGS },
+	 { (char *)"comedi_get_default_calibration_path", _wrap_comedi_get_default_calibration_path, METH_VARARGS },
+	 { (char *)"comedi_cleanup_calibration", _wrap_comedi_cleanup_calibration, METH_VARARGS },
+	 { (char *)"comedi_apply_calibration", _wrap_comedi_apply_calibration, METH_VARARGS },
 	 { NULL, NULL }
 };
 
@@ -6222,6 +7176,7 @@ static void *_p_chanlistTo_p_unsigned_int(void *x) {
 }
 static swig_type_info _swigt__p_lsampl_t[] = {{"_p_lsampl_t", 0, "lsampl_t *", 0},{"_p_chanlist"},{"_p_lsampl_t"},{"_p_unsigned_int"},{0}};
 static swig_type_info _swigt__p_sampl_t[] = {{"_p_sampl_t", 0, "sampl_t *", 0},{"_p_sampl_t"},{0}};
+static swig_type_info _swigt__p_comedi_calibration_setting_t[] = {{"_p_comedi_calibration_setting_t", 0, "comedi_calibration_setting_t *", 0},{"_p_comedi_calibration_setting_t"},{0}};
 static swig_type_info _swigt__p_double[] = {{"_p_double", 0, "double *", 0},{"_p_double"},{0}};
 static swig_type_info _swigt__p_comedi_range[] = {{"_p_comedi_range", 0, "comedi_range *", 0},{"_p_comedi_range"},{0}};
 static swig_type_info _swigt__p_unsigned_int[] = {{"_p_unsigned_int", 0, "unsigned int *", 0},{"_p_chanlist", _p_chanlistTo_p_unsigned_int},{"_p_lsampl_t"},{"_p_unsigned_int"},{0}};
@@ -6239,10 +7194,12 @@ static swig_type_info _swigt__p_char[] = {{"_p_char", 0, "char *", 0},{"_p_char"
 static swig_type_info _swigt__p_comedi_devconfig_struct[] = {{"_p_comedi_devconfig_struct", 0, "comedi_devconfig_struct *", 0},{"_p_comedi_devconfig_struct"},{0}};
 static swig_type_info _swigt__p_comedi_bufconfig_struct[] = {{"_p_comedi_bufconfig_struct", 0, "comedi_bufconfig_struct *", 0},{"_p_comedi_bufconfig_struct"},{0}};
 static swig_type_info _swigt__p_comedi_bufinfo_struct[] = {{"_p_comedi_bufinfo_struct", 0, "comedi_bufinfo_struct *", 0},{"_p_comedi_bufinfo_struct"},{0}};
+static swig_type_info _swigt__p_comedi_calibration_t[] = {{"_p_comedi_calibration_t", 0, "comedi_calibration_t *", 0},{"_p_comedi_calibration_t"},{0}};
 static swig_type_info _swigt__p_comedi_sv_t[] = {{"_p_comedi_sv_t", 0, "comedi_sv_t *", 0},{"_p_comedi_sv_t"},{0}};
 static swig_type_info _swigt__p_chanlist[] = {{"_p_chanlist", 0, "chanlist *", 0},{"_p_chanlist"},{0}};
 static swig_type_info _swigt__p_comedi_insn[] = {{"_p_comedi_insn", 0, "comedi_insn *", 0},{"_p_comedi_insn_struct"},{"_p_comedi_insn"},{0}};
 static swig_type_info _swigt__p_comedi_insnlist[] = {{"_p_comedi_insnlist", 0, "comedi_insnlist *", 0},{"_p_comedi_insnlist"},{"_p_comedi_insnlist_struct"},{0}};
+static swig_type_info _swigt__p_comedi_caldac_t[] = {{"_p_comedi_caldac_t", 0, "comedi_caldac_t *", 0},{"_p_comedi_caldac_t"},{0}};
 static swig_type_info _swigt__p_comedi_t[] = {{"_p_comedi_t", 0, "comedi_t *", 0},{"_p_comedi_t"},{0}};
 static swig_type_info _swigt__p_int[] = {{"_p_int", 0, "int *", 0},{"_p_int"},{0}};
 static swig_type_info _swigt__p_comedi_cmd[] = {{"_p_comedi_cmd", 0, "comedi_cmd *", 0},{"_p_comedi_cmd"},{"_p_comedi_cmd_struct"},{0}};
@@ -6250,6 +7207,7 @@ static swig_type_info _swigt__p_comedi_cmd[] = {{"_p_comedi_cmd", 0, "comedi_cmd
 static swig_type_info *swig_types_initial[] = {
 _swigt__p_lsampl_t, 
 _swigt__p_sampl_t, 
+_swigt__p_comedi_calibration_setting_t, 
 _swigt__p_double, 
 _swigt__p_comedi_range, 
 _swigt__p_unsigned_int, 
@@ -6267,10 +7225,12 @@ _swigt__p_char,
 _swigt__p_comedi_devconfig_struct, 
 _swigt__p_comedi_bufconfig_struct, 
 _swigt__p_comedi_bufinfo_struct, 
+_swigt__p_comedi_calibration_t, 
 _swigt__p_comedi_sv_t, 
 _swigt__p_chanlist, 
 _swigt__p_comedi_insn, 
 _swigt__p_comedi_insnlist, 
+_swigt__p_comedi_caldac_t, 
 _swigt__p_comedi_t, 
 _swigt__p_int, 
 _swigt__p_comedi_cmd, 
@@ -6400,6 +7360,9 @@ static swig_const_info swig_const_table[] = {
 { SWIG_PY_INT,     (char *)"COMEDI_OPENDRAIN", (long) 2, 0, 0, 0},
 { SWIG_PY_INT,     (char *)"INSN_CONFIG_ANALOG_TRIG", (long) 0x10, 0, 0, 0},
 { SWIG_PY_INT,     (char *)"INSN_CONFIG_ALT_SOURCE", (long) 0x14, 0, 0, 0},
+{ SWIG_PY_INT,     (char *)"INSN_CONFIG_DIGITAL_TRIG", (long) 0x15, 0, 0, 0},
+{ SWIG_PY_INT,     (char *)"INSN_CONFIG_BLOCK_SIZE", (long) 0x16, 0, 0, 0},
+{ SWIG_PY_INT,     (char *)"INSN_CONFIG_TIMER_1", (long) 0x17, 0, 0, 0},
 { SWIG_PY_STRING,  (char*)"CIO", 0, 0, (void *)"d", 0},
 { SWIG_PY_INT,     (char *)"RF_EXTERNAL", (long) (1<<8), 0, 0, 0},
 { SWIG_PY_INT,     (char *)"UNIT_volt", (long) 0, 0, 0, 0},
@@ -6410,8 +7373,10 @@ static swig_const_info swig_const_table[] = {
 { SWIG_PY_INT,     (char *)"COMEDI_CB_BLOCK", (long) 4, 0, 0, 0},
 { SWIG_PY_INT,     (char *)"COMEDI_CB_EOBUF", (long) 8, 0, 0, 0},
 { SWIG_PY_INT,     (char *)"COMEDI_CB_ERROR", (long) 16, 0, 0, 0},
+{ SWIG_PY_INT,     (char *)"COMEDI_CB_OVERFLOW", (long) 32, 0, 0, 0},
 { SWIG_PY_INT,     (char *)"COMEDI_OOR_NUMBER", (long) COMEDI_OOR_NUMBER, 0, 0, 0},
 { SWIG_PY_INT,     (char *)"COMEDI_OOR_NAN", (long) COMEDI_OOR_NAN, 0, 0, 0},
+{ SWIG_PY_INT,     (char *)"CS_MAX_AREFS_LENGTH", (long) 4, 0, 0, 0},
 {0}};
 
 #ifdef __cplusplus
