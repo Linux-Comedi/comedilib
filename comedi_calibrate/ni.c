@@ -555,23 +555,24 @@ int cal_ni_pci_6052e(calibration_setup_t *setup)
 	 *
 	 */
 
-	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,2);
+	cal_postgain_binary( setup, ni_zero_offset_low,ni_zero_offset_high,2);
 	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,3);
 	cal1( setup, ni_zero_offset_high,0);
-cal_binary( setup, ni_zero_offset_high,0);
 	cal1( setup, ni_zero_offset_high,1);
-	cal1( setup, ni_reference_low,4);
+	cal_binary( setup, ni_reference_low,4);
 	cal1_fine( setup, ni_reference_low,4);
 	cal1( setup, ni_reference_low,5);
 	cal1( setup, ni_unip_offset_low,6);
 	cal1_fine( setup, ni_unip_offset_low,6);
-	//cal1( setup, ni_unip_offset_low,7);
 	if(do_output){
 		cal1( setup, ni_ao0_zero_offset,12+11);
+		cal1_fine( setup, ni_ao0_zero_offset,12+11);
 		cal1( setup, ni_ao0_reference,12+7);
+		cal1_fine( setup, ni_ao0_reference,12+7);
 		cal1( setup, ni_ao0_reference,12+3);
 		cal1( setup, ni_ao1_zero_offset,12+1);
 		cal1( setup, ni_ao1_reference,12+9);
+		cal1_fine( setup, ni_ao1_reference,12+9);
 		cal1( setup, ni_ao1_reference,12+5);
 	}
 	return 0;
@@ -581,19 +582,26 @@ int cal_ni_pci_mio_16e_4(calibration_setup_t *setup)
 {
 	/* this is for the ad8804_debug caldac */
 
-	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,4);
+	cal_postgain_binary( setup, ni_zero_offset_low,ni_zero_offset_high,4);
+	//cal_postgain_fine( setup, ni_zero_offset_low,ni_zero_offset_high,4);
 	cal1( setup, ni_zero_offset_high,8);
-	cal1( setup, ni_reference_low,2);
+	cal_binary( setup, ni_reference_low,2);
+	cal1_fine( setup, ni_reference_low,2);
 
 	cal1( setup, ni_unip_offset_low,7);
+	cal1_fine( setup, ni_unip_offset_low,7);
 
 	if(do_output){
-		cal1( setup, ni_ao0_zero_offset,6);
+		cal_binary( setup, ni_ao0_zero_offset,6);
+		cal1_fine( setup, ni_ao0_zero_offset,6);
 		//cal1( setup, ni_ao0_nonlinearity,10);
-		cal1( setup, ni_ao0_reference,11);
-		cal1( setup, ni_ao1_zero_offset,9);
+		cal_binary( setup, ni_ao0_reference,11);
+		cal1_fine( setup, ni_ao0_reference,11);
+		cal_binary( setup, ni_ao1_zero_offset,9);
+		cal1_fine( setup, ni_ao1_zero_offset,9);
 		//cal1( setup, ni_ao1_nonlinearity,1);
-		cal1( setup, ni_ao1_reference,5);
+		cal_binary( setup, ni_ao1_reference,5);
+		cal1_fine( setup, ni_ao1_reference,5);
 	}
 	return 0;
 }
