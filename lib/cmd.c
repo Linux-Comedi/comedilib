@@ -68,8 +68,8 @@ static int __generic_timed(comedi_t *it,unsigned int s,
 	if(cmd->start_src&TRIG_NOW){
 		cmd->start_src=TRIG_NOW;
 		cmd->start_arg=0;
-	}else if(cmd->start_src&TRIG_FOLLOW){
-		cmd->start_src=TRIG_FOLLOW;
+	}else if(cmd->start_src&TRIG_INT){
+		cmd->start_src=TRIG_INT;
 		cmd->start_arg=0;
 	}else{
 		DEBUG(3,"can't find good start_src\n");
