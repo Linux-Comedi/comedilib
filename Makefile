@@ -11,6 +11,12 @@ MAJOR=0
 
 CFLAGS = -Wall -O2
 
+CROSS   := 
+CC      := $(CROSS)gcc
+AR      := $(CROSS)ar
+LD      := $(CROSS)ld
+INSTALL := install
+
 TARGETS = comedilib
 ifeq ($(with_python),yes)
 TARGETS += python
