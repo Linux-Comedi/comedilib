@@ -103,6 +103,13 @@ int main(int argc,char *argv[])
 	int remove=0;
 	int index;
 
+	if(getuid() != 0)
+	{
+		errno = EPERM;
+		perror(argv[0]);
+		exit(1);
+	}
+
 	while(1){
 		c=getopt_long(argc, argv, "rvVqi:", options, &index);
 		if(c==-1)break;
@@ -187,8 +194,6 @@ int main(int argc,char *argv[])
 				do_help(1);
 			}
 		}
-		if(argc-optind > 3)
-			do_help(1);
 
 		ret=stat(fn,&statbuf);
 		if(ret<0){
