@@ -494,7 +494,45 @@ command is executed with
 comedi_command().  For input/output commands, data
 is read from or written to the device file /dev/comedi[0..3] you are using.
 </para>
- 
+
+</section>
+
+<section>
+<title>
+Anti-aliasing
+</title>
+
+<para>
+If you wish to aquire accurate waveforms, it is vital that you use an
+anti-alias filter.  An anti-alias filter is a low-pass filter used to
+remove all
+frequencies higher than the Nyquist frequency (half your sampling rate)
+ from your analog input signal
+before you convert it to digital.  If you fail to filter your input signal,
+any high frequency components in the original analog signal will create
+artifacts in your recorded
+digital waveform that cannot be corrected.
+</para>
+
+<para>
+For example, suppose you are sampling an analog input channel at a rate of
+1000 Hz.  If you were to apply a 900 Hz sine wave to the input, you
+would find that your
+sampling rate is not high enough to faithfully record the 900 Hz input,
+since it is above your Nyquist frequency of 500 Hz.  Instead, what you
+will see in your recorded digital waveform is a 100 Hz sine wave!  If you
+don't use an anti-alias filter, it is impossible to tell whether the 100
+Hz sine wave you see in your digital signal was really produced by a
+100 Hz input signal, or a 900 Hz signal aliased to 100 Hz, or a 1100 Hz
+signal, etc.
+</para>
+
+<para>
+In practice, the cutoff frequency for the anti-alias filter is usually
+set 10% to 20% below the Nyquist frequency due to fact that real filters
+do not have infinitely sharp cutoffs.
+</para>
+
 </section>
 
 </section>
