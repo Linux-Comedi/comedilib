@@ -155,7 +155,7 @@ int comedi_buf_resize_max(comedi_t *it, unsigned int subdev, unsigned int max_si
 int comedi_buf_size(comedi_t *it, unsigned int subdev);
 int comedi_buf_contents(comedi_t *it, unsigned int subdev);
 int comedi_buf_mark_read(comedi_t *it, unsigned int subdev, unsigned int bytes);
-
+int comedi_buf_offset(comedi_t *it, unsigned int subdev);
 
 #ifdef __cplusplus
 }
