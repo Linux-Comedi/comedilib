@@ -56,6 +56,11 @@ int comedi_get_cmd_generic_timed(comedi_t *it,unsigned int s,comedi_cmd *cmd)
 			cmd->convert_src = TRIG_TIMER;
 			cmd->scan_begin_src = TRIG_TIMER;
 		}
+	}else if(cmd->convert_src & TRIG_NOW &&
+		cmd->scan_begin_src & TRIG_TIMER)
+	{
+		cmd->convert_src = TRIG_NOW;
+		cmd->scan_begin_src = TRIG_TIMER;
 	}else{
 		//printf("can't do timed?!?\n");
 		return -1;
