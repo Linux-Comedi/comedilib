@@ -29,23 +29,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 #include "calib.h"
 
-#define CAL_MAX_CHANNELS_LENGTH 1024
-#define CAL_MAX_RANGES_LENGTH 128
-#define CAL_MAX_AREFS_LENGTH 16
-
-struct calibration_setting
-{
-	unsigned int subdevice;
-	caldac_t caldacs[ N_CALDACS ];
-	unsigned int caldacs_length;
-	int channels[ CAL_MAX_CHANNELS_LENGTH ]; /* channels that caldac settings are restricted to */
-	unsigned int channels_length; /* number of elements in channels array, 0 means allow all channels */
-	int ranges[ CAL_MAX_RANGES_LENGTH ]; /* ranges that caldac settings are restricted to */
-	unsigned int ranges_length;/* number of elements in ranges array, 0 means allow all ranges */
-	int arefs[ CAL_MAX_AREFS_LENGTH ]; /* arefs that caldac settings are used restricted to */
-	unsigned int arefs_length; /* number of elements in arefs array, 0 means allow any aref */
-};
-
 int get_inode( comedi_t *dev, ino_t *inode )
 {
 	struct stat file_stats;
@@ -75,7 +58,7 @@ void write_caldac( FILE *file, caldac_t caldac )
 	fprintf( file, "}" );
 }
 
-void write_calibration_setting( FILE *file, struct calibration_setting setting )
+void write_calibration_setting( FILE *file, saved_calibration_t setting )
 {
 	static const char *indent = "\t\t";
 	int i;
@@ -112,8 +95,8 @@ void write_calibration_setting( FILE *file, struct calibration_setting setting )
 	fprintf( file, "}" );
 }
 
-int write_calibration_file( FILE *file, comedi_t *dev,
-	struct calibration_setting settings[], unsigned int num_settings )
+int write_calibration_perl_hash( FILE *file, comedi_t *dev,
+	saved_calibration_t settings[], unsigned int num_settings )
 {
 	ino_t inode;
 	int retval;
@@ -134,4 +117,43 @@ int write_calibration_file( FILE *file, comedi_t *dev,
 		"};\n");
 
 	return 0;
+}
+
+int write_calibration_file( comedi_t *dev, saved_calibration_t settings[],
+	unsigned int num_settings )
+{
+	FILE *file;
+	int retval;
+	static const char *save_dir = "/etc/comedi/calibrations";
+	char file_path[ 100 ];
+	char command[ 100 ];
+	struct stat file_stats;
+
+	if( fstat( comedi_fileno( dev ), &file_stats ) < 0 )
+	{
+		fprintf( stderr, "failed to get dev_t of comedi device file\n" );
+		return -1;
+	}
+
+	snprintf( command, sizeof( command ), "install -d %s", save_dir );
+	if( system( command ) )
+	{
+		fprintf( stderr, "failed to create directory %s\n", save_dir );
+		return -1;
+	}
+
+	snprintf( file_path, sizeof( file_path ), "%s/comedi_0x%lx",
+		save_dir, ( unsigned long ) file_stats.st_dev );
+	file = fopen( file_path, "w" );
+	if( file == NULL )
+	{
+		fprintf( stderr, "failed to open file %s for writing\n", file_path );
+		return -1;
+	}
+
+	retval = write_calibration_perl_hash( file, dev, settings, num_settings );
+
+	fclose( file );
+
+	return retval;
 }

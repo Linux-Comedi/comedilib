@@ -190,6 +190,31 @@ typedef struct{
 int new_sv_measure(comedi_t *dev, new_sv_t *sv);
 int new_sv_init(new_sv_t *sv,comedi_t *dev,int subdev,unsigned int chanspec);
 
+/* saving calibrations to file */
+#define CAL_MAX_CHANNELS_LENGTH 128
+#define CAL_MAX_RANGES_LENGTH 128
+#define CAL_MAX_AREFS_LENGTH 16
+typedef struct
+{
+	unsigned int subdevice;
+	caldac_t caldacs[ N_CALDACS ];
+	unsigned int caldacs_length;
+	/* channels that caldac settings are restricted to */
+	int channels[ CAL_MAX_CHANNELS_LENGTH ];
+	/* number of elements in channels array, 0 means allow all channels */
+	unsigned int channels_length;
+	/* ranges that caldac settings are restricted to */
+	int ranges[ CAL_MAX_RANGES_LENGTH ];
+	/* number of elements in ranges array, 0 means allow all ranges */
+	unsigned int ranges_length;
+	/* arefs that caldac settings are used restricted to */
+	int arefs[ CAL_MAX_AREFS_LENGTH ];
+	/* number of elements in arefs array, 0 means allow any aref */
+	unsigned int arefs_length;
+} saved_calibration_t;
+
+int write_calibration_file( comedi_t *dev, saved_calibration_t settings[],
+	unsigned int num_settings );
 
 #endif
 
