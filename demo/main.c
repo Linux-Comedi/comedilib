@@ -7,17 +7,16 @@
 #include <comedilib.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <sys/ioctl.h>
 #include <errno.h>
 #include <getopt.h>
 #include <ctype.h>
 #include <malloc.h>
+#include <string.h>
 #include "examples.h"
 
 
 char *filename="/dev/comedi0";
 int verbose_flag;
-comedi_t *device;
 
 int value;
 int subdevice;
@@ -76,5 +75,50 @@ int parse_options(int argc, char *argv[])
 	return argc;
 }
 
+char *cmd_src(int src,char *buf)
+{
+	buf[0]=0;
 
+	if(src&TRIG_NONE)strcat(buf,"none|");
+	if(src&TRIG_NOW)strcat(buf,"now|");
+	if(src&TRIG_FOLLOW)strcat(buf, "follow|");
+	if(src&TRIG_TIME)strcat(buf, "time|");
+	if(src&TRIG_TIMER)strcat(buf, "timer|");
+	if(src&TRIG_COUNT)strcat(buf, "count|");
+	if(src&TRIG_EXT)strcat(buf, "ext|");
+	if(src&TRIG_INT)strcat(buf, "int|");
+
+	if(strlen(buf)==0){
+		sprintf(buf,"unknown(0x%02x)",src);
+	}else{
+		buf[strlen(buf)-1]=0;
+	}
+
+	return buf;
+}
+
+void dump_cmd(comedi_cmd *cmd)
+{
+	char buf[100];
+
+	printf("start: %s %d\n",
+		cmd_src(cmd->start_src,buf),
+		cmd->start_arg);
+
+	printf("scan_begin: %s %d\n",
+		cmd_src(cmd->scan_begin_src,buf),
+		cmd->scan_begin_arg);
+
+	printf("convert: %s %d\n",
+		cmd_src(cmd->convert_src,buf),
+		cmd->convert_arg);
+
+	printf("scan_end: %s %d\n",
+		cmd_src(cmd->scan_end_src,buf),
+		cmd->scan_end_arg);
+
+	printf("stop: %s %d\n",
+		cmd_src(cmd->stop_src,buf),
+		cmd->stop_arg);
+}
 

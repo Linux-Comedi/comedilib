@@ -6,18 +6,16 @@
 #include <comedilib.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <sys/ioctl.h>
 #include <errno.h>
 #include <getopt.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include "examples.h"
 
-comedi_t *device;
-
 int read_eeprom(comedi_t *it,unsigned int **eeprom);
 void dump_eeprom(unsigned int *eeprom,int len);
 
+comedi_t *device;
 
 int main(int argc, char *argv[])
 {

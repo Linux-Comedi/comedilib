@@ -19,7 +19,6 @@
 #include <comedilib.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <sys/ioctl.h>
 #include <errno.h>
 #include <getopt.h>
 #include <ctype.h>

@@ -37,9 +37,9 @@
  * flag.  Once you have issued the command, comedi then
  * expects you to keep the buffer full of data to output
  * to the DAC.  This is done by write().  Since there
- * may be a delay between the ioctl() and a subsequent
+ * may be a delay between the comedi_command() and a subsequent
  * write(), you should fill the buffer using write() before
- * you call ioctl(), as is done here.
+ * you call comedi_command(), as is done here.
  *
  * Also NOTE!  The lseek() to offset 1 is used to tell
  * comedi that you want to write to subdevice 1.  This
@@ -52,7 +52,6 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <sys/ioctl.h>
 #include <errno.h>
 #include <getopt.h>
 #include <ctype.h>
@@ -142,9 +141,8 @@ int main(int argc, char *argv[])
 	perror("write");
 	printf("m=%d\n",m);
 
-
 	if ((err = comedi_command(dev, &cmd)) < 0) {
-		perror("ioctl");
+		comedi_perror("comedi_command");
 		exit(1);
 	}
 	while(1){

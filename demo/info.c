@@ -7,7 +7,6 @@
 #include <comedilib.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <sys/ioctl.h>
 #include <errno.h>
 #include <string.h>
 #include "examples.h"
@@ -116,28 +115,6 @@ char *tobinary(char *s,int bits,int n)
 	*t=0;
 	
 	return s;
-}
-
-char *cmd_src(int src,char *buf)
-{
-	buf[0]=0;
-
-	if(src&TRIG_NONE)strcat(buf,"none|");
-	if(src&TRIG_NOW)strcat(buf,"now|");
-	if(src&TRIG_FOLLOW)strcat(buf,"follow|");
-	if(src&TRIG_TIME)strcat(buf,"time|");
-	if(src&TRIG_TIMER)strcat(buf,"timer|");
-	if(src&TRIG_COUNT)strcat(buf,"count|");
-	if(src&TRIG_EXT)strcat(buf,"ext|");
-	if(src&TRIG_INT)strcat(buf,"int|");
-
-	if(strlen(buf)==0){
-		sprintf(buf,"unknown(0x%02x)",src);
-	}else{
-		buf[strlen(buf)-1]=0;
-	}
-
-	return buf;
 }
 
 void probe_max_1chan(comedi_t *it,int s);

@@ -18,22 +18,19 @@
 #include <comedilib.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <sys/ioctl.h>
 #include <errno.h>
 #include <getopt.h>
 #include <ctype.h>
 #include "examples.h"
 
-comedi_t *device;
 
+comedi_t *device;
 
 int main(int argc, char *argv[])
 {
 	int ret;
 	int stype;
 	int i;
-	unsigned int mask;
-	unsigned int data;
 
 	parse_options(argc,argv);
 
@@ -55,10 +52,22 @@ int main(int argc, char *argv[])
 	
 	printf("toggling pin %d rapidly...\n",channel);
 
-	for(i=0;i<10000;i++){
 		comedi_dio_write(device,subdevice,channel,1);
+#if 0
+	for(i=0;i<10000;i++){
+		usleep(1000000);
+		comedi_dio_write(device,subdevice,channel,1);
+		printf("1\n");
+		usleep(1000000);
 		comedi_dio_write(device,subdevice,channel,0);
+		printf("0\n");
 	}
+#endif
+
+#if 0
+	{
+	unsigned int mask;
+	unsigned int data;
 
 	printf("toggling pin %d rapidly (using bitfield)...\n",channel);
 
@@ -69,6 +78,8 @@ int main(int argc, char *argv[])
 		data = 0;
 		comedi_dio_bitfield(device,subdevice,mask,&data);
 	}
+	}
+#endif
 
 	return 0;
 }

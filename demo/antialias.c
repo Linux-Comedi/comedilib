@@ -33,15 +33,14 @@
 #include <comedilib.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <sys/ioctl.h>
 #include <errno.h>
 #include <getopt.h>
 #include <ctype.h>
 #include "examples.h"
 
-comedi_t *device;
-
 void ao_antialias(unsigned int data);
+
+comedi_t *device;
 
 int main(int argc, char *argv[])
 {

@@ -13,8 +13,9 @@
 
    Using instructions directly, as in this example, is not recommended
    for the beginner.  Use the higher-level functions such as
-   comedi_data_read(), comedi_data_write(), etc.  Then, if you
-   need the additional flexibility that using instructions directly
+   comedi_data_read(), comedi_data_write(), etc., as demonstrated
+   in the inp, outp, and dio examples.  Then, if you need the
+   additional flexibility that using instructions directly
    provides, study this example and the implementations of
    comedi_data_read(), etc.
  */
@@ -23,23 +24,20 @@
 #include <comedilib.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <sys/ioctl.h>
 #include <errno.h>
 #include <sys/time.h>
 #include <unistd.h>
 #include "examples.h"
 
-comedi_t *device;
-
-
 /*
  * This example does 3 instructions in one system call.  It does
  * a gettimeofday() call, then reads N_SAMPLES samples from an
  * analog input, and the another gettimeofday() call.
- *
  */
 
 #define N_SAMPLES 1
+
+comedi_t *device;
 
 int main(int argc, char *argv[])
 {
@@ -73,7 +71,6 @@ int main(int argc, char *argv[])
 	insn[0].n=2;
 	insn[0].data=(void *)&t1;
 
-//#if 0
 	/* Instruction 1: do 10 analog input reads */
 	insn[1].insn=INSN_READ;
 	insn[1].n=N_SAMPLES;
@@ -85,12 +82,6 @@ int main(int argc, char *argv[])
 	insn[2].insn=INSN_GTOD;
 	insn[2].n=2;
 	insn[2].data=(void *)&t2;
-//#endif
-#if 0
-	insn[1].insn=INSN_GTOD;
-	insn[1].n=2;
-	insn[1].data=(void *)&t2;
-#endif
 
 	ret=comedi_do_insnlist(device,&il);
 	if(ret<0){

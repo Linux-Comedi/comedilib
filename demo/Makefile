@@ -2,19 +2,21 @@
 
 
 CFLAGS += -I ../include -I . -O2 -Wall -Wstrict-prototypes
+#CFLAGS += -I ../include -I . -Wall -Wstrict-prototypes -g
 LDFLAGS = -L../lib/ -lcomedi -lm
 
 
-BINS=cmd tut1 tut2
-MBINS=inp inpn sv eeprom_dump info outp insn antialias ao_waveform dio mmap
+BINS=tut1 tut2
+MBINS=inp inpn sv eeprom_dump info outp insn antialias ao_waveform \
+	dio mmap ledclock receiver sigio select sender cmd
 
-all: $(patsubst %,_mbins_%,$(MBINS)) $(patsubst %,_bins_%,$(BINS))
+all: $(BINS) $(MBINS)
 
-$(patsubst %,_mbins_%,$(MBINS)) : main.o $(patsubst %,%.o,$(MBINS))
-	$(CC) -o $(patsubst _mbins_%,%,$@) main.o $(patsubst _mbins_%,%.o,$@) $(LDFLAGS)
+$(BINS): % : %.o
+	$(CC) $(LDFLAGS) -o $@ $<
 
-$(patsubst %,_bins_%,$(BINS)) : $(patsubst %,%.o,$(BINS))
-	$(CC) -o $(patsubst _bins_%,%,$@) $(patsubst _bins_%,%.o,$@) $(LDFLAGS)
+$(MBINS): % : %.o main.o
+	$(CC) $(LDFLAGS) -o $@ main.o $<
 
 clean:
 	-rm -f *.o $(BINS) $(MBINS)
