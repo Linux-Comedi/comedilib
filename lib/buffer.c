@@ -2,7 +2,7 @@
 
 #include <libinternal.h>
 
-int comedi_buf_resize(comedi_t *it, unsigned int subdev, unsigned int size)
+int comedi_set_buffer_size(comedi_t *it, unsigned int subdev, unsigned int size)
 {
 	int ret;
 	comedi_bufconfig bc;
@@ -16,7 +16,7 @@ int comedi_buf_resize(comedi_t *it, unsigned int subdev, unsigned int size)
 	return bc.size;
 }
 
-int comedi_buf_resize_max(comedi_t *it, unsigned int subdev, unsigned int max_size)
+int comedi_set_buffer_max_size(comedi_t *it, unsigned int subdev, unsigned int max_size)
 {
 	int ret;
 	comedi_bufconfig bc;
@@ -30,17 +30,17 @@ int comedi_buf_resize_max(comedi_t *it, unsigned int subdev, unsigned int max_si
 	return bc.maximum_size;
 }
 
-int comedi_buf_size(comedi_t *it, unsigned int subdev)
+int comedi_get_buffer_size(comedi_t *it, unsigned int subdev)
 {
-	return comedi_buf_resize(it, subdev, 0);
+	return comedi_set_buffer_size(it, subdev, 0);
 }
 
-int comedi_buf_contents(comedi_t *it, unsigned int subdev)
+int comedi_get_buffer_contents(comedi_t *it, unsigned int subdev)
 {
-	return comedi_buf_mark_read(it, subdev, 0);
+	return comedi_mark_buffer_read(it, subdev, 0);
 }
 
-int comedi_buf_mark_read(comedi_t *it, unsigned int subdev, unsigned int bytes)
+int comedi_mark_buffer_read(comedi_t *it, unsigned int subdev, unsigned int bytes)
 {
 	int ret;
 	comedi_bufinfo bi;
@@ -52,7 +52,7 @@ int comedi_buf_mark_read(comedi_t *it, unsigned int subdev, unsigned int bytes)
 	return bi.buf_int_count - bi.buf_user_count;
 }
 
-int comedi_buf_offset(comedi_t *it, unsigned int subdev)
+int comedi_get_buffer_offset(comedi_t *it, unsigned int subdev)
 {
 	int ret;
 	comedi_bufinfo bi;

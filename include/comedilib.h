@@ -90,7 +90,7 @@ int comedi_maxdata_is_chan_specific(comedi_t *it,unsigned int subdevice);
 
 int comedi_get_buffer_size(comedi_t *it,unsigned int subdevice);
 int comedi_get_max_buffer_size(comedi_t *it,unsigned int subdevice);
-int comedi_set_buffer_size(comedi_t *it,unsigned int subdevice,int len);
+int comedi_set_buffer_size(comedi_t *it,unsigned int subdevice,unsigned int len);
 
 /* triggers and commands */
 
@@ -150,18 +150,14 @@ enum comedi_oor_behavior {
 
 enum comedi_oor_behavior comedi_set_global_oor_behavior(enum comedi_oor_behavior behavior);
 
-// changes size (in bytes) of comedi's preallocated buffer, returns size of new buffer
-int comedi_buf_resize(comedi_t *it, unsigned int subdev, unsigned int size);
-// changes maximum size of preallocated buffer, requires root priviledge, returns new max size
-int comedi_buf_resize_max(comedi_t *it, unsigned int subdev, unsigned int max_size);
-// returns size (in bytes) of comedi's preallocated buffer
-int comedi_buf_size(comedi_t *it, unsigned int subdev);
+// changes maximum size (in bytes) of preallocated buffer, requires root priviledge, returns new max size
+int comedi_set_max_buffer_size(comedi_t *it, unsigned int subdev, unsigned int max_size);
 // returns number of bytes in buffer waiting to be read by user
-int comedi_buf_contents(comedi_t *it, unsigned int subdev);
+int comedi_get_buffer_contents(comedi_t *it, unsigned int subdev);
 // marks 'bytes' number of bytes in buffer as read by user, returns number of bytes left to be read
-int comedi_buf_mark_read(comedi_t *it, unsigned int subdev, unsigned int bytes);
+int comedi_mark_buffer_read(comedi_t *it, unsigned int subdev, unsigned int bytes);
 // returns offset in bytes from beginning of buffer for first unread data point in buffer
-int comedi_buf_offset(comedi_t *it, unsigned int subdev);
+int comedi_get_buffer_offset(comedi_t *it, unsigned int subdev);
 
 #ifdef __cplusplus
 }
