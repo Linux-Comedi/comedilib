@@ -1,5 +1,6 @@
 ;   usbdux_firmware.asm
-;   Copyright (C) 2004 Bernd Porr, Bernd.Porr@cn.stir.ac.uk
+;   Copyright (C) 2004 Bernd Porr, Bernd.Porr@f2s.com
+;   For usbdux.c 1.00pre2
 ;
 ;   This program is free software; you can redistribute it and/or modify
 ;   it under the terms of the GNU General Public License as published by
@@ -19,8 +20,8 @@
 ; Firmware: usbdux_firmware.asm for usbdux.c
 ; Description: University of Stirling USB DAQ & INCITE Technology Limited
 ; Devices: [ITL] USB-DUX (usbdux.o)
-; Author: Bernd Porr <Bernd.Porr@cn.stir.ac.uk>
-; Updated: 25 Jan 2004
+; Author: Bernd Porr <Bernd.Porr@f2s.com>
+; Updated: 23 Jul 2004
 ; Status: testing
 ;
 ;;;
@@ -31,10 +32,20 @@
 
 	.equ	CHANNELLIST,80h	; channellist in indirect memory
 	
-	.equ	DIOFLAG,90h	; flag if next IN transf is DIO
-		
+	.equ	CMD_FLAG,90h	; flag if next IN transf is DIO
+	.equ	SGLCHANNEL,91h	; channel for INSN
+	
+	.equ	DIOSTAT0,98h	; last status of the digital port
+	.equ	DIOSTAT1,99h	; same for the second counter
+	
+	.equ	CTR0,0A0H	; counter 0
+	.equ	CTR1,0A2H	; counter 1
+			
 	.org	0000h		; after reset the processor starts here
 	ljmp	main		; jump to the main loop
+
+	.org	000bh		; timer 0 irq
+	ljmp	timer0_isr
 
 	.org	0043h		; the IRQ2-vector
 	ljmp	jmptbl		; irq service-routine
@@ -164,18 +175,25 @@ ep2_isr:
 main:
 	mov	DPTR,#CPUCS	; CPU control register
 	mov	a,#00010000b	; 48Mhz
-	movx	@DPTR,a		; do it
-	lcall	syncdelay
+	lcall	syncdelaywr
 
+        mov     dptr,#REVCTL
+        mov     a,#00000011b    ; allows skip
+        lcall   syncdelaywr
+
+	mov	IP,#0		; all std 8051 int have low priority
+	mov	EIP,#0FFH	; all FX2 interrupts have high priority
+	
 	mov	dptr,#INTSETUP	; IRQ setup register
 	mov	a,#08h		; enable autovector
-	movx	@DPTR,a		; do it
-	lcall	syncdelay
+	lcall	syncdelaywr
 
 	lcall	initAD		; init the ports to the converters
 
 	lcall	initeps		; init the isochronous data-transfer
 
+	lcall	init_timer
+	
 mloop2:	nop
 	nop
 	nop
@@ -184,7 +202,7 @@ mloop2:	nop
 	nop
 	nop
 
-	sjmp	mloop2		; do nothing. The rest is done by the IRQs
+	sjmp	mloop2		; loop for ever
 
 
 ;;; initialise the ports for the AD-converter
@@ -194,6 +212,16 @@ initAD:
 	ret
 
 
+;;; init the timer for the soft counters
+init_timer:
+	;; init the timer for 2ms sampling rate
+	mov	CKCON,#00000001b; CLKOUT/12 for timer
+	mov	TL0,#010H	; 16
+	mov	TH0,#0H		; 256
+	mov	IE,#82H		; switch on timer interrupt (80H for all IRQs)
+	mov	TMOD,#00000000b	; 13 bit counters
+	setb	TCON.4		; enable timer 0
+	ret
 
 
 ;;; from here it's only IRQ handling...
@@ -264,82 +292,27 @@ zerob2:	mov	a,r5		; get r5 in order to shift the mask
 	
 
 	
-;;; aquires data from all 8 channels and stores it in the EP6 buffer
-convlo:	;;
-	mov	AUTOPTRH1,#0F8H	; EP6
+;;; aquires data from A/D channels and stores them in the EP6 buffer
+conv_ad:
+	mov	AUTOPTRH1,#0F8H	; auto pointer on EP6
 	mov	AUTOPTRL1,#00H
 	mov	AUTOPTRSETUP,#7
 	mov	r0,#CHANNELLIST	; points to the channellist
-	mov 	a,@r0		;Ch0
-	lcall 	readAD
-	mov 	a,R3		;
-	mov 	DPTR,#XAUTODAT1
-	movx 	@DPTR,A
-	mov 	a,R4		;
-	movx 	@DPTR,A
 
-	inc	r0		; next channel
-	mov 	a,@r0		;Ch1
-	lcall 	readAD
-	mov 	a,R3		;
-	mov 	DPTR,#XAUTODAT1
-	movx 	@DPTR,A
-	mov 	a,R4		;
-	movx 	@DPTR,A
+	mov	a,@r0		; number of channels
+	mov	r1,a		; counter
 
+	mov 	DPTR,#XAUTODAT1	; auto pointer
+convloop:
 	inc	r0
-	mov 	a,@r0		;Ch2
+	mov 	a,@r0		; Channel
 	lcall 	readAD
 	mov 	a,R3		;
-	mov 	DPTR,#XAUTODAT1
 	movx 	@DPTR,A
 	mov 	a,R4		;
 	movx 	@DPTR,A
+	djnz	r1,convloop
 
-	inc	r0
-	mov 	a,@r0		;Ch3
-	lcall 	readAD
-	mov 	a,R3		;
-	mov 	DPTR,#XAUTODAT1
-	movx 	@DPTR,A
-	mov 	a,R4		;
-	movx 	@DPTR,A
-
-	inc	r0
-	mov 	a,@r0		;Ch4
-	lcall 	readAD
-	mov 	a,R3		;
-	mov 	DPTR,#XAUTODAT1
-	movx 	@DPTR,A
-	mov 	a,R4		;
-	movx 	@DPTR,A
-
-	inc	r0
-	mov 	a,@r0		;Ch5
-	lcall 	readAD
-	mov 	a,R3		;
-	mov 	DPTR,#XAUTODAT1
-	movx 	@DPTR,A
-	mov 	a,R4		;
-	movx 	@DPTR,A
-
-	inc	r0
-	mov 	a,@r0		;Ch6
-	lcall 	readAD
-	mov 	a,R3		;
-	mov 	DPTR,#XAUTODAT1
-	movx 	@DPTR,A
-	mov 	a,R4		;
-	movx 	@DPTR,A
-
-	inc	r0
-	mov 	a,@r0		;Ch7
-	lcall 	readAD
-	mov 	a,R3		;
-	mov 	DPTR,#XAUTODAT1
-	movx 	@DPTR,A
-	mov 	a,R4		;
-	movx 	@DPTR,A
 	ret
 
 
@@ -349,9 +322,17 @@ convlo:	;;
 ;;; It is assumed that the USB interface is in alternate setting 3
 initeps:
 	mov	dptr,#FIFORESET
-	mov	a,#0fh		
+	mov	a,#80H		
 	movx	@dptr,a		; reset all fifos
-	mov	a,#00h		
+	mov	a,#2	
+	movx	@dptr,a		; 
+	mov	a,#4		
+	movx	@dptr,a		; 
+	mov	a,#6		
+	movx	@dptr,a		; 
+	mov	a,#8		
+	movx	@dptr,a		; 
+	mov	a,#0		
 	movx	@dptr,a		; normal operat
 	
 	mov	DPTR,#EP2CFG
@@ -363,7 +344,7 @@ initeps:
 	movx	@dptr,a
 
 	mov	dptr,#EP2BCL	; "arm" it
-	mov	a,#80h
+	mov	a,#00h
 	movx	@DPTR,a		; can receive data
 	lcall	syncdelay	; wait to sync
 	movx	@DPTR,a		; can receive data
@@ -380,7 +361,7 @@ initeps:
 	movx	@dptr,a
 
 	mov	dptr,#EP4BCL	; "arm" it
-	mov	a,#80h
+	mov	a,#00h
 	movx	@DPTR,a		; can receive data
 	lcall	syncdelay	; wait until we can write again
 	movx	@dptr,a		; make shure its really empty
@@ -410,10 +391,102 @@ initeps:
 	mov	EIE,#00000001b	; enable INT2 in the 8051's SFR
 	mov	IE,#80h		; IE, enable all interrupts
 
-	lcall	ep8_arm		; 
-	
 	ret
 
+
+;;; counter
+;;; r0: DIOSTAT
+;;; r1:	counter address
+;;; r2:	up/down-mask
+;;; r3:	reset-mask
+;;; r4:	clock-mask
+counter:	
+	mov	a,IOB		; actual IOB input state
+	mov	r5,a		; save in r5
+	anl	a,r3		; bit mask for reset
+	jz	no_reset	; reset if one
+	clr	a		; set counter to zero
+	mov	@r1,a
+	inc	r4
+	mov	@r1,a
+	sjmp	ctr_end
+no_reset:	
+	mov	a,@r0		; get last state
+	xrl	a,r5		; has it changed?
+	anl	a,r5		; is it now on?
+	anl	a,r4		; mask out the port
+	jz	ctr_end		; no rising edge
+	mov	a,r5		; get port B again
+	anl	a,r2		; test if up or down
+	jnz	ctr_up		; count up
+	mov	a,@r1
+	dec	a
+	mov	@r1,a
+	cjne	a,#0ffh,ctr_end	; underflow?
+	inc	r1		; high byte
+	mov	a,@r1
+	dec	a
+	mov	@r1,a
+	sjmp	ctr_end
+ctr_up:				; count up
+	mov	a,@r1
+	inc	a
+	mov	@r1,a
+	jnz	ctr_end
+	inc	r1		; high byte
+	mov	a,@r1
+	inc	a
+	mov	@r1,a
+ctr_end:
+	mov	a,r5
+	mov	@r0,a
+	ret
+
+;;; implements two soft counters with up/down and reset
+timer0_isr:
+	push	dps
+	push	acc
+	push	psw
+	push	00h		; R0
+	push	01h		; R1
+	push	02h		; R2
+	push	03h		; R3
+	push	04h		; R4
+	push	05h		; R5
+		
+	mov	r0,#DIOSTAT0	; status of port
+	mov	r1,#CTR0	; address of counter0
+	mov	a,#00000001b	; bit 0
+	mov	r4,a		; clock
+	rl	a		; bit 1
+	mov	r2,a		; up/down
+	rl	a		; bit 2
+	mov	r3,a		; reset mask
+	lcall	counter
+	inc	r0		; to DISTAT1
+	inc	r1		; to CTR1
+	inc	r1
+	mov	a,r3
+	rl	a		; bit 3
+	rl	a		; bit 4
+	mov	r4,a		; clock
+	rl	a		; bit 5
+	mov	r2,a		; up/down
+	rl	a		; bit 6
+	mov	r3,a		; reset
+	lcall	counter
+	
+	pop	05h		; R5
+	pop	04h		; R4
+	pop	03h		; R3
+	pop	02h		; R2
+	pop	01h		; R1
+	pop	00h		; R0
+	pop	psw
+	pop	acc 
+	pop	dps
+
+	reti
 
 ;;; interrupt-routine for SOF
 ;;; is for full speed
@@ -438,17 +511,15 @@ sof_isr:
 	anl	a,#20H		; full?
 	jnz	epfull		; EP6-buffer is full
 
-	lcall	convlo		; conversion
+	lcall	conv_ad		; conversion
 
 	mov	DPTR,#EP6BCH	; byte count H
 	mov	a,#0		; is zero
-	movx	@DPTR,a
-	lcall	syncdelay	; wait until we can write again
+	lcall	syncdelaywr	; wait until we can write again
 	
 	mov	DPTR,#EP6BCL	; byte count L
 	mov	a,#10H		; is 8x word = 16 bytes
-	movx	@DPTR,a
-	lcall	syncdelay	; wait until we can write again
+	lcall	syncdelaywr	; wait until we can write again
 	
 epfull:
 	;; do the D/A conversion
@@ -460,11 +531,9 @@ epfull:
 	lcall	dalo		; conversion
 
 	mov	dptr,#EP2BCL	; "arm" it
-	mov	a,#80h
-	movx	@DPTR,a		; can receive data
-	lcall	syncdelay	; wait for the rec to sync
-	movx	@dptr,a		; just to make sure that it's empty
-	lcall	syncdelay	; wait for the rec to sync
+	mov	a,#00h
+	lcall	syncdelaywr	; wait for the rec to sync
+	lcall	syncdelaywr	; wait for the rec to sync
 
 epempty:	
 	;; clear INT2
@@ -495,9 +564,34 @@ nosof:
 	reti
 
 
+reset_ep8:
+	;; erase all data in ep8
+	mov	dptr,#FIFORESET
+	mov	a,#80H		; NAK
+	lcall	syncdelaywr
+	mov	dptr,#FIFORESET
+	mov	a,#8		; reset EP8
+	lcall	syncdelaywr
+	mov	dptr,#FIFORESET
+	mov	a,#0		; normal operation
+	lcall	syncdelaywr
+	ret
 
 
+reset_ep6:
+	;; throw out old data
+	mov	dptr,#FIFORESET
+	mov	a,#80H		; NAK
+	lcall	syncdelaywr
+	mov	dptr,#FIFORESET
+	mov	a,#6		; reset EP6
+	lcall	syncdelaywr
+	mov	dptr,#FIFORESET
+	mov	a,#0		; normal operation
+	lcall	syncdelaywr
+	ret
 
+	
 ;;; interrupt-routine for ep4
 ;;; receives the channel list and other commands
 ep4_isr:
@@ -519,25 +613,74 @@ ep4_isr:
 		
 	mov	dptr,#0f400h	; FIFO buffer of EP4
 	movx	a,@dptr		; get the first byte
+	mov	r0,#CMD_FLAG	; pointer to the command byte
+	mov 	@r0,a		; store the command byte for ep8
 
 	mov	dptr,#ep4_jmp	; jump table for the different functions
 	rl	a		; multiply by 2: sizeof sjmp
 	jmp	@a+dptr		; jump to the jump table
+	;; jump table, corresponds to the command bytes defined
+	;; in usbdux.c
 ep4_jmp:
 	sjmp	storechannellist; a=0
 	sjmp	single_da	; a=1
 	sjmp	config_digital_b; a=2
 	sjmp	write_digital_b	; a=3
+	sjmp	storesglchannel	; a=4
+	sjmp	readcounter	; a=5
+	sjmp	writecounter	; a=6
 
+	;; read the counter
+readcounter:
+	lcall	reset_ep8	; reset ep8
+	lcall	ep8_ops		; fill the counter data in there
+	sjmp	over_da		; jump to the end
 
-;;; Channellist:	
+	;; write zeroes to the counters
+writecounter:
+	mov	dptr,#0f401h	; buffer
+	mov	r0,#CTR0	; r0 points to counter 0
+	movx	a,@dptr		; channel number
+	jz	wrctr0		; first channel
+	mov	r1,a		; counter
+wrctrl:
+	inc	r0		; next counter
+	inc	r0		; next counter
+	djnz	r1,wrctrl	; advance to the right counter
+wrctr0:
+	inc	dptr		; get to the value
+	movx	a,@dptr		; get value
+	mov	@r0,a		; save in ctr
+	inc	r0		; next byte
+	inc	dptr
+	movx	a,@dptr		; get value
+	mov	@r0,a		; save in ctr
+	sjmp	over_da		; jump to the end
+
+storesglchannel:
+	mov	r0,#SGLCHANNEL	; the conversion bytes are now stored in 80h
+	mov	dptr,#0f401h	; FIFO buffer of EP4
+	movx	a,@dptr		; 
+	mov	@r0,a
+
+	lcall	reset_ep8	; reset FIFO
+	;; Save new A/D data in EP8. This is the first byte
+	;; the host will read during an INSN. If there are
+	;; more to come they will be handled by the ISR of
+	;; ep8.
+	lcall	ep8_ops		; get A/D data
+		
+	sjmp	over_da
+
+	
+;;; Channellist:
 ;;; the first byte is zero:
 ;;; we've just received the channel list
-;;; the channel list is stored in the addresses from 80H which
+;;; the channel list is stored in the addresses from CHANNELLIST which
 ;;; are _only_ reachable by indirect addressing
 storechannellist:
 	mov	r0,#CHANNELLIST	; the conversion bytes are now stored in 80h
-	mov	r2,#8		; counter
+	mov	r2,#9		; counter
 	mov	dptr,#0f401h	; FIFO buffer of EP4
 chanlloop:	
 	movx	a,@dptr		; 
@@ -545,9 +688,15 @@ chanlloop:
 	inc	dptr
 	inc	r0
 	djnz	r2,chanlloop
-	clr	a		; announce analogue transaction
-	mov	r0,#DIOFLAG	; pointer to the command byte
-	mov 	@r0,a		; set the command byte
+
+	lcall	reset_ep6	; reset FIFO
+	
+	;; load new A/D data into EP6
+	;; This must be done. Otherwise the ISR is never called.
+	;; The ISR is only called when data has _left_ the
+	;; ep buffer here it has to be refilled.
+	lcall	ep6_arm		; fill with the first data byte
+	
 	sjmp	over_da
 
 ;;; Single DA conversion. The 2 bytes are in the FIFO buffer
@@ -556,7 +705,7 @@ single_da:
 	lcall	dalo		; conversion
 	sjmp	over_da
 
-;;; configure the port B
+;;; configure the port B as input or output (bitwise)
 config_digital_b:
 	mov	dptr,#0f401h	; FIFO buffer of EP4
 	movx	a,@dptr		; get the second byte
@@ -572,22 +721,25 @@ write_digital_b:
 	inc	dptr		; next byte
 	movx	a,@dptr		; bits
 	mov	IOB,a		; send the byte to the I/O port
-	mov	a,#0ffh		; announce DIO transaction
-	mov	r0,#DIOFLAG	; pointer to the command byte
-	mov 	@r0,a		; set the command byte
-	sjmp	over_da
 
-;;; more things here to come...
-	
+	lcall	reset_ep8	; reset FIFO of ep 8
+
+	;; fill ep8 with new data from port B
+	;; When the host requests the data it's already there.
+	;; This must be so. Otherwise the ISR is not called.
+	;; The ISR is only called when a packet has been delivered
+	;; to the host. Thus, we need a packet here in the
+	;; first instance.
+	lcall	ep8_ops		; get digital data
+
+	;; 
+	;; for all commands the same
 over_da:	
 	mov	dptr,#EP4BCL
-	mov	a,#80h
-	movx	@DPTR,a		; arm it
-	lcall	syncdelay	; wait
-	movx	@DPTR,a		; arm it
-	lcall	syncdelay	; wait
-	movx	@DPTR,a		; arm it
-	lcall	syncdelay	; wait
+	mov	a,#00h
+	lcall	syncdelaywr	; arm
+	lcall	syncdelaywr	; arm
+	lcall	syncdelaywr	; arm
 
 	;; clear INT2
 	mov	a,EXIF		; FIRST clear the USB (INT2) interrupt request
@@ -678,29 +830,57 @@ noDA:	ret
 
 ;;; arm ep6
 ep6_arm:
-	lcall	convlo
+	lcall	conv_ad
 	
 	mov	DPTR,#EP6BCH	; byte count H
 	mov	a,#0		; is zero
-	movx	@DPTR,a
-	lcall	syncdelay	; wait until the length has arrived
+	lcall	syncdelaywr	; wait until the length has arrived
 	
 	mov	DPTR,#EP6BCL	; byte count L
 	mov	a,#10H		; is one
-	movx	@DPTR,a
-	lcall	syncdelay	; wait until the length has been proc
+	lcall	syncdelaywr	; wait until the length has been proc
 	ret
 	
 
 
 ;;; converts one analog/digital channel and stores it in EP8
-;;; also gets the content of the digital ports B and D
-ep8_adc:
-	mov	r0,#DIOFLAG	; pointer to the DIO flag
-	mov 	a,@r0		; get the flag
-	jnz	ep8_dio		; nonzero means DIO
+;;; also gets the content of the digital ports B and D depending on
+;;; the COMMAND flag
+ep8_ops:
+	mov	r0,#CMD_FLAG
+	mov	a,@r0
 
-	mov	r0,#CHANNELLIST	; points to the channellist
+	mov	dptr,#ep8_jmp	; jump table for the different functions
+	rl	a		; multiply by 2: sizeof sjmp
+	jmp	@a+dptr		; jump to the jump table
+	;; jump table, corresponds to the command bytes defined
+	;; in usbdux.c
+ep8_jmp:
+	sjmp	ep8_err		; a=0, err
+	sjmp	ep8_err		; a=1, err
+	sjmp	ep8_err		; a=2, err
+	sjmp	ep8_dio		; a=3, digital read
+	sjmp	ep8_sglchannel	; a=4, analog A/D
+	sjmp	ep8_readctr	; a=5, read counter
+	sjmp	ep8_err		; a=6, write counter
+
+	;; reads all counters
+ep8_readctr:
+	mov	r0,#CTR0	; points to counter0
+	mov	dptr,#0fc00h	; ep8 fifo buffer
+	mov	r1,#8		; transfer 4 16bit counters
+ep8_ctrlp:
+	mov	a,@r0		; get the counter
+	movx	@dptr,a		; save in the fifo buffer
+	inc	r0		; inc pointer to the counters
+	inc	dptr		; inc pointer to the fifo buffer
+	djnz	r1,ep8_ctrlp	; loop until ready
+	
+	sjmp	ep8_send	; send the data
+	
+	;; read one A/D channel
+ep8_sglchannel:		
+	mov	r0,#SGLCHANNEL	; points to the channel
 	mov 	a,@r0		; Ch0
 	
 	lcall 	readAD		; start the conversion
@@ -714,6 +894,7 @@ ep8_adc:
 
 	sjmp	ep8_send	; send the data
 
+	;; read the digital lines
 ep8_dio:	
 	mov 	DPTR,#0fc00h	; store the contents of port B
 	mov	a,IOB		; in the next
@@ -726,27 +907,14 @@ ep8_dio:
 ep8_send:	
 	mov	DPTR,#EP8BCH	; byte count H
 	mov	a,#0		; is zero
-	movx	@DPTR,a
+	lcall	syncdelaywr
 	
 	mov	DPTR,#EP8BCL	; byte count L
 	mov	a,#10H		; 16 bytes
-	movx	@DPTR,a		; send the data over to the host
+	lcall	syncdelaywr	; send the data over to the host
+
+ep8_err:	
 	ret
-
-
-	
-;;; arms EP8 with one byte. This signals the Linux driver that
-;;; the EP has been armed only with a dummy byte to make the
-;;; IRQ work. The byte is not processed by the driver.
-ep8_arm:	
-	mov	DPTR,#EP8BCH	; byte count H
-	mov	a,#0		; is zero
-	movx	@DPTR,a
-	
-	mov	DPTR,#EP8BCL	; byte count L
-	mov	a,#1		; 1 byte
-	movx	@DPTR,a
-	ret	
 
 
 
@@ -770,7 +938,7 @@ ep8_isr:
 	push	06h		; R6
 	push	07h		; R7
 		
-	lcall	ep8_adc
+	lcall	ep8_ops
 	
 	;; clear INT2
 	mov	a,EXIF		; FIRST clear the USB (INT2) interrupt request
@@ -807,6 +975,16 @@ syncdelay:
 	nop
 	nop
 	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	ret
+
+syncdelaywr:
+	movx	@dptr,a
+	lcall	syncdelay
 	ret
 
 
