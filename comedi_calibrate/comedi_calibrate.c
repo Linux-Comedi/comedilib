@@ -164,12 +164,28 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
+double ni_get_reference(int lsb_loc,int msb_loc)
+{
+	int lsb,msb;
+	int uv;
+	double ref;
+
+	lsb=read_eeprom(lsb_loc);
+	msb=read_eeprom(msb_loc);
+	printf("lsb=%d msb=%d\n",read_eeprom(425),read_eeprom(426));
+
+	uv=lsb | (msb<<8);
+	if(uv>=0x8000)uv-=0x10000;
+	ref=5.000+1.0e-6*uv;
+	printf("ref=%g\n",ref);
+
+	return ref;
+}
 
 void cal_ni_mio_E(void)
 {
 	char *boardname;
 	double ref;
-	int uv;
 	int i;
 
 	boardname=comedi_get_board_name(dev);
@@ -185,22 +201,19 @@ void cal_ni_mio_E(void)
    1	AI post-gain offset	8.1e-4
    2	AI unipolar offset	7.9e-4
    3	AI gain			
-   4	AO
-   5	AO
-   6	AO
-   7	A0
-   8	AO
-   9	AO
+   4	AO 0 	-1.2e-4		-1.2e-4
+   5	AO 0 	-8.0e-4		-8.0e-4
+   6	AO 0 	1.9e-4		-3.8e-7
+   7	AO 1	-8.0e-5		-1.2e-4
+   8	AO 1	-7.9e-4		-7.9e-4
+   9	AO 1	1.9e-4		3.0e-7
    10	analog trigger
    11	unknown
  */
 		printf("last factory calibration %02d/%02d/%02d\n",
 			read_eeprom(508),read_eeprom(507),read_eeprom(506));
 
-		printf("lsb=%d msb=%d\n",read_eeprom(425),read_eeprom(426));
-
-		ref=5.000+(1e-6*(read_eeprom(425)+read_eeprom(426)));
-		printf("ref=%g\n",ref);
+		ref=ni_get_reference(425,426);
 
 		reset_caldacs();
 
@@ -219,7 +232,18 @@ void cal_ni_mio_E(void)
 		chan_cal(5,3,0,5.0);
 		chan_cal(5,3,0,5.0);
 
-		return;
+		printf("ao 0 offset\n");
+		comedi_data_write(dev,1,0,0,0,2048);
+		chan_cal(2,4,0,0.0);
+		chan_cal(2,5,0,0.0);
+
+		printf("ao 0 gain\n");
+		comedi_data_write(dev,1,0,0,0,3072);
+		chan_cal(6,6,0,0.0);
+		chan_cal(6,6,0,0.0);
+		comedi_data_write(dev,1,0,0,0,2048);
+
+		//return;
 	}
 	if(!strcmp(boardname,"at-mio-16e-10")){
 /*
@@ -241,10 +265,7 @@ void cal_ni_mio_E(void)
 		printf("last factory calibration %02d/%02d/%02d\n",
 			read_eeprom(508),read_eeprom(507),read_eeprom(506));
 
-		printf("lsb=%d msb=%d\n",read_eeprom(423),read_eeprom(424));
-
-		ref=5.000+(0.001*(read_eeprom(423)+read_eeprom(424)));
-		printf("ref=%g\n",ref);
+		ref=ni_get_reference(423,424);
 
 		reset_caldacs();
 
@@ -302,12 +323,7 @@ void cal_ni_mio_E(void)
 		printf("last factory calibration %02d/%02d/%02d\n",
 			read_eeprom(508),read_eeprom(507),read_eeprom(506));
 
-		printf("lsb=%d msb=%d\n",read_eeprom(430),read_eeprom(431));
-
-		uv=read_eeprom(430)+256*read_eeprom(431);
-		if(uv>=0x8000)uv-=0x10000;
-		ref=5.000+1.0e-6*uv;
-		printf("ref=%g\n",ref);
+		ref=ni_get_reference(430,431);
 
 		reset_caldacs();
 
@@ -365,12 +381,7 @@ void cal_ni_mio_E(void)
 		printf("last factory calibration %02d/%02d/%02d\n",
 			read_eeprom(508),read_eeprom(507),read_eeprom(506));
 
-		printf("lsb=%d msb=%d\n",read_eeprom(446),read_eeprom(447));
-
-		uv=read_eeprom(446)+256*read_eeprom(447);
-		if(uv>=0x8000)uv-=0x10000;
-		ref=5.000+1.0e-6*uv;
-		printf("ref=%g\n",ref);
+		ref=ni_get_reference(446,447);
 
 		reset_caldacs();
 
@@ -396,7 +407,67 @@ void cal_ni_mio_E(void)
 
 		return;
 	}
+	if(!strcmp(boardname,"pci-mio-16xe-50")){
+/*
+ * results of channel dependence test:
+ *
+ * 		[0]	[1]	[2]	[3]	[8]
+ * offset, lo			1.6e-5		2.0e-7
+ * offset, hi			1.6e-7		1.8e-7
+ * offset, unip	
+ * ref		-4.5e-5	-2.9e-6	1.6e-5*		5.5e-7
+ *
+ * thus, 2 is postgain offset, 8 is pregain, 0 is
+ * unipolar offset, 1 is gain
+ * 
+ * layout
+ *
+ * 0	AI unipolar offset	7.4e-4
+ * 1	AI gain			-5.4e-6
+ * 2	AI postgain offset	1.5e-4
+ * 3	unknown
+ * 4	AO
+ * 5	AO
+ * 6	AO
+ * 7	AO
+ * 8	AI pregain offset	2.5e-7
+ * 9	unknown
+ * 10	unknown
+ */
+		printf("last factory calibration %02d/%02d/%02d\n",
+			read_eeprom(508),read_eeprom(507),read_eeprom(506));
 
+		ref=ni_get_reference(437,438);
+
+		reset_caldacs();
+
+		printf("postgain offset\n");
+		ni_mio_ai_postgain_cal_2(0,2,0,3,100.0);
+
+		printf("pregain offset\n");
+		chan_cal(0,8,3,0.0);
+		chan_cal(0,8,3,0.0);
+
+#if 0
+		printf("unipolar offset\n");
+		chan_cal(0,0,4,0.0);
+		chan_cal(0,0,4,0.0);
+#endif
+
+		printf("gain offset\n");
+		chan_cal(5,0,0,5.0);
+		chan_cal(5,1,0,5.0);
+		chan_cal(5,1,0,5.0);
+
+		printf("results (offset)\n");
+		for(i=0;i<16;i++){
+			read_chan(0,i);
+		}
+
+		return;
+	}
+
+#if 0
 	{
 		int n_ranges;
 
@@ -421,7 +492,44 @@ void cal_ni_mio_E(void)
 	/* voltage reference */
 	printf("channel dependence 5 range 0\n");
 	channel_dependence(5,0);
+
 	}
+#endif
+#if 0
+	{
+		int n_ranges;
+
+	printf("please send this output to <ds@stm.lbl.gov>\n");
+	printf("%s\n",comedi_get_board_name(dev));
+
+	n_ranges=comedi_get_n_ranges(dev,ad_subdev,0);
+
+	comedi_data_write(dev,1,0,0,0,2048);
+	/* ao0 offset */
+	printf("channel dependence ao0=0 range 0\n");
+	channel_dependence(2,0);
+
+	comedi_data_write(dev,1,0,0,0,3072);
+	/* ao gain */
+	printf("channel dependence ao0=5V range 0\n");
+	channel_dependence(6,0);
+
+	comedi_data_write(dev,1,0,0,0,2048);
+
+	comedi_data_write(dev,1,1,0,0,2048);
+	/* ao0 offset */
+	printf("channel dependence ao1=0 range 0\n");
+	channel_dependence(3,0);
+
+	comedi_data_write(dev,1,1,0,0,3072);
+	/* ao gain */
+	printf("channel dependence ao1=5V range 0\n");
+	channel_dependence(7,0);
+	comedi_data_write(dev,1,1,0,0,2048);
+
+	}
+#endif
+	
 }
 
 
