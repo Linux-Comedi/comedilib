@@ -133,10 +133,12 @@ enum observables{
 	ni_ao1_linearity,
 	ni_ao0_unip_zero_offset,
 	ni_ao0_unip_reference,
-	ni_ao0_unip_linearity,
+	ni_ao0_unip_low_linearity,
+	ni_ao0_unip_mid_linearity,
 	ni_ao1_unip_zero_offset,
 	ni_ao1_unip_reference,
-	ni_ao1_unip_linearity,
+	ni_ao1_unip_low_linearity,
+	ni_ao1_unip_mid_linearity,
 };
 static inline unsigned int ni_ao_zero_offset( unsigned int channel )
 {
@@ -163,10 +165,15 @@ static inline unsigned int ni_ao_unip_reference( unsigned int channel )
 	if( channel ) return ni_ao1_unip_reference;
 	else return ni_ao0_unip_reference;
 }
-static inline unsigned int ni_ao_unip_linearity( unsigned int channel )
+static inline unsigned int ni_ao_unip_low_linearity( unsigned int channel )
 {
-	if( channel ) return ni_ao1_unip_linearity;
-	else return ni_ao0_unip_linearity;
+	if( channel ) return ni_ao1_unip_low_linearity;
+	else return ni_ao0_unip_low_linearity;
+}
+static inline unsigned int ni_ao_unip_mid_linearity( unsigned int channel )
+{
+	if( channel ) return ni_ao1_unip_mid_linearity;
+	else return ni_ao0_unip_mid_linearity;
 }
 
 static const int num_ao_observables_611x = 4;
@@ -376,10 +383,10 @@ static void ni_setup_ao_observables( calibration_setup_t *setup )
 				CR_PACK(REF_DAC_GND( channel ),ai_bipolar_lowgain,AREF_OTHER)
 				| CR_ALT_SOURCE | CR_ALT_FILTER;
 			o->reference_source = REF_DAC_GND( channel );
-			set_target( setup, ni_ao_unip_reference( channel ),8.0);
+			set_target( setup, ni_ao_unip_reference( channel ), 9.0);
 
-			/* ao unipolar linearity, negative */
-			o = setup->observables + ni_ao_unip_linearity( channel );
+			/* ao unipolar linearity, mid */
+			o = setup->observables + ni_ao_unip_mid_linearity( channel );
 			assert( o->name == NULL );
 			asprintf( &o->name, "ao %i, unipolar linearity (mid), low gain", channel );
 			o->preobserve_insn = po_tmpl;
@@ -390,7 +397,21 @@ static void ni_setup_ao_observables( calibration_setup_t *setup )
 				CR_PACK(REF_DAC_GND( channel ),ai_bipolar_lowgain,AREF_OTHER)
 				| CR_ALT_SOURCE | CR_ALT_FILTER;
 			o->reference_source = REF_DAC_GND( channel );
-			set_target( setup, ni_ao_unip_linearity( channel ),4.0);
+			set_target( setup, ni_ao_unip_mid_linearity( channel ), 5.0);
+
+			/* ao unipolar linearity, low */
+			o = setup->observables + ni_ao_unip_low_linearity( channel );
+			assert( o->name == NULL );
+			asprintf( &o->name, "ao %i, unipolar linearity (low), low gain", channel );
+			o->preobserve_insn = po_tmpl;
+			o->preobserve_insn.chanspec = CR_PACK(channel,ao_unipolar_lowgain,0);
+			o->preobserve_insn.data = o->preobserve_data;
+			o->observe_insn = tmpl;
+			o->observe_insn.chanspec =
+				CR_PACK(REF_DAC_GND( channel ),ai_bipolar_lowgain,AREF_OTHER)
+				| CR_ALT_SOURCE | CR_ALT_FILTER;
+			o->reference_source = REF_DAC_GND( channel );
+			set_target( setup, ni_ao_unip_low_linearity( channel ), 1.0);
 		}
 	}
 }
@@ -1218,8 +1239,8 @@ static int cal_ni_generic( calibration_setup_t *setup, const ni_caldac_layout_t 
 
 				current_cal = sc_alloc_calibration_setting( setup );
 				current_cal->subdevice = setup->da_subdev;
-				generic_do_linearity( setup, current_cal, ni_ao_unip_zero_offset( channel ),
-					ni_ao_unip_linearity( channel ), ni_ao_unip_reference( channel ),
+				generic_do_linearity( setup, current_cal, ni_ao_unip_low_linearity( channel ),
+					ni_ao_unip_mid_linearity( channel ), ni_ao_unip_reference( channel ),
 					layout->dac_linearity[ channel ] );
 				generic_do_cal( setup, current_cal, ni_ao_unip_zero_offset( channel),
 					layout->dac_offset[ channel ] );
