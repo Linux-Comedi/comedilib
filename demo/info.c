@@ -7,6 +7,7 @@
 #include <comedilib.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <errno.h>
 #include <string.h>
 #include "examples.h"

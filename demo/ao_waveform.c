@@ -52,6 +52,7 @@
 #include <getopt.h>
 #include <ctype.h>
 #include <math.h>
+#include <string.h>
 #include "examples.h"
 
 
@@ -112,7 +113,6 @@ int main(int argc, char *argv[])
 	unsigned int maxdata;
 	comedi_range *rng;
 	int ret;
-	lsampl_t insn_data = 0;
 
 	parse_options(argc,argv);
 
