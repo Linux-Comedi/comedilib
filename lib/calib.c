@@ -87,7 +87,7 @@ static int check_cal_file( comedi_t *dev, const char *file_path )
 	char result[ 100 ];
 	int retval;
 
-	retval = extract_ph_string( file_path, "cal", "cal->{driver_name}",
+	retval = extract_ph_string( file_path, "cal", "$cal->{driver_name}",
 		result, sizeof( result ) );
 	if( retval < 0 ) return retval;
 
@@ -97,7 +97,7 @@ static int check_cal_file( comedi_t *dev, const char *file_path )
 		return -1;
 	}
 
-	retval = extract_ph_string( file_path, "cal", "cal->{board_name}",
+	retval = extract_ph_string( file_path, "cal", "$cal->{board_name}",
 		result, sizeof( result ) );
 	if( retval < 0 ) return retval;
 
@@ -121,7 +121,7 @@ static int extract_array_element( const char *file_path, unsigned int cal_index,
 	char element[ 100 ];
 
 	snprintf( element, sizeof( element ),
-		"cal->{ calibrations }[ %i ]->{ %s }[ %i ]", cal_index, array_name, array_index );
+		"$cal->{ calibrations }[ %i ]->{ %s }[ %i ]", cal_index, array_name, array_index );
 	return extract_ph_integer( file_path, "cal", element );
 }
 
@@ -131,7 +131,7 @@ static int extract_array_length( const char *file_path, unsigned int cal_index,
 	char element[ 100 ];
 
 	snprintf( element, sizeof( element ),
-		"scalar( @{ cal->{ calibrations }[ %i ]->{ %s } } )", cal_index, array_name );
+		"scalar( @{ $cal->{ calibrations }[ %i ]->{ %s } } )", cal_index, array_name );
 	return extract_ph_integer( file_path, "cal", element );
 }
 
@@ -140,7 +140,7 @@ static int extract_subdevice( const char *file_path, unsigned int cal_index )
 	char element[ 100 ];
 
 	snprintf( element, sizeof( element ),
-		"cal->{ calibrations }[ %i ]->{ subdevice }", cal_index );
+		"$cal->{ calibrations }[ %i ]->{ subdevice }", cal_index );
 	return extract_ph_integer( file_path, "cal", element );
 }
 
@@ -213,7 +213,7 @@ static int set_calibration( comedi_t *dev, const char *file_path,
 		int subdev, channel, value;
 		char *element;
 
-		asprintf( &element, "cal->{calibrations}[ %i ]->{caldacs}[ %i ]->{subdev}",
+		asprintf( &element, "$cal->{calibrations}[ %i ]->{caldacs}[ %i ]->{subdevice}",
 			cal_index, i );
 		subdev = extract_ph_integer( file_path, "cal", element );
 		free( element );
@@ -223,7 +223,7 @@ static int set_calibration( comedi_t *dev, const char *file_path,
 			return subdev;
 		}
 
-		asprintf( &element, "cal->{calibrations}[ %i ]->{caldacs}[ %i ]->{channel}",
+		asprintf( &element, "$cal->{calibrations}[ %i ]->{caldacs}[ %i ]->{channel}",
 			cal_index, i );
 		channel = extract_ph_integer( file_path, "cal", element );
 		free( element );
@@ -233,7 +233,7 @@ static int set_calibration( comedi_t *dev, const char *file_path,
 			return channel;
 		}
 
-		asprintf( &element, "cal->{calibrations}[ %i ]->{caldacs}[ %i ]->{value}",
+		asprintf( &element, "$cal->{calibrations}[ %i ]->{caldacs}[ %i ]->{value}",
 			cal_index, i );
 		value = extract_ph_integer( file_path, "cal", element );
 		free( element );
@@ -246,7 +246,7 @@ static int set_calibration( comedi_t *dev, const char *file_path,
 		retval = comedi_data_write( dev, subdev, channel, 0, 0, value );
 		if( retval < 0 ) return retval;
 	}
-	
+
 	return 0;
 }
 
