@@ -1,12 +1,13 @@
 #!/bin/sh
 
-# Policy says that the user should be asked before we do this.
-cd /dev && MAKEDEV comedi
+if [ "$1" = "configure" ]; then
+	if [ ! -e "/dev/comedi0" ];then
+		echo "Creating /dev/comediN device nodes"
+		cd /dev && MAKEDEV comedi
+	fi
+fi
 
 #DEBHELPER#
 
-if [ "$1" = "configure" ]; then
-	ldconfig
-fi
-
 exit 0
+

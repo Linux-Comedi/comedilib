@@ -1,14 +1,29 @@
-comedilib (0.7.19.1-2) unstable; urgency=low
+comedilib (0.7.20-2) unstable; urgency=low
 
-  * snapshot
+  * Apparently debian/copyright got broken at some point in time.
+    (probably forgot to merge code back into CVS).  Fixed now,
+    but not merged into CVS.  :)
+  * Bumped shlibs, since there were symbols added to the lib.
+  * Updated to policy 3.5.10:
+   - Handle DEB_BUILD_OPTIONS
+   - Fix creation of device nodes
+  * Long overdue rewrite of package descriptions
 
- -- David Schleef <ds@schleef.org>  Thu, 05 Jun 2003 12:55:03 -0700
+ -- David Schleef <ds@schleef.org>  Wed, 25 Jun 2003 10:18:09 -0700
 
-comedilib (0.7.18-cvs20020912) unstable; urgency=low
+comedilib (0.7.20-1) unstable; urgency=low
 
-  * snapshot
+  * New upstream release
+  * Convert to using autoconf/automake, which takes care of problems
+    with gcc-3.x (Closes: #194885)
 
- -- David Schleef <ds@schleef.org>  Thu, 12 Sep 2002 16:43:08 -0700
+ -- David Schleef <ds@schleef.org>  Tue, 17 Jun 2003 16:18:25 -0700
+
+comedilib (0.7.19-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- David Schleef <ds@schleef.org>  Wed,  3 Jul 2002 21:04:37 -0700
 
 comedilib (0.7.18) unstable; urgency=low
 

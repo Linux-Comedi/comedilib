@@ -2,8 +2,4 @@
 
 #DEBHELPER#
 
-if [ "$1" = "remove" ]; then
-	ldconfig
-fi
-
 exit 0
