@@ -56,6 +56,7 @@ struct option options[] = {
 	{ "remove", 0, 0, 'r' },
 	{ "read-buffer", 1, NULL, 0x1000},
 	{ "write-buffer", 1, NULL, 0x1001},
+	{ 0 },
 };
 
 void do_help(int i)
