@@ -46,6 +46,7 @@ clean:	dummy
 distclean:	clean
 
 debian: dummy
+	chmod 755 debian/rules
 	dpkg-buildpackage -rfakeroot
 
 dev:	dummy
