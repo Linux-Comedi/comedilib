@@ -7,6 +7,7 @@
 <!ENTITY drivers SYSTEM "drivers.sgml">
 <!ENTITY reference SYSTEM "reference.sgml">
 <!ENTITY funcref SYSTEM "funcref.sgml">
+<!ENTITY glossary SYSTEM "glossary.sgml">
 ]>
 
 <article>
@@ -65,6 +66,8 @@
   &reference
 
   &funcref
+
+  &glossary
 
 </section>
 
