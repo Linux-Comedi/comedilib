@@ -27,7 +27,7 @@
 #define DPRINT(level,fmt,args...) do{if(verbose>=level)printf(fmt, ## args);}while(0)
 
 #define N_CALDACS 64
-#define N_OBSERVABLES 32
+#define N_OBSERVABLES 64
 #define PREOBSERVE_DATA_LEN 10
 
 typedef struct{
@@ -109,7 +109,7 @@ int cb64_setup( calibration_setup_t*, const char *device_name );
 /* low level */
 
 void set_target( calibration_setup_t *setup, int obs,double target);
-void update_caldac( calibration_setup_t *setup, unsigned int caldac_index, int value );
+void update_caldac( calibration_setup_t *setup, int caldac_index, int value );
 void setup_caldacs( calibration_setup_t *setup, int caldac_subdev);
 void postgain_cal( calibration_setup_t *setup, int obs1, int obs2, int dac);
 void cal1( calibration_setup_t *setup, int obs, int dac);

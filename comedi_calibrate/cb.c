@@ -127,7 +127,7 @@ static int setup_cb_pci_1602_16( calibration_setup_t *setup )
 	static const int calpot_subdev = 5;
 	static const int dac08_subdev = 6;
 
-	init_observables_1602_16( setup );
+	init_observables_1xxx( setup );
 	setup_caldacs( setup, caldac_subdev );
 	setup_caldacs( setup, calpot_subdev );
 	setup_caldacs( setup, dac08_subdev );
@@ -474,6 +474,72 @@ static int cal_cb_pci_1xxx( calibration_setup_t *setup )
 	return generic_cal_by_range( setup, &layout );
 }
 
+enum cal_knobs_1602_16
+{
+	DAC0_GAIN_FINE_1602_16 = 0,
+	DAC0_GAIN_COARSE_1602_16 = 1,
+	DAC0_OFFSET_COARSE_1602_16 = 2,
+	DAC1_OFFSET_COARSE_1602_16 = 3,
+	DAC1_GAIN_FINE_1602_16 = 4,
+	DAC1_GAIN_COARSE_1602_16 = 5,
+	DAC0_OFFSET_FINE_1602_16 = 6,
+	DAC1_OFFSET_FINE_1602_16 = 7,
+	ADC_GAIN_1602_16 = 8,
+	ADC_POSTGAIN_OFFSET_1602_16 = 9,
+	ADC_PREGAIN_OFFSET_1602_16 = 10,
+};
+static int dac_gain_coarse_1602_16( unsigned int channel )
+{
+	if( channel ) return DAC1_GAIN_COARSE_1602_16;
+	else return DAC0_GAIN_COARSE_1602_16;
+}
+static int dac_gain_fine_1602_16( unsigned int channel )
+{
+	if( channel ) return DAC1_GAIN_FINE_1602_16;
+	else return DAC0_GAIN_FINE_1602_16;
+}
+static int dac_offset_coarse_1602_16( unsigned int channel )
+{
+	if( channel ) return DAC1_OFFSET_COARSE_1602_16;
+	else return DAC0_OFFSET_COARSE_1602_16;
+}
+static int dac_offset_fine_1602_16( unsigned int channel )
+{
+	if( channel ) return DAC1_OFFSET_FINE_1602_16;
+	else return DAC0_OFFSET_FINE_1602_16;
+}
+static int adc_gain_1602_16( unsigned int channel )
+{
+	return ADC_GAIN_1602_16;
+}
+static int adc_pregain_offset_1602_16( unsigned int channel )
+{
+	return ADC_PREGAIN_OFFSET_1602_16;
+}
+static int adc_postgain_offset_1602_16( unsigned int channel )
+{
+	return ADC_POSTGAIN_OFFSET_1602_16;
+}
+static int cal_cb_pci_1602_16( calibration_setup_t *setup )
+{
+	generic_layout_t layout;
+
+	init_generic_layout( &layout );
+	layout.adc_gain = adc_gain_1602_16;
+	layout.adc_offset = adc_pregain_offset_1602_16;
+	layout.adc_postgain_offset = adc_postgain_offset_1602_16;
+	layout.dac_gain = dac_gain_coarse_1602_16;
+	layout.dac_gain_fine = dac_gain_fine_1602_16;
+	layout.dac_offset = dac_offset_coarse_1602_16;
+	layout.dac_offset_fine = dac_offset_fine_1602_16;
+	layout.adc_high_observable = ai_high_observable_1xxx;
+	layout.adc_ground_observable = ai_ground_observable_1xxx;
+	layout.dac_high_observable = ao_high_observable_1xxx;
+	layout.dac_ground_observable = ao_ground_observable_1xxx;
+	return generic_cal_by_range( setup, &layout );
+}
+
+#if 0
 static int cal_cb_pci_1602_16( calibration_setup_t *setup )
 {
 	enum cal_knobs_1602_16
@@ -497,6 +563,7 @@ static int cal_cb_pci_1602_16( calibration_setup_t *setup )
 
 	return 0;
 }
+#endif
 
 // converts calibration source voltages from two 16 bit eeprom values to a floating point value
 static float eeprom16_to_source( uint16_t *data )

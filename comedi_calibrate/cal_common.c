@@ -64,10 +64,8 @@ void generic_prep_adc_caldacs( calibration_setup_t *setup,
 		reset_caldac( setup, layout->adc_gain( channel ) );
 		reset_caldac( setup, layout->adc_offset_fine( channel ) );
 		reset_caldac( setup, layout->adc_gain_fine( channel ) );
-		// don't reset postgain offset here
 	}else
 	{
-		// need to preserve postgain offset? XXX
 		retval = comedi_apply_calibration( setup->dev, setup->ad_subdev,
 			channel, range, AREF_GROUND, setup->cal_save_file_path);
 		if( retval < 0 )
@@ -77,7 +75,6 @@ void generic_prep_adc_caldacs( calibration_setup_t *setup,
 			reset_caldac( setup, layout->adc_gain( channel ) );
 			reset_caldac( setup, layout->adc_offset_fine( channel ) );
 			reset_caldac( setup, layout->adc_gain_fine( channel ) );
-			// don't reset postgain offset here
 		}
 	}
 }
@@ -182,8 +179,6 @@ static void generic_do_dac_channel( calibration_setup_t *setup, const generic_la
 	saved_calibration_t *saved_cals, unsigned int saved_cals_length, saved_calibration_t *current_cal,
 	unsigned int channel, unsigned int range )
 {
-	generic_prep_dac_caldacs( setup, layout, channel, range );
-
 	generic_prep_adc_for_dac( setup, layout, saved_cals, saved_cals_length,
 		layout->dac_ground_observable( setup, channel, range ) );
 
@@ -205,8 +200,6 @@ static void generic_do_dac_channel( calibration_setup_t *setup, const generic_la
 static void generic_do_adc_channel( calibration_setup_t *setup, const generic_layout_t *layout,
 	saved_calibration_t *current_cal, unsigned int channel, unsigned int range )
 {
-	generic_prep_adc_caldacs( setup, layout, channel, range );
-
 	generic_do_relative( setup, current_cal, layout->adc_high_observable( setup, channel, range ),
 		layout->adc_ground_observable( setup, channel, range ), layout->adc_gain( channel ) );
 	generic_do_cal( setup, current_cal, layout->adc_ground_observable( setup, channel, range ),
@@ -219,6 +212,29 @@ static void generic_do_adc_channel( calibration_setup_t *setup, const generic_la
 	current_cal->subdevice = setup->ad_subdev;
 	sc_push_channel( current_cal, channel );
 	sc_push_range( current_cal, range );
+	sc_push_aref( current_cal, SC_ALL_AREFS );
+}
+
+static void generic_do_adc_postgain_offset( calibration_setup_t *setup, const generic_layout_t *layout,
+	saved_calibration_t *current_cal, unsigned int channel, int unipolar )
+{
+	int lowgain, highgain;
+
+	if( unipolar )
+	{
+		lowgain = get_unipolar_lowgain( setup->dev, setup->ad_subdev );
+		highgain = get_unipolar_highgain( setup->dev, setup->ad_subdev );
+	}else
+	{
+		lowgain = get_bipolar_lowgain( setup->dev, setup->ad_subdev );
+		highgain = get_bipolar_highgain( setup->dev, setup->ad_subdev );
+	}
+
+	generic_do_relative( setup, current_cal, layout->adc_ground_observable( setup, channel, lowgain ),
+		layout->adc_ground_observable( setup, channel, highgain ), layout->adc_postgain_offset( channel ) );
+
+	current_cal->subdevice = setup->ad_subdev;
+	sc_push_channel( current_cal, channel );
 	sc_push_aref( current_cal, SC_ALL_AREFS );
 }
 
@@ -251,6 +267,10 @@ int generic_cal_by_channel_and_range( calibration_setup_t *setup,
 
 	num_ai_calibrations = num_ai_ranges * num_ai_channels;
 	num_calibrations = num_ai_calibrations + num_ao_ranges * num_ao_channels;
+	for( channel = 0; channel < num_ai_channels; channel++ )
+		if( layout->adc_postgain_offset( channel ) >= 0 )
+			num_calibrations += 2;
+	saved_cals = malloc( num_calibrations * sizeof( saved_calibration_t ) );
 
 	saved_cals = malloc( num_calibrations * sizeof( saved_calibration_t ) );
 	if( saved_cals == NULL ) return -1;
@@ -259,8 +279,34 @@ int generic_cal_by_channel_and_range( calibration_setup_t *setup,
 
 	for( channel = 0; channel < num_ai_channels; channel++ )
 	{
+		int postgain_bip, postgain_unip;
+
+		if( layout->adc_postgain_offset( 0 ) >= 0 )
+		{
+			/* bipolar postgain */
+			generic_do_adc_postgain_offset( setup, layout, current_cal, channel, 0 );
+			for( range = 0; range < num_ai_ranges; range++ )
+				if( is_bipolar( setup->dev, setup->ad_subdev, channel, range ) )
+					sc_push_range( current_cal, range );
+			postgain_bip = setup->caldacs[ layout->adc_postgain_offset( channel ) ].current;
+			current_cal++;
+			/* unipolar postgain */
+			generic_do_adc_postgain_offset( setup, layout, current_cal, channel, 1 );
+			for( range = 0; range < num_ai_ranges; range++ )
+				if( is_unipolar( setup->dev, setup->ad_subdev, channel, range ) )
+					sc_push_range( current_cal, range );
+			postgain_unip = setup->caldacs[ layout->adc_postgain_offset( channel ) ].current;
+			current_cal++;
+		}else
+			postgain_bip = postgain_unip = -1;
+
 		for( range = 0; range < num_ai_ranges; range++ )
 		{
+			generic_prep_adc_caldacs( setup, layout, channel, range );
+			if( is_unipolar( setup->dev, setup->ad_subdev, channel, range ) )
+				update_caldac( setup, layout->adc_postgain_offset( channel ), postgain_bip );
+			else
+				update_caldac( setup, layout->adc_postgain_offset( channel ), postgain_unip );
 			generic_do_adc_channel( setup, layout, current_cal, channel, range );
 			current_cal++;
 		}
@@ -269,6 +315,7 @@ int generic_cal_by_channel_and_range( calibration_setup_t *setup,
 	{
 		for( range = 0; range < num_ao_ranges; range++ )
 		{
+			generic_prep_dac_caldacs( setup, layout, channel, range );
 			generic_do_dac_channel( setup, layout, saved_cals, num_ai_calibrations,
 				current_cal, channel, range );
 			current_cal++;
@@ -288,6 +335,7 @@ int generic_cal_by_range( calibration_setup_t *setup,
 	int channel, range, num_ai_ranges, num_ao_ranges,
 		num_ao_channels, retval, num_calibrations, i;
 	saved_calibration_t *saved_cals, *current_cal;
+	int postgain_bip, postgain_unip;
 
 	assert( comedi_range_is_chan_specific( setup->dev, setup->ad_subdev ) == 0 );
 
@@ -307,14 +355,41 @@ int generic_cal_by_range( calibration_setup_t *setup,
 		num_ao_ranges = num_ao_channels = 0;
 
 	num_calibrations = num_ai_ranges + num_ao_ranges * num_ao_channels;
-
+	if( layout->adc_postgain_offset( 0 ) >= 0 )
+		num_calibrations += 2;
 	saved_cals = malloc( num_calibrations * sizeof( saved_calibration_t ) );
 	if( saved_cals == NULL ) return -1;
 
 	current_cal = saved_cals;
 
+	if( layout->adc_postgain_offset( 0 ) >= 0 )
+	{
+		/* bipolar postgain */
+		generic_do_adc_postgain_offset( setup, layout, current_cal, 0, 0 );
+		sc_push_channel( current_cal, SC_ALL_CHANNELS );
+		for( range = 0; range < num_ai_ranges; range++ )
+			if( is_bipolar( setup->dev, setup->ad_subdev, 0, range ) )
+				sc_push_range( current_cal, range );
+		postgain_bip = setup->caldacs[ layout->adc_postgain_offset( 0 ) ].current;
+		current_cal++;
+		/* unipolar postgain */
+		generic_do_adc_postgain_offset( setup, layout, current_cal, 0, 1 );
+		sc_push_channel( current_cal, SC_ALL_CHANNELS );
+		for( range = 0; range < num_ai_ranges; range++ )
+			if( is_unipolar( setup->dev, setup->ad_subdev, 0, range ) )
+				sc_push_range( current_cal, range );
+		postgain_unip = setup->caldacs[ layout->adc_postgain_offset( 0 ) ].current;
+		current_cal++;
+	}else
+		postgain_bip = postgain_unip = -1;
+
 	for( range = 0; range < num_ai_ranges; range++ )
 	{
+		generic_prep_adc_caldacs( setup, layout, 0, range );
+		if( is_unipolar( setup->dev, setup->ad_subdev, 0, range ) )
+			update_caldac( setup, layout->adc_postgain_offset( 0 ), postgain_bip );
+		else
+			update_caldac( setup, layout->adc_postgain_offset( 0 ), postgain_unip );
 		generic_do_adc_channel( setup, layout, current_cal, 0, range );
 		sc_push_channel( current_cal, SC_ALL_CHANNELS );
 		current_cal++;
@@ -323,6 +398,7 @@ int generic_cal_by_range( calibration_setup_t *setup,
 	{
 		for( range = 0; range < num_ao_ranges; range++ )
 		{
+			generic_prep_dac_caldacs( setup, layout, channel, range );
 			generic_do_dac_channel( setup, layout, saved_cals, num_ai_ranges,
 				current_cal, channel, range );
 			current_cal++;

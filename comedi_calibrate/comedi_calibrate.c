@@ -810,12 +810,13 @@ void reset_caldacs( calibration_setup_t *setup )
 	}
 }
 
-void update_caldac( calibration_setup_t *setup, unsigned int caldac_index,
+void update_caldac( calibration_setup_t *setup, int caldac_index,
 	int value )
 {
 	int ret;
 	caldac_t *dac;
 
+	if( caldac_index < 0 ) return;
 	if( caldac_index > setup->n_caldacs )
 	{
 		fprintf( stderr, "invalid caldac index\n" );
