@@ -170,12 +170,12 @@ static inline unsigned int ni_ao_unip_linearity( unsigned int channel )
 static const int num_ao_observables_611x = 4;
 static int ni_ao_zero_offset_611x( const calibration_setup_t *setup,
 	unsigned int channel, unsigned int range ) {
-	assert( range = 0 );
+	assert( range == 0 );
 	return 2 * channel;
 };
 static int ni_ao_reference_611x( const calibration_setup_t *setup,
 	unsigned int channel, unsigned int range ) {
-	assert( range = 0 );
+	assert( range == 0 );
 	return 2 * channel + 1;
 };
 static int ni_zero_offset_611x( const calibration_setup_t *setup,
