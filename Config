@@ -15,6 +15,7 @@ LD = $(CROSS)ld
 # Optimization and debugging
 CFLAGS = -Wall -Wstrict-prototypes
 CFLAGS += -O2
+CFLAGS += -DI18N # This enables gettextization
 #CFLAGS += -g
 
 
