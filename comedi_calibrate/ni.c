@@ -57,7 +57,7 @@ void cal_ni_pci_mio_16xe_50(void);
 void cal_ni_pci_6023e(void);
 
 struct board_struct boards[]={
-	{ "at-mio-16e-2",	STATUS_SOME,	cal_ni_at_mio_16e_2 },
+	{ "at-mio-16e-2",	STATUS_DONE,	cal_ni_at_mio_16e_2 },
 	{ "DAQCard-ai-16xe-50",	STATUS_DONE,	cal_ni_daqcard_ai_16xe_50 },
 	{ "at-mio-16e-1",	STATUS_SOME,	cal_ni_at_mio_16e_1 },
 	{ "pci-mio-16e-1",	STATUS_SOME,	cal_ni_pci_mio_16e_1 },
