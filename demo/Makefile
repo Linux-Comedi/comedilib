@@ -8,7 +8,7 @@ LDFLAGS = -L../lib/ -lcomedi -lm
 
 BINS=tut1 tut2
 MBINS=inp inpn sv eeprom_dump info outp insn antialias ao_waveform \
-	dio mmap ledclock receiver sigio select sender cmd
+	dio mmap ledclock receiver sigio select sender cmd poll
 
 all: $(BINS) $(MBINS)
 
