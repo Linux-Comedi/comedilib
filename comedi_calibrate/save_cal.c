@@ -103,7 +103,7 @@ int write_calibration_perl_hash( FILE *file, comedi_t *dev,
 		fprintf( file, ",\n" );
 	}
 	fprintf( file, "\t],\n"
-		"};\n");
+		"}\n");
 
 	return 0;
 }
@@ -118,21 +118,21 @@ int write_calibration_file( calibration_setup_t *setup, saved_calibration_t sett
 	struct stat file_stats;
 	comedi_t *dev = setup->dev;
 
-	if( fstat( comedi_fileno( dev ), &file_stats ) < 0 )
-	{
-		fprintf( stderr, "failed to get file stats of comedi device file\n" );
-		return -1;
-	}
-
-	snprintf( command, sizeof( command ), "install -d %s", save_dir );
-	if( system( command ) )
-	{
-		fprintf( stderr, "failed to create directory %s\n", save_dir );
-		return -1;
-	}
-
 	if( setup->cal_save_file_path == NULL )
 	{
+		if( fstat( comedi_fileno( dev ), &file_stats ) < 0 )
+		{
+			fprintf( stderr, "failed to get file stats of comedi device file\n" );
+			return -1;
+		}
+
+		snprintf( command, sizeof( command ), "install -d %s", save_dir );
+		if( system( command ) )
+		{
+			fprintf( stderr, "failed to create directory %s\n", save_dir );
+			return -1;
+		}
+
 		asprintf( &setup->cal_save_file_path, "%s/%s_0x%lx",
 			save_dir, comedi_get_board_name( dev ),
 			( unsigned long ) file_stats.st_ino );
