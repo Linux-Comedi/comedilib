@@ -69,6 +69,8 @@ int cal_ni_pci_6032e(calibration_setup_t *setup);
 int cal_ni_daqcard_ai_16e_4(calibration_setup_t *setup);
 int cal_ni_pci_611x(calibration_setup_t *setup);
 
+double ni_get_reference( calibration_setup_t *setup, int lsb_loc,int msb_loc);
+
 static struct board_struct boards[]={
 	{ "at-mio-16e-2",	STATUS_DONE,	cal_ni_at_mio_16e_2,	ni_setup_observables  },
 	{ "DAQCard-ai-16xe-50",	STATUS_DONE,	cal_ni_daqcard_ai_16xe_50,	ni_setup_observables },
@@ -346,7 +348,8 @@ void ni_setup_observables_611x( calibration_setup_t *setup )
 
 	range = 2;
 
-	voltage_reference = 5.000;
+/*	voltage_reference = ni_get_reference( setup, 468, 469 ); */
+	voltage_reference = 5.0;
 	cal_gain_reg_bits = cal_gain_register_bits_611x( &voltage_reference );
 
 	memset(&tmpl,0,sizeof(tmpl));
@@ -819,15 +822,14 @@ int cal_ni_pci_611x( calibration_setup_t *setup )
 double ni_get_reference( calibration_setup_t *setup, int lsb_loc,int msb_loc)
 {
 	int lsb,msb;
-	int uv;
+	int16_t uv;
 	double ref;
 
 	lsb=read_eeprom( setup, lsb_loc);
 	msb=read_eeprom( setup, msb_loc);
-	printf("lsb=%d msb=%d\n",read_eeprom( setup, 425),read_eeprom( setup, 426));
+	printf("lsb=%d msb=%d\n", lsb, msb);
 
-	uv=lsb | (msb<<8);
-	if(uv>=0x8000)uv-=0x10000;
+	uv = ( lsb & 0xff ) | ( ( msb << 8 ) & 0xff00 );
 	ref=5.000+1.0e-6*uv;
 	printf("ref=%g\n",ref);
 
