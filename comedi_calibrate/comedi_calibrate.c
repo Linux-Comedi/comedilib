@@ -318,6 +318,8 @@ void set_target( calibration_setup_t *setup, int obs,double target)
 	comedi_range *range;
 	lsampl_t maxdata, data;
 
+	comedi_set_global_oor_behavior( COMEDI_OOR_NUMBER );
+
 	range = comedi_get_range(setup->dev,
 		setup->observables[obs].preobserve_insn.subdev,
 		CR_CHAN( setup->observables[obs].preobserve_insn.chanspec ),
@@ -426,6 +428,7 @@ void measure_observable( calibration_setup_t *setup, int obs)
 
 	sci_sprint_alt(s,sv.average,sv.error);
 	DPRINT(0,"reading %s, target %g\n",s, setup->observables[obs].target);
+	assert( isnan( setup->observables[obs].target) == 0 );
 }
 
 void observable_dependence(calibration_setup_t *setup, int obs)
