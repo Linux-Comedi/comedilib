@@ -177,6 +177,12 @@ ok:
 			do_calibrate=1;
 			do_results=1;
 		}
+		if(device_status==STATUS_GUESS){
+			do_reset=1;
+			do_dump=1;
+			do_calibrate=1;
+			do_results=1;
+		}
 	}
 	if(verbose>=0){
 		printf("$Id$\n");

@@ -1,0 +1,16 @@
+Warning: device not fully calibrated due to insufficient information
+Please send this output to <ds@schleef.org>
+$Id$
+Driver name: ni_pcimio
+Device name: pci-6071e
+Comedi version: 0.7.61
+postgain: ai, bipolar zero offset, low gain; ai, bipolar zero offset, high gain
+caldac[1] gain=-7.8199(21)e-4 V/bit S_min=499.462 dof=254
+caldac[1] gain=-3.9085(14)e-6 V/bit S_min=480.297 dof=254
+caldac[1] set to 113.476
+linear: ai, bipolar zero offset, high gain
+caldac[0] gain=-8.6007(14)e-6 V/bit S_min=369.586 dof=254
+caldac[0] set to 143.069
+linear: ai, bipolar voltage reference, low gain
+caldac[3] gain=-4.7227(21)e-4 V/bit S_min=522.886 dof=254
+caldac[3] set to 149.506
