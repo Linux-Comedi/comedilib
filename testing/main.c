@@ -34,6 +34,7 @@ int test_cmd_fifo_depth_check(void);
 int test_mmap(void);
 int test_read_select(void);
 int test_cmd_continuous(void);
+int test_bufconfig(void);
 
 #define TEST_NEVER 0
 #define TEST_STD 1
@@ -55,6 +56,7 @@ struct test_struct tests[]={
 	{ "mmap", test_mmap, TEST_STD },
 	{ "read_select", test_read_select, TEST_STD },
 	{ "cmd_continuous", test_cmd_continuous, TEST_NEVER },
+	{ "bufconfig", test_bufconfig, TEST_STD },
 };
 static int n_tests = sizeof(tests)/sizeof(tests[0]);
 
