@@ -257,8 +257,8 @@ int main(int argc,char *argv[])
 				exit(1);
 			}
 
-			it.options[0]=(int)init_data;
-			it.options[1]=init_size;
+			it.options[COMEDI_DEVCONF_AUX_DATA]=(int)init_data;
+			it.options[COMEDI_DEVCONF_AUX_DATA_LENGTH]=init_size;
 		}
 
 	/* add: sanity check for device */
