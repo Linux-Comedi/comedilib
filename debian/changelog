@@ -1,3 +1,21 @@
+comedilib (0.7.21-3) unstable; urgency=low
+
+  * Added dh_python to take care of python dependency (Closes: #207310)
+
+ -- David Schleef <ds@schleef.org>  Tue, 23 Sep 2003 18:11:12 -0700
+
+comedilib (0.7.21-2) unstable; urgency=low
+
+  * Fix accidental overlap of files between libcomedi-dev and libcomedi0
+
+ -- David Schleef <ds@schleef.org>  Mon, 18 Aug 2003 19:35:06 -0700
+
+comedilib (0.7.21-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- David Schleef <ds@schleef.org>  Sat, 16 Aug 2003 16:25:13 -0700
+
 comedilib (0.7.20-2) unstable; urgency=low
 
   * Apparently debian/copyright got broken at some point in time.

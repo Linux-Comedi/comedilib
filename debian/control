@@ -43,7 +43,7 @@ Description: Library for Comedi
 Package: python-comedilib
 Section: python
 Architecture: any
-Depends: ${shlibs:Depends}
+Depends: ${shlibs:Depends}, ${python:Depends}
 Description: Python wrapper for Comedilib
  Comedilib is a library for using Comedi, a driver interface for data
  acquisition hardware.  See the libcomedi0 package for more information.
