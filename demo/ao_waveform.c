@@ -92,9 +92,12 @@ int main(int argc, char *argv[])
 	int n,m;
 	int total=0;
 	comedi_t *dev;
-	unsigned int chanlist[1];
+	unsigned int chanlist[16];
 
 	parse_options(argc,argv);
+
+	/* Force n_chan to be 1 */
+	n_chan = 1;
 
 	if(value){
 		waveform_frequency = value;
@@ -117,14 +120,15 @@ int main(int argc, char *argv[])
 	cmd.convert_src = TRIG_NOW;
 	cmd.convert_arg = 0;
 	cmd.scan_end_src = TRIG_COUNT;
-	cmd.scan_end_arg = 1;
+	cmd.scan_end_arg = n_chan;
 	cmd.stop_src = TRIG_NONE;
 	cmd.stop_arg = 0;
 
 	cmd.chanlist = chanlist;
-	cmd.chanlist_len = 1;
+	cmd.chanlist_len = n_chan;
 
 	chanlist[0] = CR_PACK(channel,range,aref);
+	chanlist[1] = CR_PACK(channel+1,range,aref);
 
 	dds_init();
 
