@@ -42,22 +42,28 @@ comedilib:	subdirs
 
 config:	dummy
 
-install:	dummy
+install:	install_dev install_runtime install_doc
+
+install_dev:	dummy
 	install -d ${INSTALLDIR}/include
 	install -m 644 include/comedilib.h ${INSTALLDIR}/include
 	install -m 644 include/comedi.h ${INSTALLDIR}/include
-	install lib/libcomedi.so.${version} ${INSTALLDIR_LIB}
-	(cd $(INSTALLDIR_LIB);ln -sf libcomedi.so.${version} libcomedi.so.${MAJOR})
 	(cd $(INSTALLDIR_LIB);ln -sf libcomedi.so.${version} libcomedi.so)
 	install -m 644 lib/libcomedi.a ${INSTALLDIR_LIB}
+
+install_runtime:
+	install lib/libcomedi.so.${version} ${INSTALLDIR_LIB}
+	(cd $(INSTALLDIR_LIB);ln -sf libcomedi.so.${version} libcomedi.so.${MAJOR})
+	install -s -m 755 comedi_config/comedi_config ${INSTALLDIR_SBIN}
+	install -s -m 755 comedi_calibrate/comedi_calibrate ${INSTALLDIR_BIN}
+
+install_doc:
 ifneq ($(INSTALLDIR),)
 	install -d ${INSTALLDIR_DOC}
 	install ${DOCFILES} ${INSTALLDIR_DOC}
 endif
 	install man/*.7 ${INSTALLDIR_MAN}/man7
 	install man/*.8 ${INSTALLDIR_MAN}/man8
-	install -s -m 755 comedi_config/comedi_config ${INSTALLDIR_SBIN}
-	install -s -m 755 comedi_calibrate/comedi_calibrate ${INSTALLDIR_BIN}
 
 install_debian: install
 	install -d ${INSTALLDIR_DOC}
