@@ -251,12 +251,16 @@ int test_cmd_write_fast_1chan(void)
 	}
 	// make sure all samples have been written out
 	while(1)
-	{	
-		ret = comedi_get_buffer_contents(device, subdevice);
-		if(ret < 0)
+	{
+		int flags = comedi_get_subdevice_flags(device,subdevice);
+		if(flags < 0)
 		{
-			printf("E: comedi_get_buffer_contents() returned %i\n", ret);
-		}else if(ret == 0) break;
+			printf("E: comedi_get_subdevice_flags returned %i\n", flags);
+			break;
+		}
+		if((flags & SDF_RUNNING) == 0){
+			break;
+		}
 		usleep(10000);
 	}
 	// cancel needed in the case of stop_src==TRIG_NONE
