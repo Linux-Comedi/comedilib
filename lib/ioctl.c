@@ -72,6 +72,13 @@ int ioctl_cmd(int fd,comedi_cmd *it)
 }
 #endif
 
+#ifdef HAVE_COMEDI_INSN
+int ioctl_insnlist(int fd,comedi_insn *it)
+{
+	return ioctl(fd,COMEDI_INSNLIST,it);
+}
+#endif
+
 int ioctl_lock(int fd,int subdevice)
 {
 	return ioctl(fd,COMEDI_LOCK,subdevice);

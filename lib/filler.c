@@ -38,6 +38,8 @@
 
 /* these functions download information from the comedi module. */
 
+static int do_test_for_cmd(comedi_t *dev,unsigned int subdevice);
+static int do_test_for_insn(comedi_t *dev,unsigned int subdevice);
 
 
 int get_subdevices(comedi_t *it)
@@ -91,6 +93,9 @@ int get_subdevices(comedi_t *it)
 		}else{
 			r[i].rangeinfo=get_rangeinfo(it->fd,r[i].range_type);
 		}
+
+		r[i].has_cmd = do_test_for_cmd(it,i);
+		r[i].has_insn = do_test_for_insn(it,i);
 	}
 
 	free(s);
@@ -121,6 +126,64 @@ comedi_range *get_rangeinfo(int fd,unsigned int range_type)
 	free(kr);
 
 	return r;
+}
+
+
+/* some command testing */
+
+static int do_test_for_cmd(comedi_t *dev,unsigned int subdevice)
+{
+	comedi_cmd it;
+	int ret;
+
+	memset(&it,0,sizeof(it));
+
+	it.subdev = 0;
+	it.start_src = TRIG_ANY;
+	it.scan_begin_src = TRIG_ANY;
+	it.convert_src = TRIG_ANY;
+	it.scan_end_src = TRIG_ANY;
+	it.stop_src = TRIG_ANY;
+
+	ret = ioctl(dev->fd,COMEDI_CMDTEST,&it);
+
+	if(ret<0 && errno==EIO){
+		return 0;
+	}
+	if(ret<0){
+		fprintf(stderr,"BUG in do_test_for_cmd()\n");
+		return 0;
+	}
+	return 1;
+}
+
+static int do_test_for_insn(comedi_t *dev,unsigned int subdevice)
+{
+	comedi_insn insn;
+	comedi_insnlist il;
+	lsampl_t data[2];
+	int ret;
+
+	memset(&insn,0,sizeof(insn));
+
+	il.n_insns = 1;
+	il.insns = &insn;
+
+	insn.insn = INSN_GTOD;
+	insn.n = 2;
+	insn.data = (void *)&data;
+	insn.subdev = subdevice;
+
+	ret = ioctl(dev->fd,COMEDI_INSN,&il);
+
+	if(ret<0 && errno==EIO){
+		return 0;
+	}
+	if(ret<0){
+		fprintf(stderr,"BUG in do_test_for_insn()\n");
+		return 0;
+	}
+	return 1;
 }
 
 
