@@ -1,6 +1,6 @@
 <!-- <!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook V3.1//EN"> -->
 
-<glossary>
+<glossary id="comedilib-glossary">
   <title>
     Glossary
   </title>
