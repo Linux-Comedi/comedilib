@@ -7,7 +7,7 @@ SGML= drivers.sgml funcref.sgml glossary.sgml \
 
 BUILT_SOURCES = funcref.sgml drivers.sgml
 
-EXTRA_DIST=$(SGML) comedilib.sgml funcref mkref drivers.txt mkdr acq-seq.gif
+EXTRA_DIST=$(SGML) comedilib.sgml funcref mkref drivers.txt mkdr
 
 if HAVE_DOCBOOK2PDF
 all_pdf = comedilib.pdf
