@@ -89,6 +89,9 @@ static inline int comedi_internal_data_read_n(comedi_t *it, unsigned int subdev,
 		unsigned int aref, unsigned int flags, lsampl_t *data, unsigned int n)
 {
 	subdevice *s;
+	
+	flags &= CR_FLAGS_MASK;
+	chan &= ~CR_FLAGS_MASK;
 
 	if(!valid_chan(it,subdev,chan))
 		return -1;
@@ -186,6 +189,9 @@ int comedi_data_read_delayed( comedi_t *it, unsigned int subdev, unsigned int ch
 	comedi_insnlist ilist;
 	comedi_insn insn[3];
 	lsampl_t delay = nano_sec;
+	unsigned int flags = chan & CR_FLAGS_MASK;
+	
+	chan &= ~CR_FLAGS_MASK;
 
 	if( !valid_chan( it, subdev, chan ) )
 		return -1;
@@ -200,7 +206,7 @@ int comedi_data_read_delayed( comedi_t *it, unsigned int subdev, unsigned int ch
 	insn[0].n = 0;
 	insn[0].data = data;
 	insn[0].subdev = subdev;
-	insn[0].chanspec = CR_PACK_FLAGS( chan, range, aref, chan );
+	insn[0].chanspec = CR_PACK_FLAGS( chan, range, aref, flags );
 	// delay
 	insn[1].insn = INSN_WAIT;
 	insn[1].n = 1;
@@ -210,7 +216,7 @@ int comedi_data_read_delayed( comedi_t *it, unsigned int subdev, unsigned int ch
 	insn[2].n = 1;
 	insn[2].data = data;
 	insn[2].subdev = subdev;
-	insn[2].chanspec = CR_PACK_FLAGS( chan, range, aref, chan );
+	insn[2].chanspec = CR_PACK_FLAGS( chan, range, aref, flags );
 
 	ilist.insns = insn;
 	ilist.n_insns = sizeof(insn) / sizeof(insn[0]);
