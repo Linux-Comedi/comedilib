@@ -132,7 +132,7 @@ int setup_cb_pci_4020( calibration_setup_t *setup )
 
 	init_observables_4020( setup );
 	setup_caldacs( setup, caldac_subdev );
-	setup->do_cal = cal_cb_pci_60xx;
+	setup->do_cal = cal_cb_pci_4020;
 	return 0;
 }
 
