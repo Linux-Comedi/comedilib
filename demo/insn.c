@@ -35,7 +35,7 @@
  * analog input, and the another gettimeofday() call.
  */
 
-#define N_SAMPLES 10
+#define MAX_SAMPLES 128
 
 comedi_t *device;
 
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 	comedi_insn insn[3];
 	comedi_insnlist il;
 	struct timeval t1,t2;
-	lsampl_t data[N_SAMPLES];
+	lsampl_t data[MAX_SAMPLES];
 
 	parse_options(argc,argv);
 
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 
 	/* Instruction 1: do 10 analog input reads */
 	insn[1].insn=INSN_READ;
-	insn[1].n=N_SAMPLES;
+	insn[1].n=n_scan;
 	insn[1].data=data;
 	insn[1].subdev=subdevice;
 	insn[1].chanspec=CR_PACK(channel,range,aref);
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 	}
 
 	printf("initial time: %ld.%06ld\n",t1.tv_sec,t1.tv_usec);
-	for(i=0;i<N_SAMPLES;i++){
+	for(i=0;i<n_scan;i++){
 		printf("%d\n",data[i]);
 	}
 	printf("final time: %ld.%06ld\n",t2.tv_sec,t2.tv_usec);
