@@ -93,6 +93,7 @@ int main(int argc, char *argv[])
 	int total=0;
 	comedi_t *dev;
 	unsigned int chanlist[16];
+	lsampl_t insn_data = 0;
 
 	parse_options(argc,argv);
 
@@ -147,7 +148,15 @@ int main(int argc, char *argv[])
 	memset(&insn, 0, sizeof(comedi_insn));
 	insn.insn = INSN_INTTRIG;
 	insn.subdev = subdevice;
-	comedi_do_insn(dev, &insn);
+	insn.n = 1;
+	insn.data = &insn_data;
+	insn.data[ 0 ] = 0;
+	err = comedi_do_insn(dev, &insn);
+	if( err < 0 )
+	{
+		perror("comedi_do_insn()");
+		abort();
+	}
 
 	while(1){
 		dds_output(data,BUF_LEN);
