@@ -16,7 +16,7 @@ DOCFILES= README INSTALL `find doc -type f`
 
 INSTALLDIR=$(DESTDIR)/usr
 INSTALLDIR_LIB=$(DESTDIR)/usr/lib
-ifeq ($(DEBIAN),)
+ifneq ($(DEB_BUILD_ARCH),)
 INSTALLDIR_DOC=$(DESTDIR)/usr/share/doc/libcomedi
 INSTALLDIR_MAN=$(DESTDIR)/usr/share/man
 else
