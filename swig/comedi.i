@@ -34,6 +34,7 @@
 #include "comedilib.h"
 %}
 %include "carrays.i"
+%include "typemaps.i"
 
 %inline %{
 static unsigned int cr_pack(unsigned int chan, unsigned int rng, unsigned int aref){
