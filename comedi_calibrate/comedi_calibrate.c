@@ -55,6 +55,7 @@ struct board_struct drivers[] = {
 	{ "ni_pcimio",	ni_id,	ni_setup },
 	{ "ni_atmio",	ni_id,	ni_setup },
 	{ "ni_mio_cs",	ni_id,	ni_setup },
+	{ "cb_pcidas",	cb_id,	cb_setup },
 	{ "cb_pcidas64",	cb_id,	cb_setup },
 };
 #define n_drivers (sizeof(drivers)/sizeof(drivers[0]))
