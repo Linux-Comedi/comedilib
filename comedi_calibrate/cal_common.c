@@ -259,8 +259,11 @@ int generic_cal_by_channel_and_range( calibration_setup_t *setup,
 					sc_push_range( current_cal, range );
 			postgain_bip = setup->caldacs[ layout->adc_postgain_offset( channel ) ].current;
 			/* unipolar postgain */
-			current_cal = sc_alloc_calibration_setting( setup );
-			generic_do_adc_postgain_offset( setup, layout, current_cal, channel, 1 );
+			if( layout->do_adc_unipolar_postgain )
+			{
+				current_cal = sc_alloc_calibration_setting( setup );
+				generic_do_adc_postgain_offset( setup, layout, current_cal, channel, 1 );
+			}
 			for( range = 0; range < num_ai_ranges; range++ )
 				if( is_unipolar( setup->dev, setup->ad_subdev, channel, range ) )
 					sc_push_range( current_cal, range );
@@ -329,11 +332,13 @@ int generic_cal_by_range( calibration_setup_t *setup,
 			if( is_bipolar( setup->dev, setup->ad_subdev, 0, range ) )
 				sc_push_range( current_cal, range );
 		postgain_bip = setup->caldacs[ layout->adc_postgain_offset( 0 ) ].current;
-
 		/* unipolar postgain */
-		current_cal = sc_alloc_calibration_setting( setup );
-		generic_do_adc_postgain_offset( setup, layout, current_cal, 0, 1 );
-		sc_push_channel( current_cal, SC_ALL_CHANNELS );
+		if( layout->do_adc_unipolar_postgain )
+		{
+			current_cal = sc_alloc_calibration_setting( setup );
+			generic_do_adc_postgain_offset( setup, layout, current_cal, 0, 1 );
+			sc_push_channel( current_cal, SC_ALL_CHANNELS );
+		}
 		for( range = 0; range < num_ai_ranges; range++ )
 			if( is_unipolar( setup->dev, setup->ad_subdev, 0, range ) )
 				sc_push_range( current_cal, range );
@@ -390,4 +395,5 @@ void init_generic_layout( generic_layout_t *layout )
 	layout->adc_ground_observable = dummy_observable;
 	layout->dac_high_observable = dummy_observable;
 	layout->dac_ground_observable = dummy_observable;
+	layout->do_adc_unipolar_postgain = 1;
 }

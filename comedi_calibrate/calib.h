@@ -251,6 +251,7 @@ typedef struct
 		unsigned int channel, unsigned int range );
 	int (*dac_ground_observable)( const calibration_setup_t *setup,
 		unsigned int channel, unsigned int range );
+	unsigned do_adc_unipolar_postgain : 1;
 } generic_layout_t;
 void init_generic_layout( generic_layout_t *layout );
 int generic_cal_by_channel_and_range( calibration_setup_t *setup,
