@@ -18,6 +18,8 @@
 #define SCXI_AIO_AO   1
 #define SCXI_AIO_AI   2
 
+#define REG_PARK 0x0FFFF
+
 struct scxi_board_struct {
 	unsigned int device_id;
 	char name[12];
@@ -55,8 +57,10 @@ typedef struct scxi_module_struct scxi_mod_t;
 extern "C" {
 #endif
 
-int comedi_scxi_serial_readwrite(comedi_t *it, unsigned char out_bits, unsigned char *in_bits);
-int comedi_scxi_serial_config(comedi_t *it, unsigned int clock_interval);
+void comedi_scxi_close(scxi_mod_t *mod);
+scxi_mod_t *comedi_scxi_open(comedi_t *dev, unsigned short chassis_address, unsigned short mod_slot);
+int comedi_scxi_register_readwrite(scxi_mod_t *mod, unsigned short address, unsigned int num_bytes,
+			    unsigned char *data_out, unsigned char *data_in);
 
 #ifdef __cplusplus
 }
