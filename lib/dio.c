@@ -29,7 +29,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
-#include <comedi.h>
 #include <string.h>
 
 #include "libinternal.h"

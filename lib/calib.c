@@ -25,7 +25,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <comedilib.h>
 #include "libinternal.h"
 
 static int check_cal_file( comedi_t *dev, struct calibration_file_contents *parsed_file )

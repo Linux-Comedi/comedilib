@@ -21,8 +21,6 @@
     USA.
 */
 
-#include <comedi.h>
-
 #include "libinternal.h"
 #include <string.h>
 

@@ -26,15 +26,15 @@
 
 #define _COMEDILIB_DEPRECATED
 
-#include <comedilib.h>
+#include "comedilib.h"
+#include "comedi.h"
+#include "comedi_errno.h"
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <stdio.h>
 #ifdef I18N
 #include <libintl.h>
 #endif
-
-#include <comedi_errno.h>
 
 /* This indicates a symbol that should not be exported as part of
  * the library.  But I don't know how to make it useful yet. */

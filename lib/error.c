@@ -25,7 +25,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <comedi_errno.h>
 
 char *__comedilib_error_strings[]={
 	_s("No error"),

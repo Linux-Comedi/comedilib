@@ -32,7 +32,6 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <errno.h>
-#include <comedi.h>
 #include <string.h>
 
 
