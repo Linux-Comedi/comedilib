@@ -7,5 +7,7 @@ extern comedi_t *device;
 
 extern int subdevice;
 
+extern int verbose;
+
 #endif
 

@@ -32,23 +32,35 @@ int test_cmd_probe_fast_1chan(void);
 int test_cmd_read_fast_1chan(void);
 int test_cmd_fifo_depth_check(void);
 int test_mmap(void);
+int test_read_select(void);
+int test_cmd_continuous(void);
+
+#define TEST_NEVER 0
+#define TEST_STD 1
 
 struct test_struct{
 	char *name;
 	int (*do_test)(void);
+	int flags;
 };
 struct test_struct tests[]={
-	{ "info", test_info },
-	{ "mode0_read", test_mode0_read },
-	{ "insn_read", test_insn_read },
-	{ "insn_read_time", test_insn_read_time },
-	{ "cmd_probe_src_mask", test_cmd_probe_src_mask },
-	{ "cmd_probe_fast_1chan", test_cmd_probe_fast_1chan },
-	{ "cmd_read_fast_1chan", test_cmd_read_fast_1chan },
-	{ "cmd_fifo_depth_check", test_cmd_fifo_depth_check },
-	{ "mmap", test_mmap },
+	{ "info", test_info, TEST_STD },
+	{ "mode0_read", test_mode0_read, TEST_STD },
+	{ "insn_read", test_insn_read, TEST_STD },
+	{ "insn_read_time", test_insn_read_time, TEST_STD },
+	{ "cmd_probe_src_mask", test_cmd_probe_src_mask, TEST_STD },
+	{ "cmd_probe_fast_1chan", test_cmd_probe_fast_1chan, TEST_STD },
+	{ "cmd_read_fast_1chan", test_cmd_read_fast_1chan, TEST_STD },
+	{ "cmd_fifo_depth_check", test_cmd_fifo_depth_check, TEST_STD },
+	{ "mmap", test_mmap, TEST_STD },
+	{ "read_select", test_read_select, TEST_STD },
+	{ "cmd_continuous", test_cmd_continuous, TEST_NEVER },
 };
 static int n_tests = sizeof(tests)/sizeof(tests[0]);
+
+int only_subdevice;
+int verbose;
+char *only_test;
 
 int main(int argc, char *argv[])
 {
@@ -56,12 +68,22 @@ int main(int argc, char *argv[])
 	int i;
 
 	while (1) {
-		c = getopt(argc, argv, "f");
+		c = getopt(argc, argv, "f:s:t:v");
 		if (c == -1)
 			break;
 		switch (c) {
 		case 'f':
-			filename = argv[optind];
+			filename = optarg;
+			break;
+		case 's':
+			only_subdevice = 1;
+			sscanf(optarg,"%d",&subdevice);
+			break;
+		case 't':
+			only_test = optarg;
+			break;
+		case 'v':
+			verbose = 1;
 			break;
 		default:
 			printf("bad option\n");
@@ -74,13 +96,25 @@ int main(int argc, char *argv[])
 		printf("E: comedi_open(\"%s\"): %s\n",filename,strerror(errno));
 	}
 
-	for(subdevice=0;subdevice<comedi_get_n_subdevices(device);subdevice++){
+	for(;subdevice<comedi_get_n_subdevices(device);subdevice++){
 		printf("I:\n");
 		printf("I: subdevice %d\n",subdevice);
-		for(i=0;i<n_tests;i++){
-			printf("I: testing %s...\n",tests[i].name);
-			tests[i].do_test();
+		if(only_test){
+			for(i=0;i<n_tests;i++){
+				if(!strcmp(tests[i].name,only_test)){
+					printf("I: testing %s...\n",tests[i].name);
+					tests[i].do_test();
+				}
+			}
+		}else{
+			for(i=0;i<n_tests;i++){
+				if(tests[i].flags&TEST_STD){
+					printf("I: testing %s...\n",tests[i].name);
+					tests[i].do_test();
+				}
+			}
 		}
+		if(only_subdevice)break;
 	}
 
 	return 0;

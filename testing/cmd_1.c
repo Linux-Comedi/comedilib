@@ -65,7 +65,7 @@ int test_cmd_probe_fast_1chan(void)
 	return 0;
 }
 
-#define BUFSZ 1000
+#define BUFSZ 2000
 
 int test_cmd_read_fast_1chan(void)
 {
@@ -83,7 +83,7 @@ int test_cmd_read_fast_1chan(void)
 
 	cmd.chanlist = chanlist;
 	cmd.scan_end_arg = 1;
-	cmd.stop_arg = 10000;
+	cmd.stop_arg = 100000;
 	cmd.chanlist_len = 1;
 	chanlist[0] = CR_PACK(0,0,0);
 
@@ -103,7 +103,8 @@ int test_cmd_read_fast_1chan(void)
 			go = 0;
 		}else{
 			total += ret;
-			printf("read %d %d\n",ret,total);
+			if(verbose)
+				printf("read %d %d\n",ret,total);
 		}
 	}
 
@@ -200,12 +201,14 @@ int comedi_get_cmd_fast_1chan(comedi_t *it,unsigned int s,comedi_cmd *cmd)
 
 	ret=comedi_command_test(it,cmd);
 	if(ret==3){
+		printf("ret==3\n");
 		/* good */
 		ret=comedi_command_test(it,cmd);
 	}
 	if(ret==4 || ret==0){
 		return 0;
 	}
+	printf("W: comedi_command_test() returned %d\n",ret);
 	return -1;
 }
 
