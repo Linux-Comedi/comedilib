@@ -59,7 +59,7 @@ extern "C" {
 
 void comedi_scxi_close(scxi_mod_t *mod);
 scxi_mod_t *comedi_scxi_open(comedi_t *dev, unsigned short chassis_address, unsigned short mod_slot);
-int comedi_scxi_register_readwrite(scxi_mod_t *mod, unsigned short address, unsigned int num_bytes,
+int comedi_scxi_register_readwrite(scxi_mod_t *mod, unsigned short reg_address, unsigned int num_bytes,
 			    unsigned char *data_out, unsigned char *data_in);
 
 #ifdef __cplusplus

@@ -177,7 +177,7 @@ static int scxi_identify(scxi_mod_t *mod)
 
 }
 
-int comedi_scxi_register_readwrite(scxi_mod_t *mod, unsigned short address, unsigned int num_bytes,
+int comedi_scxi_register_readwrite(scxi_mod_t *mod, unsigned short reg_address, unsigned int num_bytes,
 			    unsigned char *data_out, unsigned char *data_in)
 {
 	unsigned int i;
@@ -185,7 +185,7 @@ int comedi_scxi_register_readwrite(scxi_mod_t *mod, unsigned short address, unsi
 
 	if(mod == NULL || mod->dev == NULL) return -1;
 
-	scxi_module_select(mod, address);
+	scxi_module_select(mod, reg_address);
 
 	for(i = 0; i < num_bytes; ++i) {
 		if(data_out) tmp_out = data_out[i];
@@ -193,7 +193,7 @@ int comedi_scxi_register_readwrite(scxi_mod_t *mod, unsigned short address, unsi
 		if(data_in) data_in[i] = tmp_in;
 	}
 
-	if(scxi_boards[mod->board].modclass == 1 && address == 0) {
+	if(scxi_boards[mod->board].modclass == 1 && reg_address == 0) {
 		comedi_dio_write(mod->dev, mod->dio_subdev, SCXI_LINE_SS, 1);
 	}
 
