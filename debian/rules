@@ -46,7 +46,7 @@ install: build
 
 	# Add here commands to install the package into debian/tmp.
 	$(MAKE) install DESTDIR=`pwd`/debian/tmp
-	(cd debian/tmp;mv usr/doc/libcomedi usr/share/doc/libcomedi-dev;rmdir usr/doc)
+	#(cd debian/tmp;mv usr/doc/libcomedi usr/share/doc/libcomedi-dev;rmdir usr/doc)
 
 
 # Build architecture-independent files here.
@@ -63,7 +63,9 @@ binary-arch: build install
 	#
 	dh_movefiles -plibcomedi$(major)             \
                usr/lib/libcomedi.so.$(version)	\
-               usr/lib/libcomedi.so.$(major)
+               usr/lib/libcomedi.so.$(major)	\
+	       usr/bin/comedi_config		\
+	       usr/bin/comedi_calibrate
 
 #	dh_installdebconf	
 	dh_installdocs
@@ -73,7 +75,7 @@ binary-arch: build install
 #	dh_installpam
 #	dh_installinit
 	dh_installcron
-	dh_installmanpages
+	dh_installmanpages -plibcomedi0
 	dh_installinfo
 #	dh_undocumented
 	dh_installchangelogs 
