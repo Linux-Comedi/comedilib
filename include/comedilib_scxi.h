@@ -1,9 +1,8 @@
 /*
     include/comedilib_scxi.h
-    header file for the comedi library routines
+    header file for the comedi scxi library routines
 
-    COMEDI - Linux Control and Measurement Device Interface
-    Copyright (C) 1998-2002 David A. Schleef <ds@schleef.org>
+    Copyright (C) 2004 Caleb Tennis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published by
