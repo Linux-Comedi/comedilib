@@ -1,56 +1,6 @@
 
+The README that was here previously was horribly outdated.
+Remind me to write a new one.
 
 
-	Linux Control and Measurement Device Interface (comedi)
-
-		David Schleef
-		<ds@stm.lbl.gov>
-
-
-A new minor version of comedi, 0.6.0, is now available at
-<ftp://stm.lbl.gov/pub/comedi/>.  The change in minor version
-level to 6 represents a complete redesign and rewrite of
-the kernel interface.  Because of this, 0.6.0 is almost
-completely incompatible with previous versions.
-
-This redesign was necessary for current and future growth
-of comedi.  The current needs that have been addressed are
-SMP and RT compatibility, the need to be more friendly to
-high-level programming, and an overall simplification of
-the interface.  Using the 0.6 series should eventually be
-easier and more understandable.
-
-The major changes from the 0.5 series are:
-
-	- Comedi devices are now divided into "subdevices",
-	  such as a A/D subsystem or D/A subsystem, instead
-	  of channels.  This eliminates much of the redundant
-	  information and coding that was present in the 0.5
-	  series, and also allows proper locking of devices
-	  necessary for proper SMP and RT performance.
-	
-	- The 0.6 series will allow multiple methods for
-	  data transfer from hardware to your user-level
-	  process, including read()/write(), ioctl(), and
-	  mmap(), giving users needed flexibility.
-	
-	- Hardware drivers that are real-time compatibile will
-	  now be able to perform RTLinux tasks timed by device
-	  interrupts.
-
-Upgrading to 0.6 should not be too difficult, although it
-will require editing and recompiling all programs that use
-comedi, since the interface has changed.
-
-Comedi includes hardware drivers for many boards.  See ./drivers
-for details.
-
-If you want to add support for another hardware device, you
-will want to look at the comedi hardware driver writing HOWTO
-in the doc directory.  It is fairly simple to write a new hardware
-driver for comedi, but I am always willing to answer any questions
-you might have.
-
-Comedi may be freely distibuted and modified in accordance with the
-GNU General Public License.
 
