@@ -473,9 +473,36 @@ output subdevice, bidirectional digital lines will be grouped
 into a digital I/O subdevice.  Thus, there can be multiple
 digital subdevices on a particular board.
 
+Individual digital lines can be read and written using the
+functions
 
-<sect1>Timed Input/Output
-<p>
+  <tt/comedi_dio_read(device,subdevice,channel,unsigned int *bit);/
+  <tt/comedi_dio_write(device,subdevice,channel,unsigned int bit);/
+
+The direction of bidirectional lines can be configured using
+the function
+
+  <tt/comedi_dio_config(device,subdevice,channel,unsigned int dir);/
+
+The parameter <tt/dir/ should be either COMEDI_INPUT or COMEDI_OUTPUT.
+Many digital I/O subdevices group channels into blocks for
+configuring direction.  Changing one channel in a block changes
+the entire block.
+
+Multiple channels can be read and written simultaneously using the
+function
+
+  <tt/comedi_dio_bitfield(device,subdevice,unsigned int write_mask,unsigned int *bits);/
+
+Each channel is assigned to a bit in the <tt/write_mask/ and <tt/bits/
+bitfield.  If a bit in <tt/write_mask/ is set, the corresponding bit
+in <tt/*bits/ will be written to the corresponding digital output line.
+Each digital line is then read and placed into <tt/*bits/.  The value
+of bits in <tt/*bits/ corresponding to digital output lines is
+undefined and device-specific.  Channel 0 is the least significant
+bit in the bitfield; channel 31 is the most significant bit.  Channels
+higher than 31 cannot be accessed using this method.
+
 
 <p>
 <sect1>Slowly-varying inputs
@@ -529,398 +556,59 @@ perform a part-per-million calibration to a standard that
 is only accurate to part-per-thousand.
 
 
-
+<p>
+<sect1>Commands
 <p>
 
-<sect>Comedilib reference
 
-<p>
-Reference of structures:
+Many data acquisition devices have the capability to directly
+control acquisition using either an on-board timer or an external
+triggering input.  Comedi commands are used to control this kind
+of acquisition.  The same structure (comedi_cmd) used to control
+acquisition is used to query the capabilities of a device.
 
-<tscreen><verb>
-typedef struct comedi_t_struct comedi_t;
+Commands specify a particular data acquisition sequence, which
+is comprised of a number of scans.  Each scan is comprised of
+a number of conversions, which usually corresponds to a single
+A/D or D/A conversion.  The start and end of the sequence, and
+the start and end of each scan, and each conversion is called an
+event.
 
-typedef struct{
-	double min;
-	double max;
-	unsigned int unit;
-}comedi_range;
-
-typedef struct comedi_sv_struct{
-	comedi_t *dev;
-	unsigned int subdevice;
-	unsigned int chan;
-
-	/* range policy */
-	int range;
-	int aref;
-	
-	/* number of measurements to average (for ai) */
-	int n;
-
-	lsampl_t maxdata;
-}comedi_sv_t;
-</verb></tscreen>
-
-<sect1>comedi_loglevel()
-
-<p>
-
-int comedi_loglevel(int loglevel);
-
-<p>
-
-This function affects the output of debugging and error messages
-from comedlib.  By increasing the loglevel, additional debugging
-information will be printed.  This function returns the previous
-loglevel.  Some debugging information will only be printed if
-comedilib was compiled with this debugging information included.
-The loglevel can also be affected by the environment
-variable COMEDI_LOGLEVEL.  The meaning of the loglevels is as
-follows:
-
-COMEDILIB_LOGLEVEL=0
-
-Comedilib prints nothing.
-
-COMEDILIB_LOGLEVEL=1  (default)
-
-Comedilib only prints error messages when there is a
-self-consistency error.
-
-COMEDILIB_LOGLEVEL=2
-
-Comedilib prints an error message whenever an invalid
-parameter is passed to comedilib.
-
-COMEDILIB_LOGLEVEL=3
-
-Comedilib prints an error message whenever an error is generated
-in the comedilib library or is generated in the C library when
-called by comedilib.
-
-COMEDILIB_LOGLEVEL=4
-
-Comedilib prints a lot of debugging messages.
-
-<p>
-
-<sect1>comedi_open
-
-<p>
-
-comedi_t *comedi_open(char *fn);
-
-Opens a comedi device specified by the filename fn.  Returns NULL
-on error.  Returns a handle that is given as a parameter to other
-comedilib functions.
-
-You are not supposed to have access to the structure comedi_t.
-
-void comedi_close(comedi_t *it);
-
-Closes a device previously opened by comedi_open().
-
-void comedi_perror(const char *s);
-char *comedi_strerror(int errnum);
-int comedi_errno(void);
-
-When a comedilib function fails, it usually returns -1 or
-NULL, depending on the return type.  An internal library
-variable stores an error number, which can be retrieved with
-<tt>comedi_errno()</tt>.  This error number can be
-converted to a human-readable form by the functions
-<tt>comedi_perror()</tt> and <tt>comedi_strerror()</tt>.
-
-These functions are intended to mimic the behavior of the
-standard C library functions <tt>perror()</tt>,
-<tt>strerror</tt>, and <tt>errno()</tt>.  In particular,
-comedilib functions sometimes return an error that is generated
-inside the C library; the comedi error message in this case
-is the same as the C library.
-
-The function <tt>comedi_perror()</tt> prints an error
-message to stderr.  The error message consists of the
-argument string, a colon, a space, a description of the error
-condition, and a new line.
-
-The function <tt>comedi_strerror()</tt> returns a pointer to a
-character string
-describing the comedilib error <tt>errnum</tt>.  The persistence
-of the returned pointer is undefined, and should not be trusted
-after the next comedilib call.  An unrecognized error number will
-return a pointer to the string "undefined error", or similar.
-
-The function <tt>comedi_errno()</tt>
-returns an integer describing the most recent comedilib error.  This
-integer may be used as the <tt>errnum</tt> parameter for
-<tt>comedi_strerror()</tt>.
-
-<p>
-<sect1>comedi_fileno()
-
-<p>
-
-int comedi_fileno(comedi_t *it);
-
-The function <tt>comedi_fileno</tt>
-returns the integer descriptor for the handle <tt>it</tt>.  If
-<tt>it</tt> is an invalid <tt>comedi_t</tt> pointer, the function
-returns -1 and sets the appropriate comedilib error value.
-
-
-<p>
-<sect1>comedi_get_n_subdevices()
-<p>
-
-int comedi_get_n_subdevices(comedi_t *it);
-
-The function <tt>comedi_get_n_subdevices</tt> returns the
-number of subdevices associated with the comedi descriptor
-<tt>it</tt>, or -1 if there is an error.
-
-<p>
-<sect1>comedi_get_version_code()
-<p>
-
-int comedi_get_version_code(comedi_t *it);
-
-The function <tt>comedi_get_version_code()</tt> returns the
-version code of the currently running comedi module.  The version
-code is of the form 0x010203, which is the version code for
-version 1.2.3.
-
-<p>
-<sect1>comedi_get_driver_name()
-<p>
-
-char *comedi_get_driver_name(comedi_t *it);
-
-The function <tt>comedi_get_driver_name</tt> returns a pointer
-to a string containing the name of the driver being used by comedi
-for the comedi device represented by <tt>it</tt>.  This pointer is
-valid until the comedi descriptor <tt>it</tt> is closed.  This
-function returns NULL if there is an error.
-
-<p>
-<sect1>comedi_get_board_name()
-<p>
-
-char *comedi_get_board_name(comedi_t *it);
-
-The function <tt>comedi_get_board_name</tt> returns a pointer
-to a string containing the name of the device.  This pointer is
-valid until the comedi descriptor <tt>it</tt> is closed.  This
-function returns NULL if there is an error.
-
-<p>
-<sect1>comedi_get_subdevice_type()
-<p>
-
-int comedi_get_subdevice_type(comedi_t *it,unsigned int subdevice);
-
-The function <tt>comedi_get_subdevice_type()</tt> returns an
-integer describing the type of subdevice that belongs to the comedi
-device <tt>it</tt> and has the index <tt>subdevice</tt>.  The
-function returns -1 is there is an error.
-
-Valid subdevice types are:
+Each of these 5 types of events are caused by a triggering
+source.  The source types are:
 
 <itemize>
-<item><tt>COMEDI_SUBD_UNUSED</tt>
-Subdevice has no functionality, i.e., a place-holder.
-<item><tt>COMEDI_SUBD_AI</tt>	Analog input
-<item><tt>COMEDI_SUBD_AO</tt>	Analog output
-<item><tt>COMEDI_SUBD_DI</tt>	Digital input
-<item><tt>COMEDI_SUBD_DO</tt>	Digital output
-<item><tt>COMEDI_SUBD_DIO</tt>
-Digital input/output.  Channels are configurable as to whether they
-are inputs or outputs.
-<item><tt>COMEDI_SUBD_COUNTER</tt>	Counter
-<item><tt>COMEDI_SUBD_TIMER</tt>	Timer
-<item><tt>COMEDI_SUBD_MEMORY</tt>
-Memory, e.g., EEPROM or dual-ported RAM
-<item><tt>COMEDI_SUBD_CALIB</tt>
-Calibration DACs
-<item><tt>COMEDI_SUBD_PROC</tt>
-Processor or DSP
+<item>TRIG_NONE		don't ever cause event
+<item>TRIG_NOW		cause event to occur immediately
+<item>TRIG_FOLLOW	(see notes below)
+<item>TRIG_TIME		cause event to occur at a particular time
+<item>TRIG_TIMER	cause event to occur repeatedly at a specific rate
+<item>TRIG_COUNT	cause event when count reaches specific value
+<item>TRIG_EXT		external signal causes event
+<item>TRIG_INT		internal signal causes event
 </itemize>
 
+Not all triggers are applicable to all events.  Supported triggers
+for specific events depends significantly on your particular
+device.  In addition, for every trigger type, there is a cooresponding
+argument that specifies the rate, the count, which external signal,
+etc.
 
-<p>
-<sect1>comedi_find_subdevice_by_type()
-<p>
+TRIG_FOLLOW is a special type of trigger for scan_begin events that
+triggers on the next lower level trigger, in this case, the trigger
+for convert events.  It may or may not be supported.  Later, it may
+also be used for start events if you want to chain multiple commands.
 
-int comedi_find_subdevice_by_type(comedi_t *it,int type,unsigned int start_subdevice)
-
-The function <tt>comedi_find_subdevice_by_type</tt> tries to
-locate a subdevice belonging to comedi device <tt>it</tt>,
-having type <tt>type</tt>, starting with the subdevice
-<tt>start_subdevice</tt>.  If it finds the requested subdevice,
-it returns its index.  If it does not locate the requested
-subdevice, it returns -1 and sets the comedi error number to
-"subdevice not found".  If there is an error, the function
-returns -1 and sets the appropriate error.
-
-For subdevice types, see the manual page for the function
-<tt>comedi_get_subdevice_type()</tt>.
-
-<p>
-<sect1>comedi_get_n_channels()
-<p>
+In particular, scan_end events will almost always be triggered on
+TRIG_COUNT, with the argument being the number of channels in the
+scan.  (Actually, samples in the scan, since on most boards you can
+measure a single channel multiple times in a scan.)  Also, until
+otherwise supported, start events can only be TRIG_NOW.
 
 
-int comedi_get_n_channels(comedi_t *it,unsigned int subdevice);
 
-The function <tt>comedi_get_n_channels()</tt> returns the number
-of channels of the subdevice belonging to the comedi device <tt>it</tt>
-and having index <tt>subdevice</tt>.  This function returns -1 on error.
-
-<p>
-<sect1>comedi_get_maxdata()
-<p>
-
-lsampl_t comedi_get_maxdata(comedi_t *it,unsigned int subdevice,unsigned int chan);
-
-The function <tt>comedi_get_maxdata()</tt> returns the maximum
-valid data value for channel <tt>chan</tt> of subdevice
-<tt>subdevice</tt> belonging to the comedi device <tt>it</tt>
-This function returns 0 on error.
-
-<p>
-<sect1>comedi_get_rangetype()
-<p>
-
-int comedi_get_rangetype(comedi_t *it,unsigned int subdevice,unsigned int chan);
-
-The function <tt>comedi_get_rangetype()</tt> returns an integer
-that represents the number of range specifications available for a
-particular channel, as well as a conversion table to convert sample
-values to/from physical units.  The macro
-<tt>RANGE_LENGTH(rangetype)</tt>
-can be used to determine the number of range specifications for a given
-range type.
-
-<p>
-<sect1>comedi_get_range()
-<p>
-
-comedi_range * comedi_get_range(comedi_t *it,unsigned int subdevice,unsigned int chan,unsigned int range);
-
-The function <tt>comedi_get_range</tt> returns a pointer to a
-comedi_range structure that contains information that can be used to
-convert sample values to or from physical units.  The pointer is valid
-until the comedi device <tt>it</tt> is closed.  If there is an
-error, NULL is returned.
-
-<p>
-<sect1>comedi_trigger()
-<p>
-
-int comedi_trigger(comedi_t *it,comedi_trig *trig);
-
-The function <tt>comedi_trigger()</tt> instructs comedi to
-perform the command specified by the trigger structure
-<tt>trig</tt>.  Results depend on the particular command
-being issued.  If there is an error, -1 is returned.
-
-Complete information about comedi commands is given in the
-manual page comedi(8).
-
-double comedi_to_phys(lsampl_t data,comedi_range *rng,lsampl_t maxdata);
-lsampl_t comedi_from_phys(double data,comedi_range *rng,lsampl_t maxdata);
-
-The functions <tt>comedi_to_phys()</tt> and
-<tt>comedi_from_phys()</tt> convert sample values to/from physical
-units.  The parameter <tt>rng</tt> represents the conversion
-information to use, and the parameter <tt>maxdata</tt> represents
-the maximum possible data value for the channel that the data was read/
-will be written to.
 
 
 <p>
-<sect1>comedi_data_read()
-<p>
-
-int comedi_data_read(comedi_t *it,unsigned int subd,unsigned int chan,
-	unsigned int range,unsigned int aref,lsampl_t *data);
-int comedi_data_write(comedi_t *it,unsigned int subd,unsigned int chan,
-	unsigned int range,unsigned int aref,lsampl_t data);
-
-These functions read or write a single sample on the channel that
-is specified by the comedi device <tt>it</tt>, the
-subdevice <tt>subd</tt>, and the channel <tt>chan</tt>.
-For the operation,
-the device is configured to use range specification
-<tt>range</tt> and (if appropriate) analog reference type
-<tt>aref</tt>.  Analog reference types that are not supported
-by the device are silently ignored.
-
-The function <tt>comedi_data_read()</tt> reads one data value from
-the specified channel and places the 
-data value that is read in the location pointed to by
-<tt>data</tt>.
-
-The function <tt>comedi_data_write()</tt> writes the data value
-specified by the argument <tt>data</tt> to
-the specified channel.
-
-On sucess, these functions return 0.  If there is an error, -1 is
-returned.
-
-Valid analog reference numbers are:
-
-<itemize>
-<item>AREF_GROUND	Reference to analog ground
-<item>AREF_COMMON	Reference to analog common
-<item>AREF_DIFF		Differential reference
-<item>AREF_OTHER	Board-specific meaning
-</itemize>
-
-Valid data values used by these functions is an unsigned integer
-less than or equal to <tt>maxdata</tt>, which is channel-dependent.
-Conversion of these data values to physical units can be performed
-by <tt>comedi_to_phys()</tt> and <tt>comedi_from_phys()</tt>.
-
-
-<p>
-<sect1>comedi_sv_init()
-<p>
-
-<tscreen><verb>
-int comedi_sv_init(comedi_sv_t *it,comedi_t *dev,unsigned int subd,unsigned int chan);
-int comedi_sv_update(comedi_sv_t *it);
-int comedi_sv_measure(comedi_sv_t *it,double *data);
-</verb></tscreen>
-
-The special functions <tt>comedi_sv_*()</tt> are designed to
-make it easy to accurately measure slowly varying analog inputs.
-A slowly
-varying input is one that is effectively constant over the course
-of approximately 100 A/D conversions.  However, since these
-conversions can sometimes be pre-empted by scheduling, for most
-purposes, a slowly varying signal should be effectively constant
-for greater than 20 ms (the default Linux timeslice).
-
-By averaging many A/D conversions of a relatively constant
-signal, it is possible to get a better measurement of the signal
-than a single A/D conversion.  In general, the uncertainty of the
-measurement decreases as the square root of the number of samples.
-This is limited by the rate that which the signal varies, and
-ultimately by the spurious free dynamic range of the A/D converter.
-
-
-<p>
-<sect1>comedi_get_timer()
-<p>
-
-<tscreen><verb>
-int comedi_get_timer(comedi_t *it,unsigned int subdev,double freq,unsigned int *trigvar,
-	double *actual_freq);
-</verb></tscreen>
-
-
-<p>
-
 </article>
 

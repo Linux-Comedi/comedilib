@@ -49,7 +49,7 @@ device.  A valid <tt/comedi_t/ pointer is returned by a successful
 call to <tt/comedi_open()/, and should be used for subsequent
 access to the device.
 It is a transparent type, and pointers to type <tt/comedi_t/
-should not be dereferenced.  
+should not be dereferenced by the application.
 
 
 <p>
@@ -99,9 +99,11 @@ struct comedi_trig_struct{
 
 The <tt/comedi_trig/ structure is a control structure used by the
 COMEDI_TRIG ioctl, an older method of communicating
-instructions to the driver and hardware.  Use of Comedi triggers is
+instructions to the driver and hardware.  Use of comedi_trig is
 deprecated, and should not be used in new applications.
 
+<p>
+This structure is defined as part of the Comedi kernel interface.
 
 <p>
 <sect2>comedi_sv_t
@@ -129,6 +131,41 @@ The <tt/comedi_sv_t/ structure is used by the <tt/comedi_sv_*()/
 functions to provide a simple method of accurately measuring
 slowly varying inputs.  See the relevant section for more
 details.
+
+
+<p>
+<sect2>comedi_cmd
+<label id="comedi_cmd">
+<p>
+
+undocumented
+
+<p>
+Related functions are described in section XXX.
+
+<p>
+This structure is defined as part of the Comedi kernel interface.
+
+<p>
+<sect2>comedi_insn
+<label id="comedi_insn">
+<p>
+
+undocumented
+
+<p>
+Related functions are described in section XXX.
+
+<p>
+This structure is defined as part of the Comedi kernel interface.
+
+
+<p>
+<sect2>comedi_range
+<label id="comedi_range">
+<p>
+
+undocumented
 
 
 
@@ -539,7 +576,7 @@ error, NULL is returned.
 Source: <tt>/lib/get.c</tt>
 
 <p>
-<sect2>comedi_get_rangetype()
+<sect2>comedi_get_rangetype()  <it/deprecated/
 <p>
 
 <tt>int comedi_get_rangetype(comedi_t *it,unsigned int subdevice,unsigned int
@@ -554,6 +591,9 @@ values to/from physical units.
 <tt>RANGE_LENGTH(rangetype)</tt>
 can be used to determine the number of range specifications for a given
 range type.
+
+<p>
+This function is deprecated and should not be used in new code.
 
 Source: <tt>/lib/get.c</tt>
 
@@ -851,28 +891,108 @@ Lifetime: removal at 1.0.
 Source: <tt>/lib/comedi.c</tt>
 
 
+<p>
+<sect2>comedi_get_subdevice_flags()
+<label id="comedi_get_subdevice_flags">
+<p>
 
+<tt/int comedi_get_subdevice_flags(comedi_t *dev, unsigned int subdevice);/
 
+<p>
+This function returns a bitfield describing the capabilities of the
+specified subdevice.  If there is an error, -1 is returned.
 
+<p>The bits are:
 
-
-
-
-
+<itemize>
+<item>SDF_BUSY		subdevice is running a command
+<item>SDF_BUSY_OWNER	subdevice is running a command started by
+the file descriptor used by <tt/dev/.
+<item>SDF_LOCKED	subdevice is locked
+<item>SDF_LOCKED_OWNER	subdevice is locked by the file descriptor used
+by <tt/dev/.
+<item>SDF_MAXDATA	maximum data values are channel dependent
+<item>SDF_FLAGS		channel flags are channel dependent
+<item>SDF_RANGETYPE	range types are channel dependent
+<item>SDF_MODE0		deprecated
+<item>SDF_MODE1		deprecated
+<item>SDF_MODE2		deprecated
+<item>SDF_MODE3		deprecated
+<item>SDF_MODE4		deprecated
+<item>SDF_CMD		subdevice supports commands
+<item>SDF_READABLE	subdevice can be read from
+<item>SDF_WRITEABLE	subdevice can be written to
+<item>SDF_RT		deprecated
+<item>SDF_GROUND	subdevice is capable of ground analog reference
+<item>SDF_COMMON	subdevice is capable of common analog reference
+<item>SDF_DIFF		subdevice is capable of differential analog reference
+<item>SDF_OTHER		subdevice is capable of other analog reference
+<item>SDF_DITHER	subdevice recognizes dither flag
+<item>SDF_DEGLITCH	subdevice recognizes deglitch flag
+<item>SDF_MMAP		deprecated
+<item>SDF_RUNNING	subdevice is acquiring data (i.e., command has not
+completed)
+<item>SDF_LSAMPL	subdevice uses samples of type lsampl_t (otherwise
+sampl_t)
+<item>SDF_PACKED	subdevice uses bitfield samples (otherwise it uses
+one sample per channel)
+</itemize>
 
 
 
 <p>
-<sect2>comedi_get_timer()
-<p>
-
-<tscreen><verb>
-int comedi_get_timer(comedi_t *it,unsigned int subdev,double freq,unsigned int *trigvar,
-	double *actual_freq);
-</verb></tscreen>
+The bit definitions are part of the Comedi kernel interface.
 
 
 <p>
+<sect2>comedi_range_is_chan_specific()
+<label id="comedi_range_is_chan_specific">
+<p>
+
+<tt/int comedi_range_is_chan_specific(comedi_t *dev,unsigned int subdevice);/
+
+<p>
+If each channel of the specified subdevice has a different range
+specification, this function returns 1.  Otherwise, this function
+returns 0.  On error, this function returns -1.
+
+
+<p>
+<sect2>Undocumented functions
+<label id="undocumented">
+<p>
+
+
+<itemize>
+<item>comedi_maxdata_is_chan_specific()
+<item>comedi_get_buffer_size()
+<item>comedi_get_max_buffer_size()
+<item>comedi_set_buffer_size()
+<item>comedi_set_max_buffer_size()
+<item>comedi_do_insnlist()
+<item>comedi_do_insn()
+<item>comedi_lock()
+<item>comedi_unlock()
+<item>comedi_get_cmd_src_mask()
+<item>comedi_get_cmd_generic_timed()
+<item>comedi_cancel()
+<item>comedi_command()
+<item>comedi_command_test()
+<item>comedi_poll()
+<item>comedi_get_buffer_contents()
+<item>comedi_mark_buffer_read()
+<item>comedi_get_buffer_offset()
+<item>comedi_set_global_oor_behavior()
+</itemize>
+
+
+
+
+
+
+
+
+
 
 </article>
 
