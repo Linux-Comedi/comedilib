@@ -151,28 +151,35 @@ comedi_range *get_rangeinfo(int fd,unsigned int range_type)
 
 static int do_test_for_cmd(comedi_t *dev,unsigned int subdevice)
 {
-	comedi_cmd it;
-	int ret;
-
-	memset(&it,0,sizeof(it));
-
-	it.subdev = subdevice;
-	it.start_src = TRIG_ANY;
-	it.scan_begin_src = TRIG_ANY;
-	it.convert_src = TRIG_ANY;
-	it.scan_end_src = TRIG_ANY;
-	it.stop_src = TRIG_ANY;
-
-	ret = ioctl(dev->fd,COMEDI_CMDTEST,&it);
-
-	if(ret<0 && errno==EIO){
+	/* SDF_CMD was added in 0.7.57 */
+	if(dev->devinfo.version_code >= COMEDI_VERSION_CODE(0,7,57)){
+		if(dev->subdevices[subdevice].subd_flags & SDF_CMD)
+			return 1;
 		return 0;
+	}else{
+		comedi_cmd it;
+		int ret;
+
+		memset(&it,0,sizeof(it));
+
+		it.subdev = subdevice;
+		it.start_src = TRIG_ANY;
+		it.scan_begin_src = TRIG_ANY;
+		it.convert_src = TRIG_ANY;
+		it.scan_end_src = TRIG_ANY;
+		it.stop_src = TRIG_ANY;
+
+		ret = ioctl(dev->fd,COMEDI_CMDTEST,&it);
+
+		if(ret<0 && errno==EIO){
+			return 0;
+		}
+		if(ret<0){
+			fprintf(stderr,"BUG in do_test_for_cmd()\n");
+			return 0;
+		}
+		return 1;
 	}
-	if(ret<0){
-		fprintf(stderr,"BUG in do_test_for_cmd()\n");
-		return 0;
-	}
-	return 1;
 }
 
 static int do_test_for_insnlist(comedi_t *dev)
