@@ -2,7 +2,7 @@
 DOC=comedilib
 SGML= drivers.sgml funcref.sgml glossary.sgml \
 	install.sgml intro.sgml other.sgml reference.sgml tutorial.sgml \
-	driverwriting.sgml advanced.sgml
+	driverwriting.sgml 
 
 EXTRA_DIST=$(SGML) comedilib.sgml funcref mkref drivers.txt mkdr acq-seq.gif
 
