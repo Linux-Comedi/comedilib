@@ -247,7 +247,7 @@ extern comedi_calibration_t* _comedi_parse_calibration_file( const char *cal_fil
 		| error
 			{
 				fprintf(stderr, "input error on line %i\n", @1.first_line );
-				return -1;
+				YYABORT;
 			}
 		;
 
