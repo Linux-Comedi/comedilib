@@ -26,9 +26,12 @@ int range;
 int test_info(void);
 int test_mode0_read(void);
 int test_insn_read(void);
+int test_insn_read_time(void);
 int test_cmd_probe_src_mask(void);
 int test_cmd_probe_fast_1chan(void);
 int test_cmd_read_fast_1chan(void);
+int test_cmd_fifo_depth_check(void);
+int test_mmap(void);
 
 struct test_struct{
 	char *name;
@@ -38,9 +41,12 @@ struct test_struct tests[]={
 	{ "info", test_info },
 	{ "mode0_read", test_mode0_read },
 	{ "insn_read", test_insn_read },
+	{ "insn_read_time", test_insn_read_time },
 	{ "cmd_probe_src_mask", test_cmd_probe_src_mask },
 	{ "cmd_probe_fast_1chan", test_cmd_probe_fast_1chan },
 	{ "cmd_read_fast_1chan", test_cmd_read_fast_1chan },
+	{ "cmd_fifo_depth_check", test_cmd_fifo_depth_check },
+	{ "mmap", test_mmap },
 };
 static int n_tests = sizeof(tests)/sizeof(tests[0]);
 
