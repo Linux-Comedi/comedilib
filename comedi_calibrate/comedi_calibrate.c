@@ -380,6 +380,124 @@ void cal1_fine( calibration_setup_t *setup, int obs, int dac )
 	}
 }
 
+void cal_binary( calibration_setup_t *setup, int obs, int dac)
+{
+	int x1, x2, x;
+	double y1, y2, y;
+	new_sv_t sv;
+	double target = setup->observables[obs].target;
+	unsigned int chanspec = setup->observables[obs].observe_insn.chanspec;
+
+	DPRINT(0,"binary: %s\n", setup->observables[obs].name);
+	preobserve( setup, obs);
+
+	x1 = 0;
+	x2 = setup->caldacs[dac].maxdata;
+
+	new_sv_init(&sv, setup->dev,0,chanspec);
+	setup->caldacs[dac].current = x1;
+	update_caldac( setup, dac );
+	usleep(100000);
+	new_sv_measure( setup->dev, &sv);
+	y1 = sv.average;
+
+	new_sv_init(&sv, setup->dev,0,chanspec);
+	setup->caldacs[dac].current = x2;
+	update_caldac( setup, dac );
+	usleep(100000);
+	new_sv_measure( setup->dev, &sv);
+	y2 = sv.average;
+
+	x = 0;
+	while(x2-x1 > 1){
+		x = (x1 + x2 + 1)/2;
+		printf("trying %d\n",x);
+
+		new_sv_init(&sv, setup->dev,0,chanspec);
+		setup->caldacs[dac].current = x;
+		update_caldac( setup, dac );
+		usleep(100000);
+
+		new_sv_measure( setup->dev, &sv);
+		y = sv.average;
+
+		if(fabs(y2 - target) > fabs(y1 - target)){
+			x2 = x;
+			y2 = y;
+		}else{
+			x1 = x;
+			y1 = y;
+		}
+
+		measure_observable( setup, obs);
+	}
+
+	DPRINT(0,"caldac[%d] set to %d\n",dac,x);
+	if(verbose>=3){
+		measure_observable( setup, obs);
+	}
+}
+
+#if 0
+void cal_postgain_binary( calibration_setup_t *setup, int obs1, int obs2, int dac)
+{
+	int x1, x2, x;
+	double y1, y2, y;
+	new_sv_t sv;
+	double target = setup->observables[obs1].target;
+	unsigned int chanspec = setup->observables[obs].observe_insn.chanspec;
+
+	DPRINT(0,"binary: %s\n", setup->observables[obs].name);
+	preobserve( setup, obs);
+
+	x1 = 0;
+	x2 = setup->caldacs[dac].maxdata;
+
+	new_sv_init(&sv, setup->dev,0,chanspec);
+	setup->caldacs[dac].current = x1;
+	update_caldac( setup, dac );
+	usleep(100000);
+	new_sv_measure( setup->dev, &sv);
+	y1 = sv.average;
+
+	new_sv_init(&sv, setup->dev,0,chanspec);
+	setup->caldacs[dac].current = x2;
+	update_caldac( setup, dac );
+	usleep(100000);
+	new_sv_measure( setup->dev, &sv);
+	y2 = sv.average;
+
+	x = 0;
+	while(x2-x1 > 1){
+		x = (x1 + x2 + 1)/2;
+		printf("trying %d\n",x);
+
+		new_sv_init(&sv, setup->dev,0,chanspec);
+		setup->caldacs[dac].current = x;
+		update_caldac( setup, dac );
+		usleep(100000);
+
+		new_sv_measure( setup->dev, &sv);
+		y = sv.average;
+
+		if(fabs(y2 - target) > fabs(y1 - target)){
+			x2 = x;
+			y2 = y;
+		}else{
+			x1 = x;
+			y1 = y;
+		}
+
+		measure_observable( setup, obs);
+	}
+
+	DPRINT(0,"caldac[%d] set to %d\n",dac,x);
+	if(verbose>=3){
+		measure_observable( setup, obs);
+	}
+}
+#endif
+
 #if 0
 void chan_cal(int adc,int cdac,int range,double target)
 {

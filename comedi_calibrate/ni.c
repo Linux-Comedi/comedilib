@@ -558,6 +558,7 @@ int cal_ni_pci_6052e(calibration_setup_t *setup)
 	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,2);
 	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,3);
 	cal1( setup, ni_zero_offset_high,0);
+cal_binary( setup, ni_zero_offset_high,0);
 	cal1( setup, ni_zero_offset_high,1);
 	cal1( setup, ni_reference_low,4);
 	cal1_fine( setup, ni_reference_low,4);

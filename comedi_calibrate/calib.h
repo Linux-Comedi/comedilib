@@ -99,6 +99,7 @@ void setup_caldacs( calibration_setup_t *setup, int caldac_subdev);
 void postgain_cal( calibration_setup_t *setup, int obs1, int obs2, int dac);
 void cal1( calibration_setup_t *setup, int obs, int dac);
 void cal1_fine( calibration_setup_t *setup, int obs, int dac);
+void cal_binary( calibration_setup_t *setup, int obs, int dac);
 
 /* misc and temp */
 
