@@ -1,9 +1,17 @@
 
 locales = de
 
-all:
-	sgml2html comedilib.sgml
-	sgml2txt comedilib.sgml
+all: drivers.sgml funcref.sgml
+	-mkdir -p html
+	-mkdir -p man
+	-docbook2html -o html comedilib.sgml
+	-docbook2man -o man comedilib.sgml
+
+funcref.sgml: funcref mkref
+	./mkref funcref >funcref.sgml
+
+drivers.sgml: drivers.txt mkdr
+	./mkdr drivers.txt >drivers.sgml
 
 messages: .phony
 	xgettext -k_ -k_s $(shell find .. -name '*.c')
@@ -16,6 +24,9 @@ messages: .phony
 distclean: clean
 	rm -f *.html *.txt
 	rm -rf locale
+	rm -rf html
+	rm -rf man
+	rm -f drivers.sgml funcref.sgml
 
 clean:
 	for i in messages $(locales);do \
