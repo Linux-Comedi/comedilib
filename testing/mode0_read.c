@@ -1,4 +1,6 @@
 
+#define _COMEDILIB_DEPRECATED
+
 #include <stdio.h>
 #include <comedilib.h>
 #include <fcntl.h>
