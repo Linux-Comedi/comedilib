@@ -18,7 +18,6 @@
 #include <errno.h>
 #include <getopt.h>
 #include <ctype.h>
-#include <sched.h>
 #include <signal.h>
 #include <string.h>
 #include <sys/time.h>
@@ -29,7 +28,7 @@ comedi_t *device;
 
 void print_time(void);
 
-void sigio_handler(int sig,siginfo_t *si,void *x)
+void sigio_handler(int sig)
 {
 	print_time();
 }
@@ -104,13 +103,9 @@ int main(int argc, char *argv[])
 	if(ret<0)perror("fcntl");
 
 	memset(&sa,0,sizeof(sa));
-	sa.sa_sigaction = &sigio_handler;
-	sa.sa_flags = SA_SIGINFO;
+	sa.sa_handler = &sigio_handler;
 	ret = sigaction(SIGIO,&sa,NULL);
 	if(ret<0)perror("sigaction");
-
-	ret = fcntl(comedi_fileno(dev),F_SETSIG,SIGIO);
-	if(ret<0)perror("fcntl");
 
 	sigemptyset(&sigset);
 	sigaddset(&sigset,SIGIO);
