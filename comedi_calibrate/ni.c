@@ -89,7 +89,7 @@ static struct board_struct boards[]={
 	{ "pci-mio-16xe-50", STATUS_SOME, cal_ni_pci_mio_16xe_50, ni_setup_observables, 0x1b5, 0x1b6 },
 	{ "pci-6023e", STATUS_DONE, cal_ni_pci_6023e, ni_setup_observables, 0x1bb, 0x1bc },
 	{ "pci-mio-16xe-10", STATUS_DONE,	cal_ni_pci_mio_16xe_10,	ni_setup_observables, 0x1ae, 0x1af },
-	{ "pci-6052e", STATUS_DONE, cal_ni_pci_6052e, ni_setup_observables, 0x19f, 0x1a0 },
+	{ "pci-6052e", STATUS_GUESS, cal_ni_pci_6052e, ni_setup_observables, 0x19f, 0x1a0 },
 	{ "pci-6024e", STATUS_SOME, cal_ni_pci_6024e, ni_setup_observables, 0x1af, 0x1b0 },
 	{ "pci-mio-16e-4", STATUS_SOME, cal_ni_pci_mio_16e_4, ni_setup_observables, 0x1a9, 0x1aa },
 	{ "pci-6032e", STATUS_DONE, cal_ni_pci_6032e, ni_setup_observables, 0x1ae, 0x1af },
@@ -150,7 +150,7 @@ static inline unsigned int ni_ao_reference( unsigned int channel )
 	if( channel ) return ni_ao1_reference;
 	else return ni_ao0_reference;
 }
-static inline unsigned int ni_ao_linearity( unsigned int channel )
+static inline unsigned int ni_ao_mid_linearity( unsigned int channel )
 {
 	if( channel ) return ni_ao1_linearity;
 	else return ni_ao0_linearity;
@@ -341,10 +341,10 @@ static void ni_setup_ao_observables( calibration_setup_t *setup )
 		o->reference_source = REF_DAC_GND( channel );
 		set_target( setup, ni_ao_reference( channel ),5.0);
 
-		/* ao linearity, negative */
-		o = setup->observables + ni_ao_linearity( channel );
+		/* ao linearity, mid */
+		o = setup->observables + ni_ao_mid_linearity( channel );
 		assert( o->name == NULL );
-		asprintf( &o->name, "ao %i, linearity (negative), low gain", channel );
+		asprintf( &o->name, "ao %i, linearity (mid), low gain", channel );
 		o->preobserve_insn = po_tmpl;
 		o->preobserve_insn.chanspec = CR_PACK(channel,ao_bipolar_lowgain,0);
 		o->preobserve_insn.data = o->preobserve_data;
@@ -353,7 +353,7 @@ static void ni_setup_ao_observables( calibration_setup_t *setup )
 			CR_PACK(REF_DAC_GND( channel ),ai_bipolar_lowgain,AREF_OTHER)
 			| CR_ALT_SOURCE | CR_ALT_FILTER;
 		o->reference_source = REF_DAC_GND( channel );
-		set_target( setup, ni_ao_linearity( channel ),-5.0);
+		set_target( setup, ni_ao_mid_linearity( channel ),2.5);
 
 		if( ao_unipolar_lowgain >= 0 )
 		{
@@ -1216,8 +1216,8 @@ static int cal_ni_generic( calibration_setup_t *setup, const ni_caldac_layout_t 
 
 			current_cal = sc_alloc_calibration_setting( setup );
 			current_cal->subdevice = setup->da_subdev;
-			generic_do_linearity( setup, current_cal, ni_ao_linearity( channel ),
-				ni_ao_zero_offset( channel ), ni_ao_reference( channel ),
+			generic_do_linearity( setup, current_cal, ni_ao_zero_offset( channel ),
+				ni_ao_mid_linearity( channel ), ni_ao_reference( channel ),
 				layout->dac_linearity[ channel ] );
 			generic_do_cal( setup, current_cal, ni_ao_zero_offset( channel ),
 				layout->dac_offset[ channel ] );
