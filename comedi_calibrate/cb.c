@@ -114,6 +114,12 @@ static int setup_cb_pci_1xxx( calibration_setup_t *setup )
 	static const int caldac_subdev = 4;
 	static const int calpot_subdev = 5;
 
+	if( comedi_get_version_code( setup->dev ) <= COMEDI_VERSION_CODE( 0, 7, 66 ) )
+	{
+		DPRINT(0, "WARNING: you need comedi driver version 0.7.67 or later\n"
+		 "for this calibration to work properly\n" );
+	}
+
 	retval = init_observables_1xxx( setup );
 	if( retval < 0 ) return retval;
 	setup_caldacs( setup, caldac_subdev );
@@ -128,6 +134,12 @@ static int setup_cb_pci_1602_16( calibration_setup_t *setup )
 	static const int caldac_subdev = 4;
 	static const int calpot_subdev = 5;
 	static const int dac08_subdev = 6;
+
+	if( comedi_get_version_code( setup->dev ) <= COMEDI_VERSION_CODE( 0, 7, 66 ) )
+	{
+		DPRINT(0, "WARNING: you need comedi driver version 0.7.67 or later\n"
+		 "for this calibration to work properly\n" );
+	}
 
 	retval = init_observables_1xxx( setup );
 	if( retval < 0 ) return retval;
@@ -401,12 +413,6 @@ static int cal_cb_pci_1xxx( calibration_setup_t *setup )
 {
 	generic_layout_t layout;
 
-	if( comedi_get_version_code( setup->dev ) <= COMEDI_VERSION_CODE( 0, 7, 66 ) )
-	{
-		DPRINT(0, "WARNING: you need comedi driver version 0.7.67 or later\n"
-		 "for this calibration to work properly\n" );
-	}
-
 	init_generic_layout( &layout );
 	layout.adc_gain = adc_gain_1xxx;
 	layout.adc_offset = adc_offset_coarse_1xxx;
@@ -470,12 +476,6 @@ static int adc_postgain_offset_1602_16( unsigned int channel )
 static int cal_cb_pci_1602_16( calibration_setup_t *setup )
 {
 	generic_layout_t layout;
-
-	if( comedi_get_version_code( setup->dev ) <= COMEDI_VERSION_CODE( 0, 7, 66 ) )
-	{
-		DPRINT(0, "WARNING: you need comedi driver version 0.7.67 or later\n"
-		 "for this calibration to work properly\n" );
-	}
 
 	init_generic_layout( &layout );
 	layout.adc_gain = adc_gain_1602_16;
