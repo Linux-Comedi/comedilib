@@ -119,7 +119,7 @@ int test_mmap(void)
 		}else{
 			total += ret;
 			b += ret;
-			printf("read %d %d\n",ret,total);
+			if(verbose) printf("read %d %d\n",ret,total);
 		}
 	}
 	if(memcmp(buf,map,total)){

@@ -143,8 +143,7 @@ int test_cmd_read_fast_1chan(void)
 			go = 0;
 		}else{
 			total += ret;
-			if(verbose)
-				printf("read %d %d\n",ret,total);
+			if(verbose)printf("read %d %d\n",ret,total);
 		}
 	}
 
