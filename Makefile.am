@@ -10,3 +10,6 @@ EXTRA_DIST = include debian m4 comedilib.spec
 dist-hook:
 	rm -rf `find $(distdir) -name CVS`
 
+install-data-local:
+	$(INSTALL) -d /etc/comedi/calibrations
+
