@@ -344,12 +344,6 @@ static void apply_appropriate_cal( calibration_setup_t *setup, comedi_insn insn 
 {
 	int retval = 0;
 
-	if( setup->new_calibration == NULL && setup->old_calibration == NULL )
-	{
-		reset_caldacs( setup );
-		return;
-	}
-
 	if( setup->new_calibration )
 	{
 		retval = comedi_apply_parsed_calibration( setup->dev, insn.subdev,
@@ -360,6 +354,10 @@ static void apply_appropriate_cal( calibration_setup_t *setup, comedi_insn insn 
 		retval = comedi_apply_parsed_calibration( setup->dev, insn.subdev,
 			CR_CHAN( insn.chanspec ), CR_RANGE( insn.chanspec ),
 			CR_AREF( insn.chanspec ), setup->old_calibration );
+	}else
+	{
+		reset_caldacs( setup );
+		return;
 	}
 	if( retval < 0 )
 		DPRINT( 0, "failed to apply ");
@@ -1282,7 +1280,10 @@ int new_sv_init(new_sv_t *sv,comedi_t *dev,int subdev,unsigned int chanspec)
 	sv->rng=comedi_get_range(dev,subdev,
 		CR_CHAN(chanspec), CR_RANGE(chanspec));
 
-	sv->order=7;
+	/* pci-611x needs at least order 10 to overcome pickup in
+	 * its internal reference.  Probably order 12 would be better
+	 * for it.  Should make this adjustable XXX. */
+	sv->order=10;
 
 	return 0;
 }
