@@ -26,30 +26,32 @@
 
 #define MAPLEN 20480
 
-jmp_buf jump_env;
+sigjmp_buf jump_env;
 
 void segv_handler(int num)
 {
-	longjmp(jump_env,1);
+	siglongjmp(jump_env,1);
 }
 
 int test_segfault(void *memptr)
 {
 	volatile char tmp;
 	int ret;
-
-	ret=setjmp(jump_env);
-	if(!ret) tmp = *((char *)(memptr));
-	return ret;
-}
-
-void setup_segfaulter(void)
-{
 	struct sigaction act;
+	struct sigaction oldact;
 
 	memset(&act,0,sizeof(act));
 	act.sa_handler=&segv_handler;
-	sigaction(SIGSEGV,&act,NULL);
+	ret = sigaction(SIGSEGV,&act,&oldact);
+	if(ret)
+	{
+		fprintf(stderr, "sigaction failed\n");
+		return 0;
+	}
+	ret=sigsetjmp(jump_env, 1);
+	if(!ret) tmp = *((char *)(memptr));
+	sigaction(SIGSEGV,&oldact,NULL);
+	return ret;
 }
 
 int test_mmap(void)
@@ -78,8 +80,6 @@ int test_mmap(void)
 		printf("E: comedi_get_cmd_generic_timed failed\n");
 		return 0;
 	}
-
-	setup_segfaulter();
 
 	buf=malloc(BUFSZ);
 
@@ -153,7 +153,7 @@ int test_mmap(void)
 			printf("E: %p still mapped\n",adr);
 		}
 	}
-
+	
 	free(buf);
 
 	return 0;
