@@ -1,5 +1,5 @@
 
-bin_PROGRAMS = comedi_config
+sbin_PROGRAMS = comedi_config
 
 comedi_config_SOURCES = \
 	comedi_config.c
