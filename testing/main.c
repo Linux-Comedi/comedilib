@@ -74,6 +74,37 @@ int realtime;
 static void get_capabilities(unsigned int subd);
 static void print_device_info(void);
 
+void help(int ret)
+{
+	int i;
+
+	fprintf(stderr,
+"comedi_test [options]\n"
+"  --device, -f <device_file>   Use device <device_file>\n"
+"  --realtime, -r               Use real-time interrupts, if available\n"
+"  --subdevice, -s <index>      Only test subdevice <index>\n"
+"  --test, -t <test>            Only run test <test>\n"
+"  --verbose, -v                Be verbose\n"
+"  --help, -h                   Print this message\n"
+"Available tests: ");
+	for(i=0;i<n_tests;i++){
+		fprintf(stderr,"%s ",tests[i].name);
+	}
+	fprintf(stderr,"\n");
+
+	exit(ret);
+}
+
+static struct option longopts[]={
+	{ "device", 1, 0, 'f' },
+	{ "realtime", 0, 0, 'r' },
+	{ "subdevice", 1, 0, 's' },
+	{ "test", 1, 0, 't' },
+	{ "verbose", 0, 0, 'v' },
+	{ "help", 0, 0, 'h' },
+	{0}
+};
+
 int main(int argc, char *argv[])
 {
 	int c;
@@ -82,7 +113,7 @@ int main(int argc, char *argv[])
 	setvbuf(stdout,NULL,_IONBF,0);
 
 	while (1) {
-		c = getopt(argc, argv, "f:rs:t:v");
+		c = getopt_long(argc, argv, "f:rs:t:v", longopts, NULL);
 		if (c == -1)
 			break;
 		switch (c) {
@@ -99,12 +130,15 @@ int main(int argc, char *argv[])
 		case 't':
 			only_test = optarg;
 			break;
+		case 'h':
+			help(0);
+			break;
 		case 'v':
 			verbose = 1;
 			break;
 		default:
-			printf("bad option\n");
-			exit(1);
+			help(1);
+			break;
 		}
 	}
 
