@@ -125,6 +125,16 @@ int test_mmap(void)
 	}
 	munmap(map,MAPLEN);
 
+	/* test if area is really unmapped */
+	for(adr=map;adr<(void *)map+MAPLEN;adr+=PAGE_SIZE){
+		ret=test_segfault(adr);
+		if(ret){
+			printf("%p segfaulted (ok)\n",adr);
+		}else{
+			printf("E: %p still mapped\n",adr);
+		}
+	}
+
 	free(buf);
 
 	return 0;
