@@ -1,2 +1,5 @@
 demo/*.c doesn't always get headers right.
 
+Don't install man pages to /usr/share/man
+
+
