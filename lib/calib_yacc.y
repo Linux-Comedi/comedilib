@@ -246,7 +246,7 @@ extern struct calibration_file_contents* parse_calibration_file( FILE *file )
 		;
 
 	calibration_setting: /* empty */ { cal_index++; }
-		| calibration_setting_element
+		| calibration_setting_element { cal_index++; }
 		| calibration_setting_element ',' calibration_setting
 		;
 
@@ -293,7 +293,7 @@ extern struct calibration_file_contents* parse_calibration_file( FILE *file )
 		;
 
 	caldac: /* empty */ { add_caldac( parsed_file, caldac ); }
-		| caldac_element
+		| caldac_element { add_caldac( parsed_file, caldac ); }
 		| caldac_element ',' caldac
 		;
 
