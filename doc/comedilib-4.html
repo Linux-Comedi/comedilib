@@ -36,12 +36,11 @@ int aref = AREF_GROUND; /* more on this later */
 int main(int argc,char *argv[])
 {
         comedi_t *it;
-        int chan=0;
         lsampl_t data;
-        
+
         it=comedi_open("/dev/comedi0");
         
-        comedi_data_read(it,subdev,chan,range,aref,&amp; data);
+        comedi_data_read(it,subdev,chan,range,aref,&amp;data);
         
         printf("%d\n",data);
         
@@ -51,10 +50,10 @@ int main(int argc,char *argv[])
 </CODE></BLOCKQUOTE>
 </P>
 
-<P>Should be understandable.  Open the device, get the data,
+<P>Should be understandable: open the device, get the data,
 print it out.  This is basically the guts of <CODE>demo/inp.c</CODE>,
 without error checking or fancy options.
-Compile it using </P>
+Compile it using</P>
 <P>
 <BLOCKQUOTE><CODE>
 <PRE>
@@ -74,7 +73,7 @@ aref, which determines the analog reference used.</P>
 </H2>
 
 
-<P>If you selected an analog input subdevice, you should notice
+<P>If you selected an analog input subdevice, you probably noticed
 that the output of <CODE>tut1</CODE> is a number between
 0 and 4095, or 0 and 65535, depending on the number of bits
 in the A/D converter.  Comedi samples are <B>always</B> unsigned,
@@ -89,7 +88,7 @@ manner?"</P>
 input, and Comedi allows you to select which of these to
 use.  This parameter is called the "range parameter", since
 it specifies the "input range" for analog input (or "output range"
-analog output.)  The range parameter represents both the gain
+for analog output.)  The range parameter represents both the gain
 and the unipolar/bipolar aspects.</P>
 <P>Comedi keeps the number of available ranges and the largest
 sample value for each subdevice/channel combination.  (Some
@@ -205,7 +204,7 @@ that we've added what we've learned.</P>
 <PRE>
 #include &lt;stdio.h>      /* for printf() */
 #include &lt;comedi.h>     /* also included by comedilib.h */
-#include &lt;comedilib.h>  /* for comedi_get() */
+#include &lt;comedilib.h>  /* 'cuz we're using comedilib */
 
 int subdev = 0;         /* change this to your input subdevice */
 int chan = 0;           /* change this to your channel */
@@ -216,7 +215,7 @@ int main(int argc,char *argv[])
 {
         comedi_t *cf;
         int chan=0;
-        int data;
+        lsampl_t data;
         int maxdata,rangetype;
         double volts;
 
@@ -226,7 +225,7 @@ int main(int argc,char *argv[])
 
         rangetype=comedi_get_rangetype(cf,subdev,chan);
 
-        data=comedi_get(cf->fd,subdev,chan,range,aref);
+        comedi_data_read(cf->fd,subdev,chan,range,aref,&amp;data);
 
         volts=comedi_to_phys(data,rangetype,range,maxdata);
 
@@ -237,14 +236,6 @@ int main(int argc,char *argv[])
 </PRE>
 </CODE></BLOCKQUOTE>
 </P>
-
-<P>By now, the <CODE>comedi_read_data()</CODE> line looks a little archaic, using
-the UNIX file descriptor cf->fd instead of just cf.  (By the
-way, somewhere in the heart of <CODE>comedi_open()</CODE> is the line
-<CODE>cf->fd=open(filename,O_RDWR)</CODE>.)  Well, there isn't one good
-replacement, since it highly depends on your application
-what additional features you might want in a <CODE>comedi_get()</CODE>
-replacement.  But this is the topic of a different section.</P>
 
 
 
