@@ -45,8 +45,8 @@ clean:	dummy
 
 distclean:	clean
 
-debian:
-	dpkg-build -rfakeroot
+debian: dummy
+	dpkg-buildpackage -rfakeroot
 
 dev:	dummy
 	-rm /dev/comedi*
