@@ -563,7 +563,7 @@ so-called <emphasis>event</emphasis>. More on these in
 
 <para>
 The <parameter class=function>subdev</parameter> member of the
-<link linkend="ref-type-comedi-cmd">comedi_cmd()</link> structure is
+<link linkend="ref-type-comedi-cmd">comedi_cmd</link> structure is
 the index of the subdevice the command is intended for.  The
 <link linkend="func-ref-comedi-find-subdevice-by-type">comedi_find_subdevice_by_type()</link>
 function can be useful in discovering the index of your desired subdevice.
