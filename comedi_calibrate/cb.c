@@ -64,11 +64,6 @@ static struct board_struct boards[]={
 
 static const int num_boards = ( sizeof(boards) / sizeof(boards[0]) );
 
-enum observables_1602_16 {
-	OBS_0V_RANGE_10V_BIP_1602_16 = 0,
-	OBS_7V_RANGE_10V_BIP_1602_16,
-};
-
 enum calibration_source_1xxx
 {
 	CS_1XXX_GROUND = 0,
@@ -140,8 +135,10 @@ static int setup_cb_pci_1602_16( calibration_setup_t *setup )
 		DPRINT(0, "WARNING: you need comedi driver version 0.7.67 or later\n"
 		 "for this calibration to work properly\n" );
 	}
-
+	setup->sv_settling_time_ns = 10000000;
+	setup->sv_order = 12;
 	retval = init_observables_1xxx( setup );
+
 	if( retval < 0 ) return retval;
 	setup_caldacs( setup, caldac_subdev );
 	setup_caldacs( setup, calpot_subdev );
@@ -424,6 +421,8 @@ static int cal_cb_pci_1xxx( calibration_setup_t *setup )
 	layout.adc_ground_observable = ai_ground_observable_1xxx;
 	layout.dac_high_observable = ao_high_observable_1xxx;
 	layout.dac_ground_observable = ao_ground_observable_1xxx;
+	layout.adc_fractional_tolerance = get_tolerance( setup, setup->ad_subdev, 1 );
+	layout.dac_fractional_tolerance = get_tolerance( setup, setup->da_subdev, 1 );
 	return generic_cal_by_range( setup, &layout );
 }
 
@@ -489,6 +488,8 @@ static int cal_cb_pci_1602_16( calibration_setup_t *setup )
 	layout.adc_ground_observable = ai_ground_observable_1xxx;
 	layout.dac_high_observable = ao_high_observable_1xxx;
 	layout.dac_ground_observable = ao_ground_observable_1xxx;
+	layout.adc_fractional_tolerance = get_tolerance( setup, setup->ad_subdev, 1 );
+	layout.dac_fractional_tolerance = get_tolerance( setup, setup->da_subdev, 1 );
 	/* The bipolar postgain calibration should be good for both
 	 * bipolar and unipolar ranges, so disable separate
 	 * unipolar postgain offset calibration (it will fail

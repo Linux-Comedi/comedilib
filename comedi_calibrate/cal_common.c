@@ -17,10 +17,12 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+#define _GNU_SOURCE
 
 #include "calib.h"
 #include <assert.h>
 #include <stdlib.h>
+#include <math.h>
 
 void generic_do_cal( calibration_setup_t *setup,
 	comedi_calibration_setting_t *saved_cal, int observable, int caldac )
@@ -132,49 +134,84 @@ static void generic_prep_adc_for_dac( calibration_setup_t *setup, const generic_
 		adc_channel, adc_range, 0, calibration );
 }
 
+static int dac_cal_is_good( calibration_setup_t *setup, const generic_layout_t *layout,
+	unsigned int channel, unsigned int range )
+{
+	if( fabs( fractional_offset( setup, setup->da_subdev, channel, range,
+		layout->dac_ground_observable( setup, channel, range ) ) ) > layout->dac_fractional_tolerance )
+		return 0;
+	else if( fabs( fractional_offset( setup, setup->da_subdev, channel, range,
+		layout->dac_high_observable( setup, channel, range ) ) ) > layout->dac_fractional_tolerance )
+		return 0;
+
+	return 1;
+}
+
 static void generic_do_dac_channel( calibration_setup_t *setup, const generic_layout_t *layout ,
 	comedi_calibration_t *calibration, comedi_calibration_setting_t *current_cal,
 	unsigned int channel, unsigned int range )
 {
+	static const int max_iterations = 4;
+	int i;
+
 	generic_prep_adc_for_dac( setup, layout, calibration,
 		layout->dac_ground_observable( setup, channel, range ) );
 
-	generic_do_relative( setup, current_cal, layout->dac_high_observable( setup, channel, range ),
-		layout->dac_ground_observable( setup, channel, range ),layout->dac_gain( channel ) );
-	generic_do_cal( setup, current_cal, layout->dac_ground_observable( setup, channel, range ),
-		layout->dac_offset( channel ) );
-	generic_do_relative( setup, current_cal, layout->dac_high_observable( setup, channel, range ),
-		layout->dac_ground_observable( setup, channel, range ), layout->dac_gain_fine( channel ) );
-	generic_do_cal( setup, current_cal, layout->dac_ground_observable( setup, channel, range ),
-		layout->dac_offset_fine( channel ) );
-
+	for( i = 0; i < max_iterations; i++ )
+	{
+		generic_do_relative( setup, current_cal, layout->dac_high_observable( setup, channel, range ),
+			layout->dac_ground_observable( setup, channel, range ),layout->dac_gain( channel ) );
+		generic_do_cal( setup, current_cal, layout->dac_ground_observable( setup, channel, range ),
+			layout->dac_offset( channel ) );
+		generic_do_relative( setup, current_cal, layout->dac_high_observable( setup, channel, range ),
+			layout->dac_ground_observable( setup, channel, range ), layout->dac_gain_fine( channel ) );
+		generic_do_cal( setup, current_cal, layout->dac_ground_observable( setup, channel, range ),
+			layout->dac_offset_fine( channel ) );
+		if( dac_cal_is_good( setup, layout, channel, range ) ) break;
+	}
+	if( i == max_iterations )
+		DPRINT(0, "WARNING: unable to calibrate dac channel %i, range %i to desired %g tolerance\n",
+			channel, range, layout->dac_fractional_tolerance );
 	current_cal->subdevice = setup->da_subdev;
 	sc_push_channel( current_cal, channel );
 	sc_push_range( current_cal, range );
 	sc_push_aref( current_cal, SC_ALL_AREFS );
 }
 
+static int adc_cal_is_good( calibration_setup_t *setup, const generic_layout_t *layout,
+	unsigned int channel, unsigned int range )
+{
+	if( fabs( fractional_offset( setup, setup->ad_subdev, channel, range,
+		layout->adc_ground_observable( setup, channel, range ) ) ) > layout->adc_fractional_tolerance )
+		return 0;
+	else if( fabs( fractional_offset( setup, setup->ad_subdev, channel, range,
+		layout->adc_high_observable( setup, channel, range ) ) ) > layout->adc_fractional_tolerance )
+		return 0;
+
+	return 1;
+}
+
 static void generic_do_adc_channel( calibration_setup_t *setup, const generic_layout_t *layout,
 	comedi_calibration_setting_t *current_cal, unsigned int channel, unsigned int range )
 {
-	/* make sure unipolar ground observable isn't out-of-range before
-	 * doing gain calibrations */
-	if( is_unipolar( setup->dev, setup->ad_subdev, channel, range ) )
+	static const int max_iterations = 4;
+	int i;
+
+	for( i = 0; i < max_iterations; i++ )
 	{
+		generic_do_relative( setup, current_cal, layout->adc_high_observable( setup, channel, range ),
+			layout->adc_ground_observable( setup, channel, range ), layout->adc_gain( channel ) );
 		generic_do_cal( setup, current_cal, layout->adc_ground_observable( setup, channel, range ),
 			layout->adc_offset( channel ) );
+		generic_do_relative( setup, current_cal, layout->adc_high_observable( setup, channel, range ),
+			layout->adc_ground_observable( setup, channel, range ), layout->adc_gain_fine( channel ) );
 		generic_do_cal( setup, current_cal, layout->adc_ground_observable( setup, channel, range ),
 			layout->adc_offset_fine( channel ) );
+		if( adc_cal_is_good( setup, layout, channel, range ) ) break;
 	}
-	generic_do_relative( setup, current_cal, layout->adc_high_observable( setup, channel, range ),
-		layout->adc_ground_observable( setup, channel, range ), layout->adc_gain( channel ) );
-	generic_do_cal( setup, current_cal, layout->adc_ground_observable( setup, channel, range ),
-		layout->adc_offset( channel ) );
-	generic_do_relative( setup, current_cal, layout->adc_high_observable( setup, channel, range ),
-		layout->adc_ground_observable( setup, channel, range ), layout->adc_gain_fine( channel ) );
-	generic_do_cal( setup, current_cal, layout->adc_ground_observable( setup, channel, range ),
-		layout->adc_offset_fine( channel ) );
-
+	if( i == max_iterations )
+		DPRINT(0, "WARNING: unable to calibrate adc channel %i, range %i to desired %g tolerance\n",
+			channel, range, layout->adc_fractional_tolerance );
 	current_cal->subdevice = setup->ad_subdev;
 	sc_push_channel( current_cal, channel );
 	sc_push_range( current_cal, range );
@@ -395,5 +432,7 @@ void init_generic_layout( generic_layout_t *layout )
 	layout->adc_ground_observable = dummy_observable;
 	layout->dac_high_observable = dummy_observable;
 	layout->dac_ground_observable = dummy_observable;
-	layout->do_adc_unipolar_postgain = 1;
+	layout->adc_fractional_tolerance = INFINITY;
+	layout->adc_fractional_tolerance = INFINITY;
+	layout->do_adc_unipolar_postgain = 0;
 }

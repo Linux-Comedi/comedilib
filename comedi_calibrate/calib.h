@@ -152,6 +152,11 @@ int is_bipolar( comedi_t *dev, unsigned int subdevice,
 int is_unipolar( comedi_t *dev, unsigned int subdevice,
 	unsigned int channel, unsigned int range );
 
+double fractional_offset( calibration_setup_t *setup, int subdevice,
+	unsigned int channel, unsigned int range, int obs );
+double get_tolerance( calibration_setup_t *setup, int subdevice,
+	double num_bits );
+
 /* other */
 
 void comedi_nanodelay(comedi_t *dev, unsigned int delay);
@@ -251,6 +256,8 @@ typedef struct
 		unsigned int channel, unsigned int range );
 	int (*dac_ground_observable)( const calibration_setup_t *setup,
 		unsigned int channel, unsigned int range );
+	double adc_fractional_tolerance;
+	double dac_fractional_tolerance;
 	unsigned do_adc_unipolar_postgain : 1;
 } generic_layout_t;
 void init_generic_layout( generic_layout_t *layout );

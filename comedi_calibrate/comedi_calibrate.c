@@ -1587,4 +1587,38 @@ double very_low_target( comedi_t *dev, unsigned int subdevice,
 	return comedi_to_phys( 1, range_ptr, max_data ) / 2.0;
 }
 
+double fractional_offset( calibration_setup_t *setup, int subdevice,
+	unsigned int channel, unsigned int range, int obs )
+{
+	comedi_range *range_ptr;
+	double target = setup->observables[obs].target;
+	double reading;
+	unsigned int chanspec = setup->observables[obs].observe_insn.chanspec;
+	new_sv_t sv;
 
+	if( subdevice < 0 || obs < 0 ) return 0.0;
+
+	range_ptr = comedi_get_range( setup->dev, subdevice, channel, range );
+	assert( range_ptr != NULL );
+
+	comedi_set_global_oor_behavior( COMEDI_OOR_NUMBER );
+	preobserve( setup, obs);
+
+	my_sv_init( &sv, setup, setup->ad_subdev, chanspec );
+	new_sv_measure( setup->dev, &sv );
+	reading = sv.average;
+
+	return ( reading - target ) / ( range_ptr->max - range_ptr->min );
+}
+
+double get_tolerance( calibration_setup_t *setup, int subdevice,
+	double num_bits )
+{
+	int maxdata;
+
+	if( subdevice < 0 ) return INFINITY;
+
+	maxdata = comedi_get_maxdata( setup->dev, subdevice, 0 );
+	assert( maxdata > 0 );
+	return num_bits / maxdata;
+}
