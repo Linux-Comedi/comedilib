@@ -7,7 +7,7 @@ Returns:
  If sucessful, comedi_close returns 0.  On failure, -1 is returned.
 
 Function: comedi_open -- open a Comedi device
-Retval: comedi_t
+Retval: comedi_t *
 Param: const char * filename
 Description:
  Open a Comedi device specified by the file filename.
