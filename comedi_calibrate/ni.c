@@ -245,6 +245,7 @@ typedef struct
 	int adc_unip_offset;
 	int adc_unip_offset_fine;
 	int dac_offset[ 2 ];
+	int dac_offset_fine[ 2 ];
 	int dac_gain[ 2 ];
 	int dac_gain_fine[ 2 ];
 	int dac_linearity[ 2 ];
@@ -268,6 +269,7 @@ static inline void init_ni_caldac_layout( ni_caldac_layout_t *layout )
 	for( i = 0; i < 2; i++ )
 	{
 		layout->dac_offset[ i ] = -1;
+		layout->dac_offset_fine[ i ] = -1;
 		layout->dac_gain[ i ] = -1;
 		layout->dac_gain_fine[ i ] = -1;
 		layout->dac_linearity[ i ] = -1;
@@ -762,13 +764,13 @@ static int cal_ni_pci_6014(calibration_setup_t *setup)
 	layout.adc_pregain_offset_fine = 8;
 	layout.adc_gain = 2;
 	layout.dac_offset[0] = 6;
+	layout.dac_offset_fine[0] = 10;
 	layout.dac_gain[0] = 7;
 	layout.dac_gain_fine[0] = 11;
-	layout.dac_linearity[0] = 10;
 	layout.dac_offset[1] = 9;
+	layout.dac_offset_fine[1] = 1;
 	layout.dac_gain[1] = 3;
 	layout.dac_gain_fine[1] = 5;
-	layout.dac_linearity[1] = 1;
 	return cal_ni_generic( setup, &layout );
 }
 
@@ -1228,6 +1230,7 @@ static void prep_dac_caldacs_generic( calibration_setup_t *setup,
 	if( setup->old_calibration == NULL )
 	{
 		reset_caldac( setup, layout->dac_offset[ channel ] );
+		reset_caldac( setup, layout->dac_offset_fine[ channel ] );
 		reset_caldac( setup, layout->dac_gain[ channel ] );
 		reset_caldac( setup, layout->dac_gain_fine[ channel ] );
 		reset_caldac( setup, layout->dac_linearity[ channel ] );
@@ -1239,6 +1242,7 @@ static void prep_dac_caldacs_generic( calibration_setup_t *setup,
 		{
 			DPRINT( 0, "Failed to apply existing calibration, reseting dac caldacs.\n" );
 			reset_caldac( setup, layout->dac_offset[ channel ] );
+			reset_caldac( setup, layout->dac_offset_fine[ channel ] );
 			reset_caldac( setup, layout->dac_gain[ channel ] );
 			reset_caldac( setup, layout->dac_gain_fine[ channel ] );
 			reset_caldac( setup, layout->dac_linearity[ channel ] );
@@ -1366,8 +1370,11 @@ static int cal_ni_generic( calibration_setup_t *setup, const ni_caldac_layout_t 
 			generic_do_linearity( setup, current_cal, ni_ao_zero_offset( channel ),
 				ni_ao_mid_linearity( channel ), ni_ao_reference( channel ),
 				layout->dac_linearity[ channel ] );
+			reset_caldac(setup, layout->dac_offset_fine[channel]);
 			generic_do_cal( setup, current_cal, ni_ao_zero_offset( channel ),
 				layout->dac_offset[ channel ] );
+			generic_do_cal( setup, current_cal, ni_ao_zero_offset( channel ),
+				layout->dac_offset_fine[ channel ] );
 			reset_caldac( setup, layout->dac_gain_fine[ channel ] );
 			generic_do_cal( setup, current_cal, ni_ao_reference( channel ),
 				layout->dac_gain[ channel ] );
@@ -1390,8 +1397,12 @@ static int cal_ni_generic( calibration_setup_t *setup, const ni_caldac_layout_t 
 				generic_do_linearity( setup, current_cal, ni_ao_unip_low_linearity( channel ),
 					ni_ao_unip_mid_linearity( channel ), ni_ao_unip_reference( channel ),
 					layout->dac_linearity[ channel ] );
+				reset_caldac( setup, layout->dac_offset_fine[ channel ] );
 				generic_do_cal( setup, current_cal, ni_ao_unip_zero_offset( channel),
 					layout->dac_offset[ channel ] );
+				generic_do_cal( setup, current_cal, ni_ao_unip_zero_offset( channel),
+					layout->dac_offset_fine[ channel ] );
+				reset_caldac( setup, layout->dac_gain_fine[ channel ] );
 				generic_do_cal( setup, current_cal, ni_ao_unip_reference( channel ),
 					layout->dac_gain[ channel ] );
 				generic_do_cal( setup, current_cal, ni_ao_unip_reference( channel ),
