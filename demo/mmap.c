@@ -117,7 +117,7 @@ int prepare_cmd_lib(comedi_t *dev,int subdevice,comedi_cmd *cmd)
 {
 	int ret;
 
-	ret = comedi_get_cmd_generic_timed(dev,subdevice,cmd);
+	ret = comedi_get_cmd_generic_timed(dev,subdevice,cmd,1e9/freq);
 	if(ret<0){
 		comedi_perror("comedi_get_cmd_generic_timed\n");
 		return ret;

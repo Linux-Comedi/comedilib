@@ -186,7 +186,7 @@ int prepare_cmd_lib(comedi_t *dev,int subdevice,comedi_cmd *cmd)
 	/* This comedilib function will get us a generic timed
 	 * command for a particular board.  If it returns -1,
 	 * that's bad. */
-	ret = comedi_get_cmd_generic_timed(dev,subdevice,cmd);
+	ret = comedi_get_cmd_generic_timed(dev,subdevice,cmd,1e9/freq);
 	if(ret<0)return ret;
 
 	/* Modify parts of the command */

@@ -48,7 +48,7 @@ static int do_continuous(int multiplier)
 	unsigned long total_secs = 0;
 	struct timeval tv,start_tv;
 
-	if(comedi_get_cmd_generic_timed(device,subdevice,&cmd)<0){
+	if(comedi_get_cmd_generic_timed(device,subdevice,&cmd,1)<0){
 		printf("  not supported\n");
 		return 0;
 	}

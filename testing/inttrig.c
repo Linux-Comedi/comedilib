@@ -57,7 +57,7 @@ int test_cmd_start_inttrig(void)
 		return 0;
 	}
 
-	if(comedi_get_cmd_generic_timed(device,subdevice,&cmd)<0){
+	if(comedi_get_cmd_generic_timed(device,subdevice,&cmd,1)<0){
 		printf("  not supported\n");
 		return 0;
 	}
