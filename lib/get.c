@@ -96,6 +96,21 @@ int comedi_find_subdevice_by_type(comedi_t *it,int type,unsigned int subd)
 	return -1;
 }
 
+int comedi_get_read_subdevice(comedi_t *dev)
+{
+	if(!valid_dev(dev))
+		return -1;
+
+	return dev->devinfo.read_subdevice;
+}
+
+int comedi_get_write_subdevice(comedi_t *dev)
+{
+	if(!valid_dev(dev))
+		return -1;
+
+	return dev->devinfo.write_subdevice;
+}
 
 int comedi_get_n_channels(comedi_t *it,unsigned int subd)
 {

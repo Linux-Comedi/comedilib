@@ -185,6 +185,8 @@ enum comedi_oor_behavior {
 
 enum comedi_oor_behavior comedi_set_global_oor_behavior(enum comedi_oor_behavior behavior);
 
+int comedi_get_read_subdevice(comedi_t *dev);
+int comedi_get_write_subdevice(comedi_t *dev);
 
 
 
