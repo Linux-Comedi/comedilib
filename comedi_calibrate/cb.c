@@ -52,7 +52,7 @@ static int cal_cb_pci_1602_16( calibration_setup_t *setup );
 static int init_observables_1xxx( calibration_setup_t *setup );
 
 static struct board_struct boards[]={
-	{ "pci-das1000",	STATUS_SOME,	setup_cb_pci_1xxx },
+	{ "pci-das1000",	STATUS_DONE,	setup_cb_pci_1xxx },
 	{ "pci-das1001",	STATUS_GUESS,	setup_cb_pci_1xxx },
 	{ "pci-das1002",	STATUS_GUESS,	setup_cb_pci_1xxx },
 	{ "pci-das1200",	STATUS_DONE,	setup_cb_pci_1xxx },
@@ -114,7 +114,8 @@ static int setup_cb_pci_1xxx( calibration_setup_t *setup )
 		DPRINT(0, "WARNING: you need comedi driver version 0.7.67 or later\n"
 		 "for this calibration to work properly\n" );
 	}
-
+	//this larger delay is definitely needed by pci-das1000, possibly not for pci-das1200
+	setup->sv_settling_time_ns = 10000000;
 	retval = init_observables_1xxx( setup );
 	if( retval < 0 ) return retval;
 	setup_caldacs( setup, caldac_subdev );
