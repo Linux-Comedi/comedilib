@@ -550,6 +550,7 @@ is only accurate to part-per-thousand.
 
 <p>
 <sect1>Commands
+<label id="command_section">
 <p>
 
 
@@ -697,6 +698,15 @@ to do??
 
 <p>
 
+The typical sequence for executing a command is to first send
+the command through
+<ref id="comedi_command_test" name="comedi_command_test()">
+once or twice.  The test will check that the command is valid for the particular
+device, and often makes some adjustments to the command arguments, which
+can then be read back by the user to see the actual values used.  The
+command is executed with
+<ref id="comedi_command" name="comedi_command()">.  For input/output commands, data
+is read from or written to the device file /dev/comedi[0..3] you are using.
 
 <sect>Libcomedi Reference
 <p>
@@ -863,10 +873,39 @@ details.
 <label id="comedi_cmd">
 <p>
 
-undocumented
+<tscreen><verb>
+typedef struct comedi_cmd_struct comedi_cmd;
+
+struct comedi_cmd_struct{
+	unsigned int subdev;
+	unsigned int flags;
+
+	unsigned int start_src;
+	unsigned int start_arg;
+
+	unsigned int scan_begin_src;
+	unsigned int scan_begin_arg;
+
+	unsigned int convert_src;
+	unsigned int convert_arg;
+
+	unsigned int scan_end_src;
+	unsigned int scan_end_arg;
+
+	unsigned int stop_src;
+	unsigned int stop_arg;
+
+	unsigned int *chanlist;
+	unsigned int chanlist_len;
+
+	sampl_t *data;
+	unsigned int data_len;
+};
+</verb></tscreen>
 
 <p>
-Related functions are described in section XXX.
+More information on using commands can be found in the
+<ref id="command_section" name="command"> section.
 
 <p>
 This structure is defined as part of the Comedi kernel interface.
@@ -920,7 +959,14 @@ Source: <tt>/lib/comedi.c</tt>
 
 <tt>int comedi_command(comedi_t *it, comedi_cmd *cmd);</tt>
 <p>
-undocumented
+Issues the command pointed at by <tt/cmd/ to the open device <tt/it/.  It
+is usually necessary to pass the command through
+<ref id="comedi_command_test" name="comedi_command_test()"> to
+fix up the command before it can be successfully executed with
+<tt/comedi_command()/.
+See
+<ref id="command_section" name="commands"> for more information.
+
 <p>
 Source: <tt>/lib/comedi.c</tt>
 
@@ -931,7 +977,34 @@ Source: <tt>/lib/comedi.c</tt>
 
 <tt>int comedi_command_test(comedi_t *it, comedi_cmd *cmd);</tt>
 <p>
-undocumented
+
+Tests and fixes up the command pointed at by <tt/cmd/ according
+to the limitations of the driver configured on the open device <tt/it/.
+The return value has the following meaning:
+<itemize>
+<item>0:	the command passed the test and can be successfully executed
+	by <ref id="comedi_command" name="comedi_command()">.  The one exception
+	to this rule is that the test will allow a NULL chanlist for the command.
+<item>1: invalid trigger.  One or more of the trigger sources (the *_src members
+	of the <ref id="comedi_cmd" name="comedi_cmd"> structure) is not
+	supported by the driver.
+<item>2: incompatible triggers.  Two or more of the triggers selected are
+	incompatible with each other.  For example, a driver might allow either
+	the scan_begin_src or the convert_src to be TRIG_TIMER, but not both.
+<item>3: argument invalid.  One or more argument is invalid, for example
+	a timing argument might be in excess of the card's maximum speed.  The
+	command test will correct the arguments by modifying the command pointed
+	at by <tt/cmd/.  This error might also be returned if the driver is
+	unable to deal with the complexity of the command's <tt/chanlist/.
+<item>4: argument fix up.  The command underwent minor adjustment and should
+	now be valid.  For example, a timing argument might not be exactly achievable
+	by the card so the timing argument will be adjusted to the actual timing
+	the card will use.
+<item>negative: some other error has occured.
+</itemize>
+See
+<ref id="command_section" name="commands"> for more information.
+
 <p>
 Source: <tt>/lib/comedi.c</tt>
 
@@ -1737,8 +1810,6 @@ returns 0.  On error, this function returns -1.
 <item>comedi_get_cmd_src_mask()
 <item>comedi_get_cmd_generic_timed()
 <item>comedi_cancel()
-<item>comedi_command()
-<item>comedi_command_test()
 <item>comedi_poll()
 <item>comedi_get_buffer_contents()
 <item>comedi_mark_buffer_read()
