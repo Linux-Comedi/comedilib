@@ -574,7 +574,7 @@ Description:
  case, a single call to comedi_dio_config() for any channel in the
  group will affect the entire group.
 
- If sucessful, 0 is returned, otherwise -1.
+ If sucessful, 1 is returned, otherwise -1.
 
 Function: comedi_dio_read -- read single bit from digital channel
 Retval: int
