@@ -28,9 +28,18 @@ output to him.
 
 .SH OPTIONS
 
-\fBcomedi_calibrate\fR recognizes the following options:
+\fBcomedi_calibrate\fR	recognizes the following options:
 
-\fB-f /dev/comediN\fR	perform calibration on device \fB/dev/comediN\fR
+\fB-f, --file /dev/comediN\fR	perform calibration on device \fB/dev/comediN\fR
+
+\fB--help	print help for options then exit
+
+\fB-q, --quiet	don't generate output to stdout
+
+\fB-s, --save-file <file path>\fR	save calibration information to specified file,
+instead of default location
+
+\fB-v, --verbose\fR	generate more verbose output to stdout, can be specified multiple times
 
 
 .SH SEE ALSO
