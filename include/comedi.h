@@ -179,7 +179,7 @@ typedef unsigned short sampl_t;
 #define SDF_WRITABLE	0x00020000	/* subdevice can be written (e.g. analog output) */
 #define SDF_WRITEABLE	SDF_WRITABLE	/* spelling error in API */
 #define SDF_INTERNAL	0x00040000	/* subdevice does not have externally visible lines */
-#define SDF_RT		0x00080000	/* subdevice is RT capable */
+#define SDF_RT		0x00080000	/* DEPRECATED: subdevice is RT capable */
 #define SDF_GROUND	0x00100000	/* can do aref=ground */
 #define SDF_COMMON	0x00200000	/* can do aref=common */
 #define SDF_DIFF	0x00400000	/* can do aref=diff */
@@ -216,8 +216,9 @@ typedef unsigned short sampl_t;
 //#define INSN_CONFIG_TRIG		0x12
 //#define INSN_CONFIG_COUNTER		0x13
 #define INSN_CONFIG_ALT_SOURCE		0x14
-//#define INSN_CONFIG_DIGITAL_TRIG	0x15
-//#define INSN_CONFIG_BLOCK_SIZE	0x16
+#define INSN_CONFIG_DIGITAL_TRIG	0x15
+#define INSN_CONFIG_BLOCK_SIZE		0x16
+#define INSN_CONFIG_TIMER_1			0x17
 
 /* ioctls */
 
@@ -338,7 +339,8 @@ struct comedi_subdinfo_struct{
 	lsampl_t	maxdata;
 	unsigned int	flags;		/* channel flags */
 	unsigned int	range_type;	/* lookup in kernel */
-	unsigned int unused[10];
+	unsigned int	settling_time_0;
+	unsigned int unused[9];
 };
 
 struct comedi_devinfo_struct{
@@ -375,7 +377,9 @@ struct comedi_bufinfo_struct{
 	unsigned int buf_int_count;
 	unsigned int buf_user_count;
 
-	unsigned int unused[5];
+	unsigned int bytes_written;
+
+	unsigned int unused[4];
 };
 
 /* range stuff */
@@ -399,9 +403,10 @@ struct comedi_bufinfo_struct{
 
 #define COMEDI_CB_EOS		1	/* end of scan */
 #define COMEDI_CB_EOA		2	/* end of acquisition */
-#define COMEDI_CB_BLOCK		4	/* convenient block size */
-#define COMEDI_CB_EOBUF		8	/* end of buffer */
+#define COMEDI_CB_BLOCK		4	/* DEPRECATED: convenient block size */
+#define COMEDI_CB_EOBUF		8	/* DEPRECATED: end of buffer */
 #define COMEDI_CB_ERROR		16	/* card error during acquisition */
+#define COMEDI_CB_OVERFLOW	32	/* buffer overflow/underflow */
 
 
 #ifdef __cplusplus
