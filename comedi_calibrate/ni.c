@@ -20,6 +20,16 @@
     - more portable
  */
 
+/***************************************************************************
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU Lesser General Public License as        *
+ *   published by                                                          *
+ *   the Free Software Foundation; either version 2.1 of the License, or   *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ ***************************************************************************/
+
 #define _GNU_SOURCE
 
 #include <stdio.h>
@@ -45,31 +55,31 @@ struct board_struct{
 	void (*setup_observables)( calibration_setup_t *setup );
 };
 
-int ni_setup_board( calibration_setup_t *setup , const char *device_name );
-void ni_setup_observables( calibration_setup_t *setup );
-void ni_setup_observables_611x( calibration_setup_t *setup );
+static int ni_setup_board( calibration_setup_t *setup , const char *device_name );
+static void ni_setup_observables( calibration_setup_t *setup );
+static void ni_setup_observables_611x( calibration_setup_t *setup );
 
-int cal_ni_at_mio_16e_2(calibration_setup_t *setup);
-int cal_ni_daqcard_ai_16xe_50(calibration_setup_t *setup);
-int cal_ni_at_mio_16e_1(calibration_setup_t *setup);
-int cal_ni_pci_mio_16e_1(calibration_setup_t *setup);
-int cal_ni_pci_6025e(calibration_setup_t *setup);
-int cal_ni_pci_6035e(calibration_setup_t *setup);
-int cal_ni_pci_6071e(calibration_setup_t *setup);
-int cal_ni_pxi_6071e(calibration_setup_t *setup);
-int cal_ni_at_mio_16e_10(calibration_setup_t *setup);
-int cal_ni_pci_mio_16xe_50(calibration_setup_t *setup);
-int cal_ni_pci_6023e(calibration_setup_t *setup);
-int cal_ni_pci_6024e(calibration_setup_t *setup);
-int cal_ni_at_mio_16xe_50(calibration_setup_t *setup);
-int cal_ni_pci_mio_16xe_10(calibration_setup_t *setup);
-int cal_ni_pci_6052e(calibration_setup_t *setup);
-int cal_ni_pci_mio_16e_4(calibration_setup_t *setup);
-int cal_ni_pci_6032e(calibration_setup_t *setup);
-int cal_ni_daqcard_ai_16e_4(calibration_setup_t *setup);
-int cal_ni_pci_611x(calibration_setup_t *setup);
+static int cal_ni_at_mio_16e_2(calibration_setup_t *setup);
+static int cal_ni_daqcard_ai_16xe_50(calibration_setup_t *setup);
+static int cal_ni_at_mio_16e_1(calibration_setup_t *setup);
+static int cal_ni_pci_mio_16e_1(calibration_setup_t *setup);
+static int cal_ni_pci_6025e(calibration_setup_t *setup);
+static int cal_ni_pci_6035e(calibration_setup_t *setup);
+static int cal_ni_pci_6071e(calibration_setup_t *setup);
+static int cal_ni_pxi_6071e(calibration_setup_t *setup);
+static int cal_ni_at_mio_16e_10(calibration_setup_t *setup);
+static int cal_ni_pci_mio_16xe_50(calibration_setup_t *setup);
+static int cal_ni_pci_6023e(calibration_setup_t *setup);
+static int cal_ni_pci_6024e(calibration_setup_t *setup);
+static int cal_ni_at_mio_16xe_50(calibration_setup_t *setup);
+static int cal_ni_pci_mio_16xe_10(calibration_setup_t *setup);
+static int cal_ni_pci_6052e(calibration_setup_t *setup);
+static int cal_ni_pci_mio_16e_4(calibration_setup_t *setup);
+static int cal_ni_pci_6032e(calibration_setup_t *setup);
+static int cal_ni_daqcard_ai_16e_4(calibration_setup_t *setup);
+static int cal_ni_pci_611x(calibration_setup_t *setup);
 
-double ni_get_reference( calibration_setup_t *setup, int lsb_loc,int msb_loc);
+static double ni_get_reference( calibration_setup_t *setup, int lsb_loc,int msb_loc);
 
 static struct board_struct boards[]={
 	{ "at-mio-16e-2",	STATUS_DONE,	cal_ni_at_mio_16e_2,	ni_setup_observables  },
@@ -157,7 +167,7 @@ int ni_setup( calibration_setup_t *setup , const char *device_name )
 	return 0;
 }
 
-int ni_setup_board( calibration_setup_t *setup, const char *device_name )
+static int ni_setup_board( calibration_setup_t *setup, const char *device_name )
 {
 	int i;
 
@@ -173,7 +183,7 @@ int ni_setup_board( calibration_setup_t *setup, const char *device_name )
 	return 0;
 }
 
-void ni_setup_observables( calibration_setup_t *setup )
+static void ni_setup_observables( calibration_setup_t *setup )
 {
 	comedi_insn tmpl;
 	int bipolar_lowgain;
@@ -333,7 +343,7 @@ static unsigned int ref_source_611x( unsigned int ref_source, unsigned int cal_g
 	return ( ref_source & 0xf ) | ( ( cal_gain_bits << 4 ) & 0xff0 );
 }
 
-void ni_setup_observables_611x( calibration_setup_t *setup )
+static void ni_setup_observables_611x( calibration_setup_t *setup )
 {
 	comedi_insn tmpl;
 	comedi_insn po_tmpl;
@@ -438,7 +448,7 @@ void ni_setup_observables_611x( calibration_setup_t *setup )
 	setup->n_observables = 4 + 2 * num_chans;
 }
 
-int cal_ni_at_mio_16e_2(calibration_setup_t *setup)
+static int cal_ni_at_mio_16e_2(calibration_setup_t *setup)
 {
 	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,1);
 	cal1( setup, ni_zero_offset_high,0);
@@ -479,7 +489,7 @@ int cal_ni_at_mio_16e_2(calibration_setup_t *setup)
  * caldac[2] gain=7.8670(11)e-5 V/bit S_min=903.291 dof=254
  * caldac[8] gain=2.7732(74)e-7 V/bit S_min=415.399 dof=254
  */
-int cal_ni_daqcard_ai_16xe_50(calibration_setup_t *setup)
+static int cal_ni_daqcard_ai_16xe_50(calibration_setup_t *setup)
 {
 	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,2);
 	cal1( setup, ni_zero_offset_high,8);
@@ -489,7 +499,7 @@ int cal_ni_daqcard_ai_16xe_50(calibration_setup_t *setup)
 	return 0;
 }
 
-int cal_ni_at_mio_16xe_50(calibration_setup_t *setup)
+static int cal_ni_at_mio_16xe_50(calibration_setup_t *setup)
 {
 	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,2);
 	cal1( setup, ni_zero_offset_high,8);
@@ -506,7 +516,7 @@ int cal_ni_at_mio_16xe_50(calibration_setup_t *setup)
 	return 0;
 }
 
-int cal_ni_pci_mio_16xe_10(calibration_setup_t *setup)
+static int cal_ni_pci_mio_16xe_10(calibration_setup_t *setup)
 {
 	postgain_cal( setup, ni_zero_offset_low, ni_zero_offset_high, 2);
 	postgain_cal( setup, ni_zero_offset_low, ni_zero_offset_high, 3);
@@ -523,12 +533,12 @@ int cal_ni_pci_mio_16xe_10(calibration_setup_t *setup)
 	return 0;
 }
 
-int cal_ni_at_mio_16e_1(calibration_setup_t *setup)
+static int cal_ni_at_mio_16e_1(calibration_setup_t *setup)
 {
 	return cal_ni_at_mio_16e_2( setup );
 }
 
-int cal_ni_pci_mio_16e_1(calibration_setup_t *setup)
+static int cal_ni_pci_mio_16e_1(calibration_setup_t *setup)
 {
 	//cal_ni_at_mio_16e_2();
 
@@ -547,7 +557,7 @@ int cal_ni_pci_mio_16e_1(calibration_setup_t *setup)
 	return 0;
 }
 
-int cal_ni_pci_6032e(calibration_setup_t *setup)
+static int cal_ni_pci_6032e(calibration_setup_t *setup)
 {
 	postgain_cal(setup, ni_zero_offset_low, ni_zero_offset_high, 2);
 	postgain_cal(setup, ni_zero_offset_low, ni_zero_offset_high, 3);
@@ -561,7 +571,7 @@ int cal_ni_pci_6032e(calibration_setup_t *setup)
 	return 0;
 }
 
-int cal_ni_pci_6035e(calibration_setup_t *setup)
+static int cal_ni_pci_6035e(calibration_setup_t *setup)
 {
 	/* this is for the ad8804_debug caldac */
 
@@ -583,7 +593,7 @@ int cal_ni_pci_6035e(calibration_setup_t *setup)
 	return 0;
 }
 
-int cal_ni_pci_6071e(calibration_setup_t *setup)
+static int cal_ni_pci_6071e(calibration_setup_t *setup)
 {
 	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,1);
 	cal1( setup, ni_zero_offset_high,0);
@@ -602,7 +612,7 @@ int cal_ni_pci_6071e(calibration_setup_t *setup)
 	return 0;
 }
 
-int cal_ni_pxi_6071e(calibration_setup_t *setup)
+static int cal_ni_pxi_6071e(calibration_setup_t *setup)
 {
 	// 6071e (old)
 	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,1);
@@ -614,7 +624,7 @@ int cal_ni_pxi_6071e(calibration_setup_t *setup)
 	return 0;
 }
 
-int cal_ni_at_mio_16e_10(calibration_setup_t *setup)
+static int cal_ni_at_mio_16e_10(calibration_setup_t *setup)
 {
 	// 16e-10 (old)
 	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,1);
@@ -631,7 +641,7 @@ int cal_ni_at_mio_16e_10(calibration_setup_t *setup)
 	return 0;
 }
 
-int cal_ni_pci_mio_16xe_50(calibration_setup_t *setup)
+static int cal_ni_pci_mio_16xe_50(calibration_setup_t *setup)
 {
 	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,2);
 	cal1( setup, ni_zero_offset_high,8);
@@ -648,7 +658,7 @@ int cal_ni_pci_mio_16xe_50(calibration_setup_t *setup)
 	return 0;
 }
 
-int cal_ni_pci_6023e(calibration_setup_t *setup)
+static int cal_ni_pci_6023e(calibration_setup_t *setup)
 {
 	/* for comedi-0.7.65 */
 
@@ -660,7 +670,7 @@ int cal_ni_pci_6023e(calibration_setup_t *setup)
 	return 0;
 }
 
-int cal_ni_pci_6024e(calibration_setup_t *setup)
+static int cal_ni_pci_6024e(calibration_setup_t *setup)
 {
 	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,4);
 	cal1( setup, ni_zero_offset_high,0);
@@ -677,7 +687,7 @@ int cal_ni_pci_6024e(calibration_setup_t *setup)
 	return 0;
 }
 
-int cal_ni_pci_6025e(calibration_setup_t *setup)
+static int cal_ni_pci_6025e(calibration_setup_t *setup)
 {
 	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,4);
 	cal1( setup, ni_zero_offset_high,0);
@@ -694,7 +704,7 @@ int cal_ni_pci_6025e(calibration_setup_t *setup)
 	return 0;
 }
 
-int cal_ni_pci_6052e(calibration_setup_t *setup)
+static int cal_ni_pci_6052e(calibration_setup_t *setup)
 {
 	/*
 	 * This board has noisy caldacs
@@ -753,7 +763,7 @@ int cal_ni_pci_6052e(calibration_setup_t *setup)
 	return 0;
 }
 
-int cal_ni_pci_mio_16e_4(calibration_setup_t *setup)
+static int cal_ni_pci_mio_16e_4(calibration_setup_t *setup)
 {
 	/* this is for the ad8804_debug caldac */
 
@@ -781,7 +791,7 @@ int cal_ni_pci_mio_16e_4(calibration_setup_t *setup)
 	return 0;
 }
 
-int cal_ni_daqcard_ai_16e_4(calibration_setup_t *setup)
+static int cal_ni_daqcard_ai_16e_4(calibration_setup_t *setup)
 {
 	cal_postgain_binary(setup, ni_zero_offset_low, ni_zero_offset_high, 1);
 	//cal_postgain_fine(setup, ni_zero_offset_low, ni_zero_offset_high, 1);
@@ -797,7 +807,7 @@ int cal_ni_daqcard_ai_16e_4(calibration_setup_t *setup)
 	return 0;
 }
 
-int cal_ni_pci_611x( calibration_setup_t *setup )
+static int cal_ni_pci_611x( calibration_setup_t *setup )
 {
 	int i;
 	int num_chans;
@@ -819,7 +829,7 @@ int cal_ni_pci_611x( calibration_setup_t *setup )
 	return 0;
 }
 
-double ni_get_reference( calibration_setup_t *setup, int lsb_loc,int msb_loc)
+static double ni_get_reference( calibration_setup_t *setup, int lsb_loc,int msb_loc)
 {
 	int lsb,msb;
 	int16_t uv;
@@ -837,7 +847,7 @@ double ni_get_reference( calibration_setup_t *setup, int lsb_loc,int msb_loc)
 }
 
 #if 0
-void cal_ni_results(void)
+static void cal_ni_results(void)
 {
 	comedi_range *range;
 	int bipolar_lowgain;
@@ -870,7 +880,7 @@ void cal_ni_results(void)
 
 }
 
-void ni_mio_ai_postgain_cal(void)
+static void ni_mio_ai_postgain_cal(void)
 {
 	linear_fit_t l;
 	double offset_r0;
@@ -887,7 +897,7 @@ void ni_mio_ai_postgain_cal(void)
 	printf("offset r7 %g\n",offset_r7);
 
 	gain=l.slope;
-	
+
 	a=(offset_r0-offset_r7)/(200.0-1.0);
 	a=caldacs[1].current-a/gain;
 
@@ -897,7 +907,7 @@ void ni_mio_ai_postgain_cal(void)
 	update_caldac(1);
 }
 
-void ni_mio_ai_postgain_cal_2(int chan,int dac,int range_lo,int range_hi,double gain)
+static void ni_mio_ai_postgain_cal_2(int chan,int dac,int range_lo,int range_hi,double gain)
 {
 	double offset_lo,offset_hi;
 	linear_fit_t l;
