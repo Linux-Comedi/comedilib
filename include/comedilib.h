@@ -201,15 +201,15 @@ typedef struct
 	unsigned int channel;
 	unsigned int value;
 } comedi_caldac_t;
-
-typedef struct calibration_setting
+#define CS_MAX_AREFS_LENGTH 4
+typedef struct
 {
 	unsigned int subdevice;
 	unsigned int *channels;
 	unsigned int num_channels;
 	unsigned int *ranges;
 	unsigned int num_ranges;
-	unsigned int arefs[ 4 ];
+	unsigned int arefs[ CS_MAX_AREFS_LENGTH ];
 	unsigned int num_arefs;
 	comedi_caldac_t *caldacs;
 	unsigned int num_caldacs;
@@ -219,8 +219,8 @@ typedef struct
 {
 	char *driver_name;
 	char *board_name;
-	comedi_calibration_setting_t *calibrations;
-	unsigned int num_calibrations;
+	comedi_calibration_setting_t *settings;
+	unsigned int num_settings;
 } comedi_calibration_t;
 
 comedi_calibration_t* comedi_parse_calibration_file( const char *cal_file_path );

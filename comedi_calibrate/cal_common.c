@@ -23,7 +23,7 @@
 #include <stdlib.h>
 
 void generic_do_cal( calibration_setup_t *setup,
-	saved_calibration_t *saved_cal, int observable, int caldac )
+	comedi_calibration_setting_t *saved_cal, int observable, int caldac )
 {
 	if( caldac < 0 || observable < 0 ) return;
 
@@ -32,7 +32,7 @@ void generic_do_cal( calibration_setup_t *setup,
 }
 
 void generic_do_relative( calibration_setup_t *setup,
-	saved_calibration_t *saved_cal, int observable1, int observable2, int caldac )
+	comedi_calibration_setting_t *saved_cal, int observable1, int observable2, int caldac )
 {
 	if( caldac < 0 || observable1 < 0 || observable2 < 0 ) return;
 
@@ -41,7 +41,7 @@ void generic_do_relative( calibration_setup_t *setup,
 }
 
 void generic_do_linearity( calibration_setup_t *setup,
-	saved_calibration_t *saved_cal, int observable1, int observable2,
+	comedi_calibration_setting_t *saved_cal, int observable1, int observable2,
 	int observable3, int caldac )
 {
 	if( caldac < 0 || observable1 < 0 || observable2 < 0 || observable3 < 0 )
@@ -58,7 +58,7 @@ void generic_prep_adc_caldacs( calibration_setup_t *setup,
 
 	if( setup->ad_subdev < 0 ) return;
 
-	if( setup->do_reset )
+	if( setup->old_calibration == NULL )
 	{
 		reset_caldac( setup, layout->adc_offset( channel ) );
 		reset_caldac( setup, layout->adc_gain( channel ) );
@@ -66,8 +66,8 @@ void generic_prep_adc_caldacs( calibration_setup_t *setup,
 		reset_caldac( setup, layout->adc_gain_fine( channel ) );
 	}else
 	{
-		retval = comedi_apply_calibration( setup->dev, setup->ad_subdev,
-			channel, range, AREF_GROUND, setup->cal_save_file_path);
+		retval = comedi_apply_parsed_calibration( setup->dev, setup->ad_subdev,
+			channel, range, AREF_GROUND, setup->old_calibration );
 		if( retval < 0 )
 		{
 			DPRINT( 0, "Failed to apply existing calibration, reseting dac caldacs.\n" );
@@ -86,7 +86,7 @@ void generic_prep_dac_caldacs( calibration_setup_t *setup,
 
 	if( setup->da_subdev < 0 ) return;
 
-	if( setup->do_reset )
+	if( setup->old_calibration == NULL )
 	{
 		reset_caldac( setup, layout->dac_offset( channel ) );
 		reset_caldac( setup, layout->dac_gain( channel ) );
@@ -94,8 +94,8 @@ void generic_prep_dac_caldacs( calibration_setup_t *setup,
 		reset_caldac( setup, layout->dac_gain_fine( channel ) );
 	}else
 	{
-		retval = comedi_apply_calibration( setup->dev, setup->da_subdev,
-			channel, range, AREF_GROUND, setup->cal_save_file_path);
+		retval = comedi_apply_parsed_calibration( setup->dev, setup->da_subdev,
+			channel, range, AREF_GROUND, setup->old_calibration );
 		if( retval < 0 )
 		{
 			DPRINT( 0, "Failed to apply existing calibration, reseting dac caldacs.\n" );
@@ -106,61 +106,9 @@ void generic_prep_dac_caldacs( calibration_setup_t *setup,
 		}
 	}
 }
-static int calibration_is_valid( const saved_calibration_t *saved_cal,
-	unsigned int subdevice, unsigned int channel, unsigned int range )
-{
-	int i;
-
-	if( saved_cal->subdevice != subdevice ) return 0;
-	if( saved_cal->channels_length )
-	{
-		for( i = 0; i < saved_cal->channels_length; i++ )
-		{
-			if( saved_cal->channels[ i ] == channel )
-				break;
-		}
-		if( i == saved_cal->channels_length ) return 0;
-	}
-	if( saved_cal->ranges_length )
-	{
-		for( i = 0; i < saved_cal->ranges_length; i++ )
-		{
-			if( saved_cal->ranges[ i ] == range )
-				break;
-		}
-		if( i == saved_cal->ranges_length ) return 0;
-	}
-	return 1;
-}
-
-static void apply_calibration(  calibration_setup_t *setup, saved_calibration_t *saved_cals,
-	unsigned int saved_cals_length, unsigned int subdevice, unsigned int channel,
-	unsigned int range )
-{
-	int i, retval;
-
-	for( i = 0; i < saved_cals_length; i++ )
-	{
-		int j;
-
-		if( calibration_is_valid( &saved_cals[ i ], subdevice, channel, range ) )
-		{
-			for( j = 0; j < saved_cals[ i ].caldacs_length; j++ )
-			{
-				caldac_t *caldac;
-
-				caldac = &saved_cals[ i ].caldacs[ j ];
-				retval = comedi_data_write( setup->dev, caldac->subdev, caldac->chan,
-					0, 0, caldac->current );
-				assert( retval >= 0 );
-			}
-		}
-	}
-}
 
 static void generic_prep_adc_for_dac( calibration_setup_t *setup, const generic_layout_t *layout,
-	saved_calibration_t *saved_cals, unsigned int saved_cals_length,
-	int observable )
+	comedi_calibration_t *calibration, int observable )
 {
 	unsigned int adc_channel, adc_range;
 	int chanspec;
@@ -171,15 +119,15 @@ static void generic_prep_adc_for_dac( calibration_setup_t *setup, const generic_
 	adc_channel = CR_CHAN( chanspec );
 	adc_range = CR_RANGE( chanspec );
 
-	apply_calibration( setup, saved_cals, saved_cals_length, setup->ad_subdev,
-		adc_channel, adc_range );
+	comedi_apply_parsed_calibration( setup->dev, setup->ad_subdev,
+		adc_channel, adc_range, 0, calibration );
 }
 
 static void generic_do_dac_channel( calibration_setup_t *setup, const generic_layout_t *layout ,
-	saved_calibration_t *saved_cals, unsigned int saved_cals_length, saved_calibration_t *current_cal,
+	comedi_calibration_t *calibration, comedi_calibration_setting_t *current_cal,
 	unsigned int channel, unsigned int range )
 {
-	generic_prep_adc_for_dac( setup, layout, saved_cals, saved_cals_length,
+	generic_prep_adc_for_dac( setup, layout, calibration,
 		layout->dac_ground_observable( setup, channel, range ) );
 
 	generic_do_relative( setup, current_cal, layout->dac_ground_observable( setup, channel, range ),
@@ -198,7 +146,7 @@ static void generic_do_dac_channel( calibration_setup_t *setup, const generic_la
 }
 
 static void generic_do_adc_channel( calibration_setup_t *setup, const generic_layout_t *layout,
-	saved_calibration_t *current_cal, unsigned int channel, unsigned int range )
+	comedi_calibration_setting_t *current_cal, unsigned int channel, unsigned int range )
 {
 	generic_do_relative( setup, current_cal, layout->adc_high_observable( setup, channel, range ),
 		layout->adc_ground_observable( setup, channel, range ), layout->adc_gain( channel ) );
@@ -216,7 +164,7 @@ static void generic_do_adc_channel( calibration_setup_t *setup, const generic_la
 }
 
 static void generic_do_adc_postgain_offset( calibration_setup_t *setup, const generic_layout_t *layout,
-	saved_calibration_t *current_cal, unsigned int channel, int unipolar )
+	comedi_calibration_setting_t *current_cal, unsigned int channel, int unipolar )
 {
 	int lowgain, highgain;
 
@@ -242,8 +190,8 @@ int generic_cal_by_channel_and_range( calibration_setup_t *setup,
 	const generic_layout_t *layout  )
 {
 	int range, channel, num_ai_ranges, num_ai_channels, num_ao_ranges,
-		num_ao_channels, retval, num_calibrations, num_ai_calibrations, i;
-	saved_calibration_t *saved_cals, *current_cal;
+		num_ao_channels, retval, num_ai_calibrations;
+	comedi_calibration_setting_t *current_cal;
 
 	assert( comedi_range_is_chan_specific( setup->dev, setup->ad_subdev ) == 0 );
 
@@ -266,16 +214,6 @@ int generic_cal_by_channel_and_range( calibration_setup_t *setup,
 		num_ao_ranges = num_ao_channels = 0;
 
 	num_ai_calibrations = num_ai_ranges * num_ai_channels;
-	num_calibrations = num_ai_calibrations + num_ao_ranges * num_ao_channels;
-	for( channel = 0; channel < num_ai_channels; channel++ )
-		if( layout->adc_postgain_offset( channel ) >= 0 )
-			num_calibrations += 2;
-	saved_cals = malloc( num_calibrations * sizeof( saved_calibration_t ) );
-
-	saved_cals = malloc( num_calibrations * sizeof( saved_calibration_t ) );
-	if( saved_cals == NULL ) return -1;
-
-	current_cal = saved_cals;
 
 	for( channel = 0; channel < num_ai_channels; channel++ )
 	{
@@ -284,48 +222,45 @@ int generic_cal_by_channel_and_range( calibration_setup_t *setup,
 		if( layout->adc_postgain_offset( 0 ) >= 0 )
 		{
 			/* bipolar postgain */
+			current_cal = sc_alloc_calibration_setting( setup );
 			generic_do_adc_postgain_offset( setup, layout, current_cal, channel, 0 );
 			for( range = 0; range < num_ai_ranges; range++ )
 				if( is_bipolar( setup->dev, setup->ad_subdev, channel, range ) )
 					sc_push_range( current_cal, range );
 			postgain_bip = setup->caldacs[ layout->adc_postgain_offset( channel ) ].current;
-			current_cal++;
 			/* unipolar postgain */
+			current_cal = sc_alloc_calibration_setting( setup );
 			generic_do_adc_postgain_offset( setup, layout, current_cal, channel, 1 );
 			for( range = 0; range < num_ai_ranges; range++ )
 				if( is_unipolar( setup->dev, setup->ad_subdev, channel, range ) )
 					sc_push_range( current_cal, range );
 			postgain_unip = setup->caldacs[ layout->adc_postgain_offset( channel ) ].current;
-			current_cal++;
 		}else
 			postgain_bip = postgain_unip = -1;
 
 		for( range = 0; range < num_ai_ranges; range++ )
 		{
+			current_cal = sc_alloc_calibration_setting( setup );
 			generic_prep_adc_caldacs( setup, layout, channel, range );
 			if( is_unipolar( setup->dev, setup->ad_subdev, channel, range ) )
 				update_caldac( setup, layout->adc_postgain_offset( channel ), postgain_bip );
 			else
 				update_caldac( setup, layout->adc_postgain_offset( channel ), postgain_unip );
 			generic_do_adc_channel( setup, layout, current_cal, channel, range );
-			current_cal++;
 		}
 	}
 	for( channel = 0; channel < num_ao_channels; channel++ )
 	{
 		for( range = 0; range < num_ao_ranges; range++ )
 		{
+			current_cal = sc_alloc_calibration_setting( setup );
 			generic_prep_dac_caldacs( setup, layout, channel, range );
-			generic_do_dac_channel( setup, layout, saved_cals, num_ai_calibrations,
+			generic_do_dac_channel( setup, layout, setup->new_calibration,
 				current_cal, channel, range );
-			current_cal++;
 		}
 	}
 
-	retval = write_calibration_file( setup, saved_cals, num_calibrations );
-	for( i = 0; i < num_calibrations; i++ )
-		clear_saved_calibration( &saved_cals[ i ] );
-	free( saved_cals );
+	retval = write_calibration_file( setup );
 	return retval;
 }
 
@@ -333,8 +268,8 @@ int generic_cal_by_range( calibration_setup_t *setup,
 	const generic_layout_t *layout  )
 {
 	int channel, range, num_ai_ranges, num_ao_ranges,
-		num_ao_channels, retval, num_calibrations, i;
-	saved_calibration_t *saved_cals, *current_cal;
+		num_ao_channels, retval;
+	comedi_calibration_setting_t *current_cal;
 	int postgain_bip, postgain_unip;
 
 	assert( comedi_range_is_chan_specific( setup->dev, setup->ad_subdev ) == 0 );
@@ -354,37 +289,30 @@ int generic_cal_by_range( calibration_setup_t *setup,
 	}else
 		num_ao_ranges = num_ao_channels = 0;
 
-	num_calibrations = num_ai_ranges + num_ao_ranges * num_ao_channels;
-	if( layout->adc_postgain_offset( 0 ) >= 0 )
-		num_calibrations += 2;
-	saved_cals = malloc( num_calibrations * sizeof( saved_calibration_t ) );
-	if( saved_cals == NULL ) return -1;
-
-	current_cal = saved_cals;
-
 	if( layout->adc_postgain_offset( 0 ) >= 0 )
 	{
 		/* bipolar postgain */
+		current_cal = sc_alloc_calibration_setting( setup );
 		generic_do_adc_postgain_offset( setup, layout, current_cal, 0, 0 );
 		sc_push_channel( current_cal, SC_ALL_CHANNELS );
 		for( range = 0; range < num_ai_ranges; range++ )
 			if( is_bipolar( setup->dev, setup->ad_subdev, 0, range ) )
 				sc_push_range( current_cal, range );
 		postgain_bip = setup->caldacs[ layout->adc_postgain_offset( 0 ) ].current;
-		current_cal++;
 		/* unipolar postgain */
+		current_cal = sc_alloc_calibration_setting( setup );
 		generic_do_adc_postgain_offset( setup, layout, current_cal, 0, 1 );
 		sc_push_channel( current_cal, SC_ALL_CHANNELS );
 		for( range = 0; range < num_ai_ranges; range++ )
 			if( is_unipolar( setup->dev, setup->ad_subdev, 0, range ) )
 				sc_push_range( current_cal, range );
 		postgain_unip = setup->caldacs[ layout->adc_postgain_offset( 0 ) ].current;
-		current_cal++;
 	}else
 		postgain_bip = postgain_unip = -1;
 
 	for( range = 0; range < num_ai_ranges; range++ )
 	{
+		current_cal = sc_alloc_calibration_setting( setup );
 		generic_prep_adc_caldacs( setup, layout, 0, range );
 		if( is_unipolar( setup->dev, setup->ad_subdev, 0, range ) )
 			update_caldac( setup, layout->adc_postgain_offset( 0 ), postgain_bip );
@@ -392,22 +320,18 @@ int generic_cal_by_range( calibration_setup_t *setup,
 			update_caldac( setup, layout->adc_postgain_offset( 0 ), postgain_unip );
 		generic_do_adc_channel( setup, layout, current_cal, 0, range );
 		sc_push_channel( current_cal, SC_ALL_CHANNELS );
-		current_cal++;
 	}
 	for( channel = 0; channel < num_ao_channels; channel++ )
 	{
 		for( range = 0; range < num_ao_ranges; range++ )
 		{
+			current_cal = sc_alloc_calibration_setting( setup );
 			generic_prep_dac_caldacs( setup, layout, channel, range );
-			generic_do_dac_channel( setup, layout, saved_cals, num_ai_ranges,
+			generic_do_dac_channel( setup, layout, setup->new_calibration,
 				current_cal, channel, range );
-			current_cal++;
 		}
 	}
-	retval = write_calibration_file( setup, saved_cals, num_calibrations );
-	for( i = 0; i < num_calibrations; i++ )
-		clear_saved_calibration( &saved_cals[ i ] );
-	free( saved_cals );
+	retval = write_calibration_file( setup );
 	return retval;
 }
 

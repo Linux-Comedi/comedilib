@@ -63,12 +63,6 @@ struct board_struct drivers[] = {
 };
 #define n_drivers (sizeof(drivers)/sizeof(drivers[0]))
 
-static int do_dump = 0;
-static int do_reset = 1;
-static int do_calibrate = 1;
-static int do_results = 0;
-static int do_output = 1;
-
 void help(void)
 {
 	printf("comedi_calibrate [options] - autocalibrates a Comedi device\n");
@@ -104,7 +98,7 @@ typedef struct
 	unsigned int aref;
 } parsed_options_t;
 
-void parse_options( int argc, char *argv[], parsed_options_t *settings )
+static void parse_options( int argc, char *argv[], parsed_options_t *settings )
 {
 	int c, index;
 
@@ -133,14 +127,6 @@ void parse_options( int argc, char *argv[], parsed_options_t *settings )
 		{ 0 },
 	};
 
-	memset( settings, 0, sizeof( *settings ) );
-	settings->do_dump = 0;
-	settings->do_reset = 1;
-	settings->do_calibrate = 1;
-	settings->do_results = 0;
-	settings->do_output = 1;
-
-	settings->file_path = "/dev/comedi0";
 	while (1) {
 		c = getopt_long(argc, argv, "f:S:vqs:c:r:a:", options, &index);
 		if (c == -1)break;
@@ -200,13 +186,15 @@ int main(int argc, char *argv[])
 	memset( &setup, 0, sizeof( setup ) );
 	setup.settling_time_ns = 99999;
 
+	memset( &options, 0, sizeof( options ) );
+	options.do_dump = 0;
+	options.do_reset = 0;
+	options.do_calibrate = -1;
+	options.do_results = 0;
+	options.do_output = 1;
+	options.file_path = "/dev/comedi0";
 	parse_options( argc, argv, &options );
 	setup.cal_save_file_path = options.save_file_path;
-	do_reset = options.do_reset;
-	do_dump = options.do_dump;
-	do_calibrate = options.do_calibrate;
-	do_results = options.do_results;
-	do_output = options.do_output;
 
 	setup.dev = comedi_open( options.file_path );
 	if( setup.dev == NULL ) {
@@ -252,22 +240,22 @@ ok:
 			"quickly in the future.\n");
 		if(verbose<1)verbose=1;
 		if(device_status==STATUS_UNKNOWN){
-			do_reset=1;
-			do_dump=1;
-			do_calibrate=0;
-			do_results=0;
+			options.do_reset=1;
+			options.do_dump=1;
+			options.do_calibrate=0;
+			options.do_results=0;
 		}
 		if(device_status==STATUS_SOME){
-			do_reset=1;
-			do_dump=1;
-			do_calibrate=1;
-			do_results=1;
+			options.do_reset=1;
+			options.do_dump=1;
+			options.do_calibrate=1;
+			options.do_results=1;
 		}
 		if(device_status==STATUS_GUESS){
-			do_reset=1;
-			do_dump=1;
-			do_calibrate=1;
-			do_results=1;
+			options.do_reset=1;
+			options.do_dump=1;
+			options.do_calibrate=1;
+			options.do_results=1;
 		}
 	}
 	if(verbose>=0){
@@ -283,13 +271,27 @@ ok:
 			(comedi_get_version_code(setup.dev))&0xff);
 	}
 
-	setup.do_reset = do_reset;
-	setup.do_output = do_output;
-
-	if(do_reset)reset_caldacs( &setup );
-	if(do_dump) observe( &setup );
-	if(do_calibrate && setup.do_cal)
+	if( options.do_reset == 0 )
+		setup.old_calibration = comedi_parse_calibration_file( options.save_file_path );
+	else
+		setup.old_calibration = NULL;
+	if( options.do_calibrate < 0 )
 	{
+		if( setup.old_calibration ) options.do_calibrate = 0;
+		else options.do_calibrate = 1;
+	}
+	setup.do_output = options.do_output;
+
+	if(options.do_dump) observe( &setup );
+	if(options.do_calibrate && setup.do_cal)
+	{
+		setup.new_calibration = malloc( sizeof( comedi_calibration_t ) );
+		assert( setup.new_calibration );
+		memset( setup.new_calibration, 0, sizeof( comedi_calibration_t ) );
+		setup.new_calibration->driver_name = strdup( comedi_get_driver_name( setup.dev ) );
+		assert( setup.new_calibration->driver_name != NULL );
+		setup.new_calibration->board_name = strdup( comedi_get_board_name( setup.dev ) );
+		assert( setup.new_calibration->board_name != NULL );
 		retval = setup.do_cal( &setup );
 		if( retval < 0 )
 		{
@@ -297,7 +299,10 @@ ok:
 			return -1;
 		}
 	}
-	if(do_results) observe( &setup );
+	if(options.do_results) observe( &setup );
+
+	if( setup.old_calibration ) comedi_cleanup_calibration( setup.old_calibration );
+	if( setup.new_calibration ) comedi_cleanup_calibration( setup.new_calibration );
 
 	retval = comedi_apply_calibration( setup.dev, options.subdevice,
 		options.channel, options.range, options.aref, setup.cal_save_file_path );
@@ -337,11 +342,25 @@ void set_target( calibration_setup_t *setup, int obs,double target)
 
 static void apply_appropriate_cal( calibration_setup_t *setup, comedi_insn insn )
 {
-	int retval;
+	int retval = 0;
 
-	retval = comedi_apply_calibration( setup->dev, insn.subdev,
-		CR_CHAN( insn.chanspec ), CR_RANGE( insn.chanspec ),
-		CR_AREF( insn.chanspec ), setup->cal_save_file_path );
+	if( setup->new_calibration == NULL && setup->old_calibration == NULL )
+	{
+		reset_caldacs( setup );
+		return;
+	}
+
+	if( setup->new_calibration )
+	{
+		retval = comedi_apply_parsed_calibration( setup->dev, insn.subdev,
+			CR_CHAN( insn.chanspec ), CR_RANGE( insn.chanspec ),
+			CR_AREF( insn.chanspec ), setup->new_calibration );
+	}else if( setup->old_calibration )
+	{
+		retval = comedi_apply_parsed_calibration( setup->dev, insn.subdev,
+			CR_CHAN( insn.chanspec ), CR_RANGE( insn.chanspec ),
+			CR_AREF( insn.chanspec ), setup->old_calibration );
+	}
 	if( retval < 0 )
 		DPRINT( 0, "failed to apply ");
 	else

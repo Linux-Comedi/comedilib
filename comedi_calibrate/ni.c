@@ -1069,7 +1069,7 @@ static void prep_adc_caldacs_generic( calibration_setup_t *setup,
 {
 	int retval;
 
-	if( setup->do_reset )
+	if( setup->old_calibration == NULL )
 	{
 		reset_caldac( setup, layout->adc_pregain_offset );
 		reset_caldac( setup, layout->adc_postgain_offset );
@@ -1080,8 +1080,8 @@ static void prep_adc_caldacs_generic( calibration_setup_t *setup,
 		reset_caldac( setup, layout->adc_unip_offset );
 	}else
 	{
-		retval = comedi_apply_calibration( setup->dev, setup->ad_subdev,
-			0, 0, AREF_GROUND, setup->cal_save_file_path);
+		retval = comedi_apply_parsed_calibration( setup->dev, setup->ad_subdev,
+			0, 0, AREF_GROUND, setup->old_calibration );
 		if( retval < 0 )
 		{
 			DPRINT( 0, "Failed to apply existing calibration, reseting adc caldacs.\n" );
@@ -1103,7 +1103,7 @@ static void prep_dac_caldacs_generic( calibration_setup_t *setup,
 
 	if( setup->da_subdev < 0 ) return;
 
-	if( setup->do_reset )
+	if( setup->old_calibration == NULL )
 	{
 		reset_caldac( setup, layout->dac_offset[ channel ] );
 		reset_caldac( setup, layout->dac_gain[ channel ] );
@@ -1111,8 +1111,8 @@ static void prep_dac_caldacs_generic( calibration_setup_t *setup,
 		reset_caldac( setup, layout->dac_linearity[ channel ] );
 	}else
 	{
-		retval = comedi_apply_calibration( setup->dev, setup->da_subdev,
-			channel, range, AREF_GROUND, setup->cal_save_file_path);
+		retval = comedi_apply_parsed_calibration( setup->dev, setup->da_subdev,
+			channel, range, AREF_GROUND, setup->old_calibration );
 		if( retval < 0 )
 		{
 			DPRINT( 0, "Failed to apply existing calibration, reseting dac caldacs.\n" );
@@ -1126,16 +1126,12 @@ static void prep_dac_caldacs_generic( calibration_setup_t *setup,
 
 static int cal_ni_generic( calibration_setup_t *setup, const ni_caldac_layout_t *layout )
 {
-	saved_calibration_t saved_cals[ 5 ], *current_cal;
-	int i, retval;
-	int num_calibrations;
-
-	current_cal = saved_cals;
-
-	memset( saved_cals, 0, sizeof( saved_cals ) );
+	comedi_calibration_setting_t *current_cal;
+	int retval;
 
 	prep_adc_caldacs_generic( setup, layout );
 
+	current_cal = sc_alloc_calibration_setting( setup );
 	current_cal->subdevice = setup->ad_subdev;
 	generic_do_relative( setup, current_cal, ni_zero_offset_low,
 		ni_reference_low, layout->adc_gain );
@@ -1152,7 +1148,6 @@ static int cal_ni_generic( calibration_setup_t *setup, const ni_caldac_layout_t 
 	sc_push_channel( current_cal, SC_ALL_CHANNELS );
 	sc_push_range( current_cal, SC_ALL_RANGES );
 	sc_push_aref( current_cal, SC_ALL_AREFS );
-	current_cal++;
 
 	if( setup->da_subdev >= 0 && setup->do_output )
 	{
@@ -1166,6 +1161,7 @@ static int cal_ni_generic( calibration_setup_t *setup, const ni_caldac_layout_t 
 			num_ao_ranges = comedi_get_n_ranges( setup->dev, setup->da_subdev, channel );
 			prep_dac_caldacs_generic( setup, layout, channel, ao_bipolar_lowgain );
 
+			current_cal = sc_alloc_calibration_setting( setup );
 			current_cal->subdevice = setup->da_subdev;
 			generic_do_linearity( setup, current_cal, ni_ao_linearity( channel ),
 				ni_ao_zero_offset( channel ), ni_ao_reference( channel ),
@@ -1183,12 +1179,12 @@ static int cal_ni_generic( calibration_setup_t *setup, const ni_caldac_layout_t 
 					sc_push_range( current_cal, range );
 			}
 			sc_push_aref( current_cal, SC_ALL_AREFS );
-			current_cal++;
 
 			if( ao_unipolar_lowgain >= 0 )
 			{
 				prep_dac_caldacs_generic( setup, layout, channel, ao_unipolar_lowgain );
 
+				current_cal = sc_alloc_calibration_setting( setup );
 				current_cal->subdevice = setup->da_subdev;
 				generic_do_linearity( setup, current_cal, ni_ao_unip_zero_offset( channel ),
 					ni_ao_unip_linearity( channel ), ni_ao_unip_reference( channel ),
@@ -1206,15 +1202,11 @@ static int cal_ni_generic( calibration_setup_t *setup, const ni_caldac_layout_t 
 						sc_push_range( current_cal, range );
 				}
 				sc_push_aref( current_cal, SC_ALL_AREFS );
-				current_cal++;
 			}
 		}
 	}
 
-	num_calibrations = current_cal - saved_cals;
-	retval = write_calibration_file( setup, saved_cals, num_calibrations );
-	for( i = 0; i < num_calibrations; i++ )
-		clear_saved_calibration( &saved_cals[ i ] );
+	retval = write_calibration_file( setup );
 
 	return retval;
 }

@@ -44,7 +44,7 @@ static inline calib_yyparse_private_t* priv( calib_yyparse_private_t *parse_arg)
 	return parse_arg;
 }
 
-static void free_calibration_setting( struct calibration_setting *setting )
+static void free_calibration_setting( comedi_calibration_setting_t *setting )
 {
 	if( setting->channels );
 	{
@@ -67,50 +67,50 @@ static void free_calibration_setting( struct calibration_setting *setting )
 	}
 }
 
-static void free_calibrations( comedi_calibration_t *file_contents )
+static void free_settings( comedi_calibration_t *file_contents )
 {
 	int i;
 
-	if( file_contents->calibrations == NULL ) return;
+	if( file_contents->settings == NULL ) return;
 
-	for( i = 0; i < file_contents->num_calibrations; i++ )
+	for( i = 0; i < file_contents->num_settings; i++ )
 	{
-		free_calibration_setting( &file_contents->calibrations[ i ] );
+		free_calibration_setting( &file_contents->settings[ i ] );
 	}
-	file_contents->calibrations = NULL;
+	file_contents->settings = NULL;
 }
 
 static int add_calibration_setting( comedi_calibration_t *file_contents )
 {
-	struct calibration_setting *temp;
+	comedi_calibration_setting_t *temp;
 
-	temp = realloc( file_contents->calibrations,
-		( file_contents->num_calibrations + 1 ) * sizeof( struct calibration_setting ) );
+	temp = realloc( file_contents->settings,
+		( file_contents->num_settings + 1 ) * sizeof( comedi_calibration_setting_t ) );
 	if( temp == NULL ) return -1;
-	file_contents->calibrations = temp;
-	memset( &file_contents->calibrations[ file_contents->num_calibrations ],
-		0, sizeof( struct calibration_setting ) );
+	file_contents->settings = temp;
+	memset( &file_contents->settings[ file_contents->num_settings ],
+		0, sizeof( comedi_calibration_setting_t ) );
 
-	file_contents->num_calibrations++;
+	file_contents->num_settings++;
 	return 0;
 }
 
-static struct calibration_setting* current_setting( calib_yyparse_private_t *priv )
+static comedi_calibration_setting_t* current_setting( calib_yyparse_private_t *priv )
 {
 	int retval;
 
-	while( priv->cal_index >= priv->parsed_file->num_calibrations )
+	while( priv->cal_index >= priv->parsed_file->num_settings )
 	{
 		retval = add_calibration_setting( priv->parsed_file );
 		if( retval < 0 ) return NULL;
 	}
-	return &priv->parsed_file->calibrations[ priv->cal_index ];
+	return &priv->parsed_file->settings[ priv->cal_index ];
 }
 
 static int add_channel( calib_yyparse_private_t *priv, int channel )
 {
 	int *temp;
-	struct calibration_setting *setting;
+	comedi_calibration_setting_t *setting;
 
 	setting = current_setting( priv );
 	if( setting == NULL ) return -1;
@@ -125,7 +125,7 @@ static int add_channel( calib_yyparse_private_t *priv, int channel )
 static int add_range( calib_yyparse_private_t *priv, int range )
 {
 	int *temp;
-	struct calibration_setting *setting;
+	comedi_calibration_setting_t *setting;
 
 	setting = current_setting( priv );
 	if( setting == NULL ) return -1;
@@ -139,7 +139,7 @@ static int add_range( calib_yyparse_private_t *priv, int range )
 
 static int add_aref( calib_yyparse_private_t *priv, int aref )
 {
-	struct calibration_setting *setting;
+	comedi_calibration_setting_t *setting;
 
 	setting = current_setting( priv );
 	if( setting == NULL ) return -1;
@@ -155,7 +155,7 @@ static int add_caldac( calib_yyparse_private_t *priv,
 	comedi_caldac_t caldac )
 {
 	comedi_caldac_t *temp;
-	struct calibration_setting *setting;
+	comedi_calibration_setting_t *setting;
 
 	setting = current_setting( priv );
 	if( setting == NULL ) return -1;
@@ -191,7 +191,7 @@ extern void comedi_cleanup_calibration( comedi_calibration_t *file_contents )
 		free( file_contents->board_name );
 		file_contents->board_name = NULL;
 	}
-	free_calibrations( file_contents );
+	free_settings( file_contents );
 	free( file_contents );
 	file_contents = NULL;
 }
@@ -202,6 +202,8 @@ extern comedi_calibration_t* comedi_parse_calibration_file( const char *cal_file
 	calib_yyparse_private_t priv;
 	FILE *file;
 
+	if( cal_file_path == NULL ) return NULL;
+	
 	priv.parsed_file = alloc_calib_parse();
 	if( priv.parsed_file == NULL ) return NULL;
 	priv.cal_index = 0;
@@ -279,7 +281,7 @@ extern comedi_calibration_t* comedi_parse_calibration_file( const char *cal_file
 
 	calibration_setting_element: T_SUBDEVICE T_ASSIGN T_NUMBER
 		{
-			struct calibration_setting *setting;
+			comedi_calibration_setting_t *setting;
 			setting = current_setting( parse_arg );
 			if( setting == NULL ) YYABORT;
 			setting->subdevice = $3;

@@ -54,11 +54,11 @@ static inline int valid_channel( const comedi_calibration_t *parsed_file,
 {
 	int num_channels, i;
 
-	num_channels = parsed_file->calibrations[ cal_index ].num_channels;
+	num_channels = parsed_file->settings[ cal_index ].num_channels;
 	if( num_channels == 0 ) return 1;
 	for( i = 0; i < num_channels; i++ )
 	{
-		if( parsed_file->calibrations[ cal_index ].channels[ i ] == channel )
+		if( parsed_file->settings[ cal_index ].channels[ i ] == channel )
 			return 1;
 	}
 
@@ -70,11 +70,11 @@ static inline int valid_range( const comedi_calibration_t *parsed_file,
 {
 	int num_ranges, i;
 
-	num_ranges = parsed_file->calibrations[ cal_index ].num_ranges;
+	num_ranges = parsed_file->settings[ cal_index ].num_ranges;
 	if( num_ranges == 0 ) return 1;
 	for( i = 0; i < num_ranges; i++ )
 	{
-		if( parsed_file->calibrations[ cal_index ].ranges[ i ] == range )
+		if( parsed_file->settings[ cal_index ].ranges[ i ] == range )
 			return 1;
 	}
 
@@ -86,11 +86,11 @@ static inline int valid_aref( const comedi_calibration_t *parsed_file,
 {
 	int num_arefs, i;
 
-	num_arefs = parsed_file->calibrations[ cal_index ].num_arefs;
+	num_arefs = parsed_file->settings[ cal_index ].num_arefs;
 	if( num_arefs == 0 ) return 1;
 	for( i = 0; i < num_arefs; i++ )
 	{
-		if( parsed_file->calibrations[ cal_index ].arefs[ i ] == aref )
+		if( parsed_file->settings[ cal_index ].arefs[ i ] == aref )
 			return 1;
 	}
 
@@ -103,11 +103,11 @@ static int apply_calibration( comedi_t *dev, const comedi_calibration_t *parsed_
 	int num_cals, i, retval;
 	int found_cal = 0;
 
-	num_cals = parsed_file->num_calibrations;
+	num_cals = parsed_file->num_settings;
 
 	for( i = 0; i < num_cals; i++ )
 	{
-		if( parsed_file->calibrations[ i ].subdevice != subdev ) continue;
+		if( parsed_file->settings[ i ].subdevice != subdev ) continue;
 		if( valid_range( parsed_file, i, range ) == 0 ) continue;
 		if( valid_channel( parsed_file, i, channel ) == 0 ) continue;
 		if( valid_aref( parsed_file, i, aref ) == 0 ) continue;
@@ -130,14 +130,14 @@ static int set_calibration( comedi_t *dev, const comedi_calibration_t *parsed_fi
 {
 	int i, retval, num_caldacs;
 
-	num_caldacs = parsed_file->calibrations[ cal_index ].num_caldacs;
+	num_caldacs = parsed_file->settings[ cal_index ].num_caldacs;
 	COMEDILIB_DEBUG( 4, "num_caldacs %i\n", num_caldacs );
 
 	for( i = 0; i < num_caldacs; i++ )
 	{
 		comedi_caldac_t caldac;
 
-		caldac = parsed_file->calibrations[ cal_index ].caldacs[ i ];
+		caldac = parsed_file->settings[ cal_index ].caldacs[ i ];
 		COMEDILIB_DEBUG( 4, "subdev %i, ch %i, val %i\n", caldac.subdevice,
 			caldac.channel,caldac.value);
 		retval = comedi_data_write( dev, caldac.subdevice, caldac.channel,

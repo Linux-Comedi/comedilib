@@ -397,6 +397,12 @@ static int cal_cb_pci_1xxx( calibration_setup_t *setup )
 {
 	generic_layout_t layout;
 
+	if( comedi_get_version_code( setup->dev ) <= COMEDI_VERSION_CODE( 0, 7, 66 ) )
+	{
+		DPRINT(0, "WARNING: you need comedi driver version 0.7.67 or later\n"
+		 "for this calibration to work properly\n" );
+	}
+
 	init_generic_layout( &layout );
 	layout.adc_gain = adc_gain_1xxx;
 	layout.adc_offset = adc_offset_coarse_1xxx;
@@ -481,32 +487,6 @@ static int cal_cb_pci_1602_16( calibration_setup_t *setup )
 	layout.dac_ground_observable = ao_ground_observable_1xxx;
 	return generic_cal_by_range( setup, &layout );
 }
-
-#if 0
-static int cal_cb_pci_1602_16( calibration_setup_t *setup )
-{
-	enum cal_knobs_1602_16
-	{
-		DAC0_GAIN_FINE = 0,
-		DAC0_GAIN_COARSE,
-		DAC0_OFFSET_COARSE,
-		DAC1_OFFSET_COARSE,
-		DAC1_GAIN_FINE,
-		DAC1_GAIN_COARSE,
-		DAC0_OFFSET_FINE,
-		DAC1_OFFSET_FINE,
-		ADC_GAIN,
-		ADC_POSTGAIN_OFFSET,
-		ADC_PREGAIN_OFFSET,
-	};
-
-	cal_binary( setup, OBS_0V_RANGE_10V_BIP_1602_16, ADC_PREGAIN_OFFSET );
-	cal_binary( setup, OBS_0V_RANGE_10V_BIP_1602_16, ADC_POSTGAIN_OFFSET );
-	cal_binary( setup, OBS_7V_RANGE_10V_BIP_1602_16, ADC_GAIN );
-
-	return 0;
-}
-#endif
 
 // converts calibration source voltages from two 16 bit eeprom values to a floating point value
 static float eeprom16_to_source( uint16_t *data )
