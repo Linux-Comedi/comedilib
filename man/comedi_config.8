@@ -2,7 +2,7 @@
 .SH NAME
 \fBcomedi_config\fR - COMEDI configuration utility
 .SH SYNOPSIS
-\fB/usr/sbin/comedi_config\fR [-vVq] /dev/comediN <driver>
+\fBcomedi_config\fR [-vVq] /dev/comediN <driver>
 [<option1>[,<option2>...]]
 .br
 .SH DESCRIPTION
@@ -79,12 +79,12 @@ run from an initialization script.
 A National Instruments PCI-MIO E series board can be
 configured to use /dev/comedi0 using the command:
 
-	/usr/sbin/comedi_config /dev/comedi0 ni_pcimio
+	comedi_config /dev/comedi0 ni_pcimio
 
 A National Instruments AT-MIO E series board can be
 configured to use /dev/comedi3 using the command:
 
-	/usr/sbin/comedi_config /dev/comedi3 ni_atmio 0x220,3
+	comedi_config /dev/comedi3 ni_atmio 0x220,3
 
 This tells the driver that the board is configured
 for I/O base 0x220 and IRQ 3.
