@@ -9,11 +9,31 @@
 devices.  Some \fBcomedi\fR devices have the ability to
 measure internal stable voltage references and control
 gains and offsets using programmable DACs.  On these devices,
-\fBcomedi_calibrate\fR adjusts the programmable calibration
-DACs so that the measured value of reference voltages fall
-within acceptable limits.  The calibration settings are
-saved to a file which can be fed to comedi_apply_calibration()
+\fBcomedi_calibrate\fR determines the proper values to
+feed into the programmable calibration
+DACs.  These calibration settings are then
+saved to a file, which can be fed to comedi_apply_calibration()
 and related functions.
+
+If comedi_calibrate finds an existing calibration file, it
+will not perform a new calibration by default.  It will
+simply read its calibration information from the file.
+This behaviour
+may be overriden with the
+.B \-\-calibrate
+option, to force a new calibration to be performed.
+
+After obtaining the calibration information for the board,
+comedi_calibrate will then apply a calibration setting
+appropriate for the specified subdevice, channel, and
+range (see the
+.B \-\-subdevice
+,
+.B \-\-channel
+, and
+.B \-\-range
+options below).  See the comedilib documentation for
+comedi_apply_calibration() for more information.
 
 \fBcomedi_calibrate\fR prints a lot of debugging information
 as it runs.
