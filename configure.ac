@@ -83,7 +83,7 @@ AC_ARG_ENABLE([scxi], [  --enable-scxi  Enable SCXI convenience library],
 AM_CONDITIONAL(BUILD_SCXI, [test "$ENABLE_SCXI" == "yes"])
 
 # docbook
-AC_ARG_ENABLE([docbook-binding],[  --disable-docbook-binding        Disable docbook],[ENABLE_DOCBOOK=$enableval],[ENABLE_DOCBOOK="yes"])
+AC_ARG_ENABLE([docbook],[  --disable-docbook-binding        Disable docbook],[ENABLE_DOCBOOK=$enableval],[ENABLE_DOCBOOK="yes"])
 
 if test "$ENABLE_DOCBOOK" == "yes"; then
 	AC_PATH_PROG(DOCBOOK2MAN, docbook2man, no)
