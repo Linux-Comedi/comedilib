@@ -201,7 +201,7 @@ char* _comedi_get_default_calibration_path( comedi_t *dev )
 	board_name = strdup( temp );
 
 	fixup_board_name( board_name );
-	asprintf( &file_path, "/etc/comedi/calibrations/%s_%s_comedi%li",
+	asprintf( &file_path, LOCALSTATEDIR "/comedi/calibrations/%s_%s_comedi%li",
 		driver_name, board_name, ( unsigned long ) minor( file_stats.st_rdev ) );
 
 	free( board_name );
