@@ -1177,6 +1177,7 @@ int get_bipolar_lowgain(comedi_t *dev,int subdev)
 	for(i=0;i<n_ranges;i++){
 		range = comedi_get_range(dev,subdev,0,i);
 		if( is_bipolar( dev, subdev, 0, i ) == 0 ) continue;
+		if(range->unit == UNIT_none ) continue;
 		if(range->max>max){
 			ret = i;
 			max=range->max;
@@ -1197,6 +1198,7 @@ int get_bipolar_highgain(comedi_t *dev,int subdev)
 	for(i=0;i<n_ranges;i++){
 		range = comedi_get_range(dev,subdev,0,i);
 		if( is_bipolar( dev, subdev, 0, i ) == 0 ) continue;
+		if(range->unit == UNIT_none ) continue;
 		if(range->max<min){
 			ret = i;
 			min=range->max;
@@ -1217,6 +1219,7 @@ int get_unipolar_lowgain(comedi_t *dev,int subdev)
 	for(i=0;i<n_ranges;i++){
 		range = comedi_get_range(dev,subdev,0,i);
 		if( is_unipolar( dev, subdev, 0, i ) == 0 ) continue;
+		if(range->unit == UNIT_none ) continue;
 		if(range->max>max){
 			ret = i;
 			max=range->max;
@@ -1237,6 +1240,7 @@ int get_unipolar_highgain(comedi_t *dev,int subdev)
 	for(i=0;i<n_ranges;i++){
 		range = comedi_get_range(dev,subdev,0,i);
 		if( is_unipolar( dev, subdev, 0, i ) == 0 ) continue;
+		if(range->unit == UNIT_none ) continue;
 		if(range->max < max){
 			ret = i;
 			max=range->max;
