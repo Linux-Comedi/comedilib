@@ -18,7 +18,7 @@ distclean: clean
 	rm -rf locale
 
 clean:
-	for i in $(locales);do \
+	for i in messages $(locales);do \
 	  rm -f $$i.po ; \
 	done
 
