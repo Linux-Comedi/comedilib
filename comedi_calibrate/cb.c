@@ -44,28 +44,28 @@ struct board_struct{
 	int (*setup)( calibration_setup_t *setup );
 };
 
-int setup_cb_pci_64xx( calibration_setup_t *setup );
-int setup_cb_pci_60xx( calibration_setup_t *setup );
-int setup_cb_pci_4020( calibration_setup_t *setup );
-int setup_cb_pci_1xxx( calibration_setup_t *setup );
-int setup_cb_pci_1001( calibration_setup_t *setup );
-int setup_cb_pci_1602_16( calibration_setup_t *setup );
+static int setup_cb_pci_64xx( calibration_setup_t *setup );
+static int setup_cb_pci_60xx( calibration_setup_t *setup );
+static int setup_cb_pci_4020( calibration_setup_t *setup );
+static int setup_cb_pci_1xxx( calibration_setup_t *setup );
+static int setup_cb_pci_1001( calibration_setup_t *setup );
+static int setup_cb_pci_1602_16( calibration_setup_t *setup );
 
-int cal_cb_pci_64xx( calibration_setup_t *setup );
-int cal_cb_pci_60xx( calibration_setup_t *setup );
-int cal_cb_pci_4020( calibration_setup_t *setup );
-int cal_cb_pci_1xxx( calibration_setup_t *setup );
-int cal_cb_pci_1001( calibration_setup_t *setup );
-int cal_cb_pci_1602_16( calibration_setup_t *setup );
+static int cal_cb_pci_64xx( calibration_setup_t *setup );
+static int cal_cb_pci_60xx( calibration_setup_t *setup );
+static int cal_cb_pci_4020( calibration_setup_t *setup );
+static int cal_cb_pci_1xxx( calibration_setup_t *setup );
+static int cal_cb_pci_1001( calibration_setup_t *setup );
+static int cal_cb_pci_1602_16( calibration_setup_t *setup );
 
-int init_observables_64xx( calibration_setup_t *setup );
-int init_observables_60xx( calibration_setup_t *setup );
-int init_observables_4020( calibration_setup_t *setup );
-int init_observables_1xxx( calibration_setup_t *setup );
-int init_observables_1001( calibration_setup_t *setup );
-int init_observables_1602_16( calibration_setup_t *setup );
+static int init_observables_64xx( calibration_setup_t *setup );
+static int init_observables_60xx( calibration_setup_t *setup );
+static int init_observables_4020( calibration_setup_t *setup );
+static int init_observables_1xxx( calibration_setup_t *setup );
+static int init_observables_1001( calibration_setup_t *setup );
+static int init_observables_1602_16( calibration_setup_t *setup );
 
-int actual_source_voltage( comedi_t *dev, unsigned int subdevice, unsigned int eeprom_channel, float *voltage);
+static int actual_source_voltage( comedi_t *dev, unsigned int subdevice, unsigned int eeprom_channel, float *voltage);
 
 static struct board_struct boards[]={
 	{ "pci-das6402/16",	STATUS_DONE,	setup_cb_pci_64xx },
@@ -74,7 +74,7 @@ static struct board_struct boards[]={
 	{ "pci-das64/m2/16",	STATUS_GUESS,	setup_cb_pci_64xx },
 	{ "pci-das64/m3/16",	STATUS_GUESS,	setup_cb_pci_64xx },
 	{ "pci-das6023",	STATUS_DONE,	setup_cb_pci_60xx },
-	{ "pci-das6025",	STATUS_DONE,	setup_cb_pci_60xx },
+	{ "pci-das6025",	STATUS_SOME,	setup_cb_pci_60xx },
 	{ "pci-das6034",	STATUS_GUESS,	setup_cb_pci_60xx },
 	{ "pci-das6035",	STATUS_GUESS,	setup_cb_pci_60xx },
 	{ "pci-das4020/12",	STATUS_DONE,	setup_cb_pci_4020 },
@@ -139,7 +139,7 @@ int cb_setup( calibration_setup_t *setup, const char *device_name )
 	return 0;
 }
 
-int setup_cb_pci_64xx( calibration_setup_t *setup )
+static int setup_cb_pci_64xx( calibration_setup_t *setup )
 {
 	static const int caldac_subdev = 6;
 	static const int calpot_subdev = 7;
@@ -151,7 +151,7 @@ int setup_cb_pci_64xx( calibration_setup_t *setup )
 	return 0;
 }
 
-int setup_cb_pci_60xx( calibration_setup_t *setup )
+static int setup_cb_pci_60xx( calibration_setup_t *setup )
 {
 	static const int caldac_subdev = 6;
 
@@ -161,7 +161,7 @@ int setup_cb_pci_60xx( calibration_setup_t *setup )
 	return 0;
 }
 
-int setup_cb_pci_4020( calibration_setup_t *setup )
+static int setup_cb_pci_4020( calibration_setup_t *setup )
 {
 	static const int caldac_subdev = 6;
 
@@ -171,7 +171,7 @@ int setup_cb_pci_4020( calibration_setup_t *setup )
 	return 0;
 }
 
-int setup_cb_pci_1xxx( calibration_setup_t *setup )
+static int setup_cb_pci_1xxx( calibration_setup_t *setup )
 {
 	static const int caldac_subdev = 4;
 	static const int calpot_subdev = 5;
@@ -183,7 +183,7 @@ int setup_cb_pci_1xxx( calibration_setup_t *setup )
 	return 0;
 }
 
-int setup_cb_pci_1001( calibration_setup_t *setup )
+static int setup_cb_pci_1001( calibration_setup_t *setup )
 {
 	static const int caldac_subdev = 4;
 	static const int calpot_subdev = 5;
@@ -195,7 +195,7 @@ int setup_cb_pci_1001( calibration_setup_t *setup )
 	return 0;
 }
 
-int setup_cb_pci_1602_16( calibration_setup_t *setup )
+static int setup_cb_pci_1602_16( calibration_setup_t *setup )
 {
 	static const int caldac_subdev = 4;
 	static const int calpot_subdev = 5;
@@ -209,7 +209,7 @@ int setup_cb_pci_1602_16( calibration_setup_t *setup )
 	return 0;
 }
 
-int init_observables_64xx( calibration_setup_t *setup )
+static int init_observables_64xx( calibration_setup_t *setup )
 {
 	comedi_insn tmpl;//, po_tmpl;
 	observable *o;
@@ -269,17 +269,17 @@ int init_observables_64xx( calibration_setup_t *setup )
 	return 0;
 }
 
-unsigned int ai_high_observable_index_60xx( unsigned int ai_range )
+static unsigned int ai_high_observable_index_60xx( unsigned int ai_range )
 {
 	return ai_range * 2 + 1;
 }
 
-unsigned int ai_ground_observable_index_60xx( unsigned int ai_range )
+static unsigned int ai_ground_observable_index_60xx( unsigned int ai_range )
 {
 	return ai_range * 2;
 }
 
-unsigned int ao_high_observable_index_60xx( const calibration_setup_t *setup,
+static unsigned int ao_high_observable_index_60xx( const calibration_setup_t *setup,
 	unsigned int channel, unsigned int ao_range )
 {
 	int num_ai_ranges;
@@ -290,7 +290,7 @@ unsigned int ao_high_observable_index_60xx( const calibration_setup_t *setup,
 	return 2 * num_ai_ranges + 2 * channel + 4 * ao_range + 1;
 }
 
-unsigned int ao_low_observable_index_60xx( const calibration_setup_t *setup,
+static unsigned int ao_low_observable_index_60xx( const calibration_setup_t *setup,
 	unsigned int channel, unsigned int ao_range )
 {
 	int num_ai_ranges;
@@ -301,7 +301,7 @@ unsigned int ao_low_observable_index_60xx( const calibration_setup_t *setup,
 	return 2 * num_ai_ranges + 2 * channel + 4 * ao_range;
 }
 
-int ai_cal_src_voltage_60xx( calibration_setup_t *setup,
+static int ai_cal_src_voltage_60xx( calibration_setup_t *setup,
 	unsigned int calibration_source, float *voltage )
 {
 	enum source_eeprom_addr
@@ -344,7 +344,7 @@ int ai_cal_src_voltage_60xx( calibration_setup_t *setup,
 	return retval;
 }
 
-int high_ai_cal_src_60xx( calibration_setup_t *setup, unsigned int ai_range )
+static int high_ai_cal_src_60xx( calibration_setup_t *setup, unsigned int ai_range )
 {
 	comedi_range *range;
 
@@ -363,7 +363,7 @@ int high_ai_cal_src_60xx( calibration_setup_t *setup, unsigned int ai_range )
 	return -1;
 }
 
-int ao_cal_src_60xx( unsigned int channel )
+static int ao_cal_src_60xx( unsigned int channel )
 {
 	switch( channel )
 	{
@@ -379,7 +379,7 @@ int ao_cal_src_60xx( unsigned int channel )
 	}
 }
 
-int init_observables_60xx( calibration_setup_t *setup )
+static int init_observables_60xx( calibration_setup_t *setup )
 {
 	comedi_insn tmpl;
 	observable *o;
@@ -408,7 +408,7 @@ int init_observables_60xx( calibration_setup_t *setup )
 		asprintf( &o->name, "calibration source %i, range %i, ground referenced",
 			o->reference_source, i );
 		o->observe_insn = tmpl;
-		o->observe_insn.chanspec = CR_PACK( 0, 0, AREF_GROUND) | CR_ALT_SOURCE | CR_ALT_FILTER;
+		o->observe_insn.chanspec = CR_PACK( 0, i, AREF_GROUND) | CR_ALT_SOURCE | CR_ALT_FILTER;
 		o->target = 0.0;
 		setup->n_observables++;
 
@@ -420,7 +420,7 @@ int init_observables_60xx( calibration_setup_t *setup )
 		asprintf( &o->name, "calibration source %i, range %i, ground referenced",
 			o->reference_source, i );
 		o->observe_insn = tmpl;
-		o->observe_insn.chanspec = CR_PACK( 0, 0, AREF_GROUND) | CR_ALT_SOURCE | CR_ALT_FILTER;
+		o->observe_insn.chanspec = CR_PACK( 0, i, AREF_GROUND) | CR_ALT_SOURCE | CR_ALT_FILTER;
 		retval = ai_cal_src_voltage_60xx( setup, o->reference_source, &target );
 		if( retval < 0 ) return -1;
 		o->target = target;
@@ -475,7 +475,7 @@ int init_observables_60xx( calibration_setup_t *setup )
 	return 0;
 }
 
-int init_observables_4020( calibration_setup_t *setup )
+static int init_observables_4020( calibration_setup_t *setup )
 {
 	comedi_insn tmpl;//, po_tmpl;
 	observable *o;
@@ -577,7 +577,7 @@ int init_observables_4020( calibration_setup_t *setup )
 	return 0;
 }
 
-int init_observables_1xxx( calibration_setup_t *setup )
+static int init_observables_1xxx( calibration_setup_t *setup )
 {
 	comedi_insn tmpl, po_tmpl;
 	observable *o;
@@ -698,7 +698,7 @@ int init_observables_1xxx( calibration_setup_t *setup )
 	return 0;
 }
 
-int init_observables_1001( calibration_setup_t *setup )
+static int init_observables_1001( calibration_setup_t *setup )
 {
 	comedi_insn tmpl, po_tmpl;
 	observable *o;
@@ -817,7 +817,7 @@ int init_observables_1001( calibration_setup_t *setup )
 	return 0;
 }
 
-int init_observables_1602_16( calibration_setup_t *setup )
+static int init_observables_1602_16( calibration_setup_t *setup )
 {
 	comedi_insn tmpl;//, po_tmpl;
 	observable *o;
@@ -879,7 +879,7 @@ int init_observables_1602_16( calibration_setup_t *setup )
 	return 0;
 }
 
-int cal_cb_pci_64xx( calibration_setup_t *setup )
+static int cal_cb_pci_64xx( calibration_setup_t *setup )
 {
 	enum cal_knobs_64xx
 	{
@@ -904,7 +904,7 @@ int cal_cb_pci_64xx( calibration_setup_t *setup )
 	return 0;
 }
 
-int cal_cb_pci_60xx( calibration_setup_t *setup )
+static int cal_cb_pci_60xx( calibration_setup_t *setup )
 {
 	saved_calibration_t *saved_cals, *current_cal;
 	enum cal_knobs_60xx
@@ -1019,7 +1019,7 @@ int cal_cb_pci_60xx( calibration_setup_t *setup )
 	return retval;
 }
 
-int cal_cb_pci_4020( calibration_setup_t *setup )
+static int cal_cb_pci_4020( calibration_setup_t *setup )
 {
 	enum cal_knobs_4020
 	{
@@ -1060,7 +1060,7 @@ int cal_cb_pci_4020( calibration_setup_t *setup )
 	return 0;
 }
 
-int cal_cb_pci_1xxx( calibration_setup_t *setup )
+static int cal_cb_pci_1xxx( calibration_setup_t *setup )
 {
 	enum cal_knobs_1xxx
 	{
@@ -1098,7 +1098,7 @@ int cal_cb_pci_1xxx( calibration_setup_t *setup )
 	return 0;
 }
 
-int cal_cb_pci_1001( calibration_setup_t *setup )
+static int cal_cb_pci_1001( calibration_setup_t *setup )
 {
 	enum cal_knobs_1xxx
 	{
@@ -1136,7 +1136,7 @@ int cal_cb_pci_1001( calibration_setup_t *setup )
 	return 0;
 }
 
-int cal_cb_pci_1602_16( calibration_setup_t *setup )
+static int cal_cb_pci_1602_16( calibration_setup_t *setup )
 {
 	enum cal_knobs_1602_16
 	{
@@ -1166,7 +1166,7 @@ int cal_cb_pci_1602_16( calibration_setup_t *setup )
 }
 
 // converts calibration source voltages from two 16 bit eeprom values to a floating point value
-float eeprom16_to_source( uint16_t *data )
+static float eeprom16_to_source( uint16_t *data )
 {
 	union translator
 	{
@@ -1181,7 +1181,7 @@ float eeprom16_to_source( uint16_t *data )
 	return my_translator.value;
 }
 
-float eeprom8_to_source( uint8_t *data )
+static float eeprom8_to_source( uint8_t *data )
 {
 	union translator
 	{
@@ -1200,7 +1200,7 @@ float eeprom8_to_source( uint8_t *data )
 	return my_translator.value;
 }
 
-int actual_source_voltage( comedi_t *dev, unsigned int subdevice, unsigned int eeprom_channel, float *voltage)
+static int actual_source_voltage( comedi_t *dev, unsigned int subdevice, unsigned int eeprom_channel, float *voltage)
 {
 	int retval;
 	unsigned int i;
