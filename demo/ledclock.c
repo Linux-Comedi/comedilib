@@ -1,17 +1,33 @@
 /*
- * Digital I/O example
+ * LED Clock demo
  * Part of Comedilib
  *
- * Copyright (c) 1999,2000 David A. Schleef <ds@schleef.org>
+ * Copyright (c) 2001 David A. Schleef <ds@schleef.org>
  *
  * This file may be freely modified, distributed, and combined with
  * other software, as long as proper attribution is given in the
  * source code.
  */
+
 /*
- * Requirements:  A board with a digital I/O subdevice.  Not just
- *    a 'digital input' or 'digital output' subdevice, but one in
- *    which the channels can be configured between input and output.
+ * Requirements:  
+ *    - A board with a digital output subdevice and a subdevice that
+ *      can trigger on an external digital line.  A parallel port
+ *      satisfies these requirements.
+ *    - A Fantazein LED Clock modified so that the individual LEDs
+ *      can be controlled directly by the digital I/O lines.
+ *
+ * The Fantazein clock has 8 LEDs arranged in a row on a wand that
+ * sweeps back and forth at about 15 Hz.  Unmodified, the firmware
+ * of the clock lights the LEDs at the appropriate time to print
+ * words and the time of day.  Since the wand moves quickly, it is
+ * barely visible, so it looks like the image floats in the air.
+ * Stuart Hughes modified a clock so that the LEDs could be controlled
+ * directly by the parallel port of a computer, and wrote the
+ * appropriate software using RTAI to create a stable image.  This
+ * is an attempt to port the demo to Comedi.
+ *
+ * It needs much work.
  */
 
 #define _GNU_SOURCE
