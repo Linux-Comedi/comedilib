@@ -5,11 +5,8 @@ SUBDIRS = lib comedi_calibrate comedi_config man testing demo doc python \
 #pkgconfigdir = $(libdir)/pkgconfig
 #pkgconfig_DATA = comedilib.pc
 
-EXTRA_DIST = include debian m4 comedilib.spec
+EXTRA_DIST = include debian m4 etc comedilib.spec 
 
 dist-hook:
 	rm -rf `find $(distdir) -name CVS`
-
-install-data-local:
-	$(INSTALL) -d /etc/comedi/calibrations
 

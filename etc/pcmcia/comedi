@@ -15,7 +15,7 @@ case "$ACTION" in
 'start')
 
     #echo /usr/sbin/comedi_config /dev/comedi0 $2
-    export PATH=/sbin:/usr/sbin:/usr/local/sbin:$PATH;
+    PATH=/sbin:/usr/sbin:/usr/local/sbin:$PATH;
     comedi_config /dev/comedi0 $2
 
     start_fn $DEVICE

@@ -8,5 +8,8 @@ comedi_calibrate_SOURCES = \
 comedi_calibrate_CFLAGS = $(COMEDILIB_CFLAGS)
 comedi_calibrate_LDADD = $(COMEDILIB_LIBS)
 
+install-data-local:
+	$(INSTALL) -d /etc/comedi/calibrations
+
 EXTRA_DIST = results
 
