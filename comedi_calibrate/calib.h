@@ -27,7 +27,7 @@
 #define DPRINT(level,fmt,args...) do{if(verbose>=level)printf(fmt, ## args);}while(0)
 
 #define N_CALDACS 64
-#define N_OBSERVABLES 64
+#define N_OBSERVABLES 128
 #define PREOBSERVE_DATA_LEN 10
 
 typedef struct{
