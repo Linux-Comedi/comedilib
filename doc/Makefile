@@ -7,6 +7,9 @@ all: drivers.sgml funcref.sgml
 	-docbook2html -o html comedilib.sgml
 	-docbook2man -o man comedilib.sgml
 
+pdf: drivers.sgml funcref.sgml .phony
+	-docbook2pdf -o pdf comedilib.sgml
+
 funcref.sgml: funcref mkref
 	./mkref funcref >funcref.sgml
 
