@@ -16,7 +16,7 @@ tag=r0_7_$minor
 version=0.7.$minor
 lasttag=r0_7_$lastminor
 
-export CVSROOT=oss.lineo.com:/var/cvs
+export CVSROOT=cvs.comedi.org:/var/cvs
 
 rm -rf comedilib-${version}
 
