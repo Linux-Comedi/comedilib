@@ -3,7 +3,7 @@
 \fBcomedi_config\fR - COMEDI configuration utility
 .SH SYNOPSIS
 \fB/usr/sbin/comedi_config\fR [-vVq] /dev/comediN <driver>
-<option1>[,<option2>...]
+[<option1>[,<option2>...]]
 .br
 .SH DESCRIPTION
 \fBcomedi_config\fR is used to configure \fBcomedi\fR drivers.
@@ -17,13 +17,16 @@ N is 0,1,2,3, etc.
 driver and device with a \fBcomedi\fR device file, and also
 configure driver parameters for the particular device.
 
-\fBComedi_config\fR can be used with optional 
+\fBComedi_config\fR can be used with optional
 parameters which are driver dependent.  Parameters are
 specified by comma-delimited list of integers.  The integers
 may be expressed as decimal, hexidecimal (starting with 0x)
 or octal (stating with 0).  In addition, a parameter may be
 left blank, indicating 0.  PCI-based devices typically
-require no parameters.  ISA-based devices typically use
+require no parameters, although some allow you to specify
+the bus and slot of the card to configure
+as the first two parameters.
+ISA-based devices typically use
 the first and second parameters to indicate I/O base
 address and interrupt level.
 
@@ -42,6 +45,18 @@ the file \fBdrivers.txt\fR.
 \fB-v, --verbose\fR	print verbose output while running.
 
 \fB-V, --version\fR	print version number and exit.
+
+.TP
+.BI "--read-buffer " "num"
+set read buffer size to
+.I num
+kilobytes.  The default size is 128k.
+
+.TP
+.BI "--write-buffer " "num"
+set write buffer size to
+.I num
+kilobytes.  The default size is 128k.
 
 
 .SH CONFIGURATION FILE
