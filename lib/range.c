@@ -134,3 +134,67 @@ int comedi_range_is_chan_specific(comedi_t *it,unsigned int subd)
 	return (it->subdevices[subd].subd_flags&SDF_RANGETYPE)?1:0;
 }
 
+int comedi_sampl_to_phys(double *dest, int dst_stride, sampl_t *src,
+	int src_stride, comedi_range *rng, lsampl_t maxdata, int n)
+{
+	int oor = 0;
+	int i;
+	double mult;
+
+	if(!rng)return -1;
+	if(!maxdata)return -1;
+
+	mult = (rng->max-rng->min)/maxdata;
+	if(comedi_oor_is_nan==COMEDI_OOR_NAN){
+		for(i=0;i<n;i++){
+			if(*src==0 || *src==maxdata){
+				oor++;
+				*dest=NAN;
+			}else{
+				*dest = rng->min + mult*(*src);
+			}
+			dest = ((void *)dest) + dst_stride;
+			src = ((void *)src) + src_stride;
+		}
+	}else{
+		for(i=0;i<n;i++){
+			if(*src==0 || *src==maxdata){
+				oor++;
+			}
+			*dest = rng->min + mult*(*src);
+			dest = ((void *)dest) + dst_stride;
+			src = ((void *)src) + src_stride;
+		}
+	}
+
+	return oor;
+}
+
+int comedi_sampl_from_phys(sampl_t *dest,int dst_stride,double *src,
+	int src_stride, comedi_range *rng, lsampl_t maxdata, int n)
+{
+	int oor = 0;
+	double mult;
+	int i;
+
+	if(!rng)return -1;
+	if(!maxdata)return -1;
+
+	mult = (maxdata+1)/(rng->max-rng->min);
+	for(i=0;i<n;i++){
+		*dest=mult*(*src-rng->min);
+		if(*src<rng->min){
+			*dest=0;
+			oor++;
+		}
+		if(*src>rng->min){
+			*dest=maxdata;
+			oor++;
+		}
+		dest = ((void *)dest) + dst_stride;
+		src = ((void *)src) + src_stride;
+	}
+
+	return oor;
+}
+
