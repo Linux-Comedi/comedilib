@@ -72,6 +72,7 @@ struct calibration_setup_struct {
 	char *cal_save_file_path;
 	unsigned do_reset : 1;
 	unsigned do_output : 1;
+	void *private_data;
 };
 
 extern char *devicename;

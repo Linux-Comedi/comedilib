@@ -8,8 +8,6 @@
    A few things need improvement here:
     - current system gets "close", but doesn't
       do any fine-tuning
-    - should read (and use) the actual reference
-      voltage value from eeprom
     - statistics would be nice, to show how good
       the calibration is.
     - doesn't check unipolar ranges
@@ -82,38 +80,38 @@ static int cal_ni_daqcard_6062e(calibration_setup_t *setup);
 static double ni_get_reference( calibration_setup_t *setup, int lsb_loc,int msb_loc);
 
 static struct board_struct boards[]={
-	{ "at-mio-16e-2", STATUS_DONE, cal_ni_at_mio_16e_2, ni_setup_observables, -1, -1 },
-	{ "DAQCard-ai-16xe-50",	STATUS_DONE,	cal_ni_daqcard_ai_16xe_50,	ni_setup_observables, -1, -1 },
-	{ "at-mio-16xe-50",	STATUS_SOME,	cal_ni_at_mio_16xe_50,	ni_setup_observables, -1, -1 },
-	{ "at-mio-16e-1",	STATUS_SOME,	cal_ni_at_mio_16e_1,	ni_setup_observables, -1, -1 },
-	{ "pci-mio-16e-1",	STATUS_DONE,	cal_ni_pci_mio_16e_1,	ni_setup_observables, -1, -1 },
-	{ "pci-6025e",		STATUS_SOME,	cal_ni_pci_6025e,	ni_setup_observables, -1, -1 },
-	{ "pci-6035e",		STATUS_DONE,	cal_ni_pci_6035e,	ni_setup_observables, -1, -1 },
-	{ "pci-6071e",		STATUS_SOME,	cal_ni_pci_6071e,	ni_setup_observables, -1, -1 },
-	{ "pxi-6071e",		STATUS_GUESS,	cal_ni_pxi_6071e,	ni_setup_observables, -1, -1 },
-	{ "at-mio-16e-10",	STATUS_GUESS,	cal_ni_at_mio_16e_10,	ni_setup_observables, -1, -1 },
-	{ "pci-mio-16xe-50",	STATUS_SOME,	cal_ni_pci_mio_16xe_50,	ni_setup_observables, -1, -1 },
-	{ "pci-6023e",		STATUS_DONE,	cal_ni_pci_6023e,	ni_setup_observables, -1, -1 },
-	{ "pci-mio-16xe-10",	STATUS_DONE,	cal_ni_pci_mio_16xe_10,	ni_setup_observables, -1, -1 },
-	{ "pci-6052e",		STATUS_DONE,	cal_ni_pci_6052e,	ni_setup_observables, -1, -1 },
-	{ "pci-6024e",		STATUS_SOME,	cal_ni_pci_6024e,	ni_setup_observables, -1, -1 },
-	{ "pci-mio-16e-4",	STATUS_SOME,    cal_ni_pci_mio_16e_4,	ni_setup_observables, -1, -1 },
-	{ "pci-6032e",		STATUS_DONE,	cal_ni_pci_6032e,	ni_setup_observables, -1, -1 },
-	{ "DAQCard-ai-16e-4",	STATUS_DONE,	cal_ni_daqcard_ai_16e_4,	ni_setup_observables, -1, -1 },
-	{ "pci-6110",	STATUS_DONE,	cal_ni_pci_611x,	ni_setup_observables_611x, -1, -1 },
-	{ "pci-6111",	STATUS_DONE,	cal_ni_pci_611x,	ni_setup_observables_611x, -1, -1 },
-	{ "DAQCard-6062E", STATUS_DONE, cal_ni_daqcard_6062e, ni_setup_observables, -1, -1 },
-	{ "DAQCard-6024E",	STATUS_UNKNOWN, NULL, ni_setup_observables, -1, -1 },
+	{ "at-mio-16e-2", STATUS_DONE, cal_ni_at_mio_16e_2, ni_setup_observables, 0x1a9, 0x1aa },
+	{ "DAQCard-ai-16xe-50", STATUS_DONE, cal_ni_daqcard_ai_16xe_50, ni_setup_observables, 0x1be, 0x1bf },
+	{ "at-mio-16xe-50", STATUS_SOME, cal_ni_at_mio_16xe_50, ni_setup_observables, 0x1b5, 0x1b6 },
+	{ "at-mio-16e-1", STATUS_SOME, cal_ni_at_mio_16e_1, ni_setup_observables, 0x1a9, 0x1aa },
+	{ "pci-mio-16e-1", STATUS_DONE, cal_ni_pci_mio_16e_1, ni_setup_observables, 0x1a9, 0x1aa },
+	{ "pci-6025e", STATUS_SOME, cal_ni_pci_6025e, ni_setup_observables, 0x1af, 0x1b0 },
+	{ "pci-6035e", STATUS_DONE, cal_ni_pci_6035e, ni_setup_observables, 0x1af, 0x1b0 },
+	{ "pci-6071e", STATUS_SOME, cal_ni_pci_6071e, ni_setup_observables, 0x1a9, 0x1aa },
+	{ "pxi-6071e", STATUS_GUESS, cal_ni_pxi_6071e, ni_setup_observables, -1, -1 },
+	{ "at-mio-16e-10", STATUS_GUESS, cal_ni_at_mio_16e_10, ni_setup_observables, 0x1a7, 0x1a8 },
+	{ "pci-mio-16xe-50", STATUS_SOME, cal_ni_pci_mio_16xe_50, ni_setup_observables, 0x1b5, 0x1b6 },
+	{ "pci-6023e", STATUS_DONE, cal_ni_pci_6023e, ni_setup_observables, 0x1bb, 0x1bc },
+	{ "pci-mio-16xe-10", STATUS_DONE,	cal_ni_pci_mio_16xe_10,	ni_setup_observables, 0x1ae, 0x1af },
+	{ "pci-6052e", STATUS_DONE, cal_ni_pci_6052e, ni_setup_observables, 0x19f, 0x1a0 },
+	{ "pci-6024e", STATUS_SOME, cal_ni_pci_6024e, ni_setup_observables, 0x1af, 0x1b0 },
+	{ "pci-mio-16e-4", STATUS_SOME, cal_ni_pci_mio_16e_4, ni_setup_observables, 0x1a9, 0x1aa },
+	{ "pci-6032e", STATUS_DONE, cal_ni_pci_6032e, ni_setup_observables, 0x1ae, 0x1af },
+	{ "DAQCard-ai-16e-4", STATUS_DONE, cal_ni_daqcard_ai_16e_4, ni_setup_observables, 0x1b5, 0x1b6 },
+	{ "pci-6110", STATUS_DONE, cal_ni_pci_611x, ni_setup_observables_611x, 0x1d4, 0x1d5 },
+	{ "pci-6111", STATUS_DONE, cal_ni_pci_611x, ni_setup_observables_611x, 0x1d4, 0x1d5 },
+	{ "DAQCard-6062E", STATUS_SOME, cal_ni_daqcard_6062e, ni_setup_observables, 0x1a9, 0x1aa },
+	{ "DAQCard-6024E", STATUS_UNKNOWN, NULL, ni_setup_observables, -1, -1 },
+	{ "at-mio-16de-10", STATUS_UNKNOWN, NULL, ni_setup_observables, 0x1a7, 0x1a8 },
+	{ "at-mio-16xe-10", STATUS_UNKNOWN, NULL, ni_setup_observables, 0x1b7, 0x1b8 },
+	{ "at-ai-16xe-10", STATUS_UNKNOWN, NULL, ni_setup_observables, 0x1b7, 0x1b8 },
+	{ "pci-6031e", STATUS_UNKNOWN, NULL, ni_setup_observables, 0x1ae, 0x1af },
+	{ "pci-6033e", STATUS_UNKNOWN, NULL, ni_setup_observables, 0x1ae, 0x1af },
 #if 0
-//	{ "at-mio-16de-10",	cal_ni_unknown },
 	{ "at-mio-64e-3",	cal_ni_16e_1 },
 //	{ "at-mio-16xe-50",	cal_ni_unknown },
-//	{ "at-mio-16xe-10",	cal_ni_unknown },
-//	{ "at-ai-16xe-10",	cal_ni_unknown },
 //	{ "pxi-6030e",		cal_ni_unknown },
 //	{ "pxi-6040e",		cal_ni_unknown },
-//	{ "pci-6031e",		cal_ni_unknown },
-//	{ "pci-6033e",		cal_ni_unknown },
 	{ "pxi-6025e",		cal_ni_6023e }, // guess
 	{ "pci-6034e",		cal_ni_6023e }, // guess
 //	{ "pci-6711",		cal_ni_unknown },
@@ -189,6 +187,11 @@ static inline unsigned int REF_DAC_CALSRC( unsigned int channel )
 	else return REF_DAC0_CALSRC;
 }
 
+static struct board_struct* ni_board( calibration_setup_t *setup )
+{
+	return setup->private_data;
+}
+
 int ni_setup( calibration_setup_t *setup , const char *device_name )
 {
 	int retval;
@@ -208,6 +211,7 @@ static int ni_setup_board( calibration_setup_t *setup, const char *device_name )
 		if(!strcmp( device_name, boards[i].name )){
 			setup->status = boards[i].status;
 			setup->do_cal = boards[i].cal;
+			setup->private_data = &boards[ i ];
 			boards[i].setup_observables( setup );
 			break;
 		}
@@ -231,7 +235,18 @@ static void ni_setup_observables( calibration_setup_t *setup )
 	unipolar_lowgain = get_unipolar_lowgain( setup->dev, setup->ad_subdev);
 	unipolar_highgain = get_unipolar_highgain( setup->dev, setup->ad_subdev);
 
-	voltage_reference = 5.000;
+	if( ni_board( setup )->ref_eeprom_lsb >= 0 &&
+		ni_board( setup )->ref_eeprom_msb >= 0 )
+	{
+		voltage_reference = ni_get_reference( setup,
+			ni_board( setup )->ref_eeprom_lsb, ni_board( setup )->ref_eeprom_msb );
+	}else
+	{
+		DPRINT( 0, "WARNING: unknown eeprom address for reference voltage\n"
+			"correction.  This might be fixable if you send us an eeprom dump\n"
+			"(see the demo/eeprom_dump program).\n");
+		voltage_reference = 5.0;
+	}
 
 	memset(&tmpl,0,sizeof(tmpl));
 	tmpl.insn = INSN_READ;
@@ -343,7 +358,7 @@ static void ni_setup_observables( calibration_setup_t *setup )
 			/* ao gain */
 			o = setup->observables + ni_ao_reference( channel );
 			assert( o->name == NULL );
-			asprintf( &o->name, "ao %i, refernce voltage, low gain", channel );
+			asprintf( &o->name, "ao %i, reference voltage, low gain", channel );
 			o->preobserve_insn = po_tmpl;
 			o->preobserve_insn.chanspec = CR_PACK(channel,0,0);
 			o->preobserve_insn.data = o->preobserve_data;
@@ -373,14 +388,14 @@ static void ni_setup_observables( calibration_setup_t *setup )
 
 /* XXX for +-50V and +-20V ranges, the reference source goes 0V
  * to 50V instead of 0V to 5V */
-static unsigned int cal_gain_register_bits_611x( double *voltage )
+static unsigned int cal_gain_register_bits_611x( double reference, double *voltage )
 {
 	unsigned int bits;
 
-	bits = 200.0 * ( *voltage / 5.0 );
+	bits = 200.0 * ( *voltage / reference );
 	if( bits > 200 ) bits = 200;
 
-	*voltage = 5.0 * ( bits / 200.0 );
+	*voltage = reference * ( bits / 200.0 );
 	return bits;
 }
 
@@ -394,7 +409,7 @@ static void ni_setup_observables_611x( calibration_setup_t *setup )
 	comedi_insn tmpl;
 	comedi_insn po_tmpl;
 	int range, ai_range_for_ao;
-	double voltage_reference;
+	double voltage_reference, master_reference;
 	observable *o;
 	int ai_chan;
 	int num_chans;
@@ -404,9 +419,10 @@ static void ni_setup_observables_611x( calibration_setup_t *setup )
 
 	range = 2;
 
-/*	voltage_reference = ni_get_reference( setup, 468, 469 ); */
+	master_reference = ni_get_reference( setup,
+		ni_board( setup )->ref_eeprom_lsb, ni_board( setup )->ref_eeprom_msb );
 	voltage_reference = 5.0;
-	cal_gain_reg_bits = cal_gain_register_bits_611x( &voltage_reference );
+	cal_gain_reg_bits = cal_gain_register_bits_611x( master_reference, &voltage_reference );
 
 	memset(&tmpl,0,sizeof(tmpl));
 	tmpl.insn = INSN_READ;
@@ -967,8 +983,8 @@ static int cal_ni_daqcard_6062e( calibration_setup_t *setup )
 
 	prep_adc_caldacs_dc6062e( setup );
 
-	cal_postgain_binary( setup, ni_zero_offset_low, ni_reference_low, ADC_GAIN_DC6062E );
-	cal_postgain_binary( setup, ni_zero_offset_low, ni_zero_offset_high,
+	cal_relative_binary( setup, ni_zero_offset_low, ni_reference_low, ADC_GAIN_DC6062E );
+	cal_relative_binary( setup, ni_zero_offset_low, ni_zero_offset_high,
 		ADC_POSTGAIN_OFFSET_DC6062E );
 	cal_binary( setup, ni_zero_offset_high, ADC_PREGAIN_OFFSET_DC6062E );
 	cal_binary( setup, ni_unip_zero_offset_high, ADC_UNIPOLAR_OFFSET_DC6062E );
@@ -1023,13 +1039,13 @@ static double ni_get_reference( calibration_setup_t *setup, int lsb_loc,int msb_
 
 	lsb=read_eeprom( setup, lsb_loc);
 	msb=read_eeprom( setup, msb_loc);
-	printf("lsb=%d msb=%d\n", lsb, msb);
+	DPRINT(0,"eeprom reference lsb=%d msb=%d\n", lsb, msb);
 
 	uv = ( lsb & 0xff ) | ( ( msb << 8 ) & 0xff00 );
 	ref=5.000+1.0e-6*uv;
-	printf("ref=%g\n",ref);
+	DPRINT(0, "resulting reference voltage: %g\n", ref );
 	if( fabs( ref - 5.0 ) > 0.005 )
-		printf( "WARNING: eeprom indicates reference is more than 5mV away\n"
+		DPRINT( 0, "WARNING: eeprom indicates reference is more than 5mV away\n"
 			"from 5V.  Possible bad eeprom address?\n" );
 
 	return ref;
