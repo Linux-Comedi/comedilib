@@ -782,6 +782,11 @@ double check_gain_chan_x(linear_fit_t *l,int ad_chan,int range,int cdac)
 	l->n=0;
 
 	l->y_data=malloc(n*sizeof(double)/step);
+	if(l->y_data == NULL)
+	{
+		perror("comedi_calibrate");
+		exit(1);
+	}
 
 	orig=caldacs[cdac].current;
 
@@ -923,6 +928,11 @@ int new_sv_measure(new_sv_t *sv)
 	n=1<<sv->order;
 
 	data=malloc(sizeof(sampl_t)*n);
+	if(data == NULL)
+	{
+		perror("comedi_calibrate");
+		exit(1);
+	}
 
 	for(i=0;i<n;){
 		sv->t.data=data+i;
@@ -961,6 +971,11 @@ int new_sv_measure_order(new_sv_t *sv,int order)
 	n=1<<order;
 
 	data=malloc(sizeof(sampl_t)*n);
+	if(data == NULL)
+	{
+		perror("comedi_calibrate");
+		exit(1);
+	}
 
 	for(i=0;i<n;){
 		sv->t.data=data+i;
