@@ -11,7 +11,9 @@ measure internal stable voltage references and control
 gains and offsets using programmable DACs.  On these devices,
 \fBcomedi_calibrate\fR adjusts the programmable calibration
 DACs so that the measured value of reference voltages fall
-within acceptable limits.
+within acceptable limits.  The calibration settings are
+saved to a file which can be fed to the comedi_apply_calibration()
+function.
 
 \fBComedi_calibrate\fR prints a lot of debugging information
 as it runs.
@@ -30,11 +32,21 @@ output to him.
 
 \fBcomedi_calibrate\fR	recognizes the following options:
 
+\fB--[no-]calibrate\fR	Perform calibration (or not).
+
 \fB-f, --file /dev/comediN\fR	perform calibration on device \fB/dev/comediN\fR
 
-\fB--help	print help for options then exit
+\fB--help\fR	print help for options then exit
 
-\fB-q, --quiet	don't generate output to stdout
+\fB-q, --quiet\fR	don't generate output to stdout
+
+\fB--[no-]reset\fR	Reset (or don't reset) calibration subdevice to
+a reasonable starting point before
+performing calibration.  The default is \fB--reset\fR.  The
+\fB--no-reset\fR option is useful if
+a single calibration
+pass is not sufficient, and you wish to perform another calibration
+pass starting from the results of the previous pass.
 
 \fB-s, --save-file <file path>\fR	save calibration information to specified file,
 instead of default location
