@@ -79,6 +79,8 @@ int main(int argc, char *argv[])
 	int c;
 	int i;
 
+	setvbuf(stdout,NULL,_IONBF,0);
+
 	while (1) {
 		c = getopt(argc, argv, "f:rs:t:v");
 		if (c == -1)
