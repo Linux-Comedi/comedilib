@@ -65,35 +65,6 @@ int ioctl_trigger(int fd,comedi_trig *it)
 	return ioctl(fd,COMEDI_TRIG,it);
 }
 
-#ifdef HAVE_COMEDI_CMD
-int ioctl_cmd(int fd,comedi_cmd *it)
-{
-	return ioctl(fd,COMEDI_CMD,it);
-}
-#endif
-
-#ifdef HAVE_COMEDI_INSN
-int ioctl_insnlist(int fd,comedi_insn *it)
-{
-	return ioctl(fd,COMEDI_INSNLIST,it);
-}
-#endif
-
-int ioctl_lock(int fd,int subdevice)
-{
-	return ioctl(fd,COMEDI_LOCK,subdevice);
-}
-
-int ioctl_unlock(int fd,int subdevice)
-{
-	return ioctl(fd,COMEDI_UNLOCK,subdevice);
-}
-
-int ioctl_cancel(int fd,int subdevice)
-{
-	return ioctl(fd,COMEDI_CANCEL,subdevice);
-}
-
 int ioctl_rangeinfo(int fd,int range_type,comedi_krange *range_ptr)
 {
 	comedi_rangeinfo it;

@@ -129,3 +129,8 @@ int comedi_get_n_ranges(comedi_t *it,unsigned int subd,unsigned int chan)
 	return RANGE_LENGTH(range_type);
 }
 
+int comedi_range_is_chan_specific(comedi_t *it,unsigned int subd)
+{
+	return (it->subdevices[subd].subd_flags&SDF_RANGETYPE)?1:0;
+}
+

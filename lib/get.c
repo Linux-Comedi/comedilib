@@ -111,6 +111,13 @@ lsampl_t comedi_get_maxdata(comedi_t *it,unsigned int subdevice,unsigned int cha
 	return it->subdevices[subdevice].maxdata;
 }
 
+int comedi_maxdata_is_chan_specific(comedi_t *it,unsigned int subdevice)
+{
+	if(it->subdevices[subdevice].maxdata_list)
+		return 1;
+	return 0;
+}
+
 int comedi_get_rangetype(comedi_t *it,unsigned int subdevice,unsigned int chan)
 {
 	if(!valid_chan(it,subdevice,chan))

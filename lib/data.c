@@ -40,71 +40,107 @@
 int comedi_data_write(comedi_t *it,unsigned int subdev,unsigned int chan,unsigned int range,
 		unsigned int aref,lsampl_t data)
 {
-	comedi_trig cmd={
-		mode:		0,
-		flags:		TRIG_WRITE,
-		n_chan:		1,
-		n:		1,
-		trigsrc:	0,
-		trigvar:	0,
-		trigvar1:	0,
-	};
-	sampl_t sdata=data;
+	subdevice *s;
 
 	if(!valid_chan(it,subdev,chan))
 		return -1;
+
+	s=it->subdevices+subdev;
 	
-	chan=CR_PACK(chan,range,aref);
+	if(s->has_insn){
+		comedi_insn insn;
 
-	cmd.subdev=subdev;
-	if(it->subdevices[subdev].subd_flags & SDF_LSAMPL){
-		cmd.data=(sampl_t *)(&data);
+		memset(&insn,0,sizeof(insn));
+
+		insn.insn = INSN_WRITE;
+		insn.n = 1;
+		insn.data = &data;
+		insn.subdev = subdev;
+		insn.chanspec = CR_PACK(chan,range,aref);
+
+		return comedi_do_insn(it,&insn);
 	}else{
-		cmd.data=&sdata;
-	}
-	cmd.chanlist=&chan;
+		comedi_trig cmd={
+			mode:		0,
+			flags:		TRIG_WRITE,
+			n_chan:		1,
+			n:		1,
+			trigsrc:	0,
+			trigvar:	0,
+			trigvar1:	0,
+		};
+		sampl_t sdata=data;
 
-	return ioctl_trigger(it->fd,&cmd);
+		chan=CR_PACK(chan,range,aref);
+
+		cmd.subdev=subdev;
+		if(it->subdevices[subdev].subd_flags & SDF_LSAMPL){
+			cmd.data=(sampl_t *)(&data);
+		}else{
+			cmd.data=&sdata;
+		}
+		cmd.chanlist=&chan;
+
+		return ioctl_trigger(it->fd,&cmd);
+	}
 }
 
 
 int comedi_data_read(comedi_t *it,unsigned int subdev,unsigned int chan,unsigned int range,
 		unsigned int aref,lsampl_t *data)
 {
-	comedi_trig cmd={
-		mode:		0,
-		flags:		0,
-		n_chan:		1,
-		n:		1,
-		trigsrc:	0,
-		trigvar:	0,
-		trigvar1:	0,
-	};
-	int ret;
-	sampl_t sdata;
+	subdevice *s;
 
 	if(!valid_chan(it,subdev,chan))
 		return -1;
-	
-	chan=CR_PACK(chan,range,aref);
-	
-	cmd.subdev=subdev;
-	cmd.chanlist=&chan;
-	if(it->subdevices[subdev].subd_flags & SDF_LSAMPL){
-		cmd.data=(sampl_t *)data;
+
+	s=it->subdevices+subdev;
+
+	if(s->has_insn){
+		comedi_insn insn;
+
+		memset(&insn,0,sizeof(insn));
+
+		insn.insn = INSN_READ;
+		insn.n = 1;
+		insn.data = data;
+		insn.subdev = subdev;
+		insn.chanspec = CR_PACK(chan,range,aref);
+
+		return comedi_do_insn(it,&insn);
 	}else{
-		cmd.data=&sdata;
+		comedi_trig cmd={
+			mode:		0,
+			flags:		0,
+			n_chan:		1,
+			n:		1,
+			trigsrc:	0,
+			trigvar:	0,
+			trigvar1:	0,
+		};
+		int ret;
+		sampl_t sdata;
+
+		chan=CR_PACK(chan,range,aref);
+	
+		cmd.subdev=subdev;
+		cmd.chanlist=&chan;
+		if(s->subd_flags & SDF_LSAMPL){
+			cmd.data=(sampl_t *)data;
+		}else{
+			cmd.data=&sdata;
+		}
+
+		ret=ioctl_trigger(it->fd,&cmd);
+		if(ret<0)
+			return ret;
+
+		if(!(s->subd_flags & SDF_LSAMPL)){
+			*data=sdata;
+		}
+
+		return 0;
 	}
-
-	ret=ioctl_trigger(it->fd,&cmd);
-	if(ret<0)
-		return ret;
-
-	if(!(it->subdevices[subdev].subd_flags & SDF_LSAMPL)){
-		*data=sdata;
-	}
-
-	return 0;
 }
 
 #if 1

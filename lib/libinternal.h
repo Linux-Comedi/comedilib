@@ -87,6 +87,7 @@ struct subdevice_struct{
 
 	unsigned int has_cmd;
 	unsigned int has_insn;
+	unsigned int has_insn_bits;
 };
 
 
@@ -98,10 +99,6 @@ int ioctl_subdinfo(int fd,comedi_subdinfo *it);
 int ioctl_chaninfo(int fd,unsigned int subdev,lsampl_t *maxdata_list,
 		                unsigned int *flaglist,unsigned int *rangelist);
 int ioctl_trigger(int fd,comedi_trig *it);
-int ioctl_cmd(int fd,comedi_cmd *it);
-int ioctl_lock(int fd,int subdevice);
-int ioctl_unlock(int fd,int subdevice);
-int ioctl_cancel(int fd,int subdevice);
 int ioctl_rangeinfo(int fd,int range_type,comedi_krange *range_ptr);
 
 /* filler routines */

@@ -40,6 +40,7 @@
 
 static int do_test_for_cmd(comedi_t *dev,unsigned int subdevice);
 static int do_test_for_insn(comedi_t *dev,unsigned int subdevice);
+static int do_test_for_insn_bits(comedi_t *dev,unsigned int subdevice);
 
 
 int get_subdevices(comedi_t *it)
@@ -96,6 +97,11 @@ int get_subdevices(comedi_t *it)
 
 		r[i].has_cmd = do_test_for_cmd(it,i);
 		r[i].has_insn = do_test_for_insn(it,i);
+		if(r[i].has_insn){
+			r[i].has_insn_bits = do_test_for_insn_bits(it,i);
+		}else{
+			r[i].has_insn_bits = 0;
+		}
 	}
 
 	free(s);
@@ -171,10 +177,10 @@ static int do_test_for_insn(comedi_t *dev,unsigned int subdevice)
 
 	insn.insn = INSN_GTOD;
 	insn.n = 2;
-	insn.data = (void *)&data;
+	insn.data = data;
 	insn.subdev = subdevice;
 
-	ret = ioctl(dev->fd,COMEDI_INSN,&il);
+	ret = comedi_do_insnlist(dev,&il);
 
 	if(ret<0 && errno==EIO){
 		return 0;
@@ -185,5 +191,38 @@ static int do_test_for_insn(comedi_t *dev,unsigned int subdevice)
 	}
 	return 1;
 }
+
+static int do_test_for_insn_bits(comedi_t *dev,unsigned int subdevice)
+{
+	comedi_insn insn;
+	comedi_insnlist il;
+	lsampl_t data[2];
+	int ret;
+
+	memset(&insn,0,sizeof(insn));
+
+	il.n_insns = 1;
+	il.insns = &insn;
+
+	insn.insn = INSN_BITS;
+	insn.n = 2;
+	insn.data = data;
+	insn.subdev = subdevice;
+
+	data[0]=0;
+	data[1]=0;
+
+	ret = comedi_do_insnlist(dev,&il);
+
+	if(ret<0 && errno==EINVAL){
+		return 0;
+	}
+	if(ret<0){
+		fprintf(stderr,"BUG in do_test_for_insn_bits()\n");
+		return 0;
+	}
+	return 1;
+}
+
 
 
