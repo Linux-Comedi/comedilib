@@ -266,6 +266,7 @@ int main(int argc,char *argv[])
 		if(ioctl(fd, COMEDI_BUFCONFIG, &bc) < 0)
 		{
 			perror("buffer resize error");
+			exit(1);
 		}
 		if(verbose)
 		{
