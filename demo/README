@@ -3,7 +3,7 @@ GETTING STARTED:
 
 After installing comedi and comedilib, cd to this directory (comedilib*/demo).
 
-Use ./info for a very first test. If hardware and software are correctly
+Use ./board_info for a very first test. If hardware and software are correctly
 installed, the program prints a list of subdevices it recognises. If the
 device is not /dev/comedi0, use here and in the following the command-line
 option -f <device>.
@@ -45,7 +45,7 @@ eeprom_dump:
 	Dumps the EEPROM of a card, if it has one.  Useful for debugging
 	devices/drivers.
 
-info:
+board_info:
 	Displays some information that Comedi knows about a device.
 
 inp:
