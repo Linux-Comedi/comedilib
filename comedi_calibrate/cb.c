@@ -1,7 +1,6 @@
 /***************************************************************************
 	cb.c  -  calibration support for some Measurement computing boards.
-	Based on ni.c by David Schleef.
-                             -------------------
+                           -------------------
 
     begin                : Sat Apr 27 2002
     copyright            : (C) 2002,2003 by Frank Mori Hess

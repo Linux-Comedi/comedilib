@@ -1,6 +1,5 @@
 /***************************************************************************
 	cb64.c  -  calibration support for some Measurement computing boards.
-	Based on ni.c by David Schleef.
                              -------------------
 
     begin                : Sat Apr 27 2002
@@ -67,7 +66,7 @@ static struct board_struct boards[]={
 	{ "pci-das6025",	STATUS_DONE,	setup_cb_pci_60xx },
 	{ "pci-das6034",	STATUS_GUESS,	setup_cb_pci_60xx },
 	{ "pci-das6035",	STATUS_GUESS,	setup_cb_pci_60xx },
-	{ "pci-das4020/12",	STATUS_SOME,	setup_cb_pci_4020 },
+	{ "pci-das4020/12",	STATUS_DONE,	setup_cb_pci_4020 },
 };
 
 static const int num_boards = ( sizeof(boards) / sizeof(boards[0]) );

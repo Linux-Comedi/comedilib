@@ -2,18 +2,17 @@
    A little auto-calibration utility, for boards
    that support it.
 
+   copyright (C) 1999,2000,2001,2002 by David Schleef
+   copyright (C) 2003 by Frank Mori Hess
+
    A few things need improvement here:
     - current system gets "close", but doesn't
       do any fine-tuning
-    - no pre/post gain discrimination for the
-      A/D zero offset.
     - should read (and use) the actual reference
       voltage value from eeprom
     - statistics would be nice, to show how good
       the calibration is.
     - doesn't check unipolar ranges
-    - "alternate calibrations" would be cool--to
-      accurately measure 0 in a unipolar range
     - more portable
  */
 
@@ -526,6 +525,11 @@ void cal_binary( calibration_setup_t *setup, int obs, int dac)
 
 void cal_postgain_binary( calibration_setup_t *setup, int obs1, int obs2, int dac)
 {
+	cal_relative_binary( setup, obs1, obs2, dac );
+}
+
+void cal_relative_binary( calibration_setup_t *setup, int obs1, int obs2, int dac)
+{
 	int x0, x1, x2, x, polarity;
 	double y0, y1, y2;
 	new_sv_t sv1, sv2;
@@ -544,13 +548,12 @@ void cal_postgain_binary( calibration_setup_t *setup, int obs1, int obs2, int da
 	new_sv_init(&sv1, setup->dev, setup->ad_subdev,chanspec1);
 	sv1.settling_time_ns = setup->settling_time_ns;
 	new_sv_measure( setup->dev, &sv1);
-	y0 = sv1.average;
+
 	preobserve( setup, obs2);
 	new_sv_init(&sv2, setup->dev, setup->ad_subdev,chanspec2);
 	sv2.settling_time_ns = setup->settling_time_ns;
 	new_sv_measure( setup->dev, &sv2);
-	y0 -= sv2.average;
-	y1 = y2 = y0;
+	y0 = y1 = y2 = sv1.average - sv2.average;
 
 	bit = 1;
 	while( ( bit << 1 ) < setup->caldacs[dac].maxdata )
@@ -566,12 +569,12 @@ void cal_postgain_binary( calibration_setup_t *setup, int obs1, int obs2, int da
 		new_sv_init(&sv1, setup->dev, setup->ad_subdev,chanspec1);
 		sv1.settling_time_ns = setup->settling_time_ns;
 		new_sv_measure( setup->dev, &sv1);
-		y2 = sv1.average;
+
 		preobserve( setup, obs2);
 		new_sv_init(&sv2, setup->dev, setup->ad_subdev,chanspec2);
 		sv2.settling_time_ns = setup->settling_time_ns;
 		new_sv_measure( setup->dev, &sv2);
-		y2 -= sv2.average;
+		y2 = sv1.average - sv2.average;
 
 		DPRINT(3,"trying %d, result %g, target %g\n",x2,y2,target);
 
@@ -602,6 +605,106 @@ void cal_postgain_binary( calibration_setup_t *setup, int obs1, int obs2, int da
 		measure_observable( setup, obs1);
 		preobserve( setup, obs2);
 		measure_observable( setup, obs2);
+	}
+}
+
+void cal_linearity_binary( calibration_setup_t *setup, int obs1, int obs2, int obs3, int dac)
+{
+	int x0, x1, x2, x, polarity;
+	double y0, y1, y2;
+	new_sv_t sv1, sv2, sv3;
+	double target = ( setup->observables[obs3].target - setup->observables[obs2].target ) /
+		( setup->observables[obs2].target - setup->observables[obs1].target );
+	unsigned int chanspec1 = setup->observables[obs1].observe_insn.chanspec;
+	unsigned int chanspec2 = setup->observables[obs2].observe_insn.chanspec;
+	unsigned int chanspec3 = setup->observables[obs3].observe_insn.chanspec;
+	unsigned int bit;
+
+	DPRINT(0,"postgain linearity: %s,\n%s,\n%s\n", setup->observables[obs1].name,
+		setup->observables[obs2].name,setup->observables[obs3].name);
+
+	x0 = x1 = x2 = 0;
+	update_caldac( setup, dac, x0 );
+	usleep(100000);
+
+	preobserve( setup, obs1);
+	new_sv_init(&sv1, setup->dev, setup->ad_subdev,chanspec1);
+	sv1.settling_time_ns = setup->settling_time_ns;
+	new_sv_measure( setup->dev, &sv1);
+
+	preobserve( setup, obs2);
+	new_sv_init(&sv2, setup->dev, setup->ad_subdev,chanspec2);
+	sv2.settling_time_ns = setup->settling_time_ns;
+	new_sv_measure( setup->dev, &sv2);
+
+	preobserve( setup, obs3);
+	new_sv_init(&sv3, setup->dev, setup->ad_subdev,chanspec3);
+	sv3.settling_time_ns = setup->settling_time_ns;
+	new_sv_measure( setup->dev, &sv3);
+
+	y0 = sv1.average - sv2.average;
+	y1 = y2 = y0;
+
+	bit = 1;
+	while( ( bit << 1 ) < setup->caldacs[dac].maxdata )
+		bit <<= 1;
+	for( ; bit; bit >>= 1 )
+	{
+		x2 = x1 | bit;
+
+		update_caldac( setup, dac, x2 );
+		usleep(100000);
+
+		preobserve( setup, obs1);
+		new_sv_init(&sv1, setup->dev, setup->ad_subdev,chanspec1);
+		sv1.settling_time_ns = setup->settling_time_ns;
+		new_sv_measure( setup->dev, &sv1);
+
+		preobserve( setup, obs2);
+		new_sv_init(&sv2, setup->dev, setup->ad_subdev,chanspec2);
+		sv2.settling_time_ns = setup->settling_time_ns;
+		new_sv_measure( setup->dev, &sv2);
+
+		preobserve( setup, obs3);
+		new_sv_init(&sv3, setup->dev, setup->ad_subdev,chanspec3);
+		sv3.settling_time_ns = setup->settling_time_ns;
+		new_sv_measure( setup->dev, &sv3);
+
+		y2 = ( sv3.average - sv2.average ) / ( sv2.average - sv1.average );
+
+		DPRINT(3,"trying %d, result %g, target %g\n",x2,y2,target);
+
+		if( (y2 - y0) > 0.0 ) polarity = 1;
+		else polarity = -1;
+
+		if( (y2 - target) * polarity < 0.0 ){
+			x1 = x2;
+			y1 = y2;
+		}
+
+		if(verbose>=3){
+			preobserve( setup, obs1);
+			measure_observable( setup, obs1);
+			preobserve( setup, obs2);
+			measure_observable( setup, obs2);
+			preobserve( setup, obs3);
+			measure_observable( setup, obs3);
+		}
+	}
+
+	if( fabs( y1 - target ) < fabs( y2 - target ) )
+		x = x1;
+	else
+		x = x2;
+	update_caldac( setup, dac, x );
+	DPRINT(0,"caldac[%d] set to %d\n",dac,x);
+	if(verbose>=3){
+		preobserve( setup, obs1);
+		measure_observable( setup, obs1);
+		preobserve( setup, obs2);
+		measure_observable( setup, obs2);
+		preobserve( setup, obs3);
+		measure_observable( setup, obs3);
 	}
 }
 
