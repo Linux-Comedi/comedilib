@@ -180,6 +180,7 @@ static void generic_do_adc_postgain_offset( calibration_setup_t *setup, const ge
 		lowgain = get_unipolar_lowgain( setup->dev, setup->ad_subdev );
 		highgain = get_unipolar_highgain( setup->dev, setup->ad_subdev );
 
+		generic_prep_adc_caldacs( setup, layout, channel, highgain );
 		reset_caldac( setup, layout->adc_postgain_offset( channel ) );
 		/* need to make sure we aren't stuck on zero for unipolar,
 		 * by setting pregain offset to maximum */
@@ -192,7 +193,17 @@ static void generic_do_adc_postgain_offset( calibration_setup_t *setup, const ge
 		lowgain = get_bipolar_lowgain( setup->dev, setup->ad_subdev );
 		highgain = get_bipolar_highgain( setup->dev, setup->ad_subdev );
 	}
-
+	generic_prep_adc_caldacs( setup, layout, channel, highgain );
+	if( unipolar )
+	{
+		reset_caldac( setup, layout->adc_postgain_offset( channel ) );
+		/* need to make sure we aren't stuck on zero for unipolar,
+		 * by setting pregain offset to maximum */
+		generic_peg( setup, layout->adc_ground_observable( setup, channel, lowgain ),
+			layout->adc_offset( channel ), 1 );
+		generic_peg( setup, layout->adc_ground_observable( setup, channel, lowgain ),
+			layout->adc_offset_fine( channel ), 1 );
+	}
 	generic_do_relative( setup, current_cal, layout->adc_ground_observable( setup, channel, lowgain ),
 		layout->adc_ground_observable( setup, channel, highgain ), layout->adc_postgain_offset( channel ) );
 
