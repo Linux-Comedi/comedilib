@@ -178,8 +178,8 @@ static comedi_calibration_t* alloc_calib_parse( void )
 	return file_contents;
 }
 
-EXPORT_SYMBOL(comedi_cleanup_calibration,0.7.20);
-extern void comedi_cleanup_calibration( comedi_calibration_t *file_contents )
+EXPORT_ALIAS_DEFAULT(_comedi_cleanup_calibration,comedi_cleanup_calibration,0.7.20);
+extern void _comedi_cleanup_calibration( comedi_calibration_t *file_contents )
 {
 	if( file_contents->driver_name )
 	{
@@ -196,8 +196,8 @@ extern void comedi_cleanup_calibration( comedi_calibration_t *file_contents )
 	file_contents = NULL;
 }
 
-EXPORT_SYMBOL(comedi_parse_calibration_file,0.7.20);
-extern comedi_calibration_t* comedi_parse_calibration_file( const char *cal_file_path )
+EXPORT_ALIAS_DEFAULT(_comedi_parse_calibration_file,comedi_parse_calibration_file,0.7.20);
+extern comedi_calibration_t* _comedi_parse_calibration_file( const char *cal_file_path )
 {
 	calib_yyparse_private_t priv;
 	FILE *file;

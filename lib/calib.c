@@ -148,8 +148,8 @@ static int set_calibration( comedi_t *dev, const comedi_calibration_t *parsed_fi
 	return 0;
 }
 
-EXPORT_SYMBOL(comedi_apply_calibration,0.7.20);
-int comedi_apply_parsed_calibration( comedi_t *dev, unsigned int subdev, unsigned int channel,
+EXPORT_ALIAS_DEFAULT(_comedi_apply_parsed_calibration,comedi_apply_parsed_calibration,0.7.20);
+int _comedi_apply_parsed_calibration( comedi_t *dev, unsigned int subdev, unsigned int channel,
 	unsigned int range, unsigned int aref, const comedi_calibration_t *calibration )
 {
 	int retval;
@@ -161,8 +161,8 @@ int comedi_apply_parsed_calibration( comedi_t *dev, unsigned int subdev, unsigne
 	return retval;
 }
 
-EXPORT_SYMBOL(comedi_get_default_calibration_path,0.7.20);
-char* comedi_get_default_calibration_path( comedi_t *dev )
+EXPORT_ALIAS_DEFAULT(_comedi_get_default_calibration_path,comedi_get_default_calibration_path,0.7.20);
+char* _comedi_get_default_calibration_path( comedi_t *dev )
 {
 	struct stat file_stats;
 	char *file_path;
@@ -191,8 +191,8 @@ char* comedi_get_default_calibration_path( comedi_t *dev )
 	return file_path;
 }
 
-EXPORT_SYMBOL(comedi_apply_calibration,0.7.20);
-int comedi_apply_calibration( comedi_t *dev, unsigned int subdev, unsigned int channel,
+EXPORT_ALIAS_DEFAULT(_comedi_apply_calibration,comedi_apply_calibration,0.7.20);
+int _comedi_apply_calibration( comedi_t *dev, unsigned int subdev, unsigned int channel,
 	unsigned int range, unsigned int aref, const char *cal_file_path )
 {
 	char file_path[ 1024 ];

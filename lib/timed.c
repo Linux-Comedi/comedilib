@@ -37,8 +37,8 @@
 
 #define BUFSZ 100
 
-EXPORT_SYMBOL(comedi_timed_1chan,0.7.18);
-int comedi_timed_1chan(comedi_t *dev,unsigned int subd,unsigned int chan,unsigned int range,
+EXPORT_ALIAS_DEFAULT(_comedi_timed_1chan,comedi_timed_1chan,0.7.18);
+int _comedi_timed_1chan(comedi_t *dev,unsigned int subd,unsigned int chan,unsigned int range,
 	unsigned int aref,double freq,unsigned int n_samples,double *data)
 {
 	comedi_trig t;

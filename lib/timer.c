@@ -141,8 +141,8 @@ static timerfunc timer_functions[]={
 };
 #define N_TIMERTYPES 6
 
-EXPORT_SYMBOL(comedi_get_timer,0.7.18);
-int comedi_get_timer(comedi_t *it,unsigned int subdev,double freq,
+EXPORT_ALIAS_DEFAULT(_comedi_get_timer,comedi_get_timer,0.7.18);
+int _comedi_get_timer(comedi_t *it,unsigned int subdev,double freq,
 	unsigned int *trigvar,double *actual_freq)
 {
 	int timer_type;

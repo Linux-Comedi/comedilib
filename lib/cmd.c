@@ -36,8 +36,8 @@
 #include "libinternal.h"
 
 
-EXPORT_SYMBOL(comedi_get_cmd_src_mask,0.7.18);
-int comedi_get_cmd_src_mask(comedi_t *it,unsigned int subd,comedi_cmd *cmd)
+EXPORT_ALIAS_DEFAULT(_comedi_get_cmd_src_mask,comedi_get_cmd_src_mask,0.7.18);
+int _comedi_get_cmd_src_mask(comedi_t *it,unsigned int subd,comedi_cmd *cmd)
 {
 	subdevice *s;
 	int ret;
@@ -156,8 +156,8 @@ static int __generic_timed(comedi_t *it,unsigned int s,
 	return -1;
 }
 
-EXPORT_SYMBOL(comedi_get_cmd_generic_timed,0.7.18);
-int comedi_get_cmd_generic_timed(comedi_t *it,unsigned int subd,comedi_cmd *cmd,
+EXPORT_ALIAS_DEFAULT(_comedi_get_cmd_generic_timed,comedi_get_cmd_generic_timed,0.7.18);
+int _comedi_get_cmd_generic_timed(comedi_t *it,unsigned int subd,comedi_cmd *cmd,
 	unsigned int ns)
 {
 	subdevice *s;

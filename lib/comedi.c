@@ -48,8 +48,8 @@ INTERNAL void initialize(void)
 	}
 }
   
-EXPORT_SYMBOL(comedi_open,0.7.18);
-comedi_t *comedi_open(const char *fn)
+EXPORT_ALIAS_DEFAULT(_comedi_open,comedi_open,0.7.18);
+comedi_t* _comedi_open(const char *fn)
 {
 	comedi_t *it;
 
@@ -82,8 +82,8 @@ cleanup:
 	return NULL;
 }
 
-EXPORT_SYMBOL(comedi_close,0.7.18);
-int comedi_close(comedi_t *it)
+EXPORT_ALIAS_DEFAULT(_comedi_close,comedi_close,0.7.18);
+int _comedi_close(comedi_t *it)
 {
 	subdevice *s;
 	int i;
@@ -118,20 +118,20 @@ int comedi_close(comedi_t *it)
 	return 0;
 }
 
-EXPORT_SYMBOL(comedi_cancel,0.7.18);
-int comedi_cancel(comedi_t *it,unsigned int subdevice)
+EXPORT_ALIAS_DEFAULT(_comedi_cancel,comedi_cancel,0.7.18);
+int _comedi_cancel(comedi_t *it,unsigned int subdevice)
 {
 	return comedi_ioctl(it->fd,COMEDI_CANCEL,subdevice);
 }
 
-EXPORT_SYMBOL(comedi_poll,0.7.18);
-int comedi_poll(comedi_t *it,unsigned int subdevice)
+EXPORT_ALIAS_DEFAULT(_comedi_poll,comedi_poll,0.7.18);
+int _comedi_poll(comedi_t *it,unsigned int subdevice)
 {
 	return comedi_ioctl(it->fd,COMEDI_POLL,subdevice);
 }
 
-EXPORT_SYMBOL(comedi_fileno,0.7.18);
-int comedi_fileno(comedi_t *it)
+EXPORT_ALIAS_DEFAULT(_comedi_fileno,comedi_fileno,0.7.18);
+int _comedi_fileno(comedi_t *it)
 {
 	if(!it)
 		return -1;
@@ -139,8 +139,8 @@ int comedi_fileno(comedi_t *it)
 	return it->fd;
 }
 
-EXPORT_SYMBOL(comedi_trigger,0.7.18);
-int comedi_trigger(comedi_t *it,comedi_trig *t)
+EXPORT_ALIAS_DEFAULT(_comedi_trigger,comedi_trigger,0.7.18);
+int _comedi_trigger(comedi_t *it,comedi_trig *t)
 {
 	if(!it || !t)
 		return -1;
@@ -148,8 +148,8 @@ int comedi_trigger(comedi_t *it,comedi_trig *t)
 	return comedi_ioctl(it->fd, COMEDI_TRIG, (unsigned long)t);
 }
 
-EXPORT_SYMBOL(comedi_command,0.7.18);
-int comedi_command(comedi_t *it,comedi_cmd *t)
+EXPORT_ALIAS_DEFAULT(_comedi_command,comedi_command,0.7.18);
+int _comedi_command(comedi_t *it,comedi_cmd *t)
 {
 	int ret;
 	ret = comedi_ioctl(it->fd, COMEDI_CMD, (unsigned long)t);
@@ -162,8 +162,8 @@ int comedi_command(comedi_t *it,comedi_cmd *t)
 	return ret;
 }
 
-EXPORT_SYMBOL(comedi_command_test,0.7.18);
-int comedi_command_test(comedi_t *it,comedi_cmd *t)
+EXPORT_ALIAS_DEFAULT(_comedi_command_test,comedi_command_test,0.7.18);
+int _comedi_command_test(comedi_t *it,comedi_cmd *t)
 {
 	int ret;
 	ret = comedi_ioctl(it->fd, COMEDI_CMDTEST, (unsigned long)t);
@@ -176,8 +176,8 @@ int comedi_command_test(comedi_t *it,comedi_cmd *t)
 	return ret;
 }
 
-EXPORT_SYMBOL(comedi_do_insnlist,0.7.18);
-int comedi_do_insnlist(comedi_t *it,comedi_insnlist *il)
+EXPORT_ALIAS_DEFAULT(_comedi_do_insnlist,comedi_do_insnlist,0.7.18);
+int _comedi_do_insnlist(comedi_t *it,comedi_insnlist *il)
 {
 	int ret;
 	ret = comedi_ioctl(it->fd, COMEDI_INSNLIST, (unsigned long)il);
@@ -185,8 +185,8 @@ int comedi_do_insnlist(comedi_t *it,comedi_insnlist *il)
 	return ret;
 }
 
-EXPORT_SYMBOL(comedi_do_insn,0.7.18);
-int comedi_do_insn(comedi_t *it,comedi_insn *insn)
+EXPORT_ALIAS_DEFAULT(_comedi_do_insn,comedi_do_insn,0.7.18);
+int _comedi_do_insn(comedi_t *it,comedi_insn *insn)
 {
 	if(it->has_insn_ioctl){
 		return comedi_ioctl(it->fd, COMEDI_INSN, (unsigned long)insn);
@@ -204,14 +204,14 @@ int comedi_do_insn(comedi_t *it,comedi_insn *insn)
 	}
 }
 
-EXPORT_SYMBOL(comedi_lock,0.7.18);
-int comedi_lock(comedi_t *it,unsigned int subdevice)
+EXPORT_ALIAS_DEFAULT(_comedi_lock,comedi_lock,0.7.18);
+int _comedi_lock(comedi_t *it,unsigned int subdevice)
 {
 	return comedi_ioctl(it->fd, COMEDI_LOCK, subdevice);
 }
 
-EXPORT_SYMBOL(comedi_unlock,0.7.18);
-int comedi_unlock(comedi_t *it,unsigned int subdevice)
+EXPORT_ALIAS_DEFAULT(_comedi_unlock,comedi_unlock,0.7.18);
+int _comedi_unlock(comedi_t *it,unsigned int subdevice)
 {
 	return comedi_ioctl(it->fd, COMEDI_UNLOCK, subdevice);
 }

@@ -24,8 +24,8 @@
 #include "libinternal.h"
 #include <string.h>
 
-EXPORT_SYMBOL(comedi_set_buffer_size,0.7.18);
-int comedi_set_buffer_size(comedi_t *it, unsigned int subdev, unsigned int size)
+EXPORT_ALIAS_DEFAULT(_comedi_set_buffer_size,comedi_set_buffer_size,0.7.18);
+int _comedi_set_buffer_size(comedi_t *it, unsigned int subdev, unsigned int size)
 {
 	int ret;
 	comedi_bufconfig bc;
@@ -40,8 +40,8 @@ int comedi_set_buffer_size(comedi_t *it, unsigned int subdev, unsigned int size)
 	return bc.size;
 }
 
-EXPORT_SYMBOL(comedi_set_max_buffer_size,0.7.18);
-int comedi_set_max_buffer_size(comedi_t *it, unsigned int subdev, unsigned int max_size)
+EXPORT_ALIAS_DEFAULT(_comedi_set_max_buffer_size,comedi_set_max_buffer_size,0.7.18);
+int _comedi_set_max_buffer_size(comedi_t *it, unsigned int subdev, unsigned int max_size)
 {
 	int ret;
 	comedi_bufconfig bc;
@@ -56,26 +56,26 @@ int comedi_set_max_buffer_size(comedi_t *it, unsigned int subdev, unsigned int m
 	return bc.maximum_size;
 }
 
-EXPORT_SYMBOL(comedi_get_max_buffer_size,0.7.18);
-int comedi_get_max_buffer_size(comedi_t *it, unsigned int subdevice)
+EXPORT_ALIAS_DEFAULT(_comedi_get_max_buffer_size,comedi_get_max_buffer_size,0.7.18);
+int _comedi_get_max_buffer_size(comedi_t *it, unsigned int subdevice)
 {
 	return comedi_set_max_buffer_size(it, subdevice, 0);
 }
 
-EXPORT_SYMBOL(comedi_get_buffer_size,0.7.18);
-int comedi_get_buffer_size(comedi_t *it, unsigned int subdev)
+EXPORT_ALIAS_DEFAULT(_comedi_get_buffer_size,comedi_get_buffer_size,0.7.18);
+int _comedi_get_buffer_size(comedi_t *it, unsigned int subdev)
 {
 	return comedi_set_buffer_size(it, subdev, 0);
 }
 
-EXPORT_SYMBOL(comedi_get_buffer_contents,0.7.18);
-int comedi_get_buffer_contents(comedi_t *it, unsigned int subdev)
+EXPORT_ALIAS_DEFAULT(_comedi_get_buffer_contents,comedi_get_buffer_contents,0.7.18);
+int _comedi_get_buffer_contents(comedi_t *it, unsigned int subdev)
 {
 	return comedi_mark_buffer_read(it, subdev, 0);
 }
 
-EXPORT_SYMBOL(comedi_mark_buffer_read,0.7.18);
-int comedi_mark_buffer_read(comedi_t *it, unsigned int subdev, unsigned int bytes)
+EXPORT_ALIAS_DEFAULT(_comedi_mark_buffer_read,comedi_mark_buffer_read,0.7.18);
+int _comedi_mark_buffer_read(comedi_t *it, unsigned int subdev, unsigned int bytes)
 {
 	int ret;
 	comedi_bufinfo bi;
@@ -88,8 +88,8 @@ int comedi_mark_buffer_read(comedi_t *it, unsigned int subdev, unsigned int byte
 	return bi.buf_int_count - bi.buf_user_count;
 }
 
-EXPORT_SYMBOL(comedi_get_buffer_offset,0.7.18);
-int comedi_get_buffer_offset(comedi_t *it, unsigned int subdev)
+EXPORT_ALIAS_DEFAULT(_comedi_get_buffer_offset,comedi_get_buffer_offset,0.7.18);
+int _comedi_get_buffer_offset(comedi_t *it, unsigned int subdev)
 {
 	int ret;
 	comedi_bufinfo bi;
@@ -100,8 +100,8 @@ int comedi_get_buffer_offset(comedi_t *it, unsigned int subdev)
 	return bi.buf_user_ptr;
 }
 
-EXPORT_SYMBOL(comedi_get_front_count,0.7.18);
-int comedi_get_front_count(comedi_t *it, unsigned int subdev)
+EXPORT_ALIAS_DEFAULT(_comedi_get_front_count,comedi_get_front_count,0.7.18);
+int _comedi_get_front_count(comedi_t *it, unsigned int subdev)
 {
 	int ret;
 	comedi_bufinfo bi;

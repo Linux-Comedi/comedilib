@@ -39,8 +39,8 @@
 int sv_measure_l(comedi_sv_t *it,double *data);
 int sv_measure_s(comedi_sv_t *it,double *data);
 
-EXPORT_SYMBOL(comedi_sv_init,0.7.18);
-int comedi_sv_init(comedi_sv_t *it,comedi_t *dev,unsigned int subd,unsigned int chan)
+EXPORT_ALIAS_DEFAULT(_comedi_sv_init,comedi_sv_init,0.7.18);
+int _comedi_sv_init(comedi_sv_t *it,comedi_t *dev,unsigned int subd,unsigned int chan)
 {
 	if(!valid_chan(dev,subd,chan))return -1;
 	if(!it)return -1;
@@ -55,8 +55,8 @@ int comedi_sv_init(comedi_sv_t *it,comedi_t *dev,unsigned int subd,unsigned int 
 	return comedi_sv_update(it);
 }
 
-EXPORT_SYMBOL(comedi_sv_update,0.7.18);
-int comedi_sv_update(comedi_sv_t *it)
+EXPORT_ALIAS_DEFAULT(_comedi_sv_update,comedi_sv_update,0.7.18);
+int _comedi_sv_update(comedi_sv_t *it)
 {
 	if(!it)return -1;
 	if(!valid_chan(it->dev,it->subdevice,it->chan))return -1;
@@ -69,8 +69,8 @@ int comedi_sv_update(comedi_sv_t *it)
 	return 0;
 }
 
-EXPORT_SYMBOL(comedi_sv_measure,0.7.18);
-int comedi_sv_measure(comedi_sv_t *it,double *data)
+EXPORT_ALIAS_DEFAULT(_comedi_sv_measure,comedi_sv_measure,0.7.18);
+int _comedi_sv_measure(comedi_sv_t *it,double *data)
 {
 	if(it->dev->subdevices[it->subdevice].subd_flags & SDF_LSAMPL){
 		return sv_measure_l(it,data);
