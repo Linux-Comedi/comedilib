@@ -1,0 +1,355 @@
+Function: comedi_close -- close a Comedi device
+Retval: int
+Param: comedi * device
+Description:
+ Close a device previously opened by comedi_open().
+
+Function: comedi_open -- open a Comedi device
+Retval: comedi_t
+Param: const char * filename
+Description:
+ Open a Comedi device represented by the file filename.
+
+Function: comedi_loglevel -- change Comedilib logging properties
+Retval: int
+Param: int loglevel
+Description:
+
+Function: comedi_perror -- print a Comedilib error message
+Retval: void
+Param: const char * s
+Description:
+
+Function: comedi_strerror -- return string describing Comedilib error code
+Retval: char *
+Param: int errnum
+Description:
+
+Function: comedi_errno -- number of last Comedilib error
+Retval: int
+Param: void
+Description:
+
+Function: comedi_fileno -- integer descriptor of Comedilib device
+Retval: int
+Param: comedi_t * device
+Description:
+
+Function: comedi_get_n_subdevices -- number of subdevices 
+Retval: int
+Param: comedi_t * device
+Description:
+
+Function: comedi_get_version_code -- Comedi version code
+Retval: int
+Param: comedi_t * device
+Description:
+
+Function: comedi_get_driver_name -- Comedi driver name
+Retval: char *
+Param: comedi_t * device
+Description:
+
+Function: comedi_get_board_name -- Comedi device name
+Retval: char *
+Param: comedi_t * device
+Description:
+
+Function: comedi_get_subdevice_type -- type of subdevice
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Description:
+
+Function: comedi_find_subdevice_by_type -- search for subdevice type
+Retval: int
+Param: comedi_t * device
+Param: int type
+Param: unsigned int start_subdevice
+Description:
+
+Function: comedi_get_subdevice_flags -- properties of subdevice
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Description:
+
+Function: comedi_get_n_channels -- number of subdevice channels
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Description:
+
+Function: comedi_range_is_chan_specific -- range information depends on channel
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Description:
+
+Function: comedi_maxdata_is_chan_specific -- maximum sample depends on channel
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Description:
+
+Function: comedi_get_maxdata -- maximum sample of channel
+Retval: lsampl_t
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int channel
+Description:
+
+Function: comedi_get_n_ranges -- number of ranges of channel
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int channel
+Description:
+
+Function: comedi_get_range -- range information of channel
+Retval: comedi_range *
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int channel
+Param: unsigned int range
+Description:
+
+Function: comedi_find_range -- search for range
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int channel
+Param: unsigned int unit
+Param: double min
+Param: double max
+Description:
+
+Function: comedi_get_buffer_size -- streaming buffer size of subdevice
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Description:
+
+Function: comedi_get_max_buffer_size -- maximum streaming buffer size
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Description:
+
+Function: comedi_set_buffer_size -- streaming buffer size of subdevice
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int size
+Description:
+
+Function: comedi_trigger -- perform streaming input/output (deprecated)
+Retval: int
+Param: comedi_t * device
+Param: comedi_trig * trig
+Description:
+Status: deprecated
+
+Function: comedi_do_insnlist -- perform multiple instructions
+Retval: int
+Param: comedi_t * device
+Param: comedi_insnlist * list
+Description:
+
+Function: comedi_do_insn -- perform instruction
+Retval: int
+Param: comedi_t * device
+Param: comedi_insn * instruction
+Description:
+
+Function: comedi_lock -- subdevice reservation
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Description:
+
+Function: comedi_unlock -- subdevice reservation
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Description:
+
+Function: comedi_to_phys -- convert sample to physical units
+Retval: double
+Param: lsampl_t data
+Param: comedi_range * range
+Param: lsampl_t maxdata
+Description:
+
+Function: comedi_from_phys -- convert physical units to sample
+Retval: lsampl_t
+Param: double data
+Param: comedi_range * range
+Param: lsampl_t maxdata
+Description:
+
+Function: comedi_data_read -- read single sample from channel
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int channel
+Param: unsigned int range
+Param: unsigned int aref
+Param: lsampl_t * data
+Description:
+
+Function: comedi_data_write -- write single sample to channel
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int channel
+Param: unsigned int range
+Param: unsigned int aref
+Param: lsampl_t data
+Description:
+
+Function: comedi_dio_config -- change input/output properties of channel
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int channel
+Param: unsigned int direction
+Description:
+
+Function: comedi_dio_read -- read single bit from digital channel
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int channel
+Param: unsigned int * bit
+Description:
+
+Function: comedi_dio_write -- write single bit to digital channel
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int channel
+Param: unsigned int bit
+Description:
+
+Function: comedi_dio_bitfield -- read/write multiple digital channels
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int write_mask
+Param: unsigned int * bits
+Description:
+
+Function: comedi_sv_init -- slowly-varying inputs
+Retval: int
+Param: comedi_sv_t * sv
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int channel
+Description:
+
+Function: comedi_sv_update -- slowly-varying inputs
+Retval: int
+Param: comedi_sv_t * sv
+Description:
+
+Function: comedi_sv_measure -- slowly-varying inputs
+Retval: int
+Param: comedi_sv_t * sv
+Param: double * data
+Description:
+
+Function: comedi_get_cmd_src_mask -- streaming input/output capabilities
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: comedi_cmd * command
+Description:
+
+Function: comedi_get_cmd_generic_timed -- streaming input/output capabilities
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: comedi_cmd * command
+Param: unsigned int period_ns
+Description:
+
+Function: comedi_cancel -- stop streaming input/outpu in progress
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Description:
+
+Function: comedi_command -- start streaming input/output
+Retval: int
+Param: comedi_t * device
+Param: comedi_cmd * command
+Description:
+
+Function: comedi_command_test -- test streaming input/output configuration
+Retval: int
+Param: comedi_t * device
+Param: comedi_cmd * command
+Description:
+
+Function: comedi_poll -- force updating of streaming buffer
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Description:
+
+Function: comedi_set_max_buffer_size -- streaming buffer size of subdevice
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int max_size
+Description:
+
+Function: comedi_get_buffer_contents -- streaming buffer status
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Description:
+
+Function: comedi_mark_buffer_read -- streaming buffer status
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int num_bytes
+Description:
+
+Function: comedi_get_buffer_offset -- streaming buffer status
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Description:
+
+Function: comedi_get_timer -- timer information (deprecated)
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: double frequency
+Param: unsigned int * trigvar
+Param: double * actual_frequency
+Description:
+Status: deprecated
+
+Function: comedi_timed_1chan -- streaming input (deprecated)
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int channel
+Param: unsigned int range
+Param: unsigned int aref
+Param: double frequency
+Param: unsigned int num_samples
+Param: double * data
+Description:
+Status: deprecated
+
+Function: comedi_set_global_oor_behavior -- out-of-range behavior
+Retval: int
+Param: enum comedi_oor_behavior behavior
+Description:
+Status: alpha
+

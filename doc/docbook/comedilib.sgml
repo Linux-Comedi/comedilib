@@ -1,0 +1,69 @@
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook V3.1//EN"
+	"docbook/dtd/3.1/docbook.dtd" [
+<!ENTITY intro SYSTEM "intro.sgml">
+<!ENTITY install SYSTEM "install.sgml">
+<!ENTITY drivers SYSTEM "drivers.sgml">
+<!ENTITY reference SYSTEM "reference.sgml">
+<!ENTITY funcref SYSTEM "funcref.sgml">
+]>
+
+<article>
+
+<artheader>
+  <title>
+    Comedi Documentation
+  </title>
+  <author>
+    <firstname>David</firstname>
+    <surname>Schleef</surname>
+    <affiliation>
+      <address>
+        ds@schleef.org
+      </address>
+    </affiliation>
+  </author>
+  <author>
+    <firstname>Frank</firstname>
+    <surname>Hess</surname>
+    <affiliation>
+      <address>
+        fmhess@uiuc.edu
+      </address>
+    </affiliation>
+  </author>
+</artheader>
+
+&intro
+
+&install
+
+<section>
+<title>
+Writing programs that use Comedi
+</title>
+<para>
+Empty.
+</para>
+</section>
+
+&drivers
+
+<section>
+  <title>
+    Comedi Reference
+  </title>
+  <para>
+    Reference for functions, macros, and constants.
+  </para>
+
+  &reference
+
+  &funcref
+
+</section>
+
+
+
+
+</article>
+

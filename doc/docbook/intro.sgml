@@ -1,0 +1,315 @@
+<!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook V3.1//EN">
+<!--ignore the error caused by previous line-->
+
+<section>
+
+<title>
+Introduction
+</title>
+
+<para>
+This section gives high-level explanation about which functionality
+you can expect from the software. Details are given in the following
+sections of this document.
+</para>
+
+<section>
+<title>
+What is a "device driver"?
+</title>
+<para>
+A device driver is a piece of software that interfaces a particular
+piece of hardware: a printer, a sound card, a motor drive, etc. It
+translates the primitive, device-dependent commands with which the
+hardware manufacturer want you to configure, read and write the
+electronics of the hardware interface into more abstract and generic
+function calls and data structures for the application programmer.
+</para>
+
+<para>
+David Schleef started the Comedi project to interface
+lots of different cards for measurement and control purposes. This
+type of cards are often called Data AcQuisition cards, or DAQ cards.
+Schleef designed a structure which is a balance between
+modularity (i.e., it's fairly easy to integrate a new card because
+most of the infrastructure part of the driver can be reused) and
+complexity (i.e., the structure doesn't present so much overhead that
+new contributors are scared away from writing their new drivers within
+the Comedi framework). The Comedi project consists of two
+complementary packages: "comedi" (which implements the kernel space
+functionality) and "comedilib" (which implements the user space access
+to the device driver functionality). Comedi works with a standard
+Linux kernel, but also with its real-time extensions RTAI and
+Real-Time Linux.
+</para>
+</section>
+
+<section>
+<title>
+A general DAQ device driver package.
+</title>
+<para>
+From the point of view of system developers, it is worthwhile to
+standardize the structure and API (Application Programming Interface)
+for device drivers as much as possible: 
+</para>
+
+<para>
+  API: devices that offer similar functionalities, should have the same
+  software interface, and their differences should be coped with by
+  parameterizing the interfaces, not by changing the interface for
+  each new device in the family. 
+
+<para>
+  Structure: many electronic interfaces have more than one layer of
+  functionality between the hardware and the operating system, and
+  the device driver code should reflect this fact. For example, many
+  different interface cards use the same PCI driver chips, or use the
+  parallel port to connect to the hardware device. Hence, providing
+  "low-level" device drivers for these PCI chips and parallel ports
+  allows for an increased modularity and re-useability of the software.
+</para>
+
+<para>
+In the case of Linux as the host operating system, device driver
+writers must keep the following Linux-specific issues in mind:
+</para>
+
+<para>
+  Kernel space vs. User space.
+  The Linux operating system has two levels: only privileged processes
+  can run in the kernel, where they have access to all hardware and to
+  all kernel data structures and system calls; normal application
+  programs can run their processes only in user space, where these
+  processes are shielded from each other, and from direct access to
+  hardware and to critical data of the operating system. Device drivers
+  typically must access specific addresses on the bus, and hence use
+  privileged system calls.  Therefore, a device driver has a component
+  in kernel space.  One can write a user space driver for, for example,
+  a device on the parallel port, but in this case, the basic parallel
+  port device driver runs already in the kernel by default; the
+  interaction with the hardware then takes place via the method
+  explained below.
+</para>
+
+<para>
+  Device files or device file system.
+  The users that want to write an application for a particular device,
+  must link their application to the device's device driver. This device
+  driver, however, runs in kernel space, and the user application in
+  user space. So, the operating system provides an interface between
+  both. In Linux or Unix, these interfaces are in the form of "files"
+  in the /dev directory (2.2.x kernels or earlier) or /devfs directory
+  (2.4.x kernels and later). Each device has a representative, and can
+  be accessed by the classical Unix file I/O calls: open, close, read,
+  write, and ioctl.
+</para>
+
+<para>
+  /proc interface.
+  Linux offers a file-like interface to attached devices (and other
+  OS-related information) via the /proc directories. This interface
+  allows to inspect the current status of each device.
+</para>
+
+<para>
+  Direct Memory Access (DMA) vs. Programmed Input/Output (PIO).
+  Almost all devices can be interfaced in PIO mode: the processor is
+  responsible for accessing bus addresses allocated to the device, and
+  to read or write data. Some devices also allow DMA: the device and the
+  memory "talk" to each other directly, without needing the processor.
+  DMA is a feature of the bus, not of the operating system (which has
+  to support its processes to use the feature, of course).
+</para>
+
+<para>
+If the device is to be used in a Real-Time Linux or RTAI application,
+there are a few extra requirements, because not all system calls are
+available in the RTOS kernel of Real-Time Linux or RTAI.
+</para>
+</section>
+
+
+<section>
+<title>
+Policy vs. mechanism.
+</title>
+<para>
+Device drivers are often written by application programmers, that have
+a particular application in mind. For example, one writes a driver for
+the parallel port, because one wants to use it to generate pulses that
+drive a stepper motor. This approach often leads to device drivers
+that depend too much on the application, and are not general enough to
+be re-used for other applications. One golden rule for the device
+driver writer is to separate mechanism and policy:
+</para>
+
+<para>
+  Mechanism.
+  The mechanism part of the device interface is a faithful
+  representation of the bare functionality of the device, independent of
+  what part of the functionality an application will use.
+</para>
+
+<para>
+  Policy.
+  Once a device driver offers a software interface to the mechanism of
+  the device, an application writer can use this mechanism interface to
+  use the device in one particular fashion. That is, some of the data
+  stuctures offered by the mechanism are interpreted in specific
+  physical units, or some of them are taken together because this
+  composition is relevant for the application. For example, a analog
+  output card can be used to generate voltages that are the inputs for
+  the electronic drivers of the motors of a robot; these voltages can be
+  interpreted as setpoints for the desired velocity of these motors, and
+  six of them are taken together to steer one particular robot with
+  six-degrees of freedom. Some of the other outputs of the same physical
+  device can be used by another application program, for example to
+  generate a sine wave that drives a vibration shaker.
+</para>
+</section>
+
+<section>
+<title>
+Overview of Comedi.
+</title>
+<para>
+The supported cards in Comedi have one or more of the following
+features: analog input channels, analog output channels, digital input
+channels, and digital output channels. The digital channels are
+conceptually quite simple, and don't need much configuration: the
+number of channels, their addresses on the bus, and their direction
+(input/output).
+</para>
+
+<para>
+The analog channels are a bit more complicated. Typically, an analog
+channel can be programmed to generate or read a voltage between a
+lower and an upper threshold (e.g., -10V and +10V); the card's
+electronics can be programmed to automatically sample a set of
+channels, in a prescribed order; top buffer sequences of data on the
+board; or to use DMA to dump the data in an available part of memory,
+without intervention from the processor.
+</para>
+
+<para>
+Many interface cards have extra functionality, besides the analog and
+digital channels. For example, an EEPROM for configuration and board
+parameters, calibration inputs, counters and timers, encoders (=
+quadrature counter on two channels), etc. Therefore, Comedi offers
+more than just analog and digital data acquisition.
+</para>
+
+<para>
+The kernel space structures that Comedi uses have the following
+hierarchy:
+</para>
+<para>
+- channel: the lowest-level component, that represents the properties
+  of one single data channel (analog in or out; digital in or out).
+  Each channel has parameters for: the voltage range, the reference
+  voltage, the channel polarity (unipolar, bipolar), a conversion
+  factor between voltages and physical units.
+</para>
+<para>
+- sub-device: a set of functionally identical channels that are
+  physically implemented on the same (chip on an) interface card. For
+  example, a set of 16 identical analog outputs.
+  Each sub-device has parameters for: the number of channels, and the type
+  of the channels.
+</para>
+<para>
+- device: a set of sub-devices that are physically implemented on the
+  same interface card; in other words, the interface card itself.
+  For example, the NI 6024E device has a sub-device with 16 analog input
+  channels, another sub-device with two analog output channels, and a
+  third sub-device with eight digital inputs/outputs.
+  Each device has parameters for: the device identification tag from
+  the manufacturer, the identification tag given by the operating system
+  (in order to discriminate between multiple interface cards of the same
+  type), the number of sub-devices, etc.
+</para>
+
+<para>
+The basic functionalities offered by Comedi are:
+</para>
+<para>
+- instruction: to synchronously perform one single data acquisition on a
+  specified channel, or to perform a configuration on the channel.
+  "Synchronous" means that the calling process blocks until the data
+  acquisition has finished.
+</para>
+<para>
+- scan: repeated instructions on a number of different channels, with a
+  programmed sequence and timing.
+</para>
+<para>
+- command: start or stop an autonomous (and hence aynchronous) data
+  acquisition (i.e., a number of scans) on a specified set of
+  channels. "Autonomous" means: without interaction from the software,
+  i.e., by means of on-board timers or possibly external triggers.
+</para>
+<para>
+This command functionality is not offered by all DAQ cards.  When
+using RTAI or Real-Time Linux, the command functionality is emulated
+through the "comedi_rt_timer" virtual driver.
+The command functionality is very configurable, with respect to the
+choice of events with which to signal the progress of the programmed
+scans: external triggers, end of instruction, etc.
+</para>
+
+<para>
+Comedi not only offers the API to access the functionality of the
+cards, but also to query the capabilities of the installed Comedi
+devices. That is, a user process can find out on-line what channels
+are available, and what their physical parameters are (range,
+direction of input/output, etc.).
+</para>
+
+<para>
+Buffers are an important aspect of device drivers: the data has
+to be stored in such buffers, if the application program cannot
+guarantee to read or write the data as soon as the interface board
+wants to do so. Therefore, Comedi offers functionality to configure
+and manage data buffers.
+</para>
+
+<para>
+Comedi contains more than just procedural function calls: it also
+offers event-driven functionality. The data acquisition can signal
+its completion by means of an interrupt or a callback function call.
+Callbacks are also used to signal errors during the data
+acquisition or when writing to buffers, or at the end of a scan or
+acquisition that has been launched previously to take place
+asynchronously (i.e., the card fills up som shared memory buffer
+autonomously, and only warns the user program after it has finished).
+</para>
+
+<para>
+The mechanisms for synchronization and interrupt handling are a bit
+different when used in a real-time context (i.e., with either RTAI or
+Real-Time Linux), but both are encapsulated behind the same Comedi calls.
+</para>
+
+<para>
+Because multiple devices can all be active at the same time, Comedi
+provides (non-SMP!) locking primitives to ensure atomic operations on
+critical sections of the code or data structures.
+</para>
+
+<para>
+Finally, Comedi offers the above-mentioned "high-level" interaction,
+i.e., at the level of user space device drivers, through file
+operations on entries in the /dev directory (for access to the
+device's functionality), or interactively from the command line
+through the "files" in the /proc directory (which allow to inspect
+the status of a Comedi device).  This high-level interface resides in
+the "comedilib" tarball, which is the user space library, with
+facilities to connect to the kernel space drivers residing in the
+"comedi" tarball.
+</para>
+</section>
+
+
+</section>
+

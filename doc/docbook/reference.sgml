@@ -1,0 +1,987 @@
+<!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook V3.1//EN">
+
+<section>
+<title>
+Constants and Macros
+</title>
+
+<section id="ref-macro-CR-PACK">
+<title>
+CR_PACK
+</title>
+
+<para>
+CR_PACK is used to initialize the elements of the chanlist array in the
+comedi_cmd structure, and the chanspec member
+of the comedi_insn structure.
+</para>
+
+<para>
+The channel argument is the channel you wish to use, with the channel
+numbering starting at zero.
+</para>
+
+<para>
+The range is an index, starting at zero, whose meaning
+is device dependent.  The
+comedi_get_n_ranges() and
+comedi_get_range functions
+are useful in discovering information about the available ranges.
+</para>
+
+<para>
+The aref argument indicates what reference you want the device to use.  It
+can be any of the following:
+</para>
+
+<variablelist>
+  <varlistentry>
+    <term>AREF_GROUND</term>
+    <listitem>
+      <para>
+        is for inputs/outputs referenced to ground
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>AREF_COMMON</term>
+    <listitem>
+      <para>
+    is for a `common' reference (the low inputs of all the channels are tied
+together, but are isolated from ground)
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>AREF_DIFF</term>
+    <listitem>
+      <para>
+    is for differential inputs/outputs
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>AREF_OTHER</term>
+    <listitem>
+      <para>
+    is for any reference that does not fit into the above categories
+      </para>
+    </listitem>
+  </varlistentry>
+</variablelist>
+
+<para>
+Particular drivers may or may not use the AREF flags.  If they are
+not supported, they are silently ignored.
+</para>
+</section>
+
+<section id="ref-macro-RANGE-LENGTH">
+<title>
+RANGE_LENGTH (deprecated)
+</title>
+
+<para>
+Rangetype values are library-internal tokens that represent an
+array of range information structures.  These numbers are primarily
+used for communication between the kernel and library.
+</para>
+
+<para>
+The RANGE_LENGTH() macro returns the length of the array that is
+specified by the rangetype token.
+</para>
+
+<para>
+The RANGE_LENGTH() macro is deprecated, and should not be used in
+new applications.  It is scheduled to be removed from the header
+file at version 1.0.  Binary compatibility may be broken for version
+1.1.
+</para>
+</section>
+
+</section>
+
+<section>
+<title>
+Data Types and Structures
+</title>
+
+<section id="ref-type-comedi-t">
+<title>
+comedi_t
+</title>
+
+<para>
+The data type comedi_t is used to represent an open Comedi
+device.  A valid comedi_t pointer is returned by a successful
+call to comedi_open(), and should be used for subsequent
+access to the device.
+It is a transparent type, and pointers to type comedi_t
+should not be dereferenced by the application.
+</para>
+
+</section>
+
+
+<section id="ref-type-sampl-t">
+<title>
+sampl_t
+</title>
+
+
+<para>
+The data type sampl_t is one of the generic types used to represent
+data values in Comedilib.  It is used in a few places where a data type
+shorter than lsampl_t is useful.  On most architectures, sampl_t
+is defined to be uint16.
+</para>
+
+<para>
+Most drivers represent data trasferred by read() and write()
+using sampl_t.  Applications should check the subdevice flag
+SDF_LSAMPL to determine if the subdevice uses sampl_t or
+lsampl_t.
+</para>
+
+</section>
+
+<section id="ref-type-lsampl-t">
+<title>
+lsampl_t
+</title>
+
+<para>
+The data type lsampl_t is the data type typically used to represent
+data values in libcomedi.  On most architectures, lsampl_t is
+defined to be uint32.
+</para>
+</section>
+
+
+<section id="ref-type-comedi-trig">
+<title>
+comedi_trig (deprecated)
+</title>
+
+<programlisting>
+struct comedi_trig_struct{
+	unsigned int subdev;		/* subdevice */
+	unsigned int mode;		/* mode */
+	unsigned int flags;
+	unsigned int n_chan;		/* number of channels */
+	unsigned int *chanlist; 	/* channel/range list */
+	sampl_t *data;			/* data list, size depends on subd flags */
+	unsigned int n;			/* number of scans */
+	unsigned int trigsrc;
+	unsigned int trigvar;
+	unsigned int trigvar1;
+	unsigned int data_len;
+	unsigned int unused[3];
+}
+</programlisting>
+
+<para>
+The comedi_trig structure is a control structure used by the
+COMEDI_TRIG ioctl, an older method of communicating
+instructions to the driver and hardware.  Use of comedi_trig is
+deprecated, and should not be used in new applications.
+</para>
+</section>
+
+<section id="ref-type-comedi-sv-t">
+<title>
+comedi_sv_t
+</title>
+
+<programlisting>
+struct comedi_sv_struct{
+	comedi_t *dev;
+	unsigned int subdevice;
+	unsigned int chan;
+
+	/* range policy */
+	int range;
+	int aref;
+
+	/* number of measurements to average (for ai) */
+	int n;
+
+	lsampl_t maxdata;
+}
+</programlisting>
+
+<para>
+The comedi_sv_t structure is used by the comedi_sv_*()
+functions to provide a simple method of accurately measuring
+slowly varying inputs.  See the relevant section for more
+details.
+</para>
+</section>
+
+<section id="ref-type-comedi-cmd">
+<title>
+comedi_cmd
+</title>
+
+<programlisting>
+typedef struct comedi_cmd_struct comedi_cmd;
+
+struct comedi_cmd_struct{
+	unsigned int subdev;
+	unsigned int flags;
+
+	unsigned int start_src;
+	unsigned int start_arg;
+
+	unsigned int scan_begin_src;
+	unsigned int scan_begin_arg;
+
+	unsigned int convert_src;
+	unsigned int convert_arg;
+
+	unsigned int scan_end_src;
+	unsigned int scan_end_arg;
+
+	unsigned int stop_src;
+	unsigned int stop_arg;
+
+	unsigned int *chanlist;
+	unsigned int chanlist_len;
+
+	sampl_t *data;
+	unsigned int data_len;
+};
+</programlisting>
+
+<para>
+More information on using commands can be found in the
+command section.
+</para>
+</section>
+
+<section id="ref-type-comedi-insn">
+<title>
+comedi_insn
+</title>
+
+<programlisting>
+typedef struct comedi_insn_struct comedi_insn;
+
+struct comedi_insn_struct{
+	unsigned int insn;
+	unsigned int n;
+	lsampl_t *data;
+	unsigned int subdev;
+	unsigned int chanspec;
+	unsigned int unused[3];
+};
+</programlisting>
+
+<para>
+Comedi instructions are described by the comedi_insn structure.
+Applications send instructions to the driver in order to preform
+control and measurement operations that are done immediately or
+synchronously, i.e., the operations complete before program control
+returns to the application.  In particular, instructions cannot
+describe acquisition that involves timers or external events.
+</para>
+
+<para>
+The field insn determines the type of instruction that is sent
+to the driver.  Valid instruction types are
+</para>
+
+<variablelist>
+  <varlistentry>
+    <term>
+INSN_READ
+    </term>
+    <listitem>
+      <para>
+read values from an input channel
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>
+INSN_WRITE
+    </term>
+    <listitem>
+      <para>
+write values to an output channel
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>
+INSN_BITS
+    </term>
+    <listitem>
+      <para>
+read/write values on multiple digital I/O channels
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>
+INSN_CONFIG
+    </term>
+    <listitem>
+      <para>
+configure a subdevice
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>
+INSN_GTOD
+    </term>
+    <listitem>
+      <para>
+read a timestamp, identical to gettimeofday()
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>
+INSN_WAIT
+    </term>
+    <listitem>
+      <para>
+wait a specified number of nanoseconds
+      </para>
+    </listitem>
+  </varlistentry>
+</variablelist>
+
+<para>
+The number of samples to read or write, or the size of the configuration
+structure is specified by the field n, and the buffer for those
+samples by data.  The field subdev is the subdevice index
+that the instruction is sent to.  The field chanspec specifies
+the channel, range, and analog reference (if applicable).
+</para>
+
+<para>
+Instructions can be sent to drivers using comedi_do_insn().
+Multiple instructions can be sent to drivers in the same system
+call using comedi_do_insnlist().
+</para>
+</section>
+
+<section id="ref-type-comedi-range">
+<title>
+comedi_range
+</title>
+
+<programlisting>
+typedef struct{
+	double min;
+	double max;
+	unsigned int unit;
+}comedi_range;
+</programlisting>
+
+<para>
+The comedi_range structure conveys part of the information
+necessary to translate sample values to physical units, in particular,
+the endpoints of the range and the physical unit type.  The
+physical unit type is specified by the field unit, which may
+take the values UNIT_volt for volts, UNIT_mA for milliamps,
+or UNIT_none for unitless.  The endpoints are specified by
+the fields min and max.
+</para>
+</section>
+
+<section id="ref-type-comedi-krange">
+<title>
+comedi_krange
+</title>
+
+<programlisting>
+struct comedi_krange_struct{
+	int min;
+	int max;
+	unsigned int flags;
+};
+</programlisting>
+
+<para>
+The comedi_krange structure is used to transfer range information
+between the driver and Comedilib, and should not normally be used
+by applications.  The structure conveys the same information as the
+comedi_range structure, except the fields min and max
+are integers, multiplied by a factor of 1000000 compared to the
+counterparts in comedi_range.
+</para>
+</section>
+
+</section>
+
+<section>
+<title>
+Interface reference
+</title>
+
+<para>
+This chapter is meant to be a reference for some of the advanced
+features of Comedi.
+</para>
+
+<section>
+<title>
+Digital input combining machines
+</title>
+
+<para>
+When one or several digital inputs are used to modify an output
+value, either an accumulator or a single digital line or bit,
+a bitfield structure is typically used in the Comedi interface.
+The digital inputs have two properties, "sensitive" inputs and
+"modifier" inputs.  Edge transitions on sensitive inputs cause
+changes in the output signal, whereas modifier inputs change the
+effect of edge transitions on sensitive inputs.  Note that inputs
+can be both modifier inputs and sensitive inputs.
+</para>
+
+<para>
+For simplification purposes, it is assumed that multiple digital
+inputs do not change simultaneously.
+</para>
+
+<para>
+The combined state of the modifier inputs determine a modifier
+state.  For each combination of modifier state and sensitive
+input, there is a set of bits that determine the effect on the
+output value due to positive or negative transitions of the
+sensitive input.  For each transition direction, there are two
+bits defined as follows:
+</para>
+
+<variablelist>
+  <varlistentry>
+    <term>
+00
+    </term>
+    <listitem>
+      <para>
+transition is ignored
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>
+01
+    </term>
+    <listitem>
+      <para>
+accumulator is incremented, or output is set
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>
+10
+    </term>
+    <listitem>
+      <para>
+accumulator is decremented, or output is cleared
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>
+11
+    </term>
+    <listitem>
+      <para>
+reserved
+      </para>
+    </listitem>
+  </varlistentry>
+</variablelist>
+
+<para>
+For example, a simple digital follower is specified by the bit
+pattern 01 10, because it sets the output on positive transitions
+of the input, and clears the output on negative transitions.  A
+digital inverter is similarily 10 01.  These systems have only
+one sensitive input.
+</para>
+
+<para>
+As another example, a simple up counter, which increments on
+positive transitions of one input, is specified by 01 00.  This
+system has only one sensitive input.
+</para>
+
+<para>
+When multiple digital inputs are used, the inputs are divided
+into two types, inputs which cause changes in the accumulator, and
+those that only modify the meaning of transitions on other inputs.
+Modifier inputs do not require bitfields, but there needs to be
+a bitfield of length 4*(2^(N-1)) for each edge sensitive input,
+where N is the total number of inputs.  Since N is usually 2 or
+3, with only one edge sensitive input, the scaling issues are
+not significant.
+</para>
+</section>
+
+
+<section>
+<title>
+INSN_CONFIG
+</title>
+
+<para>
+Configuration instructions are used to access device and driver features
+that do not fit well into other parts of the Comedi interface.  This
+includes changing the direction of configurable digital I/O lines,
+configuring complex triggering engines, and counter/timer configuration.
+</para>
+
+<para>
+If a specified ID is not supported, the driver must return -EINVAL.
+</para>
+
+
+<section>
+<title>
+Digital I/O configuration
+</title>
+
+<para></para>
+<simplelist>
+  <member>
+    Status: Implemented
+  </member>
+  <member>
+    ID: COMEDI_INPUT, COMEDI_OUTPUT, COMEDI_OPENDRAIN
+  </member>
+  <member>
+    Length: 1
+  </member>
+  <member>
+    Chanspec: used to specify channel
+  </member>
+</simplelist>
+
+<para>
+These IDs are used to configure direction of digital I/O lines.
+Direction is chosen by the ID.  On typical devices, multiple
+channels are grouped together in blocks for determining direction.
+Configuring one channel in a block configures the entire block.
+</para>
+
+<para>
+There should also be a method to read the configuration.
+</para>
+
+<para>
+Errors:  Should return -EINVAL if the ID is not supported.
+</para>
+
+</section>
+
+<section>
+<title>
+Analog conversion configuration
+</title>
+
+<simplelist>
+  <member>
+Status: design
+  </member>
+  <member>
+ID: not assigned
+  </member>
+  <member>
+Length: 
+  </member>
+  <member>
+Chanspec: used to specify channel
+  </member>
+</simplelist>
+
+<para>
+Some devices have the capability to add white noise (dithering) to
+analog input measurement.  This additional noise can then be averaged
+out, to get a more accurate measurement of the input signal.  It
+should not be assumed that channels can be separately configured.
+A simple design can use 1 bit to turn this feature on/off.
+</para>
+
+<para>
+Some devices have the capability of changing the glitch characteristics
+of analog output subsytems.  The default (off) case should be where
+the average settling time is lowest.  A simple design can use 1 bit
+to turn this feature on/off.
+</para>
+
+<para>
+Some devices have a configurable analog filters as part of the analog
+input stage.  A simple designe can use 1 bit to enable/disable the
+filter.  Default is disabled, i.e., the filter being bypassed, or if
+the choice is between two filters, the filter with the largest
+bandwidth.
+</para>
+</section>
+
+<section>
+<title>
+Analog Output Waveform Generation
+</title>
+
+<simplelist>
+  <member>
+Status: design
+  </member>
+  <member>
+ID: not assigned
+  </member>
+  <member>
+Length:
+  </member>
+  <member>
+Chanspec: ignored
+  </member>
+</simplelist>
+
+<para>
+Some devices have the ability to cyclicly loop through samples kept in
+an on-board analog output FIFO.  This config should allow the user to
+enable/disable this mode.
+</para>
+
+<para>
+This config should allow the user to configure the number of samples
+to loop through.  It may be necessary to configure the channels used.
+</para>
+
+</section>
+
+<section>
+<title>
+Extended Triggering
+</title>
+
+<simplelist>
+  <member>
+Status: alpha
+  </member>
+  <member>
+ID: not assigned
+  </member>
+  <member>
+Chanspec: ignored
+  </member>
+</simplelist>
+
+<para>
+This section covers common information for all extended
+triggering configuration, and doesn't describe a particular
+type of extended trigger.
+</para>
+
+<para>
+Extended triggering is used to configure triggering engines that
+do not fit into commands.  In a typical programming sequence, the
+application will use configuration instructions to configure an
+extended trigger, and the issue a command, specifying TRIG_OTHER 
+as one of the trigger sources.
+</para>
+
+<para>
+Extended trigger configuration should be designed in such a way
+that the user can probe for valid parameters, similar to how
+command testing works.  An extended trigger config instruction
+should not configure the hardware directly, rather, the configuration
+should be saved until the subsequent command is issued.  This
+allows more flexibility for future interface changes.
+</para>
+
+<para>
+It has not been decided whether the config stage should return a
+token that is then used as the trigger argument in the command.
+Using tokens is one method to satisfy the problem that extended
+trigger configurations may have subtle compatiblity issues with
+other trigger sources/arguments that can only be determined at
+command test time.  Passing all stages of a command test should
+only be allowed with a properly configured extended trigger.
+</para>
+
+<para>
+Extended triggers must use data[1] as flags.  The upper 16 bits
+are reserved and used only for flags that are common to
+all extended triggers.  The lower 16 bits may be defined by the
+particular type of extended trigger.
+</para>
+
+<para>
+Various types of extended triggers must use data[1] to know which
+event the extended trigger will be assigned to in the command
+structure.  The possible values are an OR'd mask of the following:
+</para>
+
+<itemizedlist>
+  <listitem>
+    <para>
+COMEDI_EV_START
+    </para>
+  </listitem>
+  <listitem>
+    <para>
+COMEDI_EV_SCAN_BEGIN
+    </para>
+  </listitem>
+  <listitem>
+    <para>
+COMEDI_EV_CONVERT
+    </para>
+  </listitem>
+  <listitem>
+    <para>
+COMEDI_EV_SCAN_END
+    </para>
+  </listitem>
+  <listitem>
+    <para>
+COMEDI_EV_STOP
+    </para>
+  </listitem>
+</itemizedlist>
+
+</section>
+
+<section>
+<title>
+Analog Triggering
+</title>
+
+<simplelist>
+  <member>
+Status: alpha
+  </member>
+  <member>
+ID: not assigned
+  </member>
+  <member>
+Implementation: ni_mio_common
+  </member>
+  <member>
+Chanspec: ignored
+  </member>
+</simplelist>
+
+<simplelist>
+  <member>
+data 1  - trigger and combining machine configuration
+  </member>
+  <member>
+data 2  - analog triggering signal chanspec
+  </member>
+  <member>
+data 3  - primary analog level
+  </member>
+  <member>
+data 4  - secondary analog level
+  </member>
+</simplelist>
+
+<para>
+Analog triggering is described by a digital combining machine that
+has two sensitive digital inputs.  The sensitive digital inputs are
+generated by configurable analog comparators.  The analog comparators
+generate a digital 1 when the analog triggering signal is greater
+than the comparator level.  The digital inputs are not modifier
+inputs.  Note, however, there is an effective modifier due to the
+restriction that the primary analog comparator level must be less
+than the secondary analog comparator level.
+</para>
+
+<para>
+If only one analog comparator signal is used, the combining machine
+for the secondary input should be set to ignored, and the secondary
+analog level should be set to 0.
+</para>
+
+<para>
+The interpretation of the chanspec and voltage levels is device
+dependent, but should correspond to similar values of the analog
+input subdevice, if possible.
+</para>
+
+<para>
+Notes:  Reading range information is not addressed.  This makes it
+difficult to convert comparator voltages to data values.
+</para>
+
+<para>
+Possible extensions: A parameter that specifies the necessary time
+that the set condition has to be true before the trigger is generated.
+A parameter that specifies the necessary time that the reset condition
+has to be true before the state machine is reset.
+</para>
+
+</section>
+
+<section>
+<title>
+Bitfield Pattern Matching Extended Trigger
+</title>
+
+<simplelist>
+  <member>
+Status: design
+  </member>
+  <member>
+ID: not assigned
+  </member>
+  <member>
+Chanspec: ignored
+  </member>
+</simplelist>
+
+<simplelist>
+  <member>
+data 1  - trigger flags
+  </member>
+  <member>
+data 2  - mask
+  </member>
+  <member>
+data 3  - pattern
+  </member>
+</simplelist>
+
+<para>
+The pattern matching trigger issues a trigger when all of a specifed 
+set of input lines match a specified pattern.  If the device allows,
+the input lines should correspond to the input lines of a digital input
+subdevice, however, this will necessarily be device dependent.  Each
+possible digital line that can be matched is assigned a bit in the
+mask and pattern.  A bit set in the mask indicates that the
+input line must match the corresponding bit in the pattern.
+A bit cleared in the mask indicates that the input line is ignored.
+</para>
+
+<para>
+Notes: This only allows 32 bits in the pattern/mask, which may be
+too few.  Devices may support selecting different sets of lines from
+which to match a pattern.
+</para>
+
+<para>
+Discovery: The number of bits can be discovered by setting the mask
+to all 1's.  The driver must modify this value and return -EAGAIN.
+</para>
+
+</section>
+
+<section>
+<title>
+Counter configuration
+</title>
+
+<simplelist>
+  <member>
+Status: design
+  </member>
+  <member>
+ID: not assigned
+  </member>
+  <member>
+Chanspec: used to specify counter
+  </member>
+</simplelist>
+
+<simplelist>
+  <member>
+data 1  - trigger configuration
+  </member>
+  <member>
+data 2  - primary input chanspec
+  </member>
+  <member>
+data 3  - primary combining machine configuration
+  </member>
+  <member>
+data 4  - secondary input chanspec
+  </member>
+  <member>
+data 5  - secondary combining machine configuration
+  </member>
+  <member>
+data 6  - latch configuration
+  </member>
+</simplelist>
+
+<para>
+Counters can be operated either in synchronous mode (using insn_read)
+or asynchronous mode (using commands), similar to analog input subdevices.
+The input signal for both modes is the accumulator.
+Commands on counter subdevices are almost always specified using
+scan_begin_src=TRIG_OTHER, with the counter configuration also serving
+as the extended configuration for the scan begin source.
+</para>
+
+<para>
+Counters are made up of an accumulator and a combining machine that
+determines when the accumulator should be incremented or decremented
+based on the values of the input signals.  The combining machine
+optionally determines when the accumulator should be latched and
+put into a buffer.  This feature is used in asynchronous mode.
+</para>
+
+<para>
+Notes: How to access multiple pieces of data acquired at each event?
+</para>
+
+</section>
+
+<section>
+<title>
+One source plus auxiliary counter configuration
+</title>
+
+<simplelist>
+  <member>
+Status: design
+  </member>
+  <member>
+ID: not assigned
+  </member>
+  <member>
+Chanspec: ?
+  </member>
+</simplelist>
+
+<para>
+data[1] is flags, including the flags for the command triggering
+configuration.  If a command is not subsequently issued on the
+subdevice, the command triggering portion of the flags are ignored.
+</para>
+
+<para>
+data[2] determines the mode of operation.  The mode of operation
+is actually a bitfield that encodes what to do for various
+transitions of the source signals.
+</para>
+
+<para>
+data[3] and data[4] determine the primary source for the counter,
+similar to _src and _arg used in commands.
+</para>
+
+
+<para>
+Notes: How to specify which events cause a latch and push, and what
+should get latched.
+</para>
+</section>
+
+</section>
+</section>
+
+
