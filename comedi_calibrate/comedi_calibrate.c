@@ -651,7 +651,8 @@ int get_bipolar_lowgain(comedi_t *dev,int subdev)
 
 	for(i=0;i<n_ranges;i++){
 		range = comedi_get_range(dev,subdev,0,i);
-		if(range->min != -range->max)continue;
+		/* This method is better than a direct test, which might fail */
+		if((range->min+range->max)>(range->max*0.0001))continue;
 		if(range->max>max){
 			ret = i;
 			max=range->max;
@@ -671,7 +672,8 @@ int get_bipolar_highgain(comedi_t *dev,int subdev)
 
 	for(i=0;i<n_ranges;i++){
 		range = comedi_get_range(dev,subdev,0,i);
-		if(range->min != -range->max)continue;
+		/* This method is better than a direct test, which might fail */
+		if((range->min+range->max)>(range->max*0.0001))continue;
 		if(range->max<min){
 			ret = i;
 			min=range->max;
@@ -796,6 +798,8 @@ int comedi_data_read_n(comedi_t *it,unsigned int subdev,unsigned int chan,
 	printf("insn barfed: subdev=%d, chan=%d, range=%d, aref=%d, "
 		"n=%d, ret=%d, %s\n",subdev,chan,range,aref,n,ret,
 		strerror(errno));
+	printf("please report this error\n");
+	exit(1);
 
 	return ret;
 }
