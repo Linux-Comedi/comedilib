@@ -1,13 +1,14 @@
 Summary: Data Acquisition library for the Comedi DAQ driver.
 Name: comedilib
-Version: 0.7.18
+Version: 0.7.19.1
 Release: 1
-Copyright: GPL
+License: LGPL
 Group: System Environment/Kernel
-Source: http://www.comedi.org/comedi/download/comedilib-0.7.18.tgz
-Patch: comedilib.patch
+URL: http://www.comedi.org/
+Source: http://www.comedi.org/comedi/download/comedilib-0.7.19.tgz
 BuildRoot: /var/tmp/%{name}-buildroot
-requires: comedi >= 0.7.63, kernel = 2.4.7, kernel-source = 2.4.7
+Prereq: /sbin/ldconfig
+BuildRequires: python
 provides: comedilib
 
 %description
@@ -15,81 +16,75 @@ Comedilib is the library for the Comedi data acquisition driver
 for Linux.  It allows Linux processes to acquire data from
 supported DAQ cards, such as those from National Instruments.
 
+%package devel
+Summary: Libraries/include files for Comedi
+Group: Development/Libraries
+
+%description devel
+Comedilib is a library for using Comedi, a driver interface for data
+acquisition hardware.
+
 %prep
 %setup -q
-%patch -p1 -b .buildroot
 
 %build
 #called when the rpm is built
+CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS ; \
+./configure \
+  --prefix=%{_prefix} \
+  --mandir=%{_mandir} \
+  --datadir=%{_datadir} \
+  --sysconfdir=%{_sysconfdir} \
+  --disable-dependency-tracking
+
 make
 
 
 %install
-#install also gets called while compiling the RPM
-#apparently rpm requires all the files it archives to be located
-#in $RPM_BUILD_ROOT, so we copy over the files we need to save
-rm -rf $RPM_BUILD_ROOT
-#mkdir -p $RPM_BUILD_ROOT/usr/include
+[ -n "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf $RPM_BUILD_ROOT
 
-#lets try copying the install sequence...
-install -d $RPM_BUILD_ROOT/usr/include
-install -m 644 include/comedilib.h $RPM_BUILD_ROOT/usr/include
-install -m 644 include/comedi.h $RPM_BUILD_ROOT/usr/include
+%makeinstall
 
-install -d $RPM_BUILD_ROOT/usr/lib
-install -m 644 lib/libcomedi.a $RPM_BUILD_ROOT/usr/lib
-install lib/libcomedi.so.0.7.18 $RPM_BUILD_ROOT/usr/lib
+# Clean out files that should not be part of the rpm. 
+# This is the recommended way of dealing with it for RH8
+rm -f $RPM_BUILD_ROOT%{_libdir}/*.a
+rm -f $RPM_BUILD_ROOT%{_libdir}/*.la
 
-install -d $RPM_BUILD_ROOT/usr/sbin
-install -d $RPM_BUILD_ROOT/usr/bin
-install -s -m 755 comedi_config/comedi_config $RPM_BUILD_ROOT/usr/sbin
-install -s -m 755 comedi_calibrate/comedi_calibrate $RPM_BUILD_ROOT/usr/bin
-
-install -d $RPM_BUILD_ROOT/usr/share/doc/libcomedi
-install README `find doc -type f` $RPM_BUILD_ROOT/usr/share/doc/libcomedi
-install -d $RPM_BUILD_ROOT/usr/share/man/man7
-install -d $RPM_BUILD_ROOT/usr/share/man/man8
-install man/*.7 $RPM_BUILD_ROOT/usr/share/man/man7
-install man/*.8 $RPM_BUILD_ROOT/usr/share/man/man8
-
-#I'm not sure if I should include the demos or not, but
-install -d $RPM_BUILD_ROOT/usr/local/comedilib/demo
-cp demo/*.c $RPM_BUILD_ROOT/usr/local/comedilib/demo
-cp demo/*.h $RPM_BUILD_ROOT/usr/local/comedilib/demo
-cp demo/Makefile $RPM_BUILD_ROOT/usr/local/comedilib/demo
+# Move files
+mv $RPM_BUILD_ROOT%{_datadir}/comedilib $RPM_BUILD_ROOT%{_datadir}/comedilib-devel
 
 %post
-#post gets called on the user's system after the files have been copied over
-#"make install" calls install_dev, install_runtime, and install_doc:
-
-(cd /usr/lib;ln -sf libcomedi.so.0.7.18 libcomedi.so)
-(cd /usr/lib;ln -sf libcomedi.so.0.7.18 libcomedi.so.0)
-
-#ldconfig?
+/sbin/ldconfig
 
 %postun
-#postun is called after the files have been uninstalled
+/sbin/ldconfig
 
 %clean
-#clean can be called after building the package
+[ -n "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf $RPM_BUILD_ROOT
 
 %files
-%defattr(-,root,root)
-#add whatever files here
-/usr/include/comedilib.h
-/usr/include/comedi.h
-/usr/lib/libcomedi.so.0.7.18
-/usr/lib/libcomedi.a
-/usr/sbin/comedi_config
-/usr/bin/comedi_calibrate
-/usr/share/doc/libcomedi/
-/usr/share/man/man7/comedi.7.gz
-/usr/share/man/man8/comedi_calibrate.8.gz
-/usr/share/man/man8/comedi_config.8.gz
-/usr/local/comedilib/
+%defattr(-,root,root,-)
+%doc AUTHORS COPYING README TODO ChangeLog NEWS
+%{_libdir}/libcomedi0.so
+%{_libdir}/libcomedi.so.*
+%{_libdir}/python2.2/site-packages/*.so
+%{_libdir}/python2.2/site-packages/comedi.py
+%{_sbindir}/comedi_*
+%{_bindir}/comedi_*
+%{_mandir}/man7/*
+%{_mandir}/man8/*
 
+%files devel
+%defattr(-,root,root,-)
+%{_libdir}/libcomedi.a
+%{_includedir}/comedi*.h
+%{_mandir}/man3/*
+%{_datadir}/comedilib-devel/html/*
 
 %changelog
 * Wed Feb 21 2002 Tim Ousley <tim.ousley@ni.com>
 - initial build of comedilib RPM
+
+* Tue Jun 03 2002 David Schleef <ds@schleef.org>
+- update for new build system
 
