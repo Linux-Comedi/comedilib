@@ -316,7 +316,7 @@ int main(int argc,char *argv[])
 		// do buffer resizing
 		if(read_buf_size)
 		{
-			if(devinfo.read_subdevice){
+			if(devinfo.read_subdevice < 0){
 				fprintf(stderr,_("warning: no read subdevice, resize ignored\n"));
 			}else{
 				memset(&bc, 0, sizeof(bc));
@@ -337,7 +337,7 @@ int main(int argc,char *argv[])
 		}
 		if(write_buf_size)
 		{
-			if(devinfo.write_subdevice){
+			if(devinfo.write_subdevice < 0){
 				fprintf(stderr,_("warning: no write subdevice, resize ignored\n"));
 			}else{
 				memset(&bc, 0, sizeof(bc));
