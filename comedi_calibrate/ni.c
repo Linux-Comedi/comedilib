@@ -70,7 +70,7 @@ static struct board_struct boards[]={
 	{ "at-mio-16e-1",	STATUS_SOME,	cal_ni_at_mio_16e_1 },
 	{ "pci-mio-16e-1",	STATUS_DONE,	cal_ni_pci_mio_16e_1 },
 	{ "pci-6025e",		STATUS_SOME,	cal_ni_pci_6025e },
-	{ "pci-6035e",		STATUS_GUESS,	cal_ni_pci_6035e },
+	{ "pci-6035e",		STATUS_SOME,	cal_ni_pci_6035e },
 	{ "pci-6071e",		STATUS_SOME,	cal_ni_pci_6071e },
 	{ "pxi-6071e",		STATUS_GUESS,	cal_ni_pxi_6071e },
 	{ "at-mio-16e-10",	STATUS_GUESS,	cal_ni_at_mio_16e_10 },
@@ -384,12 +384,20 @@ int cal_ni_pci_mio_16e_1(calibration_setup_t *setup)
 
 int cal_ni_pci_6035e(calibration_setup_t *setup)
 {
-	// 6035e (old)
-	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,1);
+	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,4);
+
 	cal1( setup, ni_zero_offset_high,0);
-	cal1( setup, ni_reference_low,3);
+	cal1( setup, ni_zero_offset_high,8);
+
+	cal1( setup, ni_reference_low,2);
+
 	if(do_output){
-		// unknown
+		cal1( setup, ni_ao0_zero_offset,6);
+		//cal1( setup, ni_ao0_zero_offset,10); /* linearity? */
+		cal1( setup, ni_ao0_reference,11);
+		cal1( setup, ni_ao1_zero_offset,9);
+		//cal1( setup, ni_ao1_zero_offset,1); /* linearity? */
+		cal1( setup, ni_ao1_reference,5);
 	}
 	return 0;
 }
