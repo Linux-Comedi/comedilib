@@ -1,6 +1,6 @@
 
 noinst_PROGRAMS = \
-	antialias ao_waveform apply_cal cmd dio eeprom_dump info \
+	antialias ao_waveform ao_mmap apply_cal cmd dio eeprom_dump info \
 	inp inpn insn ledclock mmap outp poll receiver select \
 	sender sigio sv tut1 tut2
 
@@ -13,6 +13,10 @@ antialias_LDADD = $(COMEDILIB_LIBS)
 ao_waveform_SOURCES = ao_waveform.c common.c
 ao_waveform_CFLAGS = $(COMEDILIB_CFLAGS)
 ao_waveform_LDADD = $(COMEDILIB_LIBS)
+
+ao_mmap_SOURCES = ao_mmap.c common.c
+ao_mmap_CFLAGS = $(COMEDILIB_CFLAGS)
+ao_mmap_LDADD = $(COMEDILIB_LIBS)
 
 apply_cal_SOURCES = apply_cal.c common.c
 apply_cal_CFLAGS = $(COMEDILIB_CFLAGS)
