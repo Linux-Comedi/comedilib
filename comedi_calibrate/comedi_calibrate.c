@@ -182,6 +182,7 @@ ok:
 	setup.da_subdev = da_subdev;
 	setup.eeprom_subdev = eeprom_subdev;
 	setup.caldac_subdev = caldac_subdev;
+	setup.settling_time_ns = 99999;
 
 	retval = this_board->init_setup( &setup, devicename );
 	if( retval < 0 ){
@@ -309,10 +310,7 @@ void measure_observable( calibration_setup_t *setup, int obs)
 	new_sv_init(&sv, setup->dev,
 		setup->observables[obs].observe_insn.subdev,
 		setup->observables[obs].observe_insn.chanspec);
-	sv.order=7;
-	// read internal calibration source and turn on dithering
-	//sv.cr_flags = CR_ALT_FILTER | CR_ALT_SOURCE;
-	//sv.cr_flags = CR_ALT_FILTER;
+	sv.settling_time_ns = setup->settling_time_ns;
 	n = new_sv_measure(setup->dev, &sv);
 
 	sci_sprint_alt(s,sv.average,sv.error);
@@ -440,6 +438,7 @@ void cal_binary( calibration_setup_t *setup, int obs, int dac)
 	x2 = setup->caldacs[dac].maxdata;
 
 	new_sv_init(&sv, setup->dev,0,chanspec);
+	sv.settling_time_ns = setup->settling_time_ns;
 	setup->caldacs[dac].current = x1;
 	update_caldac( setup, dac );
 	usleep(100000);
@@ -447,6 +446,7 @@ void cal_binary( calibration_setup_t *setup, int obs, int dac)
 	y1 = sv.average;
 
 	new_sv_init(&sv, setup->dev,0,chanspec);
+	sv.settling_time_ns = setup->settling_time_ns;
 	setup->caldacs[dac].current = x2;
 	update_caldac( setup, dac );
 	usleep(100000);
@@ -459,6 +459,7 @@ void cal_binary( calibration_setup_t *setup, int obs, int dac)
 		DPRINT(3,"trying %d\n",x);
 
 		new_sv_init(&sv, setup->dev,0,chanspec);
+		sv.settling_time_ns = setup->settling_time_ns;
 		setup->caldacs[dac].current = x;
 		update_caldac( setup, dac );
 		usleep(100000);
@@ -505,10 +506,12 @@ void cal_postgain_binary( calibration_setup_t *setup, int obs1, int obs2, int da
 	usleep(100000);
 	preobserve( setup, obs1);
 	new_sv_init(&sv1, setup->dev,0,chanspec1);
+	sv1.settling_time_ns = setup->settling_time_ns;
 	new_sv_measure( setup->dev, &sv1);
 	y1 = sv1.average;
 	preobserve( setup, obs2);
 	new_sv_init(&sv2, setup->dev,0,chanspec2);
+	sv2.settling_time_ns = setup->settling_time_ns;
 	new_sv_measure( setup->dev, &sv2);
 	y1 -= sv2.average;
 
@@ -517,10 +520,12 @@ void cal_postgain_binary( calibration_setup_t *setup, int obs1, int obs2, int da
 	usleep(100000);
 	preobserve( setup, obs1);
 	new_sv_init(&sv1, setup->dev,0,chanspec1);
+	sv1.settling_time_ns = setup->settling_time_ns;
 	new_sv_measure( setup->dev, &sv1);
 	y2 = sv1.average;
 	preobserve( setup, obs2);
 	new_sv_init(&sv2, setup->dev,0,chanspec2);
+	sv2.settling_time_ns = setup->settling_time_ns;
 	new_sv_measure( setup->dev, &sv2);
 	y2 -= sv2.average;
 
@@ -535,10 +540,12 @@ void cal_postgain_binary( calibration_setup_t *setup, int obs1, int obs2, int da
 
 		preobserve( setup, obs1);
 		new_sv_init(&sv1, setup->dev,0,chanspec1);
+		sv1.settling_time_ns = setup->settling_time_ns;
 		new_sv_measure( setup->dev, &sv1);
 		y = sv1.average;
 		preobserve( setup, obs2);
 		new_sv_init(&sv2, setup->dev,0,chanspec2);
+		sv2.settling_time_ns = setup->settling_time_ns;
 		new_sv_measure( setup->dev, &sv2);
 		y -= sv2.average;
 
@@ -723,9 +730,7 @@ double check_gain_chan_x( calibration_setup_t *setup, linear_fit_t *l,unsigned i
 	orig = setup->caldacs[cdac].current;
 
 	new_sv_init(&sv, setup->dev,0,ad_chanspec);
-	// read internal calibration source and turn on dithering
-	//sv.cr_flags = CR_ALT_FILTER | CR_ALT_SOURCE;
-	//sv.cr_flags = CR_ALT_FILTER;
+	sv.settling_time_ns = setup->settling_time_ns;
 
 	setup->caldacs[cdac].current=0;
 	update_caldac( setup, cdac );
@@ -799,9 +804,7 @@ double check_gain_chan_fine( calibration_setup_t *setup, linear_fit_t *l,unsigne
 	orig = setup->caldacs[cdac].current;
 
 	new_sv_init(&sv, setup->dev,0,ad_chanspec);
-	// read internal calibration source and turn on dithering
-	//sv.cr_flags = CR_ALT_FILTER | CR_ALT_SOURCE;
-	//sv.cr_flags = CR_ALT_FILTER;
+	sv.settling_time_ns = setup->settling_time_ns;
 
 	setup->caldacs[cdac].current=0;
 	update_caldac( setup, cdac );
@@ -937,8 +940,7 @@ double read_chan( calibration_setup_t *setup, int adc,int range)
 	char str[20];
 
 	new_sv_init(&sv, setup->dev, 0,CR_PACK(adc,range,AREF_OTHER));
-	sv.order=7;
-	//sv.cr_flags = CR_ALT_FILTER;
+	sv.settling_time_ns = setup->settling_time_ns;
 
 	n=new_sv_measure( setup->dev, &sv);
 
@@ -954,9 +956,7 @@ int read_chan2( calibration_setup_t *setup, char *s,int adc,int range)
 	new_sv_t sv;
 
 	new_sv_init(&sv, setup->dev,0,CR_PACK(adc,range,AREF_OTHER));
-	sv.order=7;
-	// turn on dithering
-	//sv.cr_flags = CR_ALT_FILTER;
+	sv.settling_time_ns = setup->settling_time_ns;
 
 	n=new_sv_measure( setup->dev, &sv);
 
@@ -1017,8 +1017,7 @@ int new_sv_measure( comedi_t *dev, new_sv_t *sv)
 		printf("hint barf\n");
 		goto out;
 	}
-	comedi_nanodelay(dev, 1000*99);
-	//usleep( 1000 );
+	comedi_nanodelay(dev, sv->settling_time_ns);
 
 	ret = comedi_data_read_n(dev, sv->subd, sv->chanspec, 0, 0, data, n);
 	if(ret<0){

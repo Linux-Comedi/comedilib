@@ -54,6 +54,7 @@ struct calibration_setup_struct {
 	int eeprom_subdev;
 	int caldac_subdev;
 	int status;
+	unsigned int settling_time_ns;
 	observable observables[ N_OBSERVABLES ];
 	unsigned int n_observables;
 	caldac caldacs[ N_CALDACS ];
@@ -176,6 +177,7 @@ typedef struct{
 	int order;
 	int subd;
 	unsigned int chanspec;
+	unsigned int settling_time_ns;
 
 	comedi_range *rng;
 

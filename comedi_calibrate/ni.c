@@ -341,6 +341,8 @@ void ni_setup_observables_611x( calibration_setup_t *setup )
 	int num_chans;
 	int cal_gain_reg_bits;
 
+	setup->settling_time_ns = 1000000;
+
 	range = 2;
 
 	voltage_reference = 5.000;
