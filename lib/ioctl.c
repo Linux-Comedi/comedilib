@@ -39,3 +39,15 @@
 /* ioctl wrappers */
 
 
+int comedi_ioctl_debug(int fd, int request, unsigned long arg)
+{
+	int ret;
+
+	fprintf(stderr,"ioctl(%d,0x%08x,0x%08lx) = ",fd,request,arg);
+	ret = ioctl(fd,request,arg);
+	fprintf(stderr,"%d\n",ret);
+
+	return ret;
+}
+
+

@@ -107,7 +107,7 @@ int sv_measure_l(comedi_sv_t *it,double *data)
 	for(n=0;n<it->n;){
 		t.data=(void *)(val+n);
 		t.n=it->n-n;
-		i = ioctl(it->dev->fd, COMEDI_TRIG, &t);
+		i = comedi_ioctl(it->dev->fd, COMEDI_TRIG, (unsigned long)&t);
 		if(i<=0){
 			ret=i;
 			goto out;
@@ -160,7 +160,7 @@ int sv_measure_s(comedi_sv_t *it,double *data)
 	for(n=0;n<it->n;){
 		t.data=val+n;
 		t.n=it->n-n;
-		i = ioctl(it->dev->fd, COMEDI_TRIG, &t);
+		i = comedi_ioctl(it->dev->fd, COMEDI_TRIG, (unsigned long)&t);
 		if(i<=0){
 			ret=i;
 			goto out;

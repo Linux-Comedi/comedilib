@@ -65,7 +65,7 @@ comedi_t *comedi_open(const char *fn)
 		goto cleanup;
 	}
 
-	if(ioctl(it->fd, COMEDI_DEVINFO, &it->devinfo)<0)
+	if(comedi_ioctl(it->fd, COMEDI_DEVINFO, (unsigned long)&it->devinfo)<0)
 		goto cleanup;
 
 	it->n_subdevices=it->devinfo.n_subdevs;
@@ -124,12 +124,12 @@ int comedi_close(comedi_t *it)
 
 int comedi_cancel(comedi_t *it,unsigned int subdevice)
 {
-	return ioctl(it->fd,COMEDI_CANCEL,subdevice);
+	return comedi_ioctl(it->fd,COMEDI_CANCEL,subdevice);
 }
 
 int comedi_poll(comedi_t *it,unsigned int subdevice)
 {
-	return ioctl(it->fd,COMEDI_POLL,subdevice);
+	return comedi_ioctl(it->fd,COMEDI_POLL,subdevice);
 }
 
 int comedi_fileno(comedi_t *it)
@@ -145,13 +145,13 @@ int comedi_trigger(comedi_t *it,comedi_trig *t)
 	if(!it || !t)
 		return -1;
 
-	return ioctl(it->fd, COMEDI_TRIG, t);
+	return comedi_ioctl(it->fd, COMEDI_TRIG, (unsigned long)t);
 }
 
 int comedi_command(comedi_t *it,comedi_cmd *t)
 {
 	int ret;
-	ret = ioctl(it->fd,COMEDI_CMD,t);
+	ret = comedi_ioctl(it->fd, COMEDI_CMD, (unsigned long)t);
 	__comedi_errno = errno;
 	switch(__comedi_errno){
 	case EIO:
@@ -164,7 +164,7 @@ int comedi_command(comedi_t *it,comedi_cmd *t)
 int comedi_command_test(comedi_t *it,comedi_cmd *t)
 {
 	int ret;
-	ret = ioctl(it->fd,COMEDI_CMDTEST,t);
+	ret = comedi_ioctl(it->fd, COMEDI_CMDTEST, (unsigned long)t);
 	__comedi_errno = errno;
 	switch(__comedi_errno){
 	case EIO:
@@ -177,7 +177,7 @@ int comedi_command_test(comedi_t *it,comedi_cmd *t)
 int comedi_do_insnlist(comedi_t *it,comedi_insnlist *il)
 {
 	int ret;
-	ret = ioctl(it->fd,COMEDI_INSNLIST,il);
+	ret = comedi_ioctl(it->fd, COMEDI_INSNLIST, (unsigned long)il);
 	__comedi_errno = errno;
 	return ret;
 }
@@ -185,7 +185,7 @@ int comedi_do_insnlist(comedi_t *it,comedi_insnlist *il)
 int comedi_do_insn(comedi_t *it,comedi_insn *insn)
 {
 	if(it->has_insn_ioctl){
-		return ioctl(it->fd,COMEDI_INSN,insn);
+		return comedi_ioctl(it->fd, COMEDI_INSN, (unsigned long)insn);
 	}else{
 		comedi_insnlist il;
 		int ret;
@@ -193,7 +193,7 @@ int comedi_do_insn(comedi_t *it,comedi_insn *insn)
 		il.n_insns = 1;
 		il.insns = insn;
 
-		ret = ioctl(it->fd,COMEDI_INSNLIST,&il);
+		ret = comedi_ioctl(it->fd, COMEDI_INSNLIST, (unsigned long)&il);
 
 		if(ret<0)return ret;
 		return insn->n;
@@ -202,11 +202,11 @@ int comedi_do_insn(comedi_t *it,comedi_insn *insn)
 
 int comedi_lock(comedi_t *it,unsigned int subdevice)
 {
-	return ioctl(it->fd,COMEDI_LOCK,subdevice);
+	return comedi_ioctl(it->fd, COMEDI_LOCK, subdevice);
 }
 
 int comedi_unlock(comedi_t *it,unsigned int subdevice)
 {
-	return ioctl(it->fd,COMEDI_UNLOCK,subdevice);
+	return comedi_ioctl(it->fd, COMEDI_UNLOCK, subdevice);
 }
 
