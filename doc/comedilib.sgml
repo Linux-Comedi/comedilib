@@ -786,6 +786,7 @@ access to the device.
 It is a transparent type, and pointers to type <tt/comedi_t/
 should not be dereferenced by the application.
 
+<p>Source: <tt>/include/comedi.h</tt>
 
 <p>
 <sect2>sampl_t
@@ -793,20 +794,29 @@ should not be dereferenced by the application.
 
 <p>
 The data type <tt/sampl_t/ is one of the generic types used to represent
-data values in libcomedi.  It is used in a few places where a shorter
-data type is useful, but is limited to 16 bits on the i386 architecture.
+data values in libcomedi.  It is used in a few places where a data type
+shorter than <tt/lsampl_t/ is useful.  On most architectures, <tt/sampl_t/
+is defined to be <tt/uint16/.
 
+<p>
+Most drivers represent data trasferred by <tt/read()/ and <tt/write()/
+using <tt/sampl_t/.  Applications should check the subdevice flag
+<tt/SDF_LSAMPL/ to determine if the subdevice uses <tt/sampl_t/ or
+<tt/lsampl_t/.
+
+<p>Source: <tt>/include/comedi.h</tt>
 
 <p>
 <sect2>lsampl_t
 <label id="lsampl_t">
 
 <p>
-The data type <tt/lsampl_t/ is one of the generic types used to represent
-data values in libcomedi.  It is currently defined to be <tt/unsigned int/.
+The data type <tt/lsampl_t/ is the data type typically used to represent
+data values in libcomedi.  On most architectures, <tt/lsampl_t/ is
+defined to be <tt/uint32/.
 
 
-
+<p>Source: <tt>/include/comedi.h</tt>
 
 <p>
 <sect2>comedi_trig_struct <it/(deprecated)/
@@ -837,8 +847,7 @@ COMEDI_TRIG ioctl, an older method of communicating
 instructions to the driver and hardware.  Use of comedi_trig is
 deprecated, and should not be used in new applications.
 
-<p>
-This structure is defined as part of the Comedi kernel interface.
+<p>Source: <tt>/include/comedi.h</tt>
 
 <p>
 <sect2>comedi_sv_t
@@ -867,6 +876,7 @@ functions to provide a simple method of accurately measuring
 slowly varying inputs.  See the relevant section for more
 details.
 
+<p>Source: <tt>comedilib.h</tt>
 
 <p>
 <sect2>comedi_cmd
@@ -907,31 +917,111 @@ struct comedi_cmd_struct{
 More information on using commands can be found in the
 <ref id="command_section" name="command"> section.
 
-<p>
-This structure is defined as part of the Comedi kernel interface.
+<p>Source: <tt>comedilib.h</tt>
 
 <p>
 <sect2>comedi_insn
 <label id="comedi_insn">
 <p>
 
-undocumented
+<tscreen><verb>
+typedef struct comedi_insn_struct comedi_insn;
+
+struct comedi_insn_struct{
+	unsigned int insn;
+	unsigned int n;
+	lsampl_t *data;
+	unsigned int subdev;
+	unsigned int chanspec;
+	unsigned int unused[3];
+};
+</verb></tscreen>
 
 <p>
-Related functions are described in section XXX.
+Comedi instructions are described by the <tt/comedi_insn/ structure.
+Applications send instructions to the driver in order to preform
+control and measurement operations that are done immediately or
+synchronously, i.e., the operations complete before program control
+returns to the application.  In particular, instructions cannot
+describe acquisition that involves timers or external events.
 
 <p>
-This structure is defined as part of the Comedi kernel interface.
+The field <tt/insn/ determines the type of instruction that is sent
+to the driver.  Valid instruction types are
 
+<itemize>
+<item>INSN_READ read values from an input channel
+<item>INSN_WRITE write values to an output channel
+<item>INSN_BITS read/write values on multiple digital I/O channels
+<item>INSN_CONFIG configure a subdevice
+<item>INSN_GTOD read a timestamp, identical to <tt/gettimeofday()/
+<item>INSN_WAIT wait a specified number of nanoseconds
+</itemize>
+
+<p>
+The number of samples to read or write, or the size of the configuration
+structure is specified by the field <tt/n/, and the buffer for those
+samples by <tt/data/.  The field <tt/subdev/ is the subdevice index
+that the instruction is sent to.  The field <tt/chanspec/ specifies
+the channel, range, and analog reference (if applicable).
+
+<p>
+Instructions can be sent to drivers using <tt/comedi_do_insn()/.
+Multiple instructions can be sent to drivers in the same system
+call using <tt/comedi_do_insnlist()/.
+
+<p>Source: <tt>comedi.h</tt>
 
 <p>
 <sect2>comedi_range
 <label id="comedi_range">
 <p>
 
-undocumented
+<tscreen><verb>
+typedef struct{
+	double min;
+	double max;
+	unsigned int unit;
+}comedi_range;
+</verb></tscreen>
+
+<p>
+The <tt/comedi_range/ structure conveys part of the information
+necessary to translate sample values to physical units, in particular,
+the endpoints of the range and the physical unit type.  The
+physical unit type is specified by the field <tt/unit/, which may
+take the values <tt/UNIT_volt/ for volts, <tt/UNIT_mA/ for milliamps,
+or <tt/UNIT_none/ for unitless.  The endpoints are specified by
+the fields <tt/min/ and <tt/max/.
+
+<p>
+XXX RF_EXTERNAL 
+
+<p>Source: <tt>comedilib.h</tt>
 
 
+<p>
+<sect2>comedi_krange
+<label id="comedi_krange">
+<p>
+
+<tscreen><verb>
+struct comedi_krange_struct{
+	int min;
+	int max;
+	unsigned int flags;
+};
+</verb></tscreen>
+
+<p>
+The <tt/comedi_krange/ structure is used to transfer range information
+between the driver and Comedilib, and should not normally be used
+by applications.  The structure conveys the same information as the
+<tt/comedi_range/ structure, except the fields <tt/min/ and <tt/max/
+are integers, multiplied by a factor of 1000000 compared to the
+counterparts in <tt/comedi_range/.
+
+<p>Source: <tt>comedi.h</tt>
 
 <sect1>Functions
 <p>
@@ -1113,11 +1203,6 @@ output channel.  Each digital input channel is read, and the result
 placed in the approprate bits in <tt/*bits/.
 
 <p>
-The current implementation reads and writes bits using separate
-system calls, which is not ideal.  When the kernel driver supports
-simultaneous reading/writing, this will be fixed in the library.
-
-<p>
 It should be noted that it is not possible to access channels
 greater than 31 using this function.
 
@@ -1157,7 +1242,7 @@ chan,unsigned int *bit);/
 <p>
 The function reads the status of channel <tt/chan/ belonging to the digital
 input subdevice <tt/subd/ of device <tt/it/. The result, 0 or 1, is stored
-in bit. Returns -1 on failure.
+in <tt/bit/. Returns -1 on failure.
 
 <p>
 This function is equivalent to <tt/comedi_data_read(it,subd,chan,0,0,bit)/.
@@ -1177,20 +1262,24 @@ belonging to the digital output device <tt/subd/ of device <tt/it/. Returns
 -1 on failure.
 
 <p>
+This function is equivalent to <tt/comedi_data_write(it,subd,chan,0,0,bit)/.
+
+<p>
 Source: <tt>/lib/dio.c</tt>
 
 <p>
 <sect2>comedi_fileno()
 <p>
 
-<tt/int comedi_fileno(comedi_t *it);/
+<tt/int comedi_fileno(comedi_t *dev);/
 <p>
 
 The function <tt/comedi_fileno/
-returns the integer descriptor for the handle <tt/it/.  It
-is equivalent to the standard function <tt/fileno/.  If
-<tt>it</tt> is an invalid <tt>comedi_t</tt> pointer, the function
-returns -1 and sets the appropriate libcomedi error value.
+returns the integer descriptor for the device <tt/dev/.  It
+is functionally similar to the standard C library function
+<tt/fileno()/.  If <tt>dev</tt> is an invalid <tt>comedi_t</tt>
+pointer, the function returns -1 and sets the appropriate
+libcomedi error value.
 
 Source: <tt>/lib/comedi.c</tt>
 
@@ -1207,8 +1296,9 @@ The function <tt/comedi_find_range/ tries to
 locate the optimal (smallest) range for the channel <tt>chan</tt>
 belonging to a <tt>subdevice</tt> of the comedi device <tt>it</tt>,
 that includes both <tt>min</tt> and <tt>max</tt> in <tt>units</tt>.
-If it finds a matching range, it returns its index.  If no
-matching range is available, it returns -1.
+If a matching range is found, the index of the matching range is
+returned.  If no matching range is available, the function returns
+-1.
 
 <p>
 Valid units are:
