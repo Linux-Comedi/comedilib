@@ -925,7 +925,8 @@ void setup_caldacs( calibration_setup_t *setup, int caldac_subdev )
 	for(i = 0; i < n_chan; i++){
 		setup->caldacs[ setup->n_caldacs + i ].subdev = caldac_subdev;
 		setup->caldacs[ setup->n_caldacs + i ].chan = i;
-		setup->caldacs[ setup->n_caldacs + i ].maxdata = comedi_get_maxdata( setup->dev, caldac_subdev, i);
+		setup->caldacs[ setup->n_caldacs + i ].maxdata = comedi_get_maxdata(setup->dev, caldac_subdev, i);
+		assert(setup->caldacs[ setup->n_caldacs + i ].maxdata > 0);
 		setup->caldacs[ setup->n_caldacs + i ].current=0;
 	}
 
