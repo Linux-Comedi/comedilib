@@ -1,4 +1,18 @@
 
+GETTING STARTED:
+
+After installing comedi and comedilib, cd to this directory (comedilib*/demo).
+
+Use ./info for a very first test. If hardware and software are correctly
+installed, the program prints a list of subdevices it recognises. If the
+device is not /dev/comedi0, you can use the command-line option
+'-f <device file>'.
+
+Continue with ./inp -s <subdevice> -c <channel> to read individual samples,
+or with ./outp -s <subdevice> -c <channel> <integer value> to set an
+output value.
+
+
 Examples
 
 
@@ -8,7 +22,14 @@ ao_waveform:
 	E series.  Creates a sine wave on an analog output channel.
 
 cmd:
-	Asynchronous input.
+	An example for using Comedi commands.  Comedi commands
+	are used for asynchronous acquisition, with the timing controlled
+	by on-board timers or external events.
+
+dio:
+	Requirements:  A board with a digital I/O subdevice.  Not just
+	a 'digital input' or 'digital output' subdevice, but one in
+	which the channels can be configured between input and output.
 
 eeprom_dump:
 	Dumps the EEPROM of a card, if it has one.  Useful for debugging
@@ -18,7 +39,7 @@ info:
 	Displays some information that Comedi knows about a device.
 
 inp:
-	Simple input demo.  Reads one sample from an input line.
+	Simple input:  Reads one sample from one channel on one subdevice.
 
 inpn:
 	Slightly more complicated input demo.  (It has a for() loop.)
@@ -26,7 +47,41 @@ inpn:
 	range, and converts the data to a voltage.
 
 insn:
-	Example showing how to use instructions directly.
+	Example showing how to use instructions directly. Not
+	recommended for beginners: use higher-level functions such
+	as comedi_data_read(), comedi_data_write(), etc., as demonstrated
+	in the inp, outp, and dio examples.
+
+ledclock:
+	Requirements:  A board with a digital I/O subdevice. Not just
+	a 'digital input' or 'digital output' subdevice, but one in
+	which the channels can be configured between input and output.
+
+main:
+	This is not a demo. The file main.c contains just an auxiliary
+	function. See below.
+
+mmap:
+	Similar to the cmd demo, except the data is obtained through
+	a memory mapping instead of doing read() on /dev/comediX.
+
+outp:
+	Write one <value> to one channel of one subdevice.
+
+receiver:
+	Requirements:  A board with a digital I/O subdevice.  Not just
+	a 'digital input' or 'digital output' subdevice, but one in
+	which the channels can be configured between input and output.
+
+select:
+	An example for using select() with asynchronous input.  This
+	example requires an asynchronous input subdevice that can
+	handle TRIG_TIMER as a scan_begin_src.
+
+sender:
+	Requirements:  A board with a digital I/O subdevice.  Not just
+	a 'digital input' or 'digital output' subdevice, but one in
+	which the channels can be configured between input and output.
 
 sv:
 	Similar to inp, but measures the input using the comedi_sv_*()
