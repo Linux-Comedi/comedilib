@@ -1,0 +1,22 @@
+Document: comedilib
+Title: Debian comedilib Manual
+Author: <insert document author here>
+Abstract: This manual describes what comedilib is
+ and how it can be used to
+ manage online manuals on Debian systems.
+Section: unknown
+
+Format: debiandoc-sgml
+Files: /usr/doc/comedilib/comedilib.sgml.gz
+
+Format: postscript
+Files: /usr/doc/comedilib/comedilib.ps.gz
+
+Format: text
+Files: /usr/doc/comedilib/comedilib.text.gz
+
+Format: HTML
+Index: /usr/doc/comedilib/html/index.html
+Files: /usr/doc/comedilib/html/*.html
+
+  

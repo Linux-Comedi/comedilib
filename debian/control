@@ -1,0 +1,19 @@
+Source: comedilib
+Section: devel
+Priority: optional
+Maintainer: David Schleef <ds@stm.lbl.gov>
+Standards-Version: 3.0.1
+
+Package: libcomedi-dev
+Architecture: any
+Depends: libcomedi0 (= ${Source-Version}), libc6-dev
+Description: Development libary for Comedi
+ Comedilib is a library for using Comedi, a driver interface for data
+ acquisition hardware.
+
+Package: libcomedi0
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: Library for Comedi
+ Comedilib is a library for using Comedi, a driver interface for data
+ acquisition hardware.

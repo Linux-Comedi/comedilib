@@ -2,7 +2,7 @@
 
 
 CFLAGS +=-I ../include -I . -O2
-LDFLAGS=-L../lib/ -lcomedi
+LDFLAGS=-L../lib/ -lcomedi -lm
 
 
 BINS=mode4 mode3 mode2 ao_waveform tut2 cmd tut1

@@ -17,11 +17,9 @@ SUBDIRS= lib demo comedi_calibrate testing
 
 DOCFILES= README INSTALL `find doc -type f`
 
-ifeq ($(CONFIG_USRLOCAL),y)
-INSTALLDIR=/usr/local
-else
-INSTALLDIR=/usr
-endif
+INSTALLDIR=$(DESTDIR)/usr
+INSTALLDIR_LIB=$(DESTDIR)/usr/lib
+INSTALLDIR_DOC=$(DESTDIR)/usr/doc/libcomedi
 
 comedilib:	subdirs
 
@@ -30,12 +28,14 @@ config:	dummy
 install:	dummy
 	install -d ${INSTALLDIR}/include
 	(cd include;install -m 644 comedilib.h ${INSTALLDIR}/include)
-	install lib/libcomedi.so.${VERSION_CODE} ${INSTALLDIR}/lib
-	#ln -s ${INSTALLDIR}/lib/libcomedi.so.${VERSION_CODE} ${INSTALLDIR}/lib/libcomedi.so
-	install -m 644 lib/libcomedi.a ${INSTALLDIR}/lib
-	/sbin/ldconfig -n ${INSTALLDIR}/lib
-	install -d ${INSTALLDIR}/doc/comedilib-${VERSION_CODE}
-	install ${DOCFILES} ${INSTALLDIR}/doc/comedilib-${VERSION_CODE}
+	(cd include;install -m 644 comedi.h ${INSTALLDIR}/include)
+	install lib/libcomedi.so.${VERSION_CODE} ${INSTALLDIR_LIB}
+	(cd $(INSTALLDIR_LIB);ln -s libcomedi.so.${VERSION_CODE} libcomedi.so.${VERSION})
+	(cd $(INSTALLDIR_LIB);ln -s libcomedi.so.${VERSION_CODE} libcomedi.so)
+	install -m 644 lib/libcomedi.a ${INSTALLDIR_LIB}
+	#/sbin/ldconfig -n ${INSTALLDIR}/lib
+	install -d ${INSTALLDIR_DOC}
+	install ${DOCFILES} ${INSTALLDIR_DOC}
 
 lpr:	dummy
 	find . -name '*.[chs]'|xargs enscript -2r -pit.ps
