@@ -62,13 +62,14 @@ int device_status = STATUS_UNKNOWN;
 
 struct board_struct{
 	char *name;
+	char *id;
 	void (*setup)(void);
 };
 
 struct board_struct drivers[] = {
-	{ "ni_pcimio",		ni_setup },
-	{ "ni_atmio",		ni_setup },
-	{ "ni_mio_cs",		ni_setup },
+	{ "ni_pcimio",	ni_id,	ni_setup },
+	{ "ni_atmio",	ni_id,	ni_setup },
+	{ "ni_mio_cs",	ni_id,	ni_setup },
 };
 #define n_drivers (sizeof(drivers)/sizeof(drivers[0]))
 
@@ -187,9 +188,10 @@ ok:
 	if(verbose>=0){
 		char *s = "$Id$";
 
-		printf("%*s\n",strlen(s)-2,s+1);
+		printf("%.*s\n",strlen(s)-2,s+1);
 		printf("Driver name: %s\n",drivername);
 		printf("Device name: %s\n",devicename);
+		printf("%.*s\n",strlen(this_board->id)-2,this_board->id+1);
 		printf("Comedi version: %d.%d.%d\n",
 			(comedi_get_version_code(dev)>>16)&0xff,
 			(comedi_get_version_code(dev)>>8)&0xff,

@@ -83,6 +83,8 @@ void reset_caldacs(void);
 
 /* drivers */
 
+extern char ni_id[];
+
 void ni_setup(void);
 
 /* low level */
