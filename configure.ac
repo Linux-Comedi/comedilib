@@ -34,19 +34,24 @@ if test "$SWIG" == no ; then
 fi
 AM_CONDITIONAL(HAVE_SWIG, [test "$SWIG" != "no"])
 
+AC_ARG_ENABLE([python-binding],[  --disable-python-binding	Disable building of Python binding],
+	[ENABLE_PYTHON=$enableval],[ENABLE_PYTHON="yes"])
 AM_PATH_PYTHON
 AM_CHECK_PYTHON_HEADERS(HAVE_PYTHON=yes,[HAVE_PYTHON=no;AC_MSG_WARN([python headers not found, disabling python binding])])
-AM_CONDITIONAL(HAVE_PYTHON, [test "$HAVE_PYTHON" == "yes"])
+AM_CONDITIONAL(HAVE_PYTHON, [test "$HAVE_PYTHON" == "yes" && test "$ENABLE_PYTHON" == "yes"])
 
 AS_COMPILER_FLAG([-fno-strict-aliasing],[PYTHON_QUIET="$PYTHON_QUIET -fno-strict-aliasing"], true )
 AS_COMPILER_FLAG([-Wno-unused-function],[PYTHON_QUIET="$PYTHON_QUIET -Wno-unused-function"], true )
 AC_SUBST(PYTHON_QUIET)
 
+AC_ARG_ENABLE([ruby-binding],[  --disable-ruby-binding	Disable building of Ruby binding],
+	[ENABLE_RUBY=$enableval],[ENABLE_RUBY="yes"])
 AC_PATH_PROG(RUBY, ruby, no)
 if test "$RUBY" == "no" ; then
-  AC_MSG_WARN([ruby not found, disabling ruby binding])
+	AC_MSG_WARN([ruby not found, disabling ruby binding])
+	ENABLE_RUBY="no"
 fi
-AM_CONDITIONAL(HAVE_RUBY, [test "$RUBY" != "no"])
+AM_CONDITIONAL(HAVE_RUBY, [test "$ENABLE_RUBY" == "yes"])
 AC_ARG_VAR(RUBY_PREFIX,[path prefix for Ruby binding [PREFIX/]])
 AC_ARG_VAR(RUBY_SO_DIR,[path for Ruby extensions])
 if test "$RUBY_PREFIX" != "" ; then
