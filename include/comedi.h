@@ -71,6 +71,7 @@ typedef unsigned short sampl_t;
 #define INSN_READ		( 0 | INSN_MASK_READ)
 #define INSN_WRITE		( 1 | INSN_MASK_WRITE)
 #define INSN_BITS		( 2 | INSN_MASK_READ|INSN_MASK_WRITE)
+#define INSN_CONFIG		( 3 | INSN_MASK_READ|INSN_MASK_WRITE)
 #define INSN_GTOD		( 4 | INSN_MASK_READ|INSN_MASK_SPECIAL)
 #define INSN_WAIT		( 5 | INSN_MASK_WRITE|INSN_MASK_SPECIAL)
 
@@ -118,6 +119,7 @@ typedef unsigned short sampl_t;
 #define SDF_MODE2	0x0200		/* can do mode 2 */
 #define SDF_MODE3	0x0400		/* can do mode 3 */
 #define SDF_MODE4	0x0800		/* can do mode 4 */
+#define SDF_CMD		0x1000		/* can do commands */
 
 #define SDF_READABLE	0x00010000	/* subdevice can be read (e.g. analog input) */
 #define SDF_WRITEABLE	0x00020000	/* subdevice can be written (e.g. analog output) */
@@ -276,7 +278,9 @@ struct comedi_devinfo_struct{
 	unsigned int n_subdevs;
 	char driver_name[COMEDI_NAMELEN];
 	char board_name[COMEDI_NAMELEN];
-	int options[COMEDI_NDEVCONFOPTS];
+	int read_subdevice;
+	int write_subdevice;
+	int unused[30];
 };
 
 struct comedi_devconfig_struct{
@@ -285,9 +289,13 @@ struct comedi_devconfig_struct{
 };
 
 struct comedi_bufconfig_struct{
-	unsigned int read_size; /* read buffer size in bytes */
-	unsigned int write_size;        /* write buffer size in bytes */
-	unsigned int unused[5];
+	unsigned int subdevice;
+	unsigned int flags;
+
+	unsigned int maximum_size;
+	unsigned int size;
+
+	unsigned int unused[4];
 };
 
 /* range stuff */
@@ -305,79 +313,14 @@ struct comedi_bufconfig_struct{
 #define UNIT_none		2
 
 
-/* Kernel internal stuff.  Needed by RTLinux modules and such. */
-
-#ifdef __KERNEL__
-
 /* callback stuff */
+/* only relevant to kernel modules. */
 
 #define COMEDI_CB_EOS		1	/* end of scan */
 #define COMEDI_CB_EOA		2	/* end of acquisition */
 #define COMEDI_CB_BLOCK		4	/* convenient block size */
 #define COMEDI_CB_EOBUF		8	/* end of buffer */
 #define COMEDI_CB_ERROR		16	/* card error during acquisition */
-
-/* exported functions */
-
-/* these functions may not be called at real-time priority */
-
-int comedi_open(unsigned int minor);
-void comedi_close(unsigned int minor);
-
-/* these functions may be called at any priority, but may fail at
-   real-time priority */
-
-int comedi_lock_ioctl(unsigned int minor,unsigned int subdev);
-int comedi_unlock_ioctl(unsigned int minor,unsigned int subdev);
-
-/* these functions may be called at any priority, but you must hold
-   the lock for the subdevice */
-
-int comedi_cancel_ioctl(unsigned int minor,unsigned int subdev);
-int comedi_register_callback(unsigned int minor,unsigned int subdev,
-		unsigned int mask,int (*cb)(unsigned int,void *),void *arg);
-
-int comedi_trig_ioctl(unsigned int minor,unsigned int subdev,comedi_trig *it);
-int __comedi_trig_ioctl(unsigned int minor,unsigned int subdev,comedi_trig *it);
-int comedi_data_write(unsigned int dev,unsigned int subdev,unsigned int chan,
-	unsigned int range,unsigned int aref,lsampl_t data);
-int comedi_data_read(unsigned int dev,unsigned int subdev,unsigned int chan,
-	unsigned int range,unsigned int aref,lsampl_t *data);
-int comedi_dio_config(unsigned int dev,unsigned int subdev,unsigned int chan,
-	unsigned int io);
-int comedi_dio_read(unsigned int dev,unsigned int subdev,unsigned int chan,
-	unsigned int *val);
-int comedi_dio_write(unsigned int dev,unsigned int subdev,unsigned int chan,
-	unsigned int val);
-int comedi_dio_bitfield(unsigned int dev,unsigned int subdev,unsigned int mask,
-	unsigned int *bits);
-int comedi_get_n_subdevices(unsigned int dev);
-int comedi_get_version_code(unsigned int dev);
-char *comedi_get_driver_name(unsigned int dev);
-char *comedi_get_board_name(unsigned int minor);
-int comedi_get_subdevice_type(unsigned int minor,unsigned int subdevice);
-int comedi_find_subdevice_by_type(unsigned int minor,int type,unsigned int subd);
-int comedi_get_n_channels(unsigned int minor,unsigned int subdevice);
-lsampl_t comedi_get_maxdata(unsigned int minor,unsigned int subdevice,unsigned
-	int chan);
-int comedi_get_n_ranges(unsigned int minor,unsigned int subdevice,unsigned int
-	chan);
-
-
-
-/* ALPHA functions */
-unsigned int comedi_get_subdevice_flags(unsigned int minor,unsigned int
-	subdevice);
-int comedi_get_len_chanlist(unsigned int minor,unsigned int subdevice);
-int comedi_get_krange(unsigned int minor,unsigned int subdevice,unsigned int
-	chan, unsigned int range, comedi_krange *krange);
-unsigned int comedi_get_buf_head_pos(unsigned int minor,unsigned int
-	subdevice);
-int comedi_set_user_int_count(unsigned int minor,unsigned int subdevice,
-	unsigned int buf_user_count);
-
-#endif
-
 
 
 #ifdef __cplusplus
