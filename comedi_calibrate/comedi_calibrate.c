@@ -55,15 +55,13 @@ char *devicename = NULL;
 
 int verbose = 0;
 
-int device_status = STATUS_UNKNOWN;
-
 /* */
 
 
 struct board_struct{
 	char *name;
 	char *id;
-	void (*setup)(void);
+	int (*setup)(void);
 };
 
 struct board_struct drivers[] = {
@@ -105,6 +103,8 @@ int main(int argc, char *argv[])
 	int i;
 	struct board_struct *this_board;
 	int index;
+	int device_status = STATUS_UNKNOWN;
+
 
 	fn = "/dev/comedi0";
 	while (1) {
@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
 	return 1;
 
 ok:
-	this_board->setup();
+	device_status = this_board->setup();
 
 	if(device_status<STATUS_DONE){
 		printf("Warning: device not fully calibrated due to insufficient information\n");

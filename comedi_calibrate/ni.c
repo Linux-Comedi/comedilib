@@ -44,7 +44,7 @@ struct board_struct{
 	void (*cal)(void);
 };
 
-void ni_setup_board(void);
+int ni_setup_board(void);
 void ni_setup_observables(void);
 
 void cal_ni_at_mio_16e_2(void);
@@ -117,26 +117,31 @@ enum {
 	ni_ao1_reference,
 };
 
-void ni_setup(void)
+int ni_setup(void)
 {
-	ni_setup_board();
+	int status;
+	
+	status = ni_setup_board();
 	ni_setup_observables();
 	setup_caldacs();
+
+	return status;
 }
 
-void ni_setup_board(void)
+int ni_setup_board(void)
 {
 	int i;
+	int device_status = STATUS_UNKNOWN;
 
 	for(i=0;i<n_boards;i++){
 		if(!strcmp(devicename,boards[i].name)){
 			device_status = boards[i].status;
 			do_cal = boards[i].cal;
-			return;
+			break;
 		}
 	}
-	//device_status = STATUS_UNKNOWN;
 	//do_cal = cal_ni_unknown;
+	return device_status;
 }
 
 void ni_setup_observables(void)
