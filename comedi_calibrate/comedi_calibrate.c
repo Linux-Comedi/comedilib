@@ -185,7 +185,9 @@ ok:
 		}
 	}
 	if(verbose>=0){
-		printf("$Id$\n");
+		char *s = "$Id$";
+
+		printf("%*s\n",strlen(s)-2,s+1);
 		printf("Driver name: %s\n",drivername);
 		printf("Device name: %s\n",devicename);
 		printf("Comedi version: %d.%d.%d\n",

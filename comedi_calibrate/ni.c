@@ -67,7 +67,7 @@ struct board_struct boards[]={
 	{ "pci-mio-16e-1",	STATUS_DONE,	cal_ni_pci_mio_16e_1 },
 	{ "pci-6025e",		STATUS_GUESS,	cal_ni_pci_6025e },
 	{ "pci-6035e",		STATUS_GUESS,	cal_ni_pci_6035e },
-	{ "pci-6071e",		STATUS_GUESS,	cal_ni_pci_6071e },
+	{ "pci-6071e",		STATUS_SOME,	cal_ni_pci_6071e },
 	{ "pxi-6071e",		STATUS_GUESS,	cal_ni_pxi_6071e },
 	{ "at-mio-16e-10",	STATUS_GUESS,	cal_ni_at_mio_16e_10 },
 	{ "pci-mio-16xe-50",	STATUS_GUESS,	cal_ni_pci_mio_16xe_50 },
@@ -85,7 +85,6 @@ struct board_struct boards[]={
 //	{ "pci-6031e",		cal_ni_unknown },
 //	{ "pci-6032e",		cal_ni_unknown },
 //	{ "pci-6033e",		cal_ni_unknown },
-//	{ "pci-6071e",		cal_ni_unknown },
 	{ "pci-6024e",		cal_ni_6023e }, // guess
 	{ "pxi-6025e",		cal_ni_6023e }, // guess
 	{ "pci-6034e",		cal_ni_6023e }, // guess
@@ -375,12 +374,17 @@ void cal_ni_pci_6035e(void)
 
 void cal_ni_pci_6071e(void)
 {
-	// 6071e (old)
 	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
 	cal1(ni_zero_offset_high,0);
 	cal1(ni_reference_low,3);
+	cal1_fine(ni_reference_low,3);
 	if(do_output){
-		// unknown
+		cal1(ni_ao0_zero_offset,5);
+		//cal1(ni_ao0_zero_offset,4); /* linearity? */
+		cal1(ni_ao0_reference,6); /* guess.  Doesn't show up correctly in dump */
+		cal1(ni_ao1_zero_offset,8);
+		//cal1(ni_ao1_zero_offset,7); /* linearity? */
+		cal1(ni_ao1_reference,9);
 	}
 }
 
