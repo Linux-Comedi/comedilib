@@ -1,4 +1,4 @@
-;   usbdux_firmware.asm
+;   usbduxfast_firmware.asm
 ;   Copyright (C) 2004 Bernd Porr, Bernd.Porr@cn.stir.ac.uk
 ;
 ;   This program is free software; you can redistribute it and/or modify
@@ -16,11 +16,11 @@
 ;   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ;
 ;
-; Firmware: usbdux_firmware.asm for usbdux.c
-; Description: xxx
+; Firmware: usbduxfast_firmware.asm for usbdux.c
+; Description: Firmware for usbduxfast
 ; Devices: [ITL] USB-DUX (usbdux.o)
 ; Author: Bernd Porr <Bernd.Porr@f2s.com>
-; Updated: 
+; Updated: 4 Jan 2005
 ; Status: testing
 ;
 ;;;
@@ -170,7 +170,7 @@ main:
 	lcall	syncdelaywr
 
 	mov	dptr,#IFCONFIG	; switch on IFCLK signal
-	mov	a,#10110010b	; gpif, 30MHz, 
+	mov	a,#10100010b	; gpif, 30MHz, 
 	lcall	syncdelaywr
 
 	mov	dptr,#FIFORESET
@@ -209,6 +209,19 @@ gpif_run:
 	anl	a,#80h		; done bit
 	jz	no_trig		; GPIF busy
 
+;;; buffer overflow
+	mov 	dptr,#0F800H	; EP8 fifo buffer
+	mov	a,#0ffh		; error
+	movx	@dptr,a		; write ffh into the EP buffer
+	inc	dptr		; next byte
+	movx	@dptr,a		; write ffh into the EP buffer
+	mov	dptr,#EP6BCH	; byte count EP6 high byte
+	mov	a,#02H		; 512 bytes
+	lcall	syncdelaywr	; write to memory and sync
+	mov	dptr,#EP6BCL	; byte count EP6 low byte
+	mov	a,#0		; low byte is zero
+	lcall	syncdelaywr	; write to memory and sync
+
 	mov	a,#06h		; RD,EP6
 	mov	GPIFTRIG,a
 no_trig:
@@ -217,9 +230,9 @@ no_trig:
 	
 
 initGPIF:
-	mov	DPTR,#EP6CFG	; ISO data from here to the host
-	mov	a,#11010000b	; Valid, quad buffering
-	lcall	syncdelaywr
+	mov	DPTR,#EP6CFG	; BLK data from here to the host
+	mov	a,#11100000b	; Valid, quad buffering
+	lcall	syncdelaywr	; write
 
 	mov	dptr,#EP6FIFOCFG
 	mov	a,#00001001b	; autoin, wordwide
@@ -227,15 +240,11 @@ initGPIF:
 
 	mov	dptr,#EP6AUTOINLENH
 	mov	a,#00000010b	; 512 bytes
-	lcall	syncdelaywr
+	lcall	syncdelaywr	; write
 
 	mov	dptr,#EP6AUTOINLENL
 	mov	a,#00000000b	; 0
-	lcall	syncdelaywr
-
-	mov	dptr,#EP6ISOINPKTS
-	mov	a,#1		; 1 packets
-	lcall	syncdelaywr
+	lcall	syncdelaywr	; write
 
 	mov	dptr,#GPIFWFSELECT
 	mov	a,#11111100b	; waveform 0 for FIFO RD
@@ -298,11 +307,11 @@ initGPIF:
 
 
 ;;; initilise the transfer
-;;; It is assumed that the USB interface is in alternate setting 3
+;;; It is assumed that the USB interface is in alternate setting 1
 initeps:
 	mov	DPTR,#EP4CFG
 	mov	a,#10100000b	; valid, bulk, out
-	movx	@dptr,a
+	lcall	syncdelaywr
 
 	mov	dptr,#EP4BCL	; "arm" it
 	mov	a,#00h
@@ -312,11 +321,11 @@ initeps:
 
 	mov	DPTR,#EP8CFG
 	mov	a,#0		; disable EP8, it overlaps with EP6!!
-	movx	@dptr,a
+	lcall	syncdelaywr
 
 	mov	dptr,#EPIE	; interrupt enable
 	mov	a,#00100000b	; enable irq for ep4
-	movx	@dptr,a		; do it
+	lcall	syncdelaywr	; do it
 
 	mov	dptr,#EPIRQ	; clear IRQs
 	mov	a,#00100100b
@@ -536,5 +545,15 @@ syncdelaywr:
 
 
 .End
+
+
+
+
+
+
+
+
+
+
 
 
