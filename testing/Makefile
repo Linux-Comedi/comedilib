@@ -6,7 +6,7 @@ LDFLAGS=-L../lib/ -lcomedi
 
 
 TARG=comedi_test
-OBJS=main.o mode0_read.o insn_read.o info.o
+OBJS=main.o mode0_read.o insn_read.o info.o cmd_1.o
 
 all: $(TARG)
 

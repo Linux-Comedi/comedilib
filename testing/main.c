@@ -10,6 +10,7 @@
 #include <getopt.h>
 #include <ctype.h>
 #include <malloc.h>
+#include <string.h>
 
 #include "comedi_test.h"
 
@@ -25,6 +26,9 @@ int range;
 int test_info(void);
 int test_mode0_read(void);
 int test_insn_read(void);
+int test_cmd_probe_src_mask(void);
+int test_cmd_probe_fast_1chan(void);
+int test_cmd_read_fast_1chan(void);
 
 struct test_struct{
 	char *name;
@@ -34,6 +38,9 @@ struct test_struct tests[]={
 	{ "info", test_info },
 	{ "mode0_read", test_mode0_read },
 	{ "insn_read", test_insn_read },
+	{ "cmd_probe_src_mask", test_cmd_probe_src_mask },
+	{ "cmd_probe_fast_1chan", test_cmd_probe_fast_1chan },
+	{ "cmd_read_fast_1chan", test_cmd_read_fast_1chan },
 };
 static int n_tests = sizeof(tests)/sizeof(tests[0]);
 
@@ -57,6 +64,9 @@ int main(int argc, char *argv[])
 	}
 
 	device = comedi_open(filename);
+	if(!device){
+		printf("E: comedi_open(\"%s\"): %s\n",filename,strerror(errno));
+	}
 
 	for(subdevice=0;subdevice<comedi_get_n_subdevices(device);subdevice++){
 		printf("I:\n");
