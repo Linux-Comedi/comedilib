@@ -68,15 +68,17 @@ int _comedi_data_write(comedi_t *it,unsigned int subdev,unsigned int chan,unsign
 			trigvar:	0,
 			trigvar1:	0,
 		};
-		sampl_t sdata=data;
-
+		sampl_t sdata[2];
+		
+		sdata[0]=data & 0xffff;
+		sdata[1]=(data >> 16) & 0xffff;
 		chan=CR_PACK(chan,range,aref);
 
 		cmd.subdev=subdev;
 		if(it->subdevices[subdev].subd_flags & SDF_LSAMPL){
-			cmd.data=(sampl_t *)(&data);
+			cmd.data=sdata;
 		}else{
-			cmd.data=&sdata;
+			cmd.data=sdata;
 		}
 		cmd.chanlist=&chan;
 
