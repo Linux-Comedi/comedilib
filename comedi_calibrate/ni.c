@@ -63,6 +63,7 @@ int cal_ni_at_mio_16xe_50(calibration_setup_t *setup);
 int cal_ni_pci_mio_16xe_10(calibration_setup_t *setup);
 int cal_ni_pci_6052e(calibration_setup_t *setup);
 int cal_ni_pci_mio_16e_4(calibration_setup_t *setup);
+int cal_ni_pci_6032e(calibration_setup_t *setup);
 
 static struct board_struct boards[]={
 	{ "at-mio-16e-2",	STATUS_DONE,	cal_ni_at_mio_16e_2 },
@@ -81,6 +82,7 @@ static struct board_struct boards[]={
 	{ "pci-6052e",		STATUS_DONE,	cal_ni_pci_6052e },
 	{ "pci-6024e",		STATUS_SOME,	cal_ni_pci_6024e },
 	{ "pci-mio-16e-4",	STATUS_SOME,    cal_ni_pci_mio_16e_4 },
+	{ "pci-6032e",		STATUS_SOME,	cal_ni_pci_6032e },
 #if 0
 //	{ "at-mio-16de-10",	cal_ni_unknown },
 	{ "at-mio-64e-3",	cal_ni_16e_1 },
@@ -90,7 +92,6 @@ static struct board_struct boards[]={
 //	{ "pxi-6030e",		cal_ni_unknown },
 //	{ "pxi-6040e",		cal_ni_unknown },
 //	{ "pci-6031e",		cal_ni_unknown },
-//	{ "pci-6032e",		cal_ni_unknown },
 //	{ "pci-6033e",		cal_ni_unknown },
 	{ "pxi-6025e",		cal_ni_6023e }, // guess
 	{ "pci-6034e",		cal_ni_6023e }, // guess
@@ -386,6 +387,20 @@ int cal_ni_pci_mio_16e_1(calibration_setup_t *setup)
 		//cal1( setup, ni_ao1_zero_offset,7); /* linearity? */
 		cal1( setup, ni_ao1_reference,9);
 	}
+	return 0;
+}
+
+int cal_ni_pci_6032e(calibration_setup_t *setup)
+{
+	postgain_cal(setup, ni_zero_offset_low, ni_zero_offset_high, 2);
+	postgain_cal(setup, ni_zero_offset_low, ni_zero_offset_high, 3);
+
+	cal1( setup, ni_zero_offset_high,8);
+
+	cal1( setup, ni_reference_low,0);
+	cal1_fine( setup, ni_reference_low,0);
+	cal1( setup, ni_reference_low,1);
+
 	return 0;
 }
 
