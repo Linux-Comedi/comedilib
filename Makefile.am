@@ -1,6 +1,6 @@
 
 SUBDIRS = lib comedi_calibrate comedi_config man testing demo doc swig \
-	include etc
+	include etc scxi
 
 #pkgconfigdir = $(libdir)/pkgconfig
 #pkgconfig_DATA = comedilib.pc

@@ -44,8 +44,8 @@ AS_COMPILER_FLAG([-fno-strict-aliasing],[PYTHON_QUIET="$PYTHON_QUIET -fno-strict
 AS_COMPILER_FLAG([-Wno-unused-function],[PYTHON_QUIET="$PYTHON_QUIET -Wno-unused-function"], true )
 AC_SUBST(PYTHON_QUIET)
 
-AC_ARG_ENABLE([ruby-binding],[  --disable-ruby-binding	Disable building of Ruby binding],
-	[ENABLE_RUBY=$enableval],[ENABLE_RUBY="yes"])
+AC_ARG_ENABLE([ruby-binding], [  --disable-ruby-binding	Disable building of Ruby binding],
+	[ENABLE_RUBY=$enableval], [ENABLE_RUBY="yes"])
 AC_PATH_PROG(RUBY, ruby, no)
 if test "$RUBY" != "no" ; then
 	RUBY_INC_DIR=`$RUBY -e "require 'rbconfig'; c = ::Config::CONFIG; print c[['archdir']];"`
@@ -64,6 +64,10 @@ if test "$RUBY_SO_DIR" != "" ; then
 	RUBY_CONFIG_OPTIONS="$RUBY_CONFIG_OPTIONS --so-dir=\$(RUBY_SO_DIR)"
 fi
 AC_SUBST(RUBY_CONFIG_OPTIONS)
+
+AC_ARG_ENABLE([scxi], [  --enable-scxi  Enable SCXI convenience library],
+	[ENABLE_SCXI=$enableval], [ENABLE_SCXI="no"])
+AM_CONDITIONAL(BUILD_SCXI, [test "$ENABLE_SCXI" == "yes"])
 
 AC_PATH_PROG(DOCBOOK2MAN, docbook2man, no)
 if test "$DOCBOOK2MAN" = "no" ; then
@@ -110,6 +114,7 @@ demo/Makefile
 include/Makefile
 lib/Makefile
 man/Makefile
+scxi/Makefile
 swig/Makefile
 swig/python/Makefile
 swig/ruby/Makefile
