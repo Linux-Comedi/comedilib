@@ -195,7 +195,6 @@ typedef struct{
 
 	comedi_range *rng;
 
-	int n;
 	double average;
 	double stddev;
 	double error;

@@ -463,52 +463,54 @@ void cal1_fine( calibration_setup_t *setup, int obs, int dac )
 
 void cal_binary( calibration_setup_t *setup, int obs, int dac)
 {
-	int x1, x2, x;
-	double y1, y2, y;
+	int x0, x;
+	unsigned int bit;
+	double y0, y;
 	new_sv_t sv;
 	double target = setup->observables[obs].target;
 	unsigned int chanspec = setup->observables[obs].observe_insn.chanspec;
+	int polarity;
 
 	DPRINT(0,"binary: %s\n", setup->observables[obs].name);
 	preobserve( setup, obs);
 
-	x1 = 0;
-	x2 = setup->caldacs[dac].maxdata;
+	bit = 1;
+	while( ( bit << 1 ) < setup->caldacs[dac].maxdata )
+		bit <<= 1;
 
 	new_sv_init(&sv, setup->dev,0,chanspec);
 	sv.settling_time_ns = setup->settling_time_ns;
-	update_caldac( setup, dac, x1 );
+
+	x0 = 0;
+	update_caldac( setup, dac, x0 );
 	usleep(100000);
 	new_sv_measure( setup->dev, &sv);
-	y1 = sv.average;
+	y0 = sv.average;
 
-	new_sv_init(&sv, setup->dev,0,chanspec);
-	sv.settling_time_ns = setup->settling_time_ns;
-	update_caldac( setup, dac, x2 );
+	x = bit;
+	update_caldac( setup, dac, x );
 	usleep(100000);
 	new_sv_measure( setup->dev, &sv);
-	y2 = sv.average;
+	y = sv.average;
 
-	x = 0;
-	while(x2-x1 > 1){
-		x = (x1 + x2 + 1)/2;
+	if( y > y0 ) polarity = 1;
+	else polarity = -1;
+
+	if( (y - target) * polarity > 0.0 )
+		x &= ~bit;
+
+	for( bit = bit >> 1; bit; bit >>= 1 ){
+		x |= bit;
 		DPRINT(3,"trying %d\n",x);
 
-		new_sv_init(&sv, setup->dev,0,chanspec);
-		sv.settling_time_ns = setup->settling_time_ns;
 		update_caldac( setup, dac, x );
 		usleep(100000);
 
 		new_sv_measure( setup->dev, &sv);
 		y = sv.average;
 
-		if(fabs(y2 - target) > fabs(y1 - target)){
-			x2 = x;
-			y2 = y;
-		}else{
-			x1 = x;
-			y1 = y;
-		}
+		if( (y - target) * polarity > 0.0 )
+			x &= ~bit;
 
 		if(verbose>=3){
 			measure_observable( setup, obs);
