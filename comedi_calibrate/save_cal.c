@@ -130,6 +130,7 @@ int write_calibration_file( calibration_setup_t *setup )
 		return -1;
 	}
 
+	DPRINT( 0, "writing calibration to %s\n", setup->cal_save_file_path );
 	retval = write_calibration_perl_hash( file, setup->new_calibration );
 
 	fclose( file );

@@ -603,6 +603,8 @@ void cal_binary( calibration_setup_t *setup, int obs, int dac)
 
 	update_caldac( setup, dac, x );
 	DPRINT(0,"caldac[%d] set to %d\n",dac,x);
+	if( x >= setup->caldacs[dac].maxdata || x <= 0 )
+		DPRINT(0,"WARNING: caldac[%d] pegged!\n", dac );
 	if(verbose>=3){
 		measure_observable( setup, obs);
 	}
@@ -701,6 +703,8 @@ void cal_relative_binary( calibration_setup_t *setup, int obs1, int obs2, int da
 		x = x2;
 	update_caldac( setup, dac, x );
 	DPRINT(0,"caldac[%d] set to %d\n",dac,x);
+	if( x >= setup->caldacs[dac].maxdata || x <= 0 )
+		DPRINT(0,"WARNING: caldac[%d] pegged!\n", dac );
 	if(verbose>=3){
 		preobserve( setup, obs1);
 		measure_observable( setup, obs1);
@@ -821,6 +825,8 @@ void cal_linearity_binary( calibration_setup_t *setup, int obs1, int obs2, int o
 		x = x2;
 	update_caldac( setup, dac, x );
 	DPRINT(0,"caldac[%d] set to %d\n",dac,x);
+	if( x >= setup->caldacs[dac].maxdata || x <= 0 )
+		DPRINT(0,"WARNING: caldac[%d] pegged!\n", dac );
 	if(verbose>=3){
 		preobserve( setup, obs1);
 		measure_observable( setup, obs1);
@@ -843,7 +849,7 @@ void chan_cal(int adc,int cdac,int range,double target)
 	check_gain_chan_x(&l,CR_PACK(adc,range,AREF_OTHER),cdac);
 	offset=linear_fit_func_y(&l,caldacs[cdac].current);
 	gain=l.slope;
-	
+
 	a=caldacs[cdac].current+(target-offset)/gain;
 
 	update_caldac( setup, cdac, rint(a));
