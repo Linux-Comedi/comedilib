@@ -2,7 +2,7 @@
 
 
 CFLAGS =-I ../include -I . -O2 -Wall -Wstrict-prototypes
-LDFLAGS=-L../lib/ -lcomedi -lm -static
+LDFLAGS=-L../lib/ -lcomedi -lm
 
 
 TARG=comedi_test
@@ -16,5 +16,9 @@ $(TARG):	$(OBJS)
 
 clean:
 	-rm -f $(TARG) $(OBJS)
+
+test: $(TARG)
+	LD_LIBRARY_PATH=../lib COMEDILIB_LOGLEVEL=3 ./comedi_test -f /dev/comedi0 >out 2>&1
+	-diff -u results/DAQCard-ai-16xe-50 out >xxx
 
 distclean: clean
