@@ -1,6 +1,6 @@
 
 noinst_PROGRAMS = \
-	antialias ao_waveform ao_mmap apply_cal cmd dio eeprom_dump info \
+	antialias ao_waveform ao_mmap apply_cal cmd dio eeprom_dump board_info \
 	inp inpn insn ledclock mmap outp poll receiver select \
 	sender sigio sv tut1 tut2
 
@@ -34,9 +34,9 @@ eeprom_dump_SOURCES = eeprom_dump.c common.c
 eeprom_dump_CFLAGS = $(COMEDILIB_CFLAGS)
 eeprom_dump_LDADD = $(COMEDILIB_LIBS)
 
-info_SOURCES = info.c common.c
-info_CFLAGS = $(COMEDILIB_CFLAGS)
-info_LDADD = $(COMEDILIB_LIBS)
+board_info_SOURCES = info.c common.c
+board_info_CFLAGS = $(COMEDILIB_CFLAGS)
+board_info_LDADD = $(COMEDILIB_LIBS)
 
 inp_SOURCES = inp.c common.c
 inp_CFLAGS = $(COMEDILIB_CFLAGS)
