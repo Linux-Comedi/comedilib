@@ -489,9 +489,11 @@ static int cal_cb_pci_1602_16( calibration_setup_t *setup )
 	layout.adc_ground_observable = ai_ground_observable_1xxx;
 	layout.dac_high_observable = ao_high_observable_1xxx;
 	layout.dac_ground_observable = ao_ground_observable_1xxx;
-	/* On unipolar ranges, both the gain and offset adjustments couple
-	 * to the ground observables. I don't know if there is a way
-	 * to get around it, so we'll just use the bipolar postgain setting. */
+	/* The bipolar postgain calibration should be good for both
+	 * bipolar and unipolar ranges, so disable separate
+	 * unipolar postgain offset calibration (it will fail
+	 * horribly anyways if you try it).
+	 */
 	layout.do_adc_unipolar_postgain = 0;
 	return generic_cal_by_range( setup, &layout );
 }
