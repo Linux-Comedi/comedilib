@@ -6,7 +6,7 @@ LDFLAGS = -L../lib/ -lcomedi -lm
 
 
 BINS=cmd tut1 tut2
-MBINS=inp inpn sv eeprom_dump info outp insn antialias ao_waveform
+MBINS=inp inpn sv eeprom_dump info outp insn antialias ao_waveform dio
 
 all: $(patsubst %,_mbins_%,$(MBINS)) $(patsubst %,_bins_%,$(BINS))
 
