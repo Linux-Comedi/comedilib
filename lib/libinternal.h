@@ -120,7 +120,8 @@ struct subdevice_struct{
 };
 
 
-#define comedi_ioctl comedi_ioctl_debug
+#define comedi_ioctl ioctl
+//#define comedi_ioctl comedi_ioctl_debug
 
 int comedi_ioctl_debug(int,int,unsigned long);
 
