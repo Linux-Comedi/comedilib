@@ -22,7 +22,7 @@
 #define _GNU_SOURCE
 
 #include <stdio.h>
-#include <comedilib.h>
+#include "comedilib.h"
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>

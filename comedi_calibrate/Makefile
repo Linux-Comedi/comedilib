@@ -2,7 +2,7 @@
 include ../Config
 
 
-CFLAGS += -I../include 
+CPPFLAGS += -I../include 
 LDFLAGS += -L../lib/ -lcomedi -lm
 
 
@@ -16,3 +16,11 @@ comedi_calibrate: $(objs)
 
 clean:
 	-rm -f *.o $(BINS)
+
+#dependency stuff
+%.d: %.c
+	set -e; $(CC) -MM $(CPPFLAGS) $< \
+		| sed 's/\($*\)\.o[ :]*/\1.o $@ : /g' > $@; \
+		[ -s $@ ] || rm -f $@
+
+include $(objs:.o=.d)
