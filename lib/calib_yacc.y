@@ -31,6 +31,7 @@
 struct calibration_file_contents file_contents;
 static struct caldac_setting caldac;
 static int cal_index;
+FILE *calib_yyin;
 
 static void free_calibration_setting( struct calibration_setting *setting )
 {
@@ -179,7 +180,7 @@ extern void cleanup_calibration_parse( void )
 
 extern const struct calibration_file_contents* parse_calibration_file( FILE *file )
 {
-	calib_yyrestart( file );
+	calib_yyin = file;
 	init_calib_parse();
 	if( calib_yyparse() ) return NULL;
 	return &file_contents;
