@@ -1,4 +1,12 @@
 
+comeidlib-0.7.22:
+Bison, Flex, and docbook generated files are included in tarball now.
+Improved support for many boards in comedi_calibrate.  Added USBDUX
+firmware (Bernd Porr).  SWIG-based Ruby binding, and fixes for Python
+binding (Steven Jenkins).  Start of new SCXI convenience library (Caleb
+Tennis).  Fixed comedi_test to deal with changes in signal behaviour with
+2.6 kernels.  Fixed out-of-tree builds (Caleb Tennis).
+
 comedilib-0.7.18:
 
  - Converted documentation to DocBook-3.1.  Added man pages for all
