@@ -2,4 +2,5 @@ demo/*.c doesn't always get headers right.
 
 Don't install man pages to /usr/share/man
 
-
+Makefile dependencies on header files (at least comedi.h comedilib.h and libinternal.h)
+are broken - FMH
