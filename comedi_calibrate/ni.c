@@ -45,24 +45,28 @@ struct board_struct{
 void ni_setup_board(void);
 void ni_setup_observables(void);
 
-void cal_ni_16e_1(void);
+void cal_ni_at_mio_16e_2(void);
 void cal_ni_daqcard_ai_16xe_50(void);
-void cal_ni_6035e(void);
-void cal_ni_6071e(void);
-void cal_ni_16e_10(void);
-void cal_ni_16xe_50(void);
+void cal_ni_at_mio_16e_1(void);
+void cal_ni_pci_mio_16e_1(void);
+void cal_ni_pci_6035e(void);
+void cal_ni_pci_6071e(void);
+void cal_ni_pxi_6071e(void);
+void cal_ni_at_mio_16e_10(void);
+void cal_ni_pci_mio_16xe_50(void);
+void cal_ni_pci_6023e(void);
 
 struct board_struct boards[]={
-	{ "at-mio-16e-2",	STATUS_DONE,	cal_ni_16e_1 },
+	{ "at-mio-16e-2",	STATUS_SOME,	cal_ni_at_mio_16e_2 },
 	{ "DAQCard-ai-16xe-50",	STATUS_DONE,	cal_ni_daqcard_ai_16xe_50 },
-	{ "at-mio-16e-1",	STATUS_SOME,	cal_ni_16e_1 },
-	{ "pci-mio-16e-1",	STATUS_SOME,	cal_ni_16e_1 },
-	{ "pci-6035e",		STATUS_GUESS,	cal_ni_6035e },
-	{ "pci-6071e",		STATUS_GUESS,	cal_ni_6071e },
-	{ "pxi-6071e",		STATUS_GUESS,	cal_ni_6071e },
-	{ "at-mio-16e-10",	STATUS_GUESS,	cal_ni_16e_10 },
-	{ "pci-mio-16xe-50",	STATUS_GUESS,	cal_ni_16xe_50 },
-	{ "pci-6023e",		STATUS_GUESS,	cal_ni_6035e },
+	{ "at-mio-16e-1",	STATUS_SOME,	cal_ni_at_mio_16e_1 },
+	{ "pci-mio-16e-1",	STATUS_SOME,	cal_ni_pci_mio_16e_1 },
+	{ "pci-6035e",		STATUS_GUESS,	cal_ni_pci_6035e },
+	{ "pci-6071e",		STATUS_GUESS,	cal_ni_pci_6071e },
+	{ "pxi-6071e",		STATUS_GUESS,	cal_ni_pxi_6071e },
+	{ "at-mio-16e-10",	STATUS_GUESS,	cal_ni_at_mio_16e_10 },
+	{ "pci-mio-16xe-50",	STATUS_GUESS,	cal_ni_pci_mio_16xe_50 },
+	{ "pci-6023e",		STATUS_GUESS,	cal_ni_pci_6023e },
 #if 0
 //	{ "at-mio-16de-10",	cal_ni_unknown },
 	{ "at-mio-64e-3",	cal_ni_16e_1 },
@@ -169,6 +173,8 @@ void ni_setup_observables(void)
 	o->observe_insn.chanspec = CR_PACK(5,bipolar_lowgain,AREF_OTHER);
 	o->target = voltage_reference;
 
+	n_observables = ni_reference_low + 1;
+
 	if(unipolar_lowgain>=0){
 		/* unip/bip offset */
 		o = observables + ni_unip_offset_low;
@@ -188,6 +194,7 @@ void ni_setup_observables(void)
 		o->target = voltage_reference;
 		i++;
 #endif
+		n_observables = ni_unip_offset_low + 1;
 	}
 
 	if(da_subdev>=0){
@@ -244,21 +251,12 @@ void ni_setup_observables(void)
 		set_target(ni_ao1_reference,5.0);
 		o->target -= voltage_reference;
 
+		n_observables = ni_ao1_reference + 1;
 	}
-	n_observables = ni_ao1_reference + 1;
 }
 
-void cal_ni_daqcard_ai_16xe_50(void)
+void cal_ni_at_mio_16e_2(void)
 {
-	// daqcard
-	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,2);
-	cal1(ni_zero_offset_high,8);
-	cal1(ni_reference_low,0);
-}
-
-void cal_ni_16e_1(void)
-{
-	// 16e-2
 	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
 	cal1(ni_zero_offset_high,0);
 	cal1(ni_reference_low,3);
@@ -271,7 +269,83 @@ void cal_ni_16e_1(void)
 	}
 }
 
-void cal_ni_16e_10(void)
+/*
+ * Device name: DAQCard-ai-16xe-50
+ * Comedi version: 0.7.60
+ * ai, bipolar zero offset, low gain
+ * offset 5.87(63)e-3, target 0
+ * caldac[0] gain=-2.243(21)e-6 V/bit S_min=208.079 dof=254
+ * caldac[2] gain=1.56378(22)e-4 V/bit S_min=1782.91 dof=254
+ * caldac[8] gain=2.499(14)e-7 V/bit S_min=234.915 dof=254
+ * ai, bipolar zero offset, high gain
+ * offset 4.251(49)e-5, target 0
+ * caldac[0] gain=-2.396(30)e-8 V/bit S_min=231.387 dof=254
+ * caldac[2] gain=1.56428(28)e-6 V/bit S_min=829.096 dof=254
+ * caldac[8] gain=2.61244(18)e-7 V/bit S_min=773.092 dof=254
+ * ai, bipolar voltage reference, low gain
+ * offset 4.99650(81), target 5
+ * caldac[0] gain=-3.78250(23)e-4 V/bit S_min=12207.6 dof=254
+ * caldac[1] gain=-9.878(22)e-6 V/bit S_min=346.795 dof=254
+ * caldac[2] gain=1.57172(23)e-4 V/bit S_min=969.526 dof=254
+ * caldac[8] gain=2.795(14)e-7 V/bit S_min=245.703 dof=254
+ * ai, unipolar zero offset, low gain
+ * offset 0.0133(14), target 0
+ * caldac[0] gain=3.73923(29)e-4 V/bit S_min=2855.79 dof=151
+ * caldac[1] gain=9.784(11)e-6 V/bit S_min=727.295 dof=254
+ * caldac[2] gain=7.8670(11)e-5 V/bit S_min=903.291 dof=254
+ * caldac[8] gain=2.7732(74)e-7 V/bit S_min=415.399 dof=254
+ */
+void cal_ni_daqcard_ai_16xe_50(void)
+{
+	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,2);
+	cal1(ni_zero_offset_high,8);
+	cal1(ni_reference_low,0);
+}
+
+void cal_ni_at_mio_16e_1(void)
+{
+	cal_ni_at_mio_16e_2();
+}
+
+void cal_ni_pci_mio_16e_1(void)
+{
+	cal_ni_at_mio_16e_2();
+}
+
+void cal_ni_pci_6035e(void)
+{
+	// 6035e (old)
+	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
+	cal1(ni_zero_offset_high,0);
+	cal1(ni_reference_low,3);
+	if(do_output){
+		// unknown
+	}
+}
+
+void cal_ni_pci_6071e(void)
+{
+	// 6071e (old)
+	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
+	cal1(ni_zero_offset_high,0);
+	cal1(ni_reference_low,3);
+	if(do_output){
+		// unknown
+	}
+}
+
+void cal_ni_pxi_6071e(void)
+{
+	// 6071e (old)
+	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
+	cal1(ni_zero_offset_high,0);
+	cal1(ni_reference_low,3);
+	if(do_output){
+		// unknown
+	}
+}
+
+void cal_ni_at_mio_16e_10(void)
 {
 	// 16e-10 (old)
 	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
@@ -287,7 +361,7 @@ void cal_ni_16e_10(void)
 	}
 }
 
-void cal_ni_16xe_50(void)
+void cal_ni_pci_mio_16xe_50(void)
 {
 	// 16xe-50 (old) (same as daqcard?)
 	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,2);
@@ -298,28 +372,10 @@ void cal_ni_16xe_50(void)
 	}
 }
 
-void cal_ni_6035e(void)
+void cal_ni_pci_6023e(void)
 {
-	// 6035e (old)
-	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
-	cal1(ni_zero_offset_high,0);
-	cal1(ni_reference_low,3);
-	if(do_output){
-		// unknown
-	}
+	cal_ni_pci_6035e();
 }
-
-void cal_ni_6071e(void)
-{
-	// 6071e (old)
-	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,1);
-	cal1(ni_zero_offset_high,0);
-	cal1(ni_reference_low,3);
-	if(do_output){
-		// unknown
-	}
-}
-
 
 double ni_get_reference(int lsb_loc,int msb_loc)
 {
@@ -339,92 +395,7 @@ double ni_get_reference(int lsb_loc,int msb_loc)
 	return ref;
 }
 
-void cal_ni_unknown(void)
-{
-	comedi_range *range;
-	int bipolar_lowgain;
-	int bipolar_highgain;
-	int unipolar_lowgain;
-	int have_ao = 1;
-
-	reset_caldacs();
-	printf("Warning: device not calibrated due to insufficient information\n");
-	printf("Please send this output to <ds@schleef.org>\n");
-	printf("$Id$\n");
-	printf("Device name: %s\n",comedi_get_board_name(dev));
-	printf("Comedi version: %d.%d.%d\n",
-		(comedi_get_version_code(dev)>>16)&0xff,
-		(comedi_get_version_code(dev)>>8)&0xff,
-		(comedi_get_version_code(dev))&0xff);
-
-	bipolar_lowgain = get_bipolar_lowgain(dev,ad_subdev);
-	bipolar_highgain = get_bipolar_highgain(dev,ad_subdev);
-	unipolar_lowgain = get_unipolar_lowgain(dev,ad_subdev);
-
-	/* 0 offset, low gain */
-	range = comedi_get_range(dev,ad_subdev,0,bipolar_lowgain);
-	DPRINT(0,"bipolar zero offset, low gain [%g,%g]\n",
-		range->min,range->max);
-	channel_dependence(0,bipolar_lowgain);
-
-	/* 0 offset, high gain */
-	range = comedi_get_range(dev,ad_subdev,0,bipolar_highgain);
-	DPRINT(0,"bipolar zero offset, high gain [%g,%g]\n",
-		range->min,range->max);
-	channel_dependence(0,bipolar_highgain);
-
-	/* unip/bip offset */
-	range = comedi_get_range(dev,ad_subdev,0,unipolar_lowgain);
-	DPRINT(0,"unipolar zero offset, low gain [%g,%g]\n",
-		range->min,range->max);
-	channel_dependence(0,unipolar_lowgain);
-
-	/* voltage reference */
-	range = comedi_get_range(dev,ad_subdev,0,bipolar_lowgain);
-	DPRINT(0,"bipolar voltage reference, low gain [%g,%g]\n",
-		range->min,range->max);
-	channel_dependence(5,bipolar_lowgain);
-
-	have_ao = (comedi_get_subdevice_type(dev,da_subdev)==COMEDI_SUBD_AO);
-	if(have_ao){
-		int ao_chan;
-
-		/* ao 0, zero offset */
-		ao_chan = 0;
-		set_ao(dev,da_subdev,ao_chan,0,0.0);
-		range = comedi_get_range(dev,ad_subdev,0,bipolar_lowgain);
-		DPRINT(0,"ao 0, zero offset, low gain [%g,%g]\n",
-			range->min,range->max);
-		channel_dependence(2,bipolar_lowgain);
-
-		/* ao 0, gain */
-		ao_chan = 0;
-		set_ao(dev,da_subdev,ao_chan,0,5.0);
-		range = comedi_get_range(dev,ad_subdev,0,bipolar_lowgain);
-		DPRINT(0,"ao 0, gain, low gain [%g,%g]\n",
-			range->min,range->max);
-		channel_dependence(6,bipolar_lowgain);
-
-		/* ao 1, zero offset */
-		ao_chan = 1;
-		set_ao(dev,da_subdev,ao_chan,0,0.0);
-		range = comedi_get_range(dev,ad_subdev,0,bipolar_lowgain);
-		DPRINT(0,"ao 1, zero offset, low gain [%g,%g]\n",
-			range->min,range->max);
-		channel_dependence(3,bipolar_lowgain);
-
-		/* ao 1, gain */
-		ao_chan = 1;
-		set_ao(dev,da_subdev,ao_chan,0,5.0);
-		range = comedi_get_range(dev,ad_subdev,0,bipolar_lowgain);
-		DPRINT(0,"ao 1, gain, low gain [%g,%g]\n",
-			range->min,range->max);
-		channel_dependence(7,bipolar_lowgain);
-	}
-
-	cal_ni_results();
-}
-
+#if 0
 void cal_ni_results(void)
 {
 	comedi_range *range;
@@ -458,7 +429,6 @@ void cal_ni_results(void)
 
 }
 
-#if 0
 void ni_mio_ai_postgain_cal(void)
 {
 	linear_fit_t l;

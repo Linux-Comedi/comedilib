@@ -110,6 +110,8 @@ int main(int argc, char *argv[])
 		c = getopt_long(argc, argv, "f:vq", options, &index);
 		if (c == -1)break;
 		switch (c) {
+		case 0:
+			continue;
 		case 'f':
 			fn = optarg;
 			break;
@@ -126,7 +128,7 @@ int main(int argc, char *argv[])
 			devicename = optarg;
 			break;
 		default:
-			printf("bad option\n");
+			printf("bad option %d\n",c);
 			exit(1);
 		}
 	}
@@ -162,7 +164,7 @@ ok:
 	if(device_status<STATUS_DONE){
 		printf("Warning: device not fully calibrated due to insufficient information\n");
 		printf("Please send this output to <ds@schleef.org>\n");
-		if(verbose<0)verbose=0;
+		if(verbose<1)verbose=1;
 		if(device_status==STATUS_UNKNOWN){
 			do_reset=1;
 			do_dump=1;
@@ -219,7 +221,9 @@ void observe(void)
 		preobserve(i);
 		DPRINT(0,"%s\n",observables[i].name);
 		measure_observable(i);
-		observable_dependence(i);
+		if(verbose>=1){
+			observable_dependence(i);
+		}
 	}
 
 }
@@ -246,7 +250,7 @@ void measure_observable(int obs)
 	n=new_sv_measure(&sv);
 
 	sci_sprint_alt(s,sv.average,sv.error);
-	printf("offset %s, target %g\n",s,observables[obs].target);
+	DPRINT(0,"offset %s, target %g\n",s,observables[obs].target);
 }
 
 void observable_dependence(int obs)
@@ -271,11 +275,12 @@ void postgain_cal(int obs1, int obs2, int dac)
 	double gain;
 	comedi_range *range1,*range2;
 
-	DPRINT(0,"postgain calibration\n");
+	DPRINT(0,"postgain: %s; %s\n",observables[obs1].name,
+		observables[obs2].name);
 	preobserve(obs1);
 	check_gain_chan_x(&l,observables[obs1].observe_insn.chanspec,dac);
 	offset1=linear_fit_func_y(&l,caldacs[dac].current);
-	DPRINT(1,"obs1: [%d] offset %g\n",obs1,offset1);
+	DPRINT(2,"obs1: [%d] offset %g\n",obs1,offset1);
 	range1 = comedi_get_range(dev,observables[obs1].observe_insn.subdev,
 		CR_CHAN(observables[obs1].observe_insn.chanspec),
 		CR_RANGE(observables[obs1].observe_insn.chanspec));
@@ -284,18 +289,18 @@ void postgain_cal(int obs1, int obs2, int dac)
 	preobserve(obs2);
 	check_gain_chan_x(&l,observables[obs2].observe_insn.chanspec,dac);
 	offset2=linear_fit_func_y(&l,caldacs[dac].current);
-	DPRINT(1,"obs2: [%d] offset %g\n",obs2,offset2);
+	DPRINT(2,"obs2: [%d] offset %g\n",obs2,offset2);
 	range2 = comedi_get_range(dev,observables[obs2].observe_insn.subdev,
 		CR_CHAN(observables[obs2].observe_insn.chanspec),
 		CR_RANGE(observables[obs2].observe_insn.chanspec));
 	slope2=l.slope;
 
 	gain = (range1->max-range1->min)/(range2->max-range2->min);
-	DPRINT(3,"range1 %g range2 %g\n", range1->max-range1->min,
+	DPRINT(4,"range1 %g range2 %g\n", range1->max-range1->min,
 		range2->max-range2->min);
-	DPRINT(2,"gain: %g\n",gain);
+	DPRINT(3,"gain: %g\n",gain);
 
-	DPRINT(2,"difference: %g\n",offset2-offset1);
+	DPRINT(3,"difference: %g\n",offset2-offset1);
 
 	a = (offset1-offset2)/(slope1-slope2);
 	a=caldacs[dac].current-a;
@@ -317,30 +322,24 @@ void postgain_cal(int obs1, int obs2, int dac)
 void cal1(int obs, int dac)
 {
 	linear_fit_t l;
-	double offset;
-	double target;
-	double gain;
 	double a;
 
-	DPRINT(0,"cal1\n");
+	DPRINT(0,"linear: %s\n",observables[obs].name);
 	preobserve(obs);
 	check_gain_chan_x(&l,observables[obs].observe_insn.chanspec,dac);
-	offset=linear_fit_func_y(&l,caldacs[dac].current);
-	gain=l.slope;
-	
-	target = observables[obs].target;
-	a=caldacs[dac].current+(target-offset)/gain;
+	a=linear_fit_func_x(&l,observables[obs].target);
 
 	caldacs[dac].current=rint(a);
 	update_caldac(dac);
 	usleep(100000);
 
 	DPRINT(0,"caldac[%d] set to %g\n",dac,a);
-	if(verbose>=2){
+	if(verbose>=3){
 		measure_observable(obs);
 	}
 }
 
+#if 0
 void chan_cal(int adc,int cdac,int range,double target)
 {
 	linear_fit_t l;
@@ -359,11 +358,12 @@ void chan_cal(int adc,int cdac,int range,double target)
 	update_caldac(cdac);
 
 	read_chan2(s,adc,range);
-	DPRINT(0,"caldac[%d] set to %g, offset=%s\n",cdac,a,s);
+	DPRINT(1,"caldac[%d] set to %g, offset=%s\n",cdac,a,s);
 }
+#endif
 
 
-
+#if 0
 void channel_dependence(int adc,int range)
 {
 	int i;
@@ -373,7 +373,9 @@ void channel_dependence(int adc,int range)
 		gain=check_gain_chan(adc,range,i);
 	}
 }
+#endif
 
+#if 0
 void caldac_dependence(int caldac)
 {
 	int i;
@@ -383,13 +385,16 @@ void caldac_dependence(int caldac)
 		gain=check_gain_chan(i,0,caldac);
 	}
 }
+#endif
 
+#if 0
 void dump_curve(int adc,int caldac)
 {
 	linear_fit_t l;
 
 	check_gain_chan_x(&l,CR_PACK(adc,0,AREF_OTHER),caldac);
 }
+#endif
 
 
 void setup_caldacs(void)
@@ -427,13 +432,13 @@ void update_caldac(int i)
 {
 	int ret;
 	
-	DPRINT(3,"update %d %d %d\n",caldacs[i].subdev,caldacs[i].chan,caldacs[i].current);
+	DPRINT(4,"update %d %d %d\n",caldacs[i].subdev,caldacs[i].chan,caldacs[i].current);
 	if(caldacs[i].current<0){
-		DPRINT(0,"caldac set out of range (%d<0)\n",caldacs[i].current);
+		DPRINT(1,"caldac set out of range (%d<0)\n",caldacs[i].current);
 		caldacs[i].current=0;
 	}
 	if(caldacs[i].current>caldacs[i].maxdata){
-		DPRINT(0,"caldac set out of range (%d>%d)\n",
+		DPRINT(1,"caldac set out of range (%d>%d)\n",
 			caldacs[i].current,caldacs[i].maxdata);
 		caldacs[i].current=caldacs[i].maxdata;
 	}
@@ -443,7 +448,7 @@ void update_caldac(int i)
 	if(ret<0)perror("update_caldac()");
 }
 
-
+#if 0
 void check_gain(int ad_chan,int range)
 {
 	int i;
@@ -452,13 +457,16 @@ void check_gain(int ad_chan,int range)
 		check_gain_chan(ad_chan,range,i);
 	}
 }
+#endif
 
+#if 0
 double check_gain_chan(int ad_chan,int range,int cdac)
 {
 	linear_fit_t l;
 
 	return check_gain_chan_x(&l,CR_PACK(ad_chan,range,AREF_OTHER),cdac);
 }
+#endif
 
 double check_gain_chan_x(linear_fit_t *l,unsigned int ad_chanspec,int cdac)
 {
@@ -520,14 +528,14 @@ double check_gain_chan_x(linear_fit_t *l,unsigned int ad_chanspec,int cdac)
 
 	linear_fit_monotonic(l);
 
-	if(verbose>=1 || (verbose>=0 && fabs(l->slope/l->err_slope)>4.0)){
+	if(verbose>=2 || (verbose>=1 && fabs(l->slope/l->err_slope)>4.0)){
 		sci_sprint_alt(str,l->slope,l->err_slope);
 		printf("caldac[%d] gain=%s V/bit S_min=%g dof=%g\n",
 			cdac,str,l->S_min,l->dof);
 		//printf("--> %g\n",fabs(l.slope/l.err_slope));
 	}
 
-	if(verbose>=2){
+	if(verbose>=3){
 		static int dump_number=0;
 		double x,y;
 
@@ -652,6 +660,7 @@ int read_chan2(char *s,int adc,int range)
 	return sci_sprint_alt(s,sv.average,sv.error);
 }
 
+#if 0
 void set_ao(comedi_t *dev,int subdev,int chan,int range,double value)
 {
 	comedi_range *r = comedi_get_range(dev,subdev,chan,range);
@@ -662,6 +671,7 @@ void set_ao(comedi_t *dev,int subdev,int chan,int range,double value)
 
 	comedi_data_write(dev,subdev,chan,range,AREF_GROUND,data);
 }
+#endif
 
 
 int new_sv_init(new_sv_t *sv,comedi_t *dev,int subdev,int chan,int range,int aref)
@@ -874,6 +884,11 @@ int calculate_residuals(linear_fit_t *l)
 double linear_fit_func_y(linear_fit_t *l,double x)
 {
 	return l->ave_y+l->slope*(x-l->ave_x);
+}
+
+double linear_fit_func_x(linear_fit_t *l,double y)
+{
+	return l->ave_x+(y-l->ave_y)/l->slope;
 }
 
 

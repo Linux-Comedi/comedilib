@@ -151,6 +151,7 @@ typedef struct {
 }linear_fit_t;
 int linear_fit_monotonic(linear_fit_t *l);
 double linear_fit_func_y(linear_fit_t *l,double x);
+double linear_fit_func_x(linear_fit_t *l,double y);
 double check_gain_chan_x(linear_fit_t *l,unsigned int ad_chanspec,int cdac);
 
 /* slowly varying measurements */
