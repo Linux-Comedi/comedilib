@@ -233,8 +233,11 @@ static int source_eeprom_addr_64xx( calibration_setup_t *setup, unsigned int ran
 	comedi_range *range;
 
 	range = comedi_get_range( setup->dev, setup->ad_subdev, 0, range_index );
-	if( range == NULL ) return -1;
-
+	if( range == NULL ) 
+	{
+		fprintf(stderr, "%s: failed to get range\n", __FUNCTION__);	
+		return -1;
+	}
 	if( range->max > 7.0 )
 		return EEPROM_7V_CHAN;
 	else if( range->max > 3.5 )
@@ -252,8 +255,11 @@ static int ai_low_cal_source_64xx( calibration_setup_t *setup, unsigned int rang
 	comedi_range *range;
 
 	range = comedi_get_range( setup->dev, setup->ad_subdev, 0, range_index );
-	if( range == NULL ) return -1;
-
+	if( range == NULL )
+	{
+		fprintf(stderr, "%s: failed to get range\n", __FUNCTION__);	
+		return -1;
+	}
 	if( range->min > -0.001 )
 		return CS_64XX_8600uV;
 	else
@@ -265,8 +271,11 @@ static int ai_high_cal_source_64xx( calibration_setup_t *setup, unsigned int ran
 	comedi_range *range;
 
 	range = comedi_get_range( setup->dev, setup->ad_subdev, 0, range_index );
-	if( range == NULL ) return -1;
-
+	if( range == NULL )
+	{
+		fprintf(stderr, "%s: failed to get range\n", __FUNCTION__);	
+		return -1;
+	}
 	if( range->max > 7.0 )
 		return CS_64XX_7V;
 	else if( range->max > 3.5 )
@@ -302,8 +311,11 @@ static int ao_set_high_target_64xx( calibration_setup_t *setup, unsigned int obs
 	comedi_range *range;
 
 	range = comedi_get_range( setup->dev, setup->da_subdev, 0, range_index );
-	if( range == NULL ) return -1;
-
+	if( range == NULL ) 
+	{
+		fprintf(stderr, "%s: failed to get range\n", __FUNCTION__);	
+		return -1;
+	}
 	target = range->max * 0.9;
 	set_target( setup, obs, target );
 	return 0;
@@ -323,8 +335,11 @@ static int init_observables_64xx( calibration_setup_t *setup )
 	tmpl.subdev = setup->ad_subdev;
 
 	num_ai_ranges = comedi_get_n_ranges( setup->dev, setup->ad_subdev, 0 );
-	if( num_ai_ranges < 0 ) return -1;
-
+	if( num_ai_ranges < 0 )
+	{
+		fprintf(stderr, "%s: failed to get number of ai ranges\n", __FUNCTION__);
+		return -1;
+	}
 	setup->n_observables = 0;
 
 	for( range = 0; range < num_ai_ranges; range++ )
@@ -367,7 +382,11 @@ static int init_observables_64xx( calibration_setup_t *setup )
 		po_tmpl.subdev = setup->da_subdev;
 
 		num_ao_ranges = comedi_get_n_ranges( setup->dev, setup->da_subdev, 0 );
-		if( num_ao_ranges < 0 ) return -1;
+		if( num_ao_ranges < 0 )
+		{
+			fprintf(stderr, "%s: failed to get number of ao ranges\n", __FUNCTION__);
+			return -1;
+		}
 
 		for( range = 0; range < num_ao_ranges; range++ )
 		{
@@ -492,8 +511,11 @@ static int high_ai_cal_src_60xx( calibration_setup_t *setup, unsigned int ai_ran
 	comedi_range *range;
 
 	range = comedi_get_range( setup->dev, setup->ad_subdev, 0, ai_range );
-	if( range == NULL ) return -1;
-
+	if( range == NULL ) 
+	{
+		fprintf(stderr, "%s: failed to get range\n", __FUNCTION__);	
+		return -1;
+	}
 	if( range->max > 9.999 )
 		return CS_60XX_10V;
 	else if( range->max > 4.999 )
@@ -541,10 +563,14 @@ static int init_observables_60xx( calibration_setup_t *setup )
 	setup->n_observables = 0;
 
 	num_ranges = comedi_get_n_ranges( setup->dev, setup->ad_subdev, 0 );
-	if( num_ranges < 0 ) return -1;
-
+	if( num_ranges < 0 ) 
+	{
+		fprintf(stderr, "%s: failed to get number of ai ranges\n", __FUNCTION__);
+		return -1;
+	}
 	for( i = 0; i < num_ranges; i++ )
 	{
+fprintf(stderr, "setting up ai observables for range %i out of %i\n", i, num_ranges);
 		o = setup->observables + ai_ground_observable_index_60xx( setup, 0, i );
 		o->reference_source = CAL_SRC_GROUND;
 		assert( o->name == NULL );
@@ -580,7 +606,11 @@ static int init_observables_60xx( calibration_setup_t *setup )
 		po_tmpl.subdev = setup->da_subdev;
 
 		num_ranges = comedi_get_n_ranges( setup->dev, setup->da_subdev, 0 );
-		if( num_ranges < 0 ) return -1;
+		if( num_ranges < 0 ) 
+		{
+			fprintf(stderr, "%s: failed to get number of ao ranges\n", __FUNCTION__);
+			return -1;
+		}
 
 		for( i = 0; i < num_ranges; i++ )
 		{
@@ -635,8 +665,11 @@ static int high_ai_cal_src_4020( calibration_setup_t *setup, unsigned int ai_ran
 	comedi_range *range;
 
 	range = comedi_get_range( setup->dev, setup->ad_subdev, 0, ai_range );
-	if( range == NULL ) return -1;
-
+	if( range == NULL ) 
+	{
+		fprintf(stderr, "%s: failed to get range\n", __FUNCTION__);	
+		return -1;
+	}
 	if( range->max > 4.4  )
 		return CS_4020_4375mV;
 	else if( range->max > 0.7 )
@@ -655,8 +688,11 @@ static int source_eeprom_addr_4020( calibration_setup_t *setup, unsigned int ran
 	comedi_range *range;
 
 	range = comedi_get_range( setup->dev, setup->ad_subdev, 0, range_index );
-	if( range == NULL ) return -1;
-
+	if( range == NULL ) 
+	{
+		fprintf(stderr, "%s: failed to get range\n", __FUNCTION__);	
+		return -1;
+	}
 	if( range->max > 4.4 )
 		return EEPROM_4375mV_CHAN;
 	else if( range->max > 0.7 )
@@ -679,10 +715,18 @@ static int init_observables_4020( calibration_setup_t *setup )
 	tmpl.subdev = setup->ad_subdev;
 
 	num_ranges = comedi_get_n_ranges( setup->dev, setup->ad_subdev, 0 );
-	if( num_ranges < 0 ) return -1;
+	if( num_ranges < 0 )
+	{
+		fprintf(stderr, "%s: failed to get number of ai ranges\n", __FUNCTION__);
+		return -1;
+	}
 
 	num_channels = comedi_get_n_channels( setup->dev, setup->ad_subdev );
-	if( num_channels < 0 ) return -1;
+	if( num_channels < 0 ) 
+	{
+		fprintf(stderr, "%s: failed to get number of ai channels\n", __FUNCTION__);
+		return -1;
+	}
 
 	setup->n_observables = 0;
 

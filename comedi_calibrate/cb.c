@@ -52,7 +52,7 @@ static int cal_cb_pci_1602_16( calibration_setup_t *setup );
 static int init_observables_1xxx( calibration_setup_t *setup );
 
 static struct board_struct boards[]={
-	{ "pci-das1000",	STATUS_GUESS,	setup_cb_pci_1xxx },
+	{ "pci-das1000",	STATUS_SOME,	setup_cb_pci_1xxx },
 	{ "pci-das1001",	STATUS_GUESS,	setup_cb_pci_1xxx },
 	{ "pci-das1002",	STATUS_GUESS,	setup_cb_pci_1xxx },
 	{ "pci-das1200",	STATUS_DONE,	setup_cb_pci_1xxx },
@@ -575,8 +575,8 @@ int cb_actual_source_voltage( comedi_t *dev, unsigned int subdevice, unsigned in
 		*voltage = eeprom8_to_source( byte );
 	}else
 	{
-		fprintf( stderr, "%s: maxdata = 0x%x invalid\n",
-			__FUNCTION__, max_data );
+		fprintf( stderr, "%s: maxdata = 0x%x invalid for subdevice %i, channel %i\n",
+			__FUNCTION__, max_data, subdevice, eeprom_channel);
 		return -1;
 	}
 
