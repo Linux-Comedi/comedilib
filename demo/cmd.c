@@ -28,8 +28,7 @@
 #define N_SCANS		10
 #define N_CHANS		16
 
-int chan=9;
-int n_chan = 3;
+int n_chan = 4;
 double freq = 1000;
 
 #define BUFSZ 10000
@@ -214,10 +213,10 @@ void prepare_cmd_1(comedi_t *dev,comedi_cmd *cmd)
 	cmd->chanlist =		chanlist;
 	cmd->chanlist_len =	n_chan;
 
-	chanlist[0]=CR_PACK(chan+0,range,aref);
-	chanlist[1]=CR_PACK(chan+1,range,aref);
-	chanlist[2]=CR_PACK(15,range,aref);
-	chanlist[3]=CR_PACK(chan+3,range,aref);
+	chanlist[0]=CR_PACK(channel+0,range,aref);
+	chanlist[1]=CR_PACK(channel+1,range,aref);
+	chanlist[2]=CR_PACK(channel+2,range,aref);
+	chanlist[3]=CR_PACK(channel+3,range,aref);
 }
 
 /*
@@ -249,9 +248,9 @@ void prepare_cmd_2(comedi_t *dev,comedi_cmd *cmd)
 	cmd->chanlist =		chanlist;
 	cmd->chanlist_len =	n_chan;
 
-	chanlist[0]=CR_PACK(chan+0,range,aref);
-	chanlist[1]=CR_PACK(chan+1,range,aref);
-	chanlist[2]=CR_PACK(chan+2,range,aref);
-	chanlist[3]=CR_PACK(chan+3,range,aref);
+	chanlist[0]=CR_PACK(channel+0,range,aref);
+	chanlist[1]=CR_PACK(channel+1,range,aref);
+	chanlist[2]=CR_PACK(channel+2,range,aref);
+	chanlist[3]=CR_PACK(channel+3,range,aref);
 }
 
