@@ -65,6 +65,7 @@ run comedi_config as
 <screen>
 comedi_config /dev/comedi0 ni_atmio
 </screen>
+</para>
 <para>
 
 For the <literal>Data Translation</literal> board, you need to have a

@@ -57,6 +57,7 @@ The
 <filename>comedi0</filename> device file is configured to point to a
 valid &comedi; driver. <xref linkend="cardconfiguration"> explains
 how this driver is linked to the <quote>device file</quote>.
+</para>
 <para>
 The code above is basically the guts of
 <filename>demo/inp.c</filename>, without error checking or fancy

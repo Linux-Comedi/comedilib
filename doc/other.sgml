@@ -65,6 +65,7 @@ The <parameter class=function>subdevice</parameter> and
 integers that indicate which subdevice and channel is used in the
 acquisition. The integer <parameter class=function>bit</parameter>
 contains the value of the acquired bit.
+</para>
 <para>
 The direction of bidirectional lines can be configured using
 the function
@@ -1452,7 +1453,7 @@ data[3]: primary analog level.
 data[4]: secondary analog level.
   </member>
 </simplelist>
-
+</para>
 <para>
 Analog triggering is described by a digital combining machine that
 has two sensitive digital inputs.  The sensitive digital inputs are

@@ -261,6 +261,7 @@ struct comedi_lrange_struct{
 <section id="comedisubdevice">
 <title>
 <function>comedi_subdevice</function>
+</title>
 <para>
 The subdevice is the smallest &comedi; entity that can be used for
 <quote>stand-alone</quote> DAQ, so it is no surprise that it is
@@ -271,17 +272,17 @@ struct comedi_subdevice_struct{
   int  n_chan;
   int  subdev_flags;
   int  len_chanlist;		/* maximum length of channel/gain list */
-  
+
   void *private;
-  
+
   <link linkend="comediasync">comedi_async</link> *async;
-  
+
   void         *lock;
   void         *busy;
   unsigned int runflags;
-  
+
   int          io_bits;
-  
+
   <link linkend="ref-type-lsampl-t">lsampl_t</link> maxdata;       /* if maxdata==0, use list */
   <link linkend="ref-type-lsampl-t">lsampl_t</link> *maxdata_list; /* list is channel specific */
   
@@ -830,7 +831,7 @@ Drivers should report errors and warnings via the
 </listitem>
 
 </itemizedlist>
-
+</para>
 </section>
 
 <section id="integratingdriver">
