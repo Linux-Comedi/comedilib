@@ -59,7 +59,7 @@ void write_caldac(comedi_t *dev,int subdev,int addr,int val);
 void check_gain(int ad_chan,int range);
 double check_gain_chan(int ad_chan,int range,int cdac);
 
-int dump_flag = 1;
+int verbose = 1;
 
 
 void update_caldac(int i);
@@ -106,12 +106,14 @@ double check_gain_chan_x(linear_fit_t *l,int ad_chan,int range,int cdac);
 
 typedef struct{
 	comedi_t *dev;
-	comedi_trig t;
-
-	unsigned int chanlist[1];
 
 	int maxdata;
 	int order;
+	int aref;
+	int range;
+	int subd;
+	int chan;
+
 	comedi_range *rng;
 
 	int n;
@@ -132,12 +134,18 @@ int main(int argc, char *argv[])
 
 	fn = "/dev/comedi0";
 	while (1) {
-		c = getopt(argc, argv, "f:");
+		c = getopt(argc, argv, "f:v");
 		if (c == -1)
 			break;
 		switch (c) {
 		case 'f':
 			fn = optarg;
+			break;
+		case 'v':
+			verbose++;
+			break;
+		case 'q':
+			verbose--;
 			break;
 		default:
 			printf("bad option\n");
@@ -407,7 +415,7 @@ void cal_ni_mio_E(void)
 		chan_cal(5,1,0,ref);
 
 		printf("results (offset)\n");
-		for(i=0;i<16;i++){
+		for(i=0;i<8;i++){
 			read_chan(0,i);
 		}
 
@@ -503,7 +511,7 @@ void cal_ni_mio_E(void)
  * 11	unknown
  */
 		int offset_ad = 0;
-		int unipolar_offset_ad = 1;
+		//int unipolar_offset_ad = 1;
 		int gain_ad = 5;
 		int pregain_offset_dac = 0;
 		int postgain_offset_dac = 1;
@@ -697,9 +705,7 @@ void dump_curve(int adc,int caldac)
 {
 	linear_fit_t l;
 
-	dump_flag=1;
 	check_gain_chan_x(&l,adc,0,caldac);
-	dump_flag=0;
 }
 
 
@@ -826,7 +832,7 @@ double check_gain_chan_x(linear_fit_t *l,int ad_chan,int range,int cdac)
 		cdac,l->slope,l->err_slope,l->S_min,l->dof,l->min,l->max);
 	//printf("--> %g\n",fabs(l.slope/l.err_slope));
 
-	if(dump_flag){
+	if(verbose>=2){
 		static int dump_number=0;
 		double x,y;
 
@@ -869,7 +875,7 @@ double read_chan(int adc,int range)
 	new_sv_t sv;
 
 	new_sv_init(&sv,dev,0,adc,range,AREF_OTHER);
-	sv.order=10;
+	sv.order=7;
 	n=new_sv_measure(&sv);
 
 	printf("chan=%d ave=%g error=%g\n",adc,sv.average,sv.error);
@@ -879,22 +885,7 @@ double read_chan(int adc,int range)
 
 void write_caldac(comedi_t *dev,int subdev,int addr,int val)
 {
-	comedi_trig it;
-	unsigned int chan=CR_PACK(addr,0,0);
-	sampl_t data=val;
-
-	memset(&it,0,sizeof(it));
-
-	it.subdev = subdev;
-	it.n_chan = 1;
-	it.chanlist = &chan;
-	it.data = &data;
-	it.n = 1;
-
-	if(comedi_trigger(dev,&it)<0){
-		perror("write_caldac");
-		exit(0);
-	}
+	comedi_data_write(dev,subdev,addr,0,0,val);
 }
 
 
@@ -903,12 +894,13 @@ int new_sv_init(new_sv_t *sv,comedi_t *dev,int subdev,int chan,int range,int are
 {
 	memset(sv,0,sizeof(*sv));
 
-	sv->t.subdev=subdev;
-	sv->t.flags=TRIG_DITHER;
-	sv->t.n_chan=1;
-	sv->t.chanlist=sv->chanlist;
+	sv->subd=subdev;
+	//sv->t.flags=TRIG_DITHER;
+	sv->chan=chan;
+	sv->range=range;
+	sv->aref=aref;
 
-	sv->chanlist[0]=CR_PACK(chan,range,aref);
+	//sv->chanlist[0]=CR_PACK(chan,range,aref);
 
 	sv->maxdata=comedi_get_maxdata(dev,subdev,chan);
 	sv->rng=comedi_get_range(dev,subdev,chan,range);
@@ -918,16 +910,43 @@ int new_sv_init(new_sv_t *sv,comedi_t *dev,int subdev,int chan,int range,int are
 	return 0;
 }
 
+int comedi_data_read_n(comedi_t *it,unsigned int subdev,unsigned int chan,
+	unsigned int range,unsigned int aref,lsampl_t *data,unsigned int n)
+{
+	comedi_insn insn;
+	int ret;
+
+	if(n==0)return 0;
+
+	insn.insn = INSN_READ;
+	insn.n = n;
+	insn.data = data;
+	insn.subdev = subdev;
+	insn.chanspec = CR_PACK(chan,range,aref);
+	
+	ret = comedi_do_insn(it,&insn);
+
+	/* comedi_do_insn returns the number of sucessful insns.
+	 * Hopefully 1. */
+	if(ret==1)return n;
+
+	printf("insn barfed: subdev=%d, chan=%d, range=%d, aref=%d, "
+		"n=%d, ret=%d, %s\n",subdev,chan,range,aref,n,ret,
+		strerror(errno));
+
+	return ret;
+}
+
 int new_sv_measure(new_sv_t *sv)
 {
-	sampl_t *data;
+	lsampl_t *data;
 	int n,i,ret;
 
 	double a,x,s,s2;
 
 	n=1<<sv->order;
 
-	data=malloc(sizeof(sampl_t)*n);
+	data=malloc(sizeof(lsampl_t)*n);
 	if(data == NULL)
 	{
 		perror("comedi_calibrate");
@@ -935,10 +954,12 @@ int new_sv_measure(new_sv_t *sv)
 	}
 
 	for(i=0;i<n;){
-		sv->t.data=data+i;
-		sv->t.n=n-i;
-		ret=comedi_trigger(dev,&sv->t);
-		if(ret<0)goto out;
+		ret = comedi_data_read_n(dev,sv->subd,sv->chan,sv->range,
+			sv->aref,data+i,n-i);
+		if(ret<0){
+			printf("barf\n");
+			goto out;
+		}
 		i+=ret;
 	}
 
@@ -964,13 +985,13 @@ out:
 
 int new_sv_measure_order(new_sv_t *sv,int order)
 {
-	sampl_t *data;
+	lsampl_t *data;
 	int n,i,ret;
 	double a,x,s,s2;
 
 	n=1<<order;
 
-	data=malloc(sizeof(sampl_t)*n);
+	data=malloc(sizeof(lsampl_t)*n);
 	if(data == NULL)
 	{
 		perror("comedi_calibrate");
@@ -978,10 +999,12 @@ int new_sv_measure_order(new_sv_t *sv,int order)
 	}
 
 	for(i=0;i<n;){
-		sv->t.data=data+i;
-		sv->t.n=n-i;
-		ret=comedi_trigger(dev,&sv->t);
-		if(ret<0)goto out;
+		ret = comedi_data_read_n(dev,sv->subd,sv->chan,sv->range,
+			sv->aref,data+i,n-i);
+		if(ret<0){
+			printf("barf order\n");
+			goto out;
+		}
 		i+=ret;
 	}
 
