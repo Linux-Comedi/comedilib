@@ -928,12 +928,12 @@ int comedi_data_read_n(comedi_t *it,unsigned int subdev,unsigned int chan,
 	insn.data = data;
 	insn.subdev = subdev;
 	insn.chanspec = CR_PACK(chan,range,aref);
+	/* enable dithering */
+	insn.chanspec |= (1<<26);
 	
 	ret = comedi_do_insn(it,&insn);
 
-	/* comedi_do_insn returns the number of sucessful insns.
-	 * Hopefully 1. */
-	if(ret==1)return n;
+	if(ret>0)return n;
 
 	printf("insn barfed: subdev=%d, chan=%d, range=%d, aref=%d, "
 		"n=%d, ret=%d, %s\n",subdev,chan,range,aref,n,ret,
