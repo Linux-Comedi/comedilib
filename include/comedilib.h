@@ -57,6 +57,11 @@ typedef struct comedi_sv_struct{
 	lsampl_t maxdata;
 }comedi_sv_t;
 
+enum comedi_oor_behavior {
+	COMEDI_OOR_NUMBER = 0,
+	COMEDI_OOR_NAN
+};
+
 
 
 
@@ -70,11 +75,16 @@ char *comedi_strerror(int errnum);
 int comedi_errno(void);
 int comedi_fileno(comedi_t *it);
 
+/* global behavior */
+enum comedi_oor_behavior comedi_set_global_oor_behavior(enum comedi_oor_behavior behavior);
+
 /* device queries */
 int comedi_get_n_subdevices(comedi_t *it);
 int comedi_get_version_code(comedi_t *it);
 char *comedi_get_driver_name(comedi_t *it);
 char *comedi_get_board_name(comedi_t *it);
+int comedi_get_read_subdevice(comedi_t *dev);
+int comedi_get_write_subdevice(comedi_t *dev);
 
 /* subdevice queries */
 int comedi_get_subdevice_type(comedi_t *it,unsigned int subdevice);
@@ -87,8 +97,6 @@ int comedi_maxdata_is_chan_specific(comedi_t *it,unsigned int subdevice);
 /* channel queries */
 lsampl_t comedi_get_maxdata(comedi_t *it,unsigned int subdevice,
 	unsigned int chan);
-//int comedi_get_rangetype(comedi_t *it,unsigned int subdevice,
-//	unsigned int chan);
 int comedi_get_n_ranges(comedi_t *it,unsigned int subdevice,
 	unsigned int chan);
 comedi_range * comedi_get_range(comedi_t *it,unsigned int subdevice,
@@ -114,6 +122,10 @@ int comedi_unlock(comedi_t *it,unsigned int subdevice);
 /* physical units */
 double comedi_to_phys(lsampl_t data,comedi_range *rng,lsampl_t maxdata);
 lsampl_t comedi_from_phys(double data,comedi_range *rng,lsampl_t maxdata);
+int comedi_sampl_to_phys(double *dest, int dst_stride, sampl_t *src,
+	int src_stride, comedi_range *rng, lsampl_t maxdata, int n);
+int comedi_sampl_from_phys(sampl_t *dest,int dst_stride,double *src,
+	int src_stride, comedi_range *rng, lsampl_t maxdata, int n);
 
 /* syncronous stuff */
 int comedi_data_read(comedi_t *it,unsigned int subd,unsigned int chan,
@@ -151,44 +163,39 @@ int comedi_command(comedi_t *it,comedi_cmd *cmd);
 int comedi_command_test(comedi_t *it,comedi_cmd *cmd);
 int comedi_poll(comedi_t *dev,unsigned int subdevice);
 
-// changes maximum size (in bytes) of preallocated buffer, requires root priviledge, returns new max size
+/* buffer control */
+
 int comedi_set_max_buffer_size(comedi_t *it, unsigned int subdev,
 	unsigned int max_size);
-// returns number of bytes in buffer waiting to be read by user
 int comedi_get_buffer_contents(comedi_t *it, unsigned int subdev);
-// marks 'bytes' number of bytes in buffer as read by user, returns number of bytes left to be read
 int comedi_mark_buffer_read(comedi_t *it, unsigned int subdev,
 	unsigned int bytes);
-// returns offset in bytes from beginning of buffer for first unread data point in buffer
 int comedi_get_buffer_offset(comedi_t *it, unsigned int subdev);
 
-/* DEPRECATED */
-
 #ifdef _COMEDILIB_DEPRECATED
+/*
+ * The following functions are deprecated and should not be used.
+ */
 int comedi_get_timer(comedi_t *it,unsigned int subdev,double freq,
 	unsigned int *trigvar,double *actual_freq);
 int comedi_timed_1chan(comedi_t *it,unsigned int subdev,unsigned int chan,
 	unsigned int range, unsigned int aref,double freq,
 	unsigned int n_samples,double *data);
+int comedi_get_rangetype(comedi_t *it,unsigned int subdevice,
+	unsigned int chan);
 #endif
 
 
+#ifndef _COMEDILIB_STRICT_ABI
 /*
-   The following prototypes are ALPHA, indicating that they might change
-   in future releases of comedilib, without regard to backward compatibility.
+   The following prototypes are _NOT_ part of the Comedilib ABI, and
+   may change in future versions without regard to source or binary
+   compatibility.  In practice, this is a holding place for the next
+   library ABI version change.
  */
 
-enum comedi_oor_behavior {
-	COMEDI_OOR_NUMBER = 0,
-	COMEDI_OOR_NAN
-};
 
-enum comedi_oor_behavior comedi_set_global_oor_behavior(enum comedi_oor_behavior behavior);
-
-int comedi_get_read_subdevice(comedi_t *dev);
-int comedi_get_write_subdevice(comedi_t *dev);
-
-
+#endif
 
 #ifdef __cplusplus
 }
