@@ -659,23 +659,6 @@ static void ni_setup_observables_611x( calibration_setup_t *setup )
 	setup->n_observables = num_ao_observables_611x + 2 * num_ai_ranges * num_ai_channels;
 }
 
-static int cal_ni_at_mio_16e_2(calibration_setup_t *setup)
-{
-	ni_caldac_layout_t layout;
-
-	init_ni_caldac_layout( &layout );
-	layout.adc_pregain_offset = 0;
-	layout.adc_postgain_offset = 1;
-	layout.adc_gain = 3;
-	layout.adc_unip_offset = 2;
-	layout.dac_offset[ 0 ] = 5;
-	layout.dac_gain[ 0 ] = 6;
-	layout.dac_offset[ 1 ] = 8;
-	layout.dac_gain[ 1 ] = 9;
-
-	return cal_ni_generic( setup, &layout );
-}
-
 static int cal_ni_daqcard_ai_16xe_50(calibration_setup_t *setup)
 {
 	ni_caldac_layout_t layout;
@@ -726,7 +709,26 @@ static int cal_ni_pci_mio_16xe_10(calibration_setup_t *setup)
 
 static int cal_ni_at_mio_16e_1(calibration_setup_t *setup)
 {
-	return cal_ni_at_mio_16e_2( setup );
+	ni_caldac_layout_t layout;
+
+	init_ni_caldac_layout( &layout );
+	layout.adc_pregain_offset = 0;
+	layout.adc_postgain_offset = 1;
+	layout.adc_gain = 3;
+	layout.adc_unip_offset = 2;
+	layout.dac_offset[0] = 5;
+	layout.dac_gain[0] = 6;
+	layout.dac_linearity[0] = 4;
+	layout.dac_offset[1] = 8;
+	layout.dac_gain[1] = 9;
+	layout.dac_linearity[1] = 7;
+
+	return cal_ni_generic( setup, &layout );
+}
+
+static int cal_ni_at_mio_16e_2(calibration_setup_t *setup)
+{
+	return cal_ni_at_mio_16e_1(setup);
 }
 
 static int cal_ni_pci_mio_16e_1(calibration_setup_t *setup)
