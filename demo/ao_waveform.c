@@ -90,7 +90,6 @@ void dds_init_sawtooth(void);
 
 int main(int argc, char *argv[])
 {
-	char *fn = NULL;
 	comedi_cmd cmd;
 	int err;
 	int n,m;
@@ -98,13 +97,13 @@ int main(int argc, char *argv[])
 	comedi_t *dev;
 	unsigned int chanlist[1];
 
-	if(argc>=2){
-		waveform_frequency=strtod(argv[1],NULL);
+	parse_options(argc,argv);
+
+	if(value){
+		waveform_frequency = value;
 	}
 
-	fn = "/dev/comedi0";
-
-	dev = comedi_open(fn);
+	dev = comedi_open(filename);
 
 	subdevice = comedi_find_subdevice_by_type(dev,COMEDI_SUBD_AO,0);
 
