@@ -225,9 +225,9 @@ ok:
 	device_status = setup.status;
 
 	if(device_status<STATUS_DONE){
-		printf("Warning: device may be incompletely or incorrectly calibrated due to\n"
-			"insufficient testing.\n"
-			"Please send this output to <ds@schleef.org>.\n"
+		printf("Warning: device may not be not fully calibrated due to "
+			"insufficient information.\n"
+			"Please file a bug report at http://bugs.comedi.org/ and attach this output.\n"
 			"This output will also allow comedi_calibrate to execute more\n"
 			"quickly in the future.\n");
 		if(verbose<1)verbose=1;
