@@ -5,7 +5,7 @@
 
 VERSION = 0
 SUBVERSION = 7
-SUBSUBVERSION = 8
+SUBSUBVERSION = 10
 
 VERSION_CODE = ${VERSION}.${SUBVERSION}.${SUBSUBVERSION}
 
@@ -47,6 +47,9 @@ clean:	dummy
 	set -e;for i in $(SUBDIRS);do ${MAKE} clean -C $$i ; done
 
 distclean:	clean
+
+debian:
+	dpkg-build -rfakeroot
 
 dev:	dummy
 	-rm /dev/comedi*

@@ -1,3 +1,9 @@
+comedilib (0.7.10) unstable; urgency=low
+
+  * Merged into comedilib distro.
+
+ -- David Schleef <ds@stm.lbl.gov>  Wed, 29 Mar 2000 16:03:00 -0800
+
 comedilib (0.7.9-1) unstable; urgency=low
 
   * Initial Release.
