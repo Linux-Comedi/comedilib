@@ -31,13 +31,22 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <libintl.h>
 
 #include <comedi_errno.h>
-
 
 /* This indicates a symbol that should not be exported as part of
  * the library.  But I don't know how to make it useful yet. */
 #define INTERNAL
+
+/* gettext()ization */
+
+#ifdef I18N
+#define _(a) gettext((a))
+#else
+#define _(a) (a)
+#endif
+#define _s(a) (a)
 
 
 #define debug_ptr(a)    if(!(a))fprintf(stderr," ** NULL pointer: " __FILE__ ", line %d\n",__LINE__);

@@ -28,15 +28,15 @@
 #include <comedi_errno.h>
 
 char *__comedilib_error_strings[]={
-	"No error",
-	"Unknown error",
-	"Bad comedi_t structure",
-	"Invalid subdevice",
-	"Invalid channel",
-	"Buffer overflow",
-	"Buffer underflow",
-	"Command not supported",
-	"Not supported",
+	_s("No error"),
+	_s("Unknown error"),
+	_s("Bad comedi_t structure"),
+	_s("Invalid subdevice"),
+	_s("Invalid channel"),
+	_s("Buffer overflow"),
+	_s("Buffer underflow"),
+	_s("Command not supported"),
+	_s("Not supported"),
 };
 #define n_errors (sizeof(__comedilib_error_strings)/sizeof(void *))
 
@@ -62,7 +62,7 @@ char *comedi_strerror(int errnum)
 	if(errnum<COMEDI_NOERROR || errnum>=COMEDI_NOERROR+n_errors)
 		return strerror(errnum);
 
-	return __comedilib_error_strings[errnum-COMEDI_NOERROR];
+	return _(__comedilib_error_strings[errnum-COMEDI_NOERROR]);
 }
 
 void comedi_perror(const char *s)
