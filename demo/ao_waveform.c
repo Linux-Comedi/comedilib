@@ -56,7 +56,7 @@
 
 
 /* frequency of the sine wave to output */
-double waveform_frequency	= 100.0;
+double waveform_frequency	= 10.0;
 
 /* peak-to-peak amplitude, in DAC units (i.e., 0-4095) */
 double amplitude		= 4000;
@@ -84,21 +84,40 @@ void dds_init_sine(void);
 void dds_init_pseudocycloid(void);
 void dds_init_sawtooth(void);
 
+int comedi_internal_trigger(comedi_t *dev, unsigned int subd, unsigned int trignum)
+{
+	comedi_insn insn;
+	lsampl_t data[1];
+
+	memset(&insn, 0, sizeof(comedi_insn));
+	insn.insn = INSN_INTTRIG;
+	insn.subdev = subd;
+	insn.data = data;
+	insn.n = 1;
+
+	data[0] = trignum;
+
+	return comedi_do_insn(dev, &insn);
+}
+
+
 int main(int argc, char *argv[])
 {
 	comedi_cmd cmd;
-	comedi_insn insn;
 	int err;
 	int n,m;
 	int total=0;
 	comedi_t *dev;
 	unsigned int chanlist[16];
+	unsigned int maxdata;
+	comedi_range *rng;
+	int ret;
 	lsampl_t insn_data = 0;
 
 	parse_options(argc,argv);
 
 	/* Force n_chan to be 1 */
-	n_chan = 1;
+	n_chan = 2;
 
 	if(value){
 		waveform_frequency = value;
@@ -110,6 +129,12 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 	subdevice = comedi_find_subdevice_by_type(dev,COMEDI_SUBD_AO,0);
+
+	maxdata = comedi_get_maxdata(dev,subdevice,0);
+	rng = comedi_get_range(dev,subdevice,0,0);
+
+	offset = (double)comedi_from_phys(0.0,rng,maxdata);
+	amplitude = (double)comedi_from_phys(1.0,rng,maxdata) - offset;
 
 	memset(&cmd,0,sizeof(cmd));
 	cmd.subdev = subdevice;
@@ -136,26 +161,24 @@ int main(int argc, char *argv[])
 	dds_output(data,BUF_LEN);
 	dds_output(data,BUF_LEN);
 
+	dump_cmd(stdout,&cmd);
+
 	if ((err = comedi_command(dev, &cmd)) < 0) {
 		comedi_perror("comedi_command");
 		exit(1);
 	}
 
 	m=write(comedi_fileno(dev),data,BUF_LEN*sizeof(sampl_t));
-	perror("write");
+	if(m<0){
+		perror("write");
+		exit(1);
+	}
 	printf("m=%d\n",m);
 	
-	memset(&insn, 0, sizeof(comedi_insn));
-	insn.insn = INSN_INTTRIG;
-	insn.subdev = subdevice;
-	insn.n = 1;
-	insn.data = &insn_data;
-	insn.data[ 0 ] = 0;
-	err = comedi_do_insn(dev, &insn);
-	if( err < 0 )
-	{
-		perror("comedi_do_insn()");
-		abort();
+	ret = comedi_internal_trigger(dev, subdevice, 0);
+	if(ret<0){
+		perror("comedi_internal_trigger\n");
+		exit(1);
 	}
 
 	while(1){
@@ -167,7 +190,7 @@ int main(int argc, char *argv[])
 				perror("write");
 				exit(0);
 			}
-			//printf("m=%d\n",m);
+			printf("m=%d\n",m);
 			n-=m;
 		}
 		total+=BUF_LEN;
@@ -191,18 +214,9 @@ unsigned int adder;
 
 void dds_init(void)
 {
-	int i;
-
 	adder=waveform_frequency/freq*(1<<16)*(1<<WAVEFORM_SHIFT);
 
 	dds_init_function();
-
-	/* this is due to a bug in the NI-E driver */
-	if(range){
-		for(i=0;i<WAVEFORM_LEN;i++){
-			waveform[i]^=0x800;
-		}
-	}
 }
 
 void dds_output(sampl_t *buf,int n)
