@@ -2,7 +2,7 @@
 include ../Config
 include ../version
 
-CFLAGS += -fPIC -I../include -I.
+CFLAGS += -fPIC -D_REENTRANT -I../include -I.
 
 OBJS=comedi.o timer.o sv.o range.o ioctl.o filler.o timed.o error.o \
 	dio.o data.o get.o cmd.o buffer.o calib.o calib_lex.o calib_yacc.o
