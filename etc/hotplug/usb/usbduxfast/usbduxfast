@@ -38,7 +38,7 @@ $COMEDI_CONFIG -r /dev/comedi0
 # $COMEDI_CONFIG -r /dev/comedi1
 #
 # connecting the comedi device comedi0 with the module usbdux
-$COMEDI_CONFIG -i $USBDUX_FIRMWARE /dev/comedi0 usbduxfast
+$COMEDI_CONFIG --read-buffer 512 -i $USBDUX_FIRMWARE /dev/comedi0 usbduxfast
 # $COMEDI_CONFIG /dev/comedi1 usbduxfast
 #
 #
