@@ -133,6 +133,11 @@ This is one way that STATUS_SOME is useful, because you can calibrate
 the zero offset, then get a much better idea which other channels
 are likely to be for the voltage reference.
 
+Note that we haven't done anything with caldac[3].  It clearly
+does something useful, but until we attempt a coarse calibration,
+it's not certain what it does.  It turns out to be a fine postgain
+adjustment.
+
 In this example, there doesn't appear to be a caldac that affects
 unipolar zero offset, so it will not be used in the final function:
 
@@ -143,4 +148,30 @@ unipolar zero offset, so it will not be used in the final function:
 	cal1(ni_reference_low, 0);
 	cal1(ni_reference_low, 1);
   }
+
+There are a number of functions that are useful for optimizing a
+given caldac, each optimized for different cases.  The inconsistently
+named postgain_cal() and cal1() measure the observable(s) at a
+number of points throughout the entire caldac range, and then do a
+linear fit to determine the optimum value for caldac.  These functions
+are good if the caldac dependence is strictly linear.  They are also
+useful if the target value for the observable is at the endpoint of
+the measurable range, as when measuring unipolar zero offset, since
+the functions automatically compensate for bad input values.
+
+The function cal_fine() is useful for fine-tuning of the results of
+cal1(), especially if the dependence is close, but not quite linear.
+The goodness of the linear fit is quantified by the S_min value in the
+log -- an S_min value that is approximately the same (within a factor
+of 2 or 3) as dof (degrees of freedom) indicates a good fit.  An S_min
+value that is about 10 times dof indicates that fine tuning is probably
+necessary.  An S_min value that is many orders of magnitude larger than
+dof indicates that linear fitting should not be used.
+
+The functions cal_binary() and cal_postgain_binary() are used when
+the caldac dependence is highly non-linear.  It does a binary search
+in the range of the caldac to find a decent value.  Once a decent
+value is found, cal_fine() should be used, since the caldac dependence
+should be relatively linear in a small range around that value.
+
 
