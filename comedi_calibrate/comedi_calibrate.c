@@ -263,13 +263,35 @@ void set_target( calibration_setup_t *setup, int obs,double target)
 	setup->observables[obs].target = comedi_to_phys(data,range,maxdata);
 }
 
+static void apply_appropriate_cal( calibration_setup_t *setup, comedi_insn insn )
+{
+	int retval;
+
+	retval = comedi_apply_calibration( setup->dev, insn.subdev,
+		CR_CHAN( insn.chanspec ), CR_RANGE( insn.chanspec ),
+		CR_AREF( insn.chanspec ), setup->cal_save_file_path );
+	if( retval < 0 )
+		DPRINT( 0, "failed to apply ");
+	else
+		DPRINT( 0, "applied ");
+	DPRINT( 0, "calibration for subdev %i, channel %i, range %i, aref %i\n", insn.subdev,
+		CR_CHAN( insn.chanspec ), CR_RANGE( insn.chanspec ),
+		CR_AREF( insn.chanspec ) );
+}
+
 void observe( calibration_setup_t *setup )
 {
 	int i;
+	observable *obs;
 
 	for( i = 0; i < setup->n_observables; i++){
 		preobserve( setup, i);
 		DPRINT(0,"%s\n", setup->observables[i].name);
+		obs = &setup->observables[ i ];
+		if( obs->preobserve_insn.n != 0){
+			apply_appropriate_cal( setup, obs->preobserve_insn );
+		}
+		apply_appropriate_cal( setup, obs->observe_insn );
 		measure_observable( setup, i);
 		if(verbose>=1){
 			observable_dependence( setup, i);
