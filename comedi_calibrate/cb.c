@@ -374,8 +374,8 @@ int init_observables_60xx( calibration_setup_t *setup )
 		o->observe_insn.chanspec = CR_PACK( 0, 0, AREF_GROUND) | CR_ALT_SOURCE | CR_ALT_FILTER;
 		o->target = 0.0;
 		setup->n_observables++;
-fprintf( stderr, "cal src %i, range %i, target %g\n",
-	o->reference_source, i, o->target );
+		DPRINT( 0, "cal src %i, range %i, target %g\n",
+			o->reference_source, i, o->target );
 
 		o = setup->observables + high_observable_index_60xx( i );
 		retval = high_ai_cal_src_60xx( setup, i );
@@ -390,8 +390,8 @@ fprintf( stderr, "cal src %i, range %i, target %g\n",
 		if( retval < 0 ) return -1;
 		o->target = target;
 		setup->n_observables++;
-fprintf( stderr, "cal src %i, range %i, target %g\n",
-	o->reference_source, i, o->target );
+		DPRINT( 0, "cal src %i, range %i, target %g\n",
+			o->reference_source, i, o->target );
 	}
 
 	return 0;
