@@ -57,7 +57,8 @@ int test_cmd_probe_src_mask(void)
 
 	ret = comedi_get_cmd_src_mask(device,subdevice,&cmd);
 	if(ret<0){
-		printf("E: comedi_get_cmd_src_mask failed\n");
+		printf("E: comedi_get_cmd_src_mask failed %s\n",
+			strerror(errno));
 		return 0;
 	}
 	printf("command source mask:\n");
@@ -81,7 +82,7 @@ int test_cmd_probe_fast_1chan(void)
 	}
 
 	printf("command fast 1chan:\n");
-	if(comedi_get_cmd_generic_timed(device,subdevice,&cmd)<0){
+	if(comedi_get_cmd_generic_timed(device,subdevice,&cmd,1)<0){
 		printf("  not supported\n");
 		return 0;
 	}
@@ -115,7 +116,7 @@ int test_cmd_read_fast_1chan(void)
 		return 0;
 	}
 
-	if(comedi_get_cmd_generic_timed(device,subdevice,&cmd)<0){
+	if(comedi_get_cmd_generic_timed(device,subdevice,&cmd,1)<0){
 		printf("  not supported\n");
 		return 0;
 	}
