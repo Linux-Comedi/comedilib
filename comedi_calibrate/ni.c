@@ -383,7 +383,7 @@ void ni_setup_observables_611x( calibration_setup_t *setup )
 
 	/* ao 0, gain */
 	o = setup->observables + ni_ao0_reference_611x;
-	o->name = "ao 0, reference voltage, low gain";
+	o->name = "ao 0, reference voltage";
 	o->preobserve_insn = po_tmpl;
 	o->preobserve_insn.chanspec = CR_PACK( 0, 0, AREF_GROUND );
 	o->preobserve_insn.data = o->preobserve_data;
@@ -395,7 +395,7 @@ void ni_setup_observables_611x( calibration_setup_t *setup )
 
 	/* ao 1, zero offset */
 	o = setup->observables + ni_ao1_zero_offset_611x;
-	o->name = "ao 1, zero offset, low gain";
+	o->name = "ao 1, zero offset";
 	o->preobserve_insn = po_tmpl;
 	o->preobserve_insn.chanspec = CR_PACK( 1, 0, AREF_GROUND );
 	o->preobserve_insn.data = o->preobserve_data;
@@ -407,7 +407,7 @@ void ni_setup_observables_611x( calibration_setup_t *setup )
 
 	/* ao 1, gain */
 	o = setup->observables + ni_ao1_reference_611x;
-	o->name = "ao 1, reference voltage, low gain";
+	o->name = "ao 1, reference voltage";
 	o->preobserve_insn = po_tmpl;
 	o->preobserve_insn.chanspec = CR_PACK( 1, 0, AREF_GROUND );
 	o->preobserve_insn.data = o->preobserve_data;
@@ -792,10 +792,10 @@ int cal_ni_pci_611x( calibration_setup_t *setup )
 	}
 
 	if(do_output){
-		cal1( setup, ni_ao0_zero_offset_611x, 18 );
-		cal1( setup, ni_ao0_reference_611x, 17 );
-		cal1( setup, ni_ao1_zero_offset_611x, 20 );
-		cal1( setup, ni_ao1_reference_611x, 19 );
+		cal1( setup, ni_ao0_zero_offset_611x, 14 );
+		cal1( setup, ni_ao0_reference_611x, 13 );
+		cal1( setup, ni_ao1_zero_offset_611x, 16 );
+		cal1( setup, ni_ao1_reference_611x, 15 );
 	}
 
 	return 0;
