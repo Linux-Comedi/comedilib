@@ -1,9 +1,10 @@
 
-
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/version.h>
 #include <rtl_sched.h>
+#include <rtl_compat.h>
+#include <rtl_printf.h>
 #include <asm/rt_time.h>
 #include <comedi.h>
 
@@ -39,6 +40,7 @@ int init_module(void)
 	trig.n_chan=1;
 	trig.chanlist=&channel;
 	trig.data=&data;
+	trig.data_len=1;
 	trig.n=1;
 	trig.trigsrc=0;
 	trig.trigvar=0;
@@ -50,11 +52,11 @@ int init_module(void)
 	comedi_lock_ioctl(dev,subdev);
 
 	/* configure DIO 0 for output */
-	trig.flags=TRIG_CONFIG;
+	trig.flags=TRIG_CONFIG|TRIG_WRITE;
 	data=COMEDI_OUTPUT;
 	ret=comedi_trig_ioctl(dev,subdev,&trig);
 	printk("comedi_trig_ioctl() returned %d\n",ret);
-	trig.flags=0;
+	trig.flags=TRIG_WRITE;
 	data=1;
 
 	/* a little test */
@@ -63,7 +65,7 @@ int init_module(void)
 
 	rt_task_init(&mytask,do_comedi_toggle, 0xffff, 3000, 4);
 	
-	rt_task_make_periodic(&mytask,now+3000,50000);
+	rt_task_make_periodic(&mytask,now+3000,1000);
 
 	return 0;
 }

@@ -4,9 +4,14 @@
 # I don't have RTLinux installed on the computer
 # that I use to compile, so I need this:
 
-RTINCDIR = -I/b/ds/stuff/rtlinux/r-9J/rtl/include
+LINUXDIR := /d/ds/cvs/rtl/linux22
+RTINCDIR := /usr/include/rtlinux
 
-CFLAGS = -I../../include $(RTINCDIR) -O2 -Wall -D__RT__ -D__KERNEL__ -DMODULE
+CFLAGS = -O2 -Wall -D__KERNEL__ -DMODULE
+CFLAGS += -I $(LINUXDIR)/include
+CFLAGS += -I $(RTINCDIR) -O2 -Wall -D__RTL__
+CFLAGS += -D__SMP__
+CFLAGS += -DMODVERSIONS -include $(LINUXDIR)/include/linux/modversions.h
 
 all: it.o ai.o
 
