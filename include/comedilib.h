@@ -88,6 +88,10 @@ int comedi_get_n_ranges(comedi_t *it,unsigned int subdevice,unsigned int chan);
 int comedi_range_is_chan_specific(comedi_t *it,unsigned int subdevice);
 int comedi_maxdata_is_chan_specific(comedi_t *it,unsigned int subdevice);
 
+int comedi_get_buffer_size(comedi_t *it,unsigned int subdevice);
+int comedi_get_max_buffer_size(comedi_t *it,unsigned int subdevice);
+int comedi_set_buffer_size(comedi_t *it,unsigned int subdevice,int len);
+
 /* triggers and commands */
 
 int comedi_cancel(comedi_t *it,unsigned int subdevice);
