@@ -129,9 +129,6 @@ int main(int argc, char *argv[])
 	ret = fcntl(comedi_fileno(device),F_SETFL,O_NONBLOCK|O_ASYNC);
 	if(ret<0)perror("fcntl");
 
-	ret = fcntl(comedi_fileno(device),F_SETSIG,SIGIO);
-	if(ret<0)perror("fcntl");
-
 #if 0
 	{
 	struct sched_param p;
