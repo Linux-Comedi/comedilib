@@ -42,7 +42,7 @@ typedef struct{
 
 	//comedi_range *range;
 	//int maxdata;
-
+	lsampl_t reference_source;
 	double target;
 }observable;
 

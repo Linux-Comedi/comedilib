@@ -115,6 +115,7 @@ int main(int argc, char *argv[])
 	int da_subdev;
 	int eeprom_subdev;
 	int caldac_subdev;
+	int retval;
 
 	fn = "/dev/comedi0";
 	while (1) {
@@ -170,7 +171,7 @@ int main(int argc, char *argv[])
 			goto ok;
 		}
 	}
-	printf("Driver %s unknown\n",drivername);
+	fprintf(stderr, "Driver %s unknown\n",drivername);
 	return 1;
 
 ok:
@@ -182,7 +183,11 @@ ok:
 	setup.eeprom_subdev = eeprom_subdev;
 	setup.caldac_subdev = caldac_subdev;
 
-	this_board->init_setup( &setup, devicename );
+	retval = this_board->init_setup( &setup, devicename );
+	if( retval < 0 ){
+		fprintf(stderr, "init_setup() failed for %s\n", devicename );
+		return 1;
+	}
 	device_status = setup.status;
 
 	if(device_status<STATUS_DONE){
@@ -268,6 +273,25 @@ void observe( calibration_setup_t *setup )
 int preobserve( calibration_setup_t *setup, int obs)
 {
 	int retval = 0;
+	comedi_insn reference_source_config;
+	lsampl_t ref_data[ 2 ];
+	// setup reference source
+
+	memset( &reference_source_config, 0, sizeof(reference_source_config) );
+	reference_source_config.insn = INSN_CONFIG;
+	reference_source_config.n = 2;
+	reference_source_config.subdev = setup->ad_subdev;
+	reference_source_config.data = ref_data;
+	reference_source_config.data[ 0 ] = INSN_CONFIG_ALT_SOURCE;
+	reference_source_config.data[ 1 ] = setup->observables[obs].reference_source;
+
+	retval = comedi_do_insn( setup->dev, &reference_source_config );
+	/* ignore errors for now since older ni driver doesn't
+	 * support reference config insn */
+	if( retval < 0 )
+
+		perror("preobserve() ignoring reference config error" );
+	retval = 0;
 
 	if( setup->observables[obs].preobserve_insn.n != 0){
 		retval = comedi_do_insn( setup->dev, &setup->observables[obs].preobserve_insn);
