@@ -648,13 +648,9 @@ void cal_relative_binary( calibration_setup_t *setup, int obs1, int obs2, int da
 	update_caldac( setup, dac, x1 );
 	usleep(100000);
 	preobserve( setup, obs1);
-	new_sv_init(&sv1, setup->dev, setup->ad_subdev,chanspec1);
-	sv1.settling_time_ns = setup->settling_time_ns;
 	new_sv_measure( setup->dev, &sv1);
 
 	preobserve( setup, obs2);
-	new_sv_init(&sv2, setup->dev, setup->ad_subdev,chanspec2);
-	sv2.settling_time_ns = setup->settling_time_ns;
 	new_sv_measure( setup->dev, &sv2);
 	y1 = y2 = sv1.average - sv2.average;
 
@@ -672,13 +668,9 @@ void cal_relative_binary( calibration_setup_t *setup, int obs1, int obs2, int da
 		usleep(100000);
 
 		preobserve( setup, obs1);
-		new_sv_init(&sv1, setup->dev, setup->ad_subdev,chanspec1);
-		sv1.settling_time_ns = setup->settling_time_ns;
 		new_sv_measure( setup->dev, &sv1);
 
 		preobserve( setup, obs2);
-		new_sv_init(&sv2, setup->dev, setup->ad_subdev,chanspec2);
-		sv2.settling_time_ns = setup->settling_time_ns;
 		new_sv_measure( setup->dev, &sv2);
 		y2 = sv1.average - sv2.average;
 
@@ -756,18 +748,12 @@ void cal_linearity_binary( calibration_setup_t *setup, int obs1, int obs2, int o
 	usleep(100000);
 
 	preobserve( setup, obs1);
-	new_sv_init(&sv1, setup->dev, setup->ad_subdev,chanspec1);
-	sv1.settling_time_ns = setup->settling_time_ns;
 	new_sv_measure( setup->dev, &sv1);
 
 	preobserve( setup, obs2);
-	new_sv_init(&sv2, setup->dev, setup->ad_subdev,chanspec2);
-	sv2.settling_time_ns = setup->settling_time_ns;
 	new_sv_measure( setup->dev, &sv2);
 
 	preobserve( setup, obs3);
-	new_sv_init(&sv3, setup->dev, setup->ad_subdev,chanspec3);
-	sv3.settling_time_ns = setup->settling_time_ns;
 	new_sv_measure( setup->dev, &sv3);
 
 	y1 = y2 = ( sv3.average - sv2.average ) / ( sv2.average - sv1.average );
@@ -786,18 +772,12 @@ void cal_linearity_binary( calibration_setup_t *setup, int obs1, int obs2, int o
 		usleep(100000);
 
 		preobserve( setup, obs1);
-		new_sv_init(&sv1, setup->dev, setup->ad_subdev,chanspec1);
-		sv1.settling_time_ns = setup->settling_time_ns;
 		new_sv_measure( setup->dev, &sv1);
 
 		preobserve( setup, obs2);
-		new_sv_init(&sv2, setup->dev, setup->ad_subdev,chanspec2);
-		sv2.settling_time_ns = setup->settling_time_ns;
 		new_sv_measure( setup->dev, &sv2);
 
 		preobserve( setup, obs3);
-		new_sv_init(&sv3, setup->dev, setup->ad_subdev,chanspec3);
-		sv3.settling_time_ns = setup->settling_time_ns;
 		new_sv_measure( setup->dev, &sv3);
 
 		y2 = ( sv3.average - sv2.average ) / ( sv2.average - sv1.average );
