@@ -28,5 +28,5 @@ ext/comedi.so ext/comedi_ruby_wrap.o: ext/Makefile ext/comedi_ruby_wrap.c
 	$(RUBY) setup.rb setup
 
 clean-local:
-	$(RM) ext/comedi.so ext/Makefile
+	$(RM) ext/comedi.so ext/Makefile ext/*.o
 
