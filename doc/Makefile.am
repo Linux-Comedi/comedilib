@@ -13,24 +13,22 @@ clean-local:
 
 locales = de
 
-$(DOC).pdf: $(DOC).sgml
+$(DOC).pdf: $(DOC).sgml $(SGML)
 	-docbook2pdf $(DOC).sgml
-	
-html: $(DOC).sgml
-	-mkdir -p html
-	-docbook2html -o html $(DOC).sgml
 
-man: $(DOC).sgml
+html: $(DOC).sgml $(SGML)
+	-mkdir -p html
+	-docbook2html -o html $(DOC).sgml && touch html
+
+man: $(DOC).sgml $(SGML)
 	-mkdir -p man
-	-docbook2html -o man $(DOC).sgml
+	-docbook2man -o man $(DOC).sgml && touch man
 
 funcref.sgml: funcref mkref
 	./mkref funcref >funcref.sgml
 
 drivers.sgml: drivers.txt mkdr
 	./mkdr drivers.txt >drivers.sgml
-
-$(DOC).sgml: $(SGML)
 
 messages: .phony
 	xgettext -k_ -k_s $(shell find .. -name '*.c')
