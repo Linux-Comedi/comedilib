@@ -94,6 +94,8 @@ int test_mmap(void)
 		}
 	}
 
+	if(realtime)cmd.flags |= TRIG_RT;
+
 	cmd.chanlist = chanlist;
 	cmd.scan_end_arg = 1;
 	cmd.stop_arg = N_SAMPLES;

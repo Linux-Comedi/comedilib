@@ -47,6 +47,8 @@ static int get_chunks_per_length(int length)
 		return 0;
 	}
 
+	if(realtime)cmd.flags |= TRIG_RT;
+
 	cmd.chanlist = chanlist;
 	cmd.scan_end_arg = 1;
 	cmd.stop_arg = length;

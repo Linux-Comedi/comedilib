@@ -33,6 +33,7 @@ int test_cmd_probe_fast_1chan(void);
 int test_cmd_read_fast_1chan(void);
 int test_cmd_logic_bug(void);
 int test_cmd_fifo_depth_check(void);
+int test_cmd_start_inttrig(void);
 int test_mmap(void);
 int test_read_select(void);
 int test_cmd_continuous(void);
@@ -57,6 +58,7 @@ struct test_struct tests[]={
 	{ "cmd_read_fast_1chan", test_cmd_read_fast_1chan, TEST_STD },
 	{ "cmd_logic_bug", test_cmd_logic_bug, TEST_STD },
 	{ "cmd_fifo_depth_check", test_cmd_fifo_depth_check, TEST_STD },
+	{ "cmd_start_inttrig", test_cmd_start_inttrig, TEST_STD },
 	{ "mmap", test_mmap, TEST_STD },
 	{ "read_select", test_read_select, TEST_STD },
 	{ "cmd_continuous", test_cmd_continuous, TEST_NEVER },
@@ -67,6 +69,7 @@ static int n_tests = sizeof(tests)/sizeof(tests[0]);
 int only_subdevice;
 int verbose;
 char *only_test;
+int realtime;
 
 static void get_capabilities(unsigned int subd);
 static void print_device_info(void);
@@ -77,12 +80,15 @@ int main(int argc, char *argv[])
 	int i;
 
 	while (1) {
-		c = getopt(argc, argv, "f:s:t:v");
+		c = getopt(argc, argv, "f:rs:t:v");
 		if (c == -1)
 			break;
 		switch (c) {
 		case 'f':
 			filename = optarg;
+			break;
+		case 'r':
+			realtime = 1;
 			break;
 		case 's':
 			only_subdevice = 1;

@@ -11,5 +11,7 @@ extern int verbose;
 
 extern unsigned int capabilities;
 
+extern int realtime;
+
 #endif
 

@@ -38,6 +38,8 @@ int test_read_select(void)
 		return 0;
 	}
 
+	if(realtime)cmd.flags |= TRIG_RT;
+
 	cmd.chanlist = chanlist;
 	cmd.scan_end_arg = 1;
 	cmd.stop_arg = length;

@@ -120,6 +120,7 @@ int test_cmd_read_fast_1chan(void)
 		return 0;
 	}
 
+	if(realtime)cmd.flags |= TRIG_RT;
 	cmd.chanlist = chanlist;
 	cmd.scan_end_arg = 1;
 	cmd.stop_arg = 100000;
