@@ -70,8 +70,6 @@ int main(int argc, char *argv[])
 {
 	comedi_cmd cmd;
 	int err;
-	int n,m;
-	int total=0;
 	comedi_t *dev;
 	unsigned int chanlist[16];
 	unsigned int maxdata;
@@ -150,10 +148,15 @@ int main(int argc, char *argv[])
 		perror("mmap");
 		exit(1);
 	}
-	write_waveform(map, size, amplitude, offset, maxdata);
+	write_waveform(map, size / sizeof(sampl_t), amplitude, offset, maxdata);
 	if(msync(map, size, MS_SYNC) < 0)
 	{
 		perror("msync");
+		exit(1);
+	}
+	if(comedi_mark_buffer_written(dev, subdevice, size) < 0)
+	{
+		comedi_perror("comedi_mark_buffer_written");
 		exit(1);
 	}
 	ret = comedi_internal_trigger(dev, subdevice, 0);
