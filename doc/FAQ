@@ -34,3 +34,28 @@ happens when you link statically.  Add '-lm' to your linking
 command.
 
 
+4. Someone on the mailing list told me to look in the kernel log.
+How do I do that?
+
+Kernel log messages are continuously written to the file
+/var/log/messages.  In addition, a shortcut to get recent log
+messages is the 'dmesg' command, which will print the last 4-16 kB
+(depending on the kernel) of kernel log messages.
+
+
+5. I think I found a bug: I get Oops messages in the kernel log.
+
+Oops messages always indicate a bug.  If you are not using the
+latest version of Comedi, please upgrade and try again, since
+these types of bugs are usually quickly fixed.  Look at the file
+BUG_REPORTING in the Linux kernel source, follow the instructions,
+and send the information to David Schleef <ds@schleef.org>.
+
+
+6. Could you please add a search engine to the mailing list archive?
+
+No.  Please use generic web search engines such as Google, where you
+can add the search term "host:stm.lbl.gov" to limit the search to
+the site where the Comedi archives are located.
+
+
