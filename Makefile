@@ -63,7 +63,7 @@ install_doc:
 	install -d $(INSTALLDIR_DOC)
 	install README doc/FAQ doc/drivers.txt $(INSTALLDIR_DOC)
 	install -d $(INSTALLDIR_DOC)/html/
-	-install doc/html/* $(INSTALLDIR_DOC)/html/
+	-install doc/html/*.html $(INSTALLDIR_DOC)/html/
 	install -d $(INSTALLDIR_DOC)/etc/
 	install -m 755 etc/das1600.conf $(INSTALLDIR_DOC)/etc/
 	install -m 755 etc/dt282x.conf $(INSTALLDIR_DOC)/etc/
