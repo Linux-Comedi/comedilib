@@ -1,5 +1,6 @@
-
-EXTRA_DIST = demo lib
+## explicitly list ext/comedi_ruby_wrap.c in EXTRA_DIST so that it
+## gets built and put into tarball during 'make dist'
+EXTRA_DIST = demo lib ext ext/comedi_ruby_wrap.c setup.rb
 
 BUILT_SOURCES = ext/comedi_ruby_wrap.c
 
