@@ -79,9 +79,10 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
+	front = 0;
 	back = 0;
 	while(1){
-		front = comedi_get_buffer_offset(dev,subdevice);
+		front += comedi_get_buffer_contents(dev,subdevice);
 		if(verbose)fprintf(stderr,"front = %d, back = %d\n",front,back);
 		if(front<back)break;
 		if(front==back){
@@ -150,8 +151,8 @@ int prepare_cmd(comedi_t *dev,int subdevice,comedi_cmd *cmd)
 	cmd->scan_end_src = TRIG_COUNT;
 	cmd->scan_end_arg = n_chan;
 
-	cmd->stop_src = TRIG_COUNT;
-	cmd->stop_arg = n_scan;
+	cmd->stop_src = TRIG_NONE;
+	cmd->stop_arg = 0;
 
 	cmd->chanlist = chanlist;
 	cmd->chanlist_len = n_chan;
