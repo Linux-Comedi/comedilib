@@ -41,10 +41,6 @@
  * write(), you should fill the buffer using write() before
  * you call comedi_command(), as is done here.
  *
- * Also NOTE!  The lseek() to offset 1 is used to tell
- * comedi that you want to write to subdevice 1.  This
- * is not needed for analog input, since AI is usually on
- * subdevice 0.
  */
 
 #include <stdio.h>
@@ -136,7 +132,8 @@ int main(int argc, char *argv[])
 	dds_output(data,BUF_LEN);
 	dds_output(data,BUF_LEN);
 
-	lseek(comedi_fileno(dev),subdevice,SEEK_SET);
+	//lseek no longer needed or used
+	//lseek(comedi_fileno(dev),subdevice,SEEK_SET);
 	m=write(comedi_fileno(dev),data,BUF_LEN*sizeof(sampl_t));
 	perror("write");
 	printf("m=%d\n",m);
