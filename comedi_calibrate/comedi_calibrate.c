@@ -125,12 +125,66 @@ typedef struct{
 int new_sv_measure(new_sv_t *sv);
 int new_sv_init(new_sv_t *sv,comedi_t *dev,int subdev,int chan,int range,int aref);
 
+struct board_struct{
+	char *name;
+	void (*calibrate)(void);
+};
+
+void cal_ni_16e_1(void);
+void cal_ni_16e_10(void);
+void cal_ni_16xe_50(void);
+void cal_ni_16xe_10(void);
+void cal_ni_6023e(void);
+void cal_ni_daqcard_ai_16xe_50(void);
+void cal_ni_unknown(void);
+
+struct board_struct boards[]={
+	{ "at-mio-16e-1",	cal_ni_16e_1 },
+	{ "at-mio-16e-2",	cal_ni_16e_1 },
+	{ "at-mio-16e-10",	cal_ni_16e_10 },
+	{ "at-mio-16de-10",	cal_ni_unknown },
+	{ "at-mio-64e-3",	cal_ni_16e_1 },
+	{ "at-mio-16xe-50",	cal_ni_unknown },
+	{ "at-mio-16xe-10",	cal_ni_unknown },
+	{ "at-ai-16xe-10",	cal_ni_unknown },
+	{ "pci-mio-16xe-50",	cal_ni_16xe_50 },
+	{ "pci-mio-16xe-10",	cal_ni_16xe_10 },
+	{ "pxi-6030e",		cal_ni_unknown },
+	{ "pci-mio-16e-1",	cal_ni_16e_1 },
+	{ "pci-mio-16e-4",	cal_ni_unknown },
+	{ "pxi-6040e",		cal_ni_unknown },
+	{ "pci-6031e",		cal_ni_unknown },
+	{ "pci-6032e",		cal_ni_unknown },
+	{ "pci-6033e",		cal_ni_unknown },
+	{ "pci-6071e",		cal_ni_unknown },
+	{ "pci-6023e",		cal_ni_6023e },
+	{ "pci-6024e",		cal_ni_unknown },
+	{ "pci-6025e",		cal_ni_unknown },
+	{ "pxi-6025e",		cal_ni_unknown },
+	{ "pci-6034e",		cal_ni_unknown },
+	{ "pci-6035e",		cal_ni_unknown },
+	{ "pci-6052e",		cal_ni_unknown },
+	{ "pci-6110e",		cal_ni_unknown },
+	{ "pci-6111e",		cal_ni_unknown },
+//	{ "pci-6711",		cal_ni_unknown },
+//	{ "pci-6713",		cal_ni_unknown },
+	{ "pxi-6071e",		cal_ni_unknown },
+	{ "pxi-6070e",		cal_ni_unknown },
+	{ "pxi-6052e",		cal_ni_unknown },
+	{ "DAQCard-ai-16xe-50",	cal_ni_daqcard_ai_16xe_50 },
+	{ "DAQCard-ai-16e-4",	cal_ni_unknown },
+	{ "DAQCard-6062e",	cal_ni_unknown },
+	{ "DAQCard-6024e",	cal_ni_unknown },
+};
+#define n_boards (sizeof(boards)/sizeof(boards[0]))
+
 int main(int argc, char *argv[])
 {
 	char *fn = NULL;
 	int c;
 	char *drivername;
-
+	char *devicename;
+	int i;
 
 	fn = "/dev/comedi0";
 	while (1) {
@@ -165,13 +219,16 @@ int main(int argc, char *argv[])
 	eeprom_subdev=comedi_find_subdevice_by_type(dev,COMEDI_SUBD_MEMORY,0);
 
 	drivername=comedi_get_driver_name(dev);
+	devicename=comedi_get_board_name(dev);
 
-	if(   !strcmp(drivername,"atmio-E")
-	   || !strcmp(drivername,"ni_atmio") 
-	   || !strcmp(drivername,"pcimio-E") 
-	   || !strcmp(drivername,"ni_pcimio") 
-	   || !strcmp(drivername,"ni_mio_cs"))
-		cal_ni_mio_E();
+	for(i=0;i<n_boards;i++){
+		if(!strcmp(boards[i].name,devicename)){
+			boards[i].calibrate();
+			break;
+		}
+	}
+
+	printf("device %s unknown\n",devicename);
 
 	return 0;
 }
@@ -194,20 +251,12 @@ double ni_get_reference(int lsb_loc,int msb_loc)
 	return ref;
 }
 
-void cal_ni_mio_E(void)
+void cal_ni_16e_1(void)
 {
-	char *boardname;
 	double ref;
-	int i;
-
-	boardname=comedi_get_board_name(dev);
 
 	reset_caldacs();
 
-	if(!strcmp(boardname,"at-mio-16e-1") ||
-	   !strcmp(boardname,"at-mio-16e-2") ||
-	   !strcmp(boardname,"at-mio-64e-3") ||
-	   !strcmp(boardname,"pci-mio-16e-1")){
 /*
    layout
 
@@ -224,42 +273,44 @@ void cal_ni_mio_E(void)
    10	analog trigger
    11	unknown
  */
-		printf("last factory calibration %02d/%02d/%02d\n",
-			read_eeprom(508),read_eeprom(507),read_eeprom(506));
+	printf("last factory calibration %02d/%02d/%02d\n",
+		read_eeprom(508),read_eeprom(507),read_eeprom(506));
 
-		ref=ni_get_reference(425,426);
+	ref=ni_get_reference(425,426);
 
-		reset_caldacs();
+	printf("postgain offset\n");
+	ni_mio_ai_postgain_cal();
 
-		printf("postgain offset\n");
-		ni_mio_ai_postgain_cal();
+	printf("pregain offset\n");
+	chan_cal(0,0,7,0.0);
+	chan_cal(0,0,7,0.0);
 
-		printf("pregain offset\n");
-		chan_cal(0,0,7,0.0);
-		chan_cal(0,0,7,0.0);
+	printf("unipolar offset\n");
+	chan_cal(0,2,8,0.0);
+	chan_cal(0,2,8,0.0);
 
-		printf("unipolar offset\n");
-		chan_cal(0,2,8,0.0);
-		chan_cal(0,2,8,0.0);
+	printf("gain offset\n");
+	chan_cal(5,3,0,5.0);
+	chan_cal(5,3,0,5.0);
 
-		printf("gain offset\n");
-		chan_cal(5,3,0,5.0);
-		chan_cal(5,3,0,5.0);
+	printf("ao 0 offset\n");
+	comedi_data_write(dev,1,0,0,0,2048);
+	chan_cal(2,4,0,0.0);
+	chan_cal(2,5,0,0.0);
 
-		printf("ao 0 offset\n");
-		comedi_data_write(dev,1,0,0,0,2048);
-		chan_cal(2,4,0,0.0);
-		chan_cal(2,5,0,0.0);
+	printf("ao 0 gain\n");
+	comedi_data_write(dev,1,0,0,0,3072);
+	chan_cal(6,6,0,0.0);
+	chan_cal(6,6,0,0.0);
+	comedi_data_write(dev,1,0,0,0,2048);
+}
 
-		printf("ao 0 gain\n");
-		comedi_data_write(dev,1,0,0,0,3072);
-		chan_cal(6,6,0,0.0);
-		chan_cal(6,6,0,0.0);
-		comedi_data_write(dev,1,0,0,0,2048);
 
-		//return;
-	}
-	if(!strcmp(boardname,"at-mio-16e-10")){
+void cal_ni_16e_10(void)
+{
+	double ref;
+	int i;
+
 /*
    layout
 
@@ -276,37 +327,40 @@ void cal_ni_mio_E(void)
    10	AI pre-gain offset	6.4e-5
    11	unknown
  */
-		printf("last factory calibration %02d/%02d/%02d\n",
-			read_eeprom(508),read_eeprom(507),read_eeprom(506));
+	printf("last factory calibration %02d/%02d/%02d\n",
+		read_eeprom(508),read_eeprom(507),read_eeprom(506));
 
-		ref=ni_get_reference(423,424);
+	ref=ni_get_reference(423,424);
 
-		reset_caldacs();
+	reset_caldacs();
 
-		printf("postgain offset\n");
-		ni_mio_ai_postgain_cal();
+	printf("postgain offset\n");
+	ni_mio_ai_postgain_cal();
 
-		printf("pregain offset\n");
-		chan_cal(0,10,7,0.0);
-		chan_cal(0,0,7,0.0);
-		chan_cal(0,0,7,0.0);
+	printf("pregain offset\n");
+	chan_cal(0,10,7,0.0);
+	chan_cal(0,0,7,0.0);
+	chan_cal(0,0,7,0.0);
 
-		printf("unipolar offset\n");
-		chan_cal(0,2,8,0.0);
-		chan_cal(0,2,8,0.0);
+	printf("unipolar offset\n");
+	chan_cal(0,2,8,0.0);
+	chan_cal(0,2,8,0.0);
 
-		printf("gain offset\n");
-		chan_cal(5,3,0,5.0);
-		chan_cal(5,3,0,5.0);
+	printf("gain offset\n");
+	chan_cal(5,3,0,5.0);
+	chan_cal(5,3,0,5.0);
 
-		printf("results (offset)\n");
-		for(i=0;i<16;i++){
-			read_chan(i,0);
-		}
-
-		return;
+	printf("results (offset)\n");
+	for(i=0;i<16;i++){
+		read_chan(i,0);
 	}
-	if(!strcmp(boardname,"pci-mio-16xe-10")){
+}
+
+void cal_ni_16xe_10(void)
+{
+	double ref;
+	int i;
+
 /*
  * results of channel dependency test:
  *
@@ -334,38 +388,41 @@ void cal_ni_mio_E(void)
  * 9	unknown
  * 10	unknown
  */
-		printf("last factory calibration %02d/%02d/%02d\n",
-			read_eeprom(508),read_eeprom(507),read_eeprom(506));
+	printf("last factory calibration %02d/%02d/%02d\n",
+		read_eeprom(508),read_eeprom(507),read_eeprom(506));
 
-		ref=ni_get_reference(430,431);
+	ref=ni_get_reference(430,431);
 
-		reset_caldacs();
+	reset_caldacs();
 
-		printf("postgain offset\n");
-		ni_mio_ai_postgain_cal_2(0,2,0,6,100.0);
-		ni_mio_ai_postgain_cal_2(0,3,0,6,100.0);
+	printf("postgain offset\n");
+	ni_mio_ai_postgain_cal_2(0,2,0,6,100.0);
+	ni_mio_ai_postgain_cal_2(0,3,0,6,100.0);
 
-		printf("pregain offset\n");
-		chan_cal(0,8,6,0.0);
-		chan_cal(0,8,6,0.0);
+	printf("pregain offset\n");
+	chan_cal(0,8,6,0.0);
+	chan_cal(0,8,6,0.0);
 
-		//printf("unipolar offset\n");
-		//chan_cal(0,2,8,0.0);
-		//chan_cal(0,2,8,0.0);
+	//printf("unipolar offset\n");
+	//chan_cal(0,2,8,0.0);
+	//chan_cal(0,2,8,0.0);
 
-		printf("gain offset\n");
-		chan_cal(5,0,0,5.0);
-		chan_cal(5,1,0,5.0);
-		chan_cal(5,1,0,5.0);
+	printf("gain offset\n");
+	chan_cal(5,0,0,5.0);
+	chan_cal(5,1,0,5.0);
+	chan_cal(5,1,0,5.0);
 
-		printf("results (offset)\n");
-		for(i=0;i<16;i++){
-			read_chan(i,0);
-		}
-
-		return;
+	printf("results (offset)\n");
+	for(i=0;i<16;i++){
+		read_chan(i,0);
 	}
-	if(!strcmp(boardname,"DAQCard-ai-16xe-50")){
+}
+
+void cal_ni_daqcard_ai_16xe_50(void)
+{
+	double ref;
+	int i;
+
 /*
  * results of channel dependency test:
  *
@@ -392,36 +449,39 @@ void cal_ni_mio_E(void)
  * 9	unknown
  * 10	unknown
  */
-		printf("last factory calibration %02d/%02d/%02d\n",
-			read_eeprom(508),read_eeprom(507),read_eeprom(506));
+	printf("last factory calibration %02d/%02d/%02d\n",
+		read_eeprom(508),read_eeprom(507),read_eeprom(506));
 
-		ref=ni_get_reference(446,447);
+	ref=ni_get_reference(446,447);
 
-		reset_caldacs();
+	reset_caldacs();
 
-		printf("postgain offset\n");
-		ni_mio_ai_postgain_cal_2(0,2,0,3,100.0);
+	printf("postgain offset\n");
+	ni_mio_ai_postgain_cal_2(0,2,0,3,100.0);
 
-		printf("pregain offset\n");
-		chan_cal(0,8,3,0.0);
-		chan_cal(0,8,3,0.0);
+	printf("pregain offset\n");
+	chan_cal(0,8,3,0.0);
+	chan_cal(0,8,3,0.0);
 
-		printf("unipolar offset\n");
-		chan_cal(0,0,4,0.0);
-		chan_cal(0,0,4,0.0);
+	printf("unipolar offset\n");
+	chan_cal(0,0,4,0.0);
+	chan_cal(0,0,4,0.0);
 
-		printf("gain offset\n");
-		chan_cal(5,1,0,ref);
-		chan_cal(5,1,0,ref);
+	printf("gain offset\n");
+	chan_cal(5,1,0,ref);
+	chan_cal(5,1,0,ref);
 
-		printf("results (offset)\n");
-		for(i=0;i<8;i++){
-			read_chan(0,i);
-		}
-
-		return;
+	printf("results (offset)\n");
+	for(i=0;i<8;i++){
+		read_chan(0,i);
 	}
-	if(!strcmp(boardname,"pci-mio-16xe-50")){
+}
+
+void cal_ni_16xe_50(void)
+{
+	double ref;
+	int i;
+
 /*
  * results of channel dependency test:
  *
@@ -448,39 +508,42 @@ void cal_ni_mio_E(void)
  * 9	unknown
  * 10	unknown
  */
-		printf("last factory calibration %02d/%02d/%02d\n",
-			read_eeprom(508),read_eeprom(507),read_eeprom(506));
+	printf("last factory calibration %02d/%02d/%02d\n",
+		read_eeprom(508),read_eeprom(507),read_eeprom(506));
 
-		ref=ni_get_reference(437,438);
+	ref=ni_get_reference(437,438);
 
-		reset_caldacs();
+	reset_caldacs();
 
-		printf("postgain offset\n");
-		ni_mio_ai_postgain_cal_2(0,2,0,3,100.0);
+	printf("postgain offset\n");
+	ni_mio_ai_postgain_cal_2(0,2,0,3,100.0);
 
-		printf("pregain offset\n");
-		chan_cal(0,8,3,0.0);
-		chan_cal(0,8,3,0.0);
+	printf("pregain offset\n");
+	chan_cal(0,8,3,0.0);
+	chan_cal(0,8,3,0.0);
 
 #if 0
-		printf("unipolar offset\n");
-		chan_cal(0,0,4,0.0);
-		chan_cal(0,0,4,0.0);
+	printf("unipolar offset\n");
+	chan_cal(0,0,4,0.0);
+	chan_cal(0,0,4,0.0);
 #endif
 
-		printf("gain offset\n");
-		chan_cal(5,0,0,5.0);
-		chan_cal(5,1,0,5.0);
-		chan_cal(5,1,0,5.0);
+	printf("gain offset\n");
+	chan_cal(5,0,0,5.0);
+	chan_cal(5,1,0,5.0);
+	chan_cal(5,1,0,5.0);
 
-		printf("results (offset)\n");
-		for(i=0;i<16;i++){
-			read_chan(0,i);
-		}
-
-		return;
+	printf("results (offset)\n");
+	for(i=0;i<16;i++){
+		read_chan(0,i);
 	}
-	if(!strcmp(boardname,"pci-6023e")){
+}
+
+void cal_ni_6023e(void)
+{
+	double ref;
+	int i;
+
 /*
  * results of channel dependency test:
  *
@@ -510,41 +573,40 @@ void cal_ni_mio_E(void)
  * 10	AI			?
  * 11	unknown
  */
-		int offset_ad = 0;
-		//int unipolar_offset_ad = 1;
-		int gain_ad = 5;
-		int pregain_offset_dac = 0;
-		int postgain_offset_dac = 1;
-		int gain_dac = 3;
+	int offset_ad = 0;
+	//int unipolar_offset_ad = 1;
+	int gain_ad = 5;
+	int pregain_offset_dac = 0;
+	int postgain_offset_dac = 1;
+	int gain_dac = 3;
 
-		printf("last factory calibration %02d/%02d/%02d\n",
-			read_eeprom(508),read_eeprom(507),read_eeprom(506));
+	printf("last factory calibration %02d/%02d/%02d\n",
+		read_eeprom(508),read_eeprom(507),read_eeprom(506));
 
-		ref=ni_get_reference(444,443);
+	ref=ni_get_reference(444,443);
 
-		reset_caldacs();
+	reset_caldacs();
 
-		printf("postgain offset\n");
-		ni_mio_ai_postgain_cal_2(offset_ad,postgain_offset_dac,0,3,200.0);
+	printf("postgain offset\n");
+	ni_mio_ai_postgain_cal_2(offset_ad,postgain_offset_dac,0,3,200.0);
 
-		printf("pregain offset\n");
-		chan_cal(offset_ad,pregain_offset_dac,3,0.0);
-		chan_cal(offset_ad,pregain_offset_dac,3,0.0);
+	printf("pregain offset\n");
+	chan_cal(offset_ad,pregain_offset_dac,3,0.0);
+	chan_cal(offset_ad,pregain_offset_dac,3,0.0);
 
-		printf("gain offset\n");
-		chan_cal(gain_ad,gain_dac,0,5.0);
-		chan_cal(gain_ad,gain_dac,0,5.0);
+	printf("gain offset\n");
+	chan_cal(gain_ad,gain_dac,0,5.0);
+	chan_cal(gain_ad,gain_dac,0,5.0);
 
-		printf("results (offset)\n");
-		for(i=0;i<16;i++){
-			read_chan(0,i);
-		}
-
-		//return;
+	printf("results (offset)\n");
+	for(i=0;i<16;i++){
+		read_chan(0,i);
 	}
+}
 
-	{
-		int n_ranges;
+void cal_ni_unknown(void)
+{
+	int n_ranges;
 
 	reset_caldacs();
 	printf("Please send this output to <ds@schleef.org>\n");
@@ -573,42 +635,6 @@ void cal_ni_mio_E(void)
 	printf("channel dependence 5 range 0\n");
 	channel_dependence(5,0);
 
-	}
-#if 0
-	{
-		int n_ranges;
-
-	printf("please send this output to <ds@schleef.org>\n");
-	printf("%s\n",comedi_get_board_name(dev));
-
-	n_ranges=comedi_get_n_ranges(dev,ad_subdev,0);
-
-	comedi_data_write(dev,1,0,0,0,2048);
-	/* ao0 offset */
-	printf("channel dependence ao0=0 range 0\n");
-	channel_dependence(2,0);
-
-	comedi_data_write(dev,1,0,0,0,3072);
-	/* ao gain */
-	printf("channel dependence ao0=5V range 0\n");
-	channel_dependence(6,0);
-
-	comedi_data_write(dev,1,0,0,0,2048);
-
-	comedi_data_write(dev,1,1,0,0,2048);
-	/* ao0 offset */
-	printf("channel dependence ao1=0 range 0\n");
-	channel_dependence(3,0);
-
-	comedi_data_write(dev,1,1,0,0,3072);
-	/* ao gain */
-	printf("channel dependence ao1=5V range 0\n");
-	channel_dependence(7,0);
-	comedi_data_write(dev,1,1,0,0,2048);
-
-	}
-#endif
-	
 }
 
 
