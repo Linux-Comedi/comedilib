@@ -32,6 +32,7 @@
 #include <getopt.h>
 #include <errno.h>
 #include <string.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <getopt.h>
@@ -51,18 +52,30 @@ int read_buf_size=0;
 int write_buf_size=0;
 
 int init_fd;
-char *init_file;
-void *init_data;
-int init_size;
+#define MAX_NUM_INIT_FILES 4
+char *init_file[MAX_NUM_INIT_FILES] = {NULL};
+
+enum option_ids
+{
+	READ_BUFFER_OPT_ID = 0x1000,
+	WRITE_BUFFER_OPT_ID,
+	INIT_DATA1_OPT_ID,
+	INIT_DATA2_OPT_ID,
+	INIT_DATA3_OPT_ID
+};
 
 struct option options[] = {
-	{ "verbose", 0, 0, 'v' },
-	{ "quiet", 0, 0, 'q' },
-	{ "version", 0, 0, 'V' },
-	{ "init-data", 1, 0, 'i' },
-	{ "remove", 0, 0, 'r' },
-	{ "read-buffer", 1, NULL, 0x1000},
-	{ "write-buffer", 1, NULL, 0x1001},
+	{ "verbose", 0, NULL, 'v' },
+	{ "quiet", 0, NULL, 'q' },
+	{ "version", 0, NULL, 'V' },
+	{ "init-data", 1, NULL, 'i' },
+	{ "init-data0", 1, NULL, 'i' },
+	{ "remove", 0, NULL, 'r' },
+	{ "read-buffer", 1, NULL, READ_BUFFER_OPT_ID},
+	{ "write-buffer", 1, NULL, WRITE_BUFFER_OPT_ID},
+	{ "init-data1", 1, NULL, INIT_DATA1_OPT_ID },
+	{ "init-data2", 1, NULL, INIT_DATA2_OPT_ID },
+	{ "init-data3", 1, NULL, INIT_DATA3_OPT_ID },
 	{ 0 },
 };
 
@@ -79,8 +92,13 @@ _("usage:  comedi_config [OPTIONS] <device file> [<driver> <opt1>,<opt2>,...]\n"
 "      quiet output\n"
 "  -V, --version\n"
 "      print program version\n"
-"  -i, --init-data <filename>\n"
+"  -i, --init-data, --init-data0 <filename>\n"
 "      Use file for driver initialization data, typically firmware code.\n"
+"  --init-data1 <filename>\n"
+"  --init-data2 <filename>\n"
+"  --init-data3 <filename>\n"
+"      Some drivers require multiple files of initialization data.  Use these\n"
+"      options to specify them.  See the driver-specific documentation for further details.\n"
 "  -r, --remove\n"
 "      remove previously configured driver\n"
 "  --read-buffer <size>\n"
@@ -96,6 +114,75 @@ _("usage:  comedi_config [OPTIONS] <device file> [<driver> <opt1>,<opt2>,...]\n"
 "  options may be useful, see the Comedi documentation for details.\n")
 		,stderr);
 	exit(i);
+}
+
+void read_init_files(char* file_names[], int num_files, int *options)
+{
+	int i;
+	int offset;
+	FILE* files[num_files];
+	int sizes[num_files];
+	uintptr_t data_address;
+	int data_length = 0;
+	void *data = NULL;
+	for(i = 0; i < num_files; ++i)
+	{
+		struct stat buf;
+		if(files[i] == NULL) 
+		{
+			sizes[i] = 0;
+			continue;
+		}
+		files[i] = fopen(file_names[i], O_RDONLY);
+		if(files[i] == NULL)
+		{
+			perror(file_names[i]);
+			exit(1);
+		}
+		fstat(fileno(files[i]), &buf);
+		sizes[i] = buf.st_size;
+		data_length += sizes[i];
+	}
+	options[COMEDI_DEVCONF_AUX_DATA0_LENGTH] = sizes[0];
+	options[COMEDI_DEVCONF_AUX_DATA1_LENGTH] = sizes[1];
+	options[COMEDI_DEVCONF_AUX_DATA2_LENGTH] = sizes[2];
+	options[COMEDI_DEVCONF_AUX_DATA3_LENGTH] = sizes[3];
+	options[COMEDI_DEVCONF_AUX_DATA_LENGTH] = data_length;
+	if(data_length == 0) 
+	{
+		return;
+	}
+	data = malloc(data_length);
+	if(data==NULL)
+	{
+		perror(_("allocating initialization data\n"));
+		exit(1);
+	}
+	data_address = (uintptr_t)data;
+	options[COMEDI_DEVCONF_AUX_DATA_LO] = data_address;
+	options[COMEDI_DEVCONF_AUX_DATA_HI] = 0;
+	if(sizeof(void*) > sizeof(int))
+	{
+		int bit_shift = sizeof(int) * 8;
+		options[COMEDI_DEVCONF_AUX_DATA_HI] = data_address >> bit_shift;
+	}
+	offset = 0;
+	for(i = 0; i < num_files; ++i)
+	{
+		size_t ret;
+		if(file_names[i] == NULL) 
+		{
+			continue;
+		}
+		ret = fread(data + offset, 1, sizes[i], files[i]);
+		if(ret < sizes[i])
+		{
+			perror(_("reading initialization data\n"));
+			exit(1);
+		}
+		offset += sizes[i];
+	}
+	return;
 }
 
 int main(int argc,char *argv[])
@@ -139,9 +226,18 @@ int main(int argc,char *argv[])
 			remove=1;
 			break;
 		case 'i':
-			init_file=optarg;
+			init_file[0]=optarg;
 			break;
-		case 0x1000:
+		case INIT_DATA1_OPT_ID:
+			init_file[1]=optarg;
+			break;
+		case INIT_DATA2_OPT_ID:
+			init_file[2]=optarg;
+			break;
+		case INIT_DATA3_OPT_ID:
+			init_file[3]=optarg;
+			break;
+		case READ_BUFFER_OPT_ID:
 			read_buf_size = strtol(optarg, NULL, 0);
 			if(read_buf_size < 0)
 			{
@@ -149,7 +245,7 @@ int main(int argc,char *argv[])
 				exit(-1);
 			}
 			break;
-		case 0x1001:
+		case WRITE_BUFFER_OPT_ID:
 			write_buf_size = strtol(optarg, NULL, 0);
 			if(write_buf_size < 0)
 			{
@@ -232,35 +328,7 @@ int main(int argc,char *argv[])
 				fprintf(stderr,"warning: %s might not be a comedi device\n",fn);
 		}
 #endif
-
-		if(init_file){
-			struct stat buf;
-
-			init_fd = open(init_file,O_RDONLY);
-			if(init_fd<0){
-				perror(init_file);
-				exit(1);
-			}
-
-			fstat(init_fd,&buf);
-
-			init_size = buf.st_size;
-			init_data = malloc(init_size);
-			if(init_data==NULL){
-				perror(_("allocating initialization data\n"));
-				exit(1);
-			}
-
-			ret = read(init_fd,init_data,init_size);
-			if(ret<0){
-				perror(_("reading initialization data\n"));
-				exit(1);
-			}
-
-			it.options[COMEDI_DEVCONF_AUX_DATA]=(int)init_data;
-			it.options[COMEDI_DEVCONF_AUX_DATA_LENGTH]=init_size;
-		}
-
+	read_init_files(init_file, MAX_NUM_INIT_FILES, it.options);
 	/* add: sanity check for device */
 
 		if(verbose){
