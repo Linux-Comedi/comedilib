@@ -87,7 +87,7 @@ cleanup:
 __asm__(".symver comedi_open_0,comedi_open@");
 #endif
 
-void comedi_close(comedi_t *it)
+int comedi_close(comedi_t *it)
 {
 	subdevice *s;
 	int i;
@@ -117,6 +117,7 @@ void comedi_close(comedi_t *it)
 	}
 	close(it->fd);
 	free(it);
+	return 0;
 }
 
 int comedi_cancel(comedi_t *it,unsigned int subdevice)
