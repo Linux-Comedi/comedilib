@@ -768,32 +768,20 @@ int cal_cb_pci_60xx( calibration_setup_t *setup )
 		ADC_GAIN_FINE,
 	};
 
-	cal1( setup, OBS_0V_RANGE_10V_BIP_60XX, ADC_OFFSET_COARSE );
-	cal1_fine( setup, OBS_0V_RANGE_10V_BIP_60XX, ADC_OFFSET_COARSE );
+	cal_binary( setup, OBS_0V_RANGE_10V_BIP_60XX, ADC_OFFSET_COARSE );
+	cal_binary( setup, OBS_0V_RANGE_10V_BIP_60XX, ADC_OFFSET_FINE );
+	cal_binary( setup, OBS_5V_RANGE_10V_BIP_60XX, ADC_GAIN_COARSE );
+	cal_binary( setup, OBS_5V_RANGE_10V_BIP_60XX, ADC_GAIN_FINE );
 
-	cal1( setup, OBS_0V_RANGE_10V_BIP_60XX, ADC_OFFSET_FINE );
-	cal1_fine( setup, OBS_0V_RANGE_10V_BIP_60XX, ADC_OFFSET_FINE );
-
-	cal1( setup, OBS_5V_RANGE_10V_BIP_60XX, ADC_GAIN_COARSE );
-	cal1_fine( setup, OBS_5V_RANGE_10V_BIP_60XX, ADC_GAIN_COARSE );
-
-	cal1( setup, OBS_5V_RANGE_10V_BIP_60XX, ADC_GAIN_FINE );
-	cal1_fine( setup, OBS_5V_RANGE_10V_BIP_60XX, ADC_GAIN_FINE );
-
+	memset( &saved_cals[ 0 ], 0, sizeof( saved_calibration_t ) );
 	saved_cals[ 0 ].subdevice = setup->ad_subdev;
-	saved_cals[ 0 ].caldacs_length = 0;
-	saved_cals[ 0 ].caldacs[ saved_cals[ 0 ].caldacs_length++ ] =
-		setup->caldacs[ ADC_OFFSET_FINE ];
-	saved_cals[ 0 ].caldacs[ saved_cals[ 0 ].caldacs_length++ ] =
-		setup->caldacs[ ADC_OFFSET_COARSE ];
-	saved_cals[ 0 ].caldacs[ saved_cals[ 0 ].caldacs_length++ ] =
-		setup->caldacs[ ADC_GAIN_COARSE ];
-	saved_cals[ 0 ].caldacs[ saved_cals[ 0 ].caldacs_length++ ] =
-		setup->caldacs[ ADC_GAIN_FINE ];
-	saved_cals[ 0 ].channels_length = 0;
-	saved_cals[ 0 ].ranges[ 0 ] = 0;
-	saved_cals[ 0 ].ranges_length = 1;
-	saved_cals[ 0 ].arefs_length = 0;
+	sc_push_caldac( &saved_cals[ 0 ], setup->caldacs[ ADC_OFFSET_FINE ] );
+	sc_push_caldac( &saved_cals[ 0 ], setup->caldacs[ ADC_OFFSET_COARSE ] );
+	sc_push_caldac( &saved_cals[ 0 ], setup->caldacs[ ADC_GAIN_FINE ] );
+	sc_push_caldac( &saved_cals[ 0 ], setup->caldacs[ ADC_GAIN_COARSE ] );
+	sc_push_channel( &saved_cals[ 0 ], SC_ALL_CHANNELS );
+	sc_push_range( &saved_cals[ 0 ], 0 );
+	sc_push_aref( &saved_cals[ 0 ], SC_ALL_AREFS );
 
 	return write_calibration_file( setup->dev, saved_cals, 1 );
 }

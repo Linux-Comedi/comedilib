@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <sys/stat.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include <comedilib.h>
 
@@ -117,7 +118,7 @@ int write_calibration_file( comedi_t *dev, saved_calibration_t settings[],
 
 	if( fstat( comedi_fileno( dev ), &file_stats ) < 0 )
 	{
-		fprintf( stderr, "failed to get dev_t of comedi device file\n" );
+		fprintf( stderr, "failed to get file stats of comedi device file\n" );
 		return -1;
 	}
 
@@ -143,4 +144,41 @@ int write_calibration_file( comedi_t *dev, saved_calibration_t settings[],
 	fclose( file );
 
 	return retval;
+}
+
+void sc_push_caldac( saved_calibration_t *saved_cal, caldac_t caldac )
+{
+	assert( saved_cal->caldacs_length < N_CALDACS );
+
+	saved_cal->caldacs[ saved_cal->caldacs_length++ ] = caldac;
+}
+
+void sc_push_channel( saved_calibration_t *saved_cal, int channel )
+{
+	assert( saved_cal->channels_length < SC_MAX_CHANNELS_LENGTH );
+
+	if( channel == SC_ALL_CHANNELS )
+		saved_cal->channels_length = 0;
+	else
+		saved_cal->channels[ saved_cal->channels_length++ ] = channel;
+}
+
+void sc_push_range( saved_calibration_t *saved_cal, int range )
+{
+	assert( saved_cal->ranges_length < SC_MAX_RANGES_LENGTH );
+
+	if( range == SC_ALL_RANGES )
+		saved_cal->ranges_length = 0;
+	else
+		saved_cal->ranges[ saved_cal->ranges_length++ ] = range;
+}
+
+void sc_push_aref( saved_calibration_t *saved_cal, int aref )
+{
+	assert( saved_cal->arefs_length < SC_MAX_AREFS_LENGTH );
+
+	if( aref == SC_ALL_AREFS )
+		saved_cal->arefs_length = 0;
+	else
+		saved_cal->arefs[ saved_cal->arefs_length++ ] = aref;
 }
