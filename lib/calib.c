@@ -140,6 +140,20 @@ static int extract_array_length( const char *file_path, unsigned int cal_index,
 	return strtol( result, NULL, 0 );
 }
 
+static int extract_subdevice( const char *file_path, unsigned int cal_index )
+{
+	char element[ 100 ];
+	char result[ 100 ];
+	int retval;
+
+	snprintf( element, sizeof( element ),
+		"cal->{ calibrations }[ %i ]->{ subdevice }", cal_index );
+	retval = extract_ph_element( file_path, "cal", element, result, sizeof( result ) );
+	if( retval < 0 ) return retval;
+
+	return strtol( result, NULL, 0 );
+}
+
 static int valid_item( const char *file_path, unsigned int cal_index,
 	const char *item_type, unsigned int item )
 {
@@ -175,8 +189,8 @@ static inline int valid_aref( const char *file_path, unsigned int cal_index,
 	return valid_item( file_path, cal_index, "arefs", aref );
 }
 
-static int find_calibration( const char *file_path, unsigned int channel,
-	unsigned int range, unsigned int aref )
+static int find_calibration( const char *file_path, unsigned int subdev,
+	unsigned int channel, unsigned int range, unsigned int aref )
 {
 	int num_cals, i;
 
@@ -188,6 +202,7 @@ static int find_calibration( const char *file_path, unsigned int channel,
 		if( valid_range( file_path, i, range ) == 0 ) continue;
 		if( valid_channel( file_path, i, channel ) == 0 ) continue;
 		if( valid_aref( file_path, i, aref ) == 0 ) continue;
+		if( extract_subdevice( file_path, i ) != subdev ) continue;
 		break;
 	}
 	if( i == num_cals ) return -1;
@@ -223,7 +238,7 @@ int comedi_set_calibration( comedi_t *dev, unsigned int subdev, unsigned int cha
 	retval = check_cal_file( dev, file_path );
 	if( retval < 0 ) return retval;
 
-	cal_index = find_calibration( file_path, channel, range, aref );
+	cal_index = find_calibration( file_path, subdev, channel, range, aref );
 
 	return 0;
 }
