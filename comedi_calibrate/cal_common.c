@@ -51,8 +51,8 @@ void generic_do_linearity( calibration_setup_t *setup,
 	sc_push_caldac( saved_cal, setup->caldacs[ caldac ] );
 }
 
-void generic_peg( calibration_setup_t *setup,
-	comedi_calibration_setting_t *saved_cal, int observable, int caldac, int maximize )
+void generic_peg( calibration_setup_t *setup, int observable, int caldac,
+	int maximize )
 {
 	if( caldac < 0 || observable < 0 ) return;
 	peg_binary( setup, observable, caldac, maximize );
@@ -183,9 +183,9 @@ static void generic_do_adc_postgain_offset( calibration_setup_t *setup, const ge
 		reset_caldac( setup, layout->adc_postgain_offset( channel ) );
 		/* need to make sure we aren't stuck on zero for unipolar,
 		 * by setting pregain offset to maximum */
-		generic_peg( setup, current_cal, layout->adc_ground_observable( setup, channel, lowgain ),
+		generic_peg( setup, layout->adc_ground_observable( setup, channel, lowgain ),
 			layout->adc_offset( channel ), 1 );
-		generic_peg( setup, current_cal, layout->adc_ground_observable( setup, channel, lowgain ),
+		generic_peg( setup, layout->adc_ground_observable( setup, channel, lowgain ),
 			layout->adc_offset_fine( channel ), 1 );
 	}else
 	{
@@ -258,9 +258,9 @@ int generic_cal_by_channel_and_range( calibration_setup_t *setup,
 			current_cal = sc_alloc_calibration_setting( setup );
 			generic_prep_adc_caldacs( setup, layout, channel, range );
 			if( is_unipolar( setup->dev, setup->ad_subdev, channel, range ) )
-				update_caldac( setup, layout->adc_postgain_offset( channel ), postgain_bip );
-			else
 				update_caldac( setup, layout->adc_postgain_offset( channel ), postgain_unip );
+			else
+				update_caldac( setup, layout->adc_postgain_offset( channel ), postgain_bip );
 			generic_do_adc_channel( setup, layout, current_cal, channel, range );
 		}
 	}
@@ -314,6 +314,7 @@ int generic_cal_by_range( calibration_setup_t *setup,
 			if( is_bipolar( setup->dev, setup->ad_subdev, 0, range ) )
 				sc_push_range( current_cal, range );
 		postgain_bip = setup->caldacs[ layout->adc_postgain_offset( 0 ) ].current;
+
 		/* unipolar postgain */
 		current_cal = sc_alloc_calibration_setting( setup );
 		generic_do_adc_postgain_offset( setup, layout, current_cal, 0, 1 );
@@ -330,9 +331,9 @@ int generic_cal_by_range( calibration_setup_t *setup,
 		current_cal = sc_alloc_calibration_setting( setup );
 		generic_prep_adc_caldacs( setup, layout, 0, range );
 		if( is_unipolar( setup->dev, setup->ad_subdev, 0, range ) )
-			update_caldac( setup, layout->adc_postgain_offset( 0 ), postgain_bip );
-		else
 			update_caldac( setup, layout->adc_postgain_offset( 0 ), postgain_unip );
+		else
+			update_caldac( setup, layout->adc_postgain_offset( 0 ), postgain_bip );
 		generic_do_adc_channel( setup, layout, current_cal, 0, range );
 		sc_push_channel( current_cal, SC_ALL_CHANNELS );
 	}
