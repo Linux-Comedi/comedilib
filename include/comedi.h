@@ -3,7 +3,7 @@
     header file for comedi
 
     COMEDI - Linux Control and Measurement Device Interface
-    Copyright (C) 1998-2000 David A. Schleef <ds@schleef.org>
+    Copyright (C) 1998-2001 David A. Schleef <ds@schleef.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -97,16 +97,32 @@ typedef unsigned short sampl_t;
 #define INSN_CONFIG		( 3 | INSN_MASK_READ|INSN_MASK_WRITE)
 #define INSN_GTOD		( 4 | INSN_MASK_READ|INSN_MASK_SPECIAL)
 #define INSN_WAIT		( 5 | INSN_MASK_WRITE|INSN_MASK_SPECIAL)
+#define INSN_INTTRIG		( 6 | INSN_MASK_WRITE|INSN_MASK_SPECIAL)
 
 /* trigger flags */
+/* These flags are used in comedi_trig structures */
 
 #define TRIG_BOGUS	0x0001		/* do the motions */
 #define TRIG_DITHER	0x0002		/* enable dithering */
 #define TRIG_DEGLITCH	0x0004		/* enable deglitching */
-#define TRIG_RT		0x0008		/* perform op in real time */
+//#define TRIG_RT	0x0008		/* perform op in real time */
 #define TRIG_CONFIG	0x0010		/* perform configuration, not triggering */
-#define TRIG_WAKE_EOS	0x0020		/* wake up on end-of-scan events */
+//#define TRIG_WAKE_EOS	0x0020		/* wake up on end-of-scan events */
 #define TRIG_WRITE	0x0040		/* write to bidirectional devices */
+
+/* command flags */
+/* These flags are used in comedi_cmd structures */
+
+#define CMDF_PRIORITY		0x00000008 /* try to use a real-time interrupt while performing command */
+
+#define TRIG_RT		CMDF_PRIORITY /* compatibility definition */
+#define TRIG_WAKE_EOS		0x00000020 /* legacy definition for COMEDI_EV_SCAN_END */
+
+#define COMEDI_EV_START		0x00040000
+#define COMEDI_EV_SCAN_BEGIN	0x00080000
+#define COMEDI_EV_CONVERT	0x00100000
+#define COMEDI_EV_SCAN_END	0x00200000
+#define COMEDI_EV_STOP		0x00400000
 
 #define TRIG_ROUND_MASK		0x00030000
 #define TRIG_ROUND_NEAREST	0x00000000
@@ -117,6 +133,8 @@ typedef unsigned short sampl_t;
 /* trigger sources */
 
 #define TRIG_ANY	0xffffffff
+#define TRIG_INVALID	0x00000000
+
 #define TRIG_NONE	0x00000001	/* never trigger */
 #define TRIG_NOW	0x00000002	/* trigger now + N ns */
 #define TRIG_FOLLOW	0x00000004	/* trigger on next lower level trig */
@@ -125,8 +143,7 @@ typedef unsigned short sampl_t;
 #define TRIG_COUNT	0x00000020	/* trigger when count reaches N */
 #define TRIG_EXT	0x00000040	/* trigger on external signal N */
 #define TRIG_INT	0x00000080	/* trigger on comedi-internal signal N */
-
-#define TRIG_INVAL	0x00000100	/* choice was invalid */
+#define TRIG_OTHER	0x00000100	/* driver defined */
 
 /* subdevice flags */
 
