@@ -17,11 +17,6 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
-/*
-	TODO:
-	read calibration voltage targets from eeprom
-	calibrate all possible ranges and save to file
-*/
 
 #define _GNU_SOURCE
 
@@ -36,6 +31,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <assert.h>
 
 #include "calib.h"
 
@@ -94,11 +90,6 @@ static struct board_struct boards[]={
 
 static const int num_boards = ( sizeof(boards) / sizeof(boards[0]) );
 
-enum observables_60xx {
-	OBS_0V_RANGE_10V_BIP_60XX = 0,
-	OBS_5V_RANGE_10V_BIP_60XX,
-};
-
 enum observables_64xx {
 	OBS_0V_RANGE_10V_BIP_64XX = 0,
 	OBS_7V_RANGE_10V_BIP_64XX,
@@ -116,6 +107,18 @@ enum observables_1xxx {
 enum observables_1602_16 {
 	OBS_0V_RANGE_10V_BIP_1602_16 = 0,
 	OBS_7V_RANGE_10V_BIP_1602_16,
+};
+
+enum calibration_source_60xx
+{
+	CS_60XX_GROUND = 0,
+	CS_60XX_10V = 1,
+	CS_60XX_5V = 2,
+	CS_60XX_500mV = 3,
+	CS_60XX_50mV = 4,
+	CS_60XX_UNUSED = 5,	// 0V
+	CS_60XX_DAC0 = 6,
+	CS_60XX_DAC1 = 7,
 };
 
 int cb_setup( calibration_setup_t *setup, const char *device_name )
@@ -266,31 +269,85 @@ int init_observables_64xx( calibration_setup_t *setup )
 	return 0;
 }
 
-int init_observables_60xx( calibration_setup_t *setup )
+unsigned int high_observable_index_60xx( unsigned int ai_range )
 {
-	comedi_insn tmpl;//, po_tmpl;
-	observable *o;
-	int retval;
-	float target;
+	return ai_range * 2 + 1;
+}
+
+unsigned int ground_observable_index_60xx( unsigned int ai_range )
+{
+	return ai_range * 2;
+}
+
+int ai_cal_src_voltage_60xx( calibration_setup_t *setup,
+	unsigned int calibration_source, float *voltage )
+{
 	enum source_eeprom_addr
 	{
 		EEPROM_10V_CHAN = 0x30,
 		EEPROM_5V_CHAN = 0x32,
 		EEPROM_500mV_CHAN = 0x38,
 		EEPROM_50mV_CHAN = 0x3e,
-		EEPROM_8mV_CHAN = 0x40,
+		EEPROM_8mV_CHAN = 0x40,	// bogus?
 	};
-	enum calibration_source
+	int retval;
+
+	switch( calibration_source )
 	{
-		CAL_SRC_GROUND = 0,
-		CAL_SRC_10V = 1,
-		CAL_SRC_5V = 2,
-		CAL_SRC_500mV = 3,
-		CAL_SRC_50mV = 4,
-		CAL_SRC_5mV = 5,	// XXX check
-		CAL_SRC_DAC0 = 6,
-		CAL_SRC_DAC1 = 7,
-	};
+		case CS_60XX_GROUND:
+			*voltage = 0.0;
+			retval = 0;
+			break;
+		case CS_60XX_10V:
+			retval = actual_source_voltage( setup->dev, setup->eeprom_subdev,
+				EEPROM_10V_CHAN, voltage );
+			break;
+		case CS_60XX_5V:
+			retval = actual_source_voltage( setup->dev, setup->eeprom_subdev,
+				EEPROM_5V_CHAN, voltage );
+			break;
+		case CS_60XX_500mV:
+			retval = actual_source_voltage( setup->dev, setup->eeprom_subdev,
+				EEPROM_500mV_CHAN, voltage );
+			break;
+		case CS_60XX_50mV:
+			retval = actual_source_voltage( setup->dev, setup->eeprom_subdev,
+				EEPROM_50mV_CHAN, voltage );
+			break;
+		default:
+			fprintf( stderr, "invalid calibration_source in ai_cal_src_voltage_60xx()\n" );
+			retval = -1;
+			break;
+	}
+	return retval;
+}
+
+int high_ai_cal_src_60xx( calibration_setup_t *setup, unsigned int ai_range )
+{
+	comedi_range *range;
+
+	range = comedi_get_range( setup->dev, setup->ad_subdev, 0, ai_range );
+	if( range == NULL ) return -1;
+
+	if( range->max > 9.999 )
+		return CS_60XX_10V;
+	else if( range->max > 4.999 )
+		return CS_60XX_5V;
+	else if( range->max > 0.4999 )
+		return CS_60XX_500mV;
+	else if( range->max > 0.04999 )
+		return CS_60XX_50mV;
+
+	return -1;
+}
+
+int init_observables_60xx( calibration_setup_t *setup )
+{
+	comedi_insn tmpl;//, po_tmpl;
+	observable *o;
+	int retval, num_ranges, i;
+	float target;
+	static const int CAL_SRC_GROUND = 0;
 #if 0
 	memset( &po_tmpl, 0, sizeof(po_tmpl) );
 	po_tmpl.insn = INSN_CONFIG;
@@ -301,25 +358,41 @@ int init_observables_60xx( calibration_setup_t *setup )
 	tmpl.insn = INSN_READ;
 	tmpl.n = 1;
 	tmpl.subdev = setup->ad_subdev;
+	setup->n_observables = 0;
 
-	o = setup->observables + OBS_0V_RANGE_10V_BIP_60XX;
-	o->name = "ground calibration source, 10V bipolar range, ground referenced";
-	o->reference_source = CAL_SRC_GROUND;
-	o->observe_insn = tmpl;
-	o->observe_insn.chanspec = CR_PACK( 0, 0, AREF_GROUND) | CR_ALT_SOURCE | CR_ALT_FILTER;
-	o->target = 0.0;
+	num_ranges = comedi_get_n_ranges( setup->dev, setup->ad_subdev, 0 );
+	if( num_ranges < 0 ) return -1;
 
-	o = setup->observables + OBS_5V_RANGE_10V_BIP_60XX;
-	o->name = "5V calibration source, 10V bipolar range, ground referenced";
-	o->reference_source = CAL_SRC_5V;
-	o->observe_insn = tmpl;
-	o->observe_insn.chanspec = CR_PACK( 0, 0, AREF_GROUND) | CR_ALT_SOURCE | CR_ALT_FILTER;
-	o->target = 5.0;
-	retval = actual_source_voltage( setup->dev, setup->eeprom_subdev, EEPROM_5V_CHAN, &target );
-	if( retval == 0 )
+	for( i = 0; i < num_ranges; i++ )
+	{
+		o = setup->observables + ground_observable_index_60xx( i );
+		o->reference_source = CAL_SRC_GROUND;
+		assert( o->name == NULL );
+		asprintf( &o->name, "calibration source %i, range %i, ground referenced",
+			o->reference_source, i );
+		o->observe_insn = tmpl;
+		o->observe_insn.chanspec = CR_PACK( 0, 0, AREF_GROUND) | CR_ALT_SOURCE | CR_ALT_FILTER;
+		o->target = 0.0;
+		setup->n_observables++;
+fprintf( stderr, "cal src %i, range %i, target %g\n",
+	o->reference_source, i, o->target );
+
+		o = setup->observables + high_observable_index_60xx( i );
+		retval = high_ai_cal_src_60xx( setup, i );
+		if( retval < 0 ) return -1;
+		o->reference_source = retval;
+		assert( o->name == NULL );
+		asprintf( &o->name, "calibration source %i, range %i, ground referenced",
+			o->reference_source, i );
+		o->observe_insn = tmpl;
+		o->observe_insn.chanspec = CR_PACK( 0, 0, AREF_GROUND) | CR_ALT_SOURCE | CR_ALT_FILTER;
+		retval = ai_cal_src_voltage_60xx( setup, o->reference_source, &target );
+		if( retval < 0 ) return -1;
 		o->target = target;
-
-	setup->n_observables = 2;
+		setup->n_observables++;
+fprintf( stderr, "cal src %i, range %i, target %g\n",
+	o->reference_source, i, o->target );
+	}
 
 	return 0;
 }
@@ -755,7 +828,7 @@ int cal_cb_pci_64xx( calibration_setup_t *setup )
 
 int cal_cb_pci_60xx( calibration_setup_t *setup )
 {
-	saved_calibration_t saved_cals[1];
+	saved_calibration_t *saved_cals;
 	enum cal_knobs_60xx
 	{
 		DAC0_OFFSET = 0,
@@ -767,23 +840,39 @@ int cal_cb_pci_60xx( calibration_setup_t *setup )
 		ADC_GAIN_COARSE,
 		ADC_GAIN_FINE,
 	};
+	int i, num_ranges, retval;
 
-	cal_binary( setup, OBS_0V_RANGE_10V_BIP_60XX, ADC_OFFSET_COARSE );
-	cal_binary( setup, OBS_0V_RANGE_10V_BIP_60XX, ADC_OFFSET_FINE );
-	cal_binary( setup, OBS_5V_RANGE_10V_BIP_60XX, ADC_GAIN_COARSE );
-	cal_binary( setup, OBS_5V_RANGE_10V_BIP_60XX, ADC_GAIN_FINE );
+	comedi_set_global_oor_behavior( COMEDI_OOR_NUMBER );
 
-	memset( &saved_cals[ 0 ], 0, sizeof( saved_calibration_t ) );
-	saved_cals[ 0 ].subdevice = setup->ad_subdev;
-	sc_push_caldac( &saved_cals[ 0 ], setup->caldacs[ ADC_OFFSET_FINE ] );
-	sc_push_caldac( &saved_cals[ 0 ], setup->caldacs[ ADC_OFFSET_COARSE ] );
-	sc_push_caldac( &saved_cals[ 0 ], setup->caldacs[ ADC_GAIN_FINE ] );
-	sc_push_caldac( &saved_cals[ 0 ], setup->caldacs[ ADC_GAIN_COARSE ] );
-	sc_push_channel( &saved_cals[ 0 ], SC_ALL_CHANNELS );
-	sc_push_range( &saved_cals[ 0 ], 0 );
-	sc_push_aref( &saved_cals[ 0 ], SC_ALL_AREFS );
+	num_ranges = comedi_get_n_ranges( setup->dev, setup->ad_subdev, 0 );
+	if( num_ranges < 1 ) return -1;
 
-	return write_calibration_file( setup->dev, saved_cals, 1 );
+	saved_cals = malloc( num_ranges * sizeof( saved_calibration_t ) );
+	if( saved_cals == NULL ) return -1;
+
+	for( i = num_ranges - 1; i >= 0; i-- )
+	{
+		reset_caldacs( setup );
+
+		cal_binary( setup, ground_observable_index_60xx( i ), ADC_OFFSET_COARSE );
+		cal_binary( setup, ground_observable_index_60xx( i ), ADC_OFFSET_FINE );
+		cal_binary( setup, high_observable_index_60xx( i ), ADC_GAIN_COARSE );
+		cal_binary( setup, high_observable_index_60xx( i ), ADC_GAIN_FINE );
+
+		memset( &saved_cals[ i ], 0, sizeof( saved_calibration_t ) );
+		saved_cals[ i ].subdevice = setup->ad_subdev;
+		sc_push_caldac( &saved_cals[ i ], setup->caldacs[ ADC_OFFSET_FINE ] );
+		sc_push_caldac( &saved_cals[ i ], setup->caldacs[ ADC_OFFSET_COARSE ] );
+		sc_push_caldac( &saved_cals[ i ], setup->caldacs[ ADC_GAIN_FINE ] );
+		sc_push_caldac( &saved_cals[ i ], setup->caldacs[ ADC_GAIN_COARSE ] );
+		sc_push_channel( &saved_cals[ i ], SC_ALL_CHANNELS );
+		sc_push_range( &saved_cals[ i ], i );
+		sc_push_aref( &saved_cals[ i ], SC_ALL_AREFS );
+	}
+
+	retval = write_calibration_file( setup->dev, saved_cals, num_ranges );
+	free( saved_cals );
+	return retval;
 }
 
 int cal_cb_pci_4020( calibration_setup_t *setup )
@@ -1012,6 +1101,6 @@ int actual_source_voltage( comedi_t *dev, unsigned int subdevice, unsigned int e
 		return -1;
 	}
 
-	DPRINT(0, "eeprom ch %i gives calibration source of %gV\n", eeprom_channel, *voltage);
+	DPRINT(0, "eeprom ch 0x%x gives calibration source of %gV\n", eeprom_channel, *voltage);
 	return 0;
 }
