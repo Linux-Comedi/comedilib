@@ -270,15 +270,12 @@ int main(int argc,char *argv[])
 
 Should be understandable.  Open the device, get the data,
 print it out.  This is basically the guts of <tt>demo/inp.c</tt>,
-without error checking or fancy options.  Including all
-the appropriate headers is sometimes a little tricky.
+without error checking or fancy options.
 Compile it using 
 
 <tscreen><verb>
 cc tut1.c -lcomedi -o tut1
 </verb></tscreen>
-
-Hopefully it works.
 
 A few notes:  The range variable tells comedi which gain
 to use when measuring an analog voltage.  Since we don't
@@ -303,20 +300,29 @@ a voltage.  Naturally, as a good programmer, your first
 question is: "How do I do this in a device-independent
 manner?"
 
-For each subdevice, the comedi kernel module keeps a
-'range_type' variable.  This variable contains the number
-of available ranges (i.e., gains) that you can select,
-along with an offset in a list of range information
-structures.  If you know the range_type variable, you
-can use these macros:
+Most devices give you a choice of gain and unipolar/bipolar
+input, and Comedi allows you to select which of these to
+use.  This parameter is called the "range parameter", since
+it specifies the "input range" for analog input (or "output range"
+analog output.)  The range parameter represents both the gain
+and the unipolar/bipolar aspects.
 
-   RANGE_OFFSET(range_type)
-   RANGE_LENGTH(range_type)
+Comedi keeps the number of available ranges and the largest
+sample value for each subdevice/channel combination.  (Some
+devices allow different input/output ranges for different
+channels in a subdevice.)
 
-to extract such information.  However, you want the
-actual voltage information, not some integer offset
-in a table.  Rather than messing with the library
-internals, use the function
+The largest sample value can be found using the function:
+
+   comedi_get_maxdata()
+
+The number of available ranges can be found using the function:
+
+   comedi_get_n_ranges()
+
+For each value of the range parameter for a particular
+subdevice/channel, you can get range information using the
+function:
 
    ptr=comedi_get_range(comedi_file,subdevice,channel,
 	range)
@@ -333,8 +339,7 @@ typedef struct{
 }comedi_range;
 </verb></tscreen>
 
-As you might expect, ptr[range] is for range 'range',
-which you provided to comedi_data_read() above.  'min' represents
+The structure element 'min' represents
 the voltage corresponding to comedi_data_read() returning 0,
 and 'max' represents comedi_data_read() returning 'maxdata',
 (i.e., 4095 for 12 bit A/C converters, 65535 for 16 bit,
@@ -355,13 +360,6 @@ and the opposite
 <tscreen><verb>
 data=comedi_from_phys(it,volts,range,maxdata);
 </verb></tscreen>
-
-You probably noticed (and were worried) that we haven't
-discussed how to determine maxdata and range_type.  Well,
-you could ask the kernel this information each time you need
-it, but since there are other variables, special cases,
-and several subdevices to worry about, it would be nice
-if the library could take care of this...  (read on...)
 
 
 <p>
@@ -385,7 +383,7 @@ where file is of type <tt>(comedi_t *)</tt>.  This function
 calls <tt>open()</tt>, like we did explicitly in a previous
 section, but also fills the <tt>comedi_t</tt> structure with
 lots of goodies -- information that we will need to use
-soon.
+soon.  
 
 Specifically, we needed to know maxdata for a specific
 subdevice/channel.  How about:
