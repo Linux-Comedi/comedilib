@@ -282,58 +282,62 @@ int main(int argc,char *argv[])
 		}
 	}
 
-	if(read_buf_size || write_buf_size){
-		ret = ioctl(fd,COMEDI_DEVINFO,&devinfo);
-		if(ret<0){
-			perror("devinfo");
-			exit(1);
+	// dont do buffer resize if we have removed device
+	if(remove == 0)
+	{
+		if(read_buf_size || write_buf_size){
+			ret = ioctl(fd,COMEDI_DEVINFO,&devinfo);
+			if(ret<0){
+				perror("devinfo");
+				exit(1);
+			}
+			if(devinfo.version_code < ((7<<8) | (57))){
+				fprintf(stderr,"Buffer resizing requires Comedi version >= 0.7.57\n");
+				exit(1);
+			}
 		}
-		if(devinfo.version_code < ((7<<8) | (57))){
-			fprintf(stderr,"Buffer resizing requires Comedi version >= 0.7.57\n");
-			exit(1);
-		}
-	}
 
-	// do buffer resizing
-	if(read_buf_size)
-	{
-		if(devinfo.read_subdevice){
-			fprintf(stderr,"warning: no read subdevice, resize ignored\n");
-		}else{
-			memset(&bc, 0, sizeof(bc));
-			bc.subdevice = devinfo.read_subdevice;
-			bc.maximum_size = read_buf_size * 1024;
-			bc.size = read_buf_size * 1024;
-			if(ioctl(fd, COMEDI_BUFCONFIG, &bc) < 0)
-			{
-				perror("buffer resize error");
-				exit(1);
-			}
-			if(verbose)
-			{
-				printf("%s read buffer resized to %i kilobytes\n",
-					fn, bc.size / 1024);
+		// do buffer resizing
+		if(read_buf_size)
+		{
+			if(devinfo.read_subdevice){
+				fprintf(stderr,"warning: no read subdevice, resize ignored\n");
+			}else{
+				memset(&bc, 0, sizeof(bc));
+				bc.subdevice = devinfo.read_subdevice;
+				bc.maximum_size = read_buf_size * 1024;
+				bc.size = read_buf_size * 1024;
+				if(ioctl(fd, COMEDI_BUFCONFIG, &bc) < 0)
+				{
+					perror("buffer resize error");
+					exit(1);
+				}
+				if(verbose)
+				{
+					printf("%s read buffer resized to %i kilobytes\n",
+						fn, bc.size / 1024);
+				}
 			}
 		}
-	}
-	if(write_buf_size)
-	{
-		if(devinfo.write_subdevice){
-			fprintf(stderr,"warning: no write subdevice, resize ignored\n");
-		}else{
-			memset(&bc, 0, sizeof(bc));
-			bc.subdevice = devinfo.write_subdevice;
-			bc.maximum_size = write_buf_size * 1024;
-			bc.size = write_buf_size * 1024;
-			if(ioctl(fd, COMEDI_BUFCONFIG, &bc) < 0)
-			{
-				perror("buffer resize error");
-				exit(1);
-			}
-			if(verbose)
-			{
-				printf("%s write buffer resized to %i kilobytes\n",
-					fn, bc.size / 1024);
+		if(write_buf_size)
+		{
+			if(devinfo.write_subdevice){
+				fprintf(stderr,"warning: no write subdevice, resize ignored\n");
+			}else{
+				memset(&bc, 0, sizeof(bc));
+				bc.subdevice = devinfo.write_subdevice;
+				bc.maximum_size = write_buf_size * 1024;
+				bc.size = write_buf_size * 1024;
+				if(ioctl(fd, COMEDI_BUFCONFIG, &bc) < 0)
+				{
+					perror("buffer resize error");
+					exit(1);
+				}
+				if(verbose)
+				{
+					printf("%s write buffer resized to %i kilobytes\n",
+						fn, bc.size / 1024);
+				}
 			}
 		}
 	}
