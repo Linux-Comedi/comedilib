@@ -229,6 +229,9 @@ static int do_test_for_insn_bits(comedi_t *dev,unsigned int subdevice)
 	lsampl_t data[2];
 	int ret;
 
+	if(dev->subdevices[subdevice].maxdata != 1)
+		return 0;
+
 	memset(&insn,0,sizeof(insn));
 
 	il.n_insns = 1;
