@@ -5,12 +5,6 @@
    copyright (C) 1999,2000,2001,2002 by David Schleef
    copyright (C) 2003 by Frank Mori Hess
 
-   A few things need improvement here:
-    - current system gets "close", but doesn't
-      do any fine-tuning
-    - statistics would be nice, to show how good
-      the calibration is.
-    - more portable
  */
 
 /***************************************************************************
@@ -643,32 +637,6 @@ static int cal_ni_at_mio_16e_2(calibration_setup_t *setup)
 	return cal_ni_generic( setup, &layout );
 }
 
-/*
- * Device name: DAQCard-ai-16xe-50
- * Comedi version: 0.7.60
- * ai, bipolar zero offset, low gain
- * offset 5.87(63)e-3, target 0
- * caldac[0] gain=-2.243(21)e-6 V/bit S_min=208.079 dof=254
- * caldac[2] gain=1.56378(22)e-4 V/bit S_min=1782.91 dof=254
- * caldac[8] gain=2.499(14)e-7 V/bit S_min=234.915 dof=254
- * ai, bipolar zero offset, high gain
- * offset 4.251(49)e-5, target 0
- * caldac[0] gain=-2.396(30)e-8 V/bit S_min=231.387 dof=254
- * caldac[2] gain=1.56428(28)e-6 V/bit S_min=829.096 dof=254
- * caldac[8] gain=2.61244(18)e-7 V/bit S_min=773.092 dof=254
- * ai, bipolar voltage reference, low gain
- * offset 4.99650(81), target 5
- * caldac[0] gain=-3.78250(23)e-4 V/bit S_min=12207.6 dof=254
- * caldac[1] gain=-9.878(22)e-6 V/bit S_min=346.795 dof=254
- * caldac[2] gain=1.57172(23)e-4 V/bit S_min=969.526 dof=254
- * caldac[8] gain=2.795(14)e-7 V/bit S_min=245.703 dof=254
- * ai, unipolar zero offset, low gain
- * offset 0.0133(14), target 0
- * caldac[0] gain=3.73923(29)e-4 V/bit S_min=2855.79 dof=151
- * caldac[1] gain=9.784(11)e-6 V/bit S_min=727.295 dof=254
- * caldac[2] gain=7.8670(11)e-5 V/bit S_min=903.291 dof=254
- * caldac[8] gain=2.7732(74)e-7 V/bit S_min=415.399 dof=254
- */
 static int cal_ni_daqcard_ai_16xe_50(calibration_setup_t *setup)
 {
 	ni_caldac_layout_t layout;
@@ -1271,90 +1239,3 @@ static double ni_get_reference( calibration_setup_t *setup, int lsb_loc,int msb_
 	return ref;
 }
 
-#if 0
-static void cal_ni_results(void)
-{
-	comedi_range *range;
-	int bipolar_lowgain;
-	int bipolar_highgain;
-	int unipolar_lowgain;
-	//int have_ao;
-	char s[32];
-
-	bipolar_lowgain = get_bipolar_lowgain(dev,setup->ad_subdev);
-	bipolar_highgain = get_bipolar_highgain(dev,setup->ad_subdev);
-	unipolar_lowgain = get_unipolar_lowgain(dev,setup->ad_subdev);
-
-	/* 0 offset, low gain */
-	range = comedi_get_range(dev,setup->ad_subdev,0,bipolar_lowgain);
-	read_chan2(s,0,bipolar_lowgain);
-	DPRINT(0,"bipolar zero offset, low gain [%g,%g]: %s\n",
-		range->min,range->max,s);
-
-	/* 0 offset, high gain */
-	range = comedi_get_range(dev,setup->ad_subdev,0,bipolar_highgain);
-	read_chan2(s,0,bipolar_highgain);
-	DPRINT(0,"bipolar zero offset, high gain [%g,%g]: %s\n",
-		range->min,range->max,s);
-
-	/* unip/bip offset */
-	range = comedi_get_range(dev,setup->ad_subdev,0,unipolar_lowgain);
-	read_chan2(s,0,unipolar_lowgain);
-	DPRINT(0,"unipolar zero offset, low gain [%g,%g]: %s\n",
-		range->min,range->max,s);
-
-}
-
-static void ni_mio_ai_postgain_cal(void)
-{
-	linear_fit_t l;
-	double offset_r0;
-	double offset_r7;
-	double gain;
-	double a;
-
-	check_gain_chan_x(&l,CR_PACK(0,0,AREF_OTHER),1);
-	offset_r0=linear_fit_func_y(&l,caldacs[1].current);
-	printf("offset r0 %g\n",offset_r0);
-
-	check_gain_chan_x(&l,CR_PACK(0,7,AREF_OTHER),1);
-	offset_r7=linear_fit_func_y(&l,caldacs[1].current);
-	printf("offset r7 %g\n",offset_r7);
-
-	gain=l.slope;
-
-	a=(offset_r0-offset_r7)/(200.0-1.0);
-	a=caldacs[1].current-a/gain;
-
-	printf("%g\n",a);
-
-	caldacs[1].current=rint(a);
-	update_caldac(1);
-}
-
-static void ni_mio_ai_postgain_cal_2(int chan,int dac,int range_lo,int range_hi,double gain)
-{
-	double offset_lo,offset_hi;
-	linear_fit_t l;
-	double slope;
-	double a;
-
-	check_gain_chan_x(&l,CR_PACK(chan,range_lo,AREF_OTHER),dac);
-	offset_lo=linear_fit_func_y(&l,caldacs[dac].current);
-	printf("offset lo %g\n",offset_lo);
-
-	check_gain_chan_x(&l,CR_PACK(chan,range_hi,AREF_OTHER),dac);
-	offset_hi=linear_fit_func_y(&l,caldacs[dac].current);
-	printf("offset hi %g\n",offset_hi);
-
-	slope=l.slope;
-
-	a=(offset_lo-offset_hi)/(gain-1.0);
-	a=caldacs[dac].current-a/slope;
-
-	printf("%g\n",a);
-
-	caldacs[dac].current=rint(a);
-	update_caldac(dac);
-}
-#endif
