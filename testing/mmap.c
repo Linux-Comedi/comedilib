@@ -62,8 +62,11 @@ int test_mmap(void)
 	int ret;
 	void *b, *adr;
 	sampl_t *map;
+	unsigned int flags;
 
-	if(!(comedi_get_subdevice_flags(device,subdevice)&SDF_CMD)){
+	flags = comedi_get_subdevice_flags(device,subdevice);
+
+	if(!(flags&SDF_CMD) || flags&SDF_WRITEABLE){
 		printf("not applicable\n");
 		return 0;
 	}

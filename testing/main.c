@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
 	device = comedi_open(filename);
 	if(!device){
 		printf("E: comedi_open(\"%s\"): %s\n",filename,strerror(errno));
-		exit(0);
+		exit(1);
 	}
 
 	print_device_info();

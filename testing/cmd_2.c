@@ -19,8 +19,9 @@ static int get_chunks_per_length(int length);
 int test_cmd_fifo_depth_check(void)
 {
 	int len;
+	unsigned int flags = comedi_get_subdevice_flags(device,subdevice);
 
-	if(!(comedi_get_subdevice_flags(device,subdevice)&SDF_CMD)){
+	if(!(flags&SDF_CMD) || flags&SDF_WRITEABLE){
 		printf("not applicable\n");
 		return 0;
 	}

@@ -27,8 +27,10 @@ int test_read_select(void)
 	int length=100000;
 	fd_set rdset;
 	struct timeval timeout;
+	unsigned int flags;
 
-	if(!(comedi_get_subdevice_flags(device,subdevice)&SDF_CMD)){
+	flags = comedi_get_subdevice_flags(device,subdevice);
+	if(!(flags&SDF_CMD) || flags&SDF_WRITEABLE){
 		printf("not applicable\n");
 		return 0;
 	}
