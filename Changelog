@@ -1,0 +1,29 @@
+
+comedilib-0.7.16:
+
+ - New Config file meant to be user-edited, plus necessary changes to
+   build system.
+ - Build and install perl and python wrappers
+ - new README
+ - comedi_calibrate: minor fixes
+ - comedi_config: documentation, getopt, buffer resize fixes
+ - demo/cmd: major updates
+ - demo/mmap: major updates
+ - demo/poll: new demo for comedi_poll()
+ - demo/: lots of general updates
+ - demo/perl/: moved perl demos
+ - documentation: updates, additions
+ - PCMCIA: moved /etc configuration files from Comedi
+ - headers: removed obsolete functions.  use -D_COMEDILIB_DEPRECATED
+   to get them back.  (They still work fine.)
+ - new functions to access buffer information.  (These may change.)
+ - new functions to access command information.
+ - new function comedi_data_read_n() for reading N samples using insns
+ - additional error reporting/logging
+ - new function comedi_get_subdevice_flags().  Returns subdevice flags.
+ - new python wrapper (it's been around for a long time, just not included)
+ - comedi_test: new tests, fixed tests, additional error logging, additional
+   results
+
+ 
+
