@@ -29,9 +29,10 @@ AC_SUBST(COMEDILIB_CFLAGS)
 AC_SUBST(COMEDILIB_LIBS)
 
 AC_PATH_PROG(SWIG, swig, no)
-if test x$SWIG = xno ; then
+if test "x$SWIG" == xno ; then
   AC_MSG_WARN([swig not found, will not be able to regenerate code for swig bindings])
 fi
+AM_CONDITIONAL(HAVE_SWIG, [test "x$SWIG" != xno])
 
 AM_PATH_PYTHON
 AM_CHECK_PYTHON_HEADERS(HAVE_PYTHON=yes,[HAVE_PYTHON=no;AC_MSG_WARN([python headers not found, disabling python binding])])
@@ -42,7 +43,7 @@ AS_COMPILER_FLAG([-Wno-unused-function],[PYTHON_QUIET="$PYTHON_QUIET -Wno-unused
 AC_SUBST(PYTHON_QUIET)
 
 AC_PATH_PROG(RUBY, ruby, no)
-if test x$RUBY = xno ; then
+if test "x$RUBY" == xno ; then
   AC_MSG_WARN([ruby not found, disabling ruby binding])
 fi
 AM_CONDITIONAL(HAVE_RUBY, [test "x$RUBY" != xno])
