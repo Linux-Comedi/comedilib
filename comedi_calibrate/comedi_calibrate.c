@@ -300,9 +300,10 @@ void observe( calibration_setup_t *setup )
 	observable *obs;
 
 	for( i = 0; i < setup->n_observables; i++){
+		obs = &setup->observables[ i ];
+		if( obs->observe_insn.n == 0 ) continue;
 		preobserve( setup, i);
 		DPRINT(0,"%s\n", setup->observables[i].name);
-		obs = &setup->observables[ i ];
 		if( obs->preobserve_insn.n != 0){
 			apply_appropriate_cal( setup, obs->preobserve_insn );
 		}
@@ -933,12 +934,13 @@ int get_unipolar_lowgain(comedi_t *dev,int subdev)
 	int ret = -1;
 	int i;
 	int n_ranges = comedi_get_n_ranges(dev,subdev,0);
-	double max = 0;
+	double max = 0.0;
 	comedi_range *range;
 
 	for(i=0;i<n_ranges;i++){
 		range = comedi_get_range(dev,subdev,0,i);
-		if(range->min != 0)continue;
+		/* This method is better than a direct test, which might fail */
+		if((range->min+range->max)<(range->max*0.99))continue;
 		if(range->max>max){
 			ret = i;
 			max=range->max;
@@ -948,6 +950,26 @@ int get_unipolar_lowgain(comedi_t *dev,int subdev)
 	return ret;
 }
 
+int get_unipolar_highgain(comedi_t *dev,int subdev)
+{
+	int ret = -1;
+	int i;
+	int n_ranges = comedi_get_n_ranges(dev,subdev,0);
+	double max = HUGE_VAL;
+	comedi_range *range;
+
+	for(i=0;i<n_ranges;i++){
+		range = comedi_get_range(dev,subdev,0,i);
+		/* This method is better than a direct test, which might fail */
+		if((range->min+range->max)<(range->max*0.99))continue;
+		if(range->max < max){
+			ret = i;
+			max=range->max;
+		}
+	}
+
+	return ret;
+}
 
 int read_eeprom( calibration_setup_t *setup, int addr)
 {

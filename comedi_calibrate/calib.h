@@ -137,6 +137,7 @@ int cb_actual_source_voltage( comedi_t *dev, unsigned int subdevice,
 int get_bipolar_lowgain(comedi_t *dev,int subdev);
 int get_bipolar_highgain(comedi_t *dev,int subdev);
 int get_unipolar_lowgain(comedi_t *dev,int subdev);
+int get_unipolar_highgain(comedi_t *dev,int subdev);
 
 /* other */
 

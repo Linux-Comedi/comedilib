@@ -129,7 +129,9 @@ enum observables{
 	ni_zero_offset_low = 0,
 	ni_zero_offset_high,
 	ni_reference_low,
-	ni_unip_offset_low,
+	ni_unip_zero_offset_low,
+	ni_unip_zero_offset_high,
+	ni_unip_reference_low,
 	ni_ao0_zero_offset,
 	ni_ao0_reference,
 	ni_ao1_zero_offset,
@@ -193,12 +195,14 @@ static void ni_setup_observables( calibration_setup_t *setup )
 	int bipolar_lowgain;
 	int bipolar_highgain;
 	int unipolar_lowgain;
+	int unipolar_highgain;
 	double voltage_reference;
 	observable *o;
 
 	bipolar_lowgain = get_bipolar_lowgain( setup->dev, setup->ad_subdev);
 	bipolar_highgain = get_bipolar_highgain( setup->dev, setup->ad_subdev);
 	unipolar_lowgain = get_unipolar_lowgain( setup->dev, setup->ad_subdev);
+	unipolar_highgain = get_unipolar_highgain( setup->dev, setup->ad_subdev);
 
 	voltage_reference = 5.000;
 
@@ -207,7 +211,7 @@ static void ni_setup_observables( calibration_setup_t *setup )
 	tmpl.n = 1;
 	tmpl.subdev = setup->ad_subdev;
 
-	setup->n_observables = 0;
+	setup->n_observables = 10;
 
 	/* 0 offset, low gain */
 	o = setup->observables + ni_zero_offset_low;
@@ -217,7 +221,6 @@ static void ni_setup_observables( calibration_setup_t *setup )
 		| CR_ALT_SOURCE | CR_ALT_FILTER;
 	o->reference_source = REF_GND_GND;
 	o->target = 0;
-	setup->n_observables++;
 
 	/* 0 offset, high gain */
 	o = setup->observables + ni_zero_offset_high;
@@ -227,7 +230,6 @@ static void ni_setup_observables( calibration_setup_t *setup )
 		| CR_ALT_SOURCE | CR_ALT_FILTER;
 	o->reference_source = REF_GND_GND;
 	o->target = 0;
-	setup->n_observables++;
 
 	/* voltage reference */
 	o = setup->observables + ni_reference_low;
@@ -237,24 +239,18 @@ static void ni_setup_observables( calibration_setup_t *setup )
 		| CR_ALT_SOURCE | CR_ALT_FILTER;
 	o->reference_source = REF_CALSRC_GND;
 	o->target = voltage_reference;
-	setup->n_observables++;
 
 	if(unipolar_lowgain>=0){
-		/* unip/bip offset */
-		o = setup->observables + ni_unip_offset_low;
+		o = setup->observables + ni_unip_zero_offset_low;
 		o->name = "ai, unipolar zero offset, low gain";
 		o->observe_insn = tmpl;
 		o->observe_insn.chanspec =
 			CR_PACK(REF_GND_GND,unipolar_lowgain,AREF_OTHER)
 			| CR_ALT_SOURCE | CR_ALT_FILTER;
-
 		o->reference_source = REF_GND_GND;
 		o->target = 0.0;
-		setup->n_observables++;
 
-#if 0
-		/* unip gain */
-		o = observables + ni_unip_reference_low;
+		o = setup->observables + ni_unip_reference_low;
 		o->name = "ai, unipolar voltage reference, low gain";
 		o->observe_insn = tmpl;
 		o->observe_insn.chanspec =
@@ -262,9 +258,18 @@ static void ni_setup_observables( calibration_setup_t *setup )
 			| CR_ALT_SOURCE | CR_ALT_FILTER;
 		o->reference_source = REF_CALSRC_GND;
 		o->target = voltage_reference;
-		i++;
-#endif
-		setup->n_observables = ni_unip_offset_low + 1;
+	}
+
+	if(unipolar_highgain >= 0)
+	{
+		o = setup->observables + ni_unip_zero_offset_high;
+		o->name = "ai, unipolar zero offset, high gain";
+		o->observe_insn = tmpl;
+		o->observe_insn.chanspec =
+			CR_PACK(REF_GND_GND,unipolar_highgain,AREF_OTHER)
+			| CR_ALT_SOURCE | CR_ALT_FILTER;
+		o->reference_source = REF_GND_GND;
+		o->target = 0.0;
 	}
 
 	if(setup->da_subdev>=0){
@@ -287,7 +292,6 @@ static void ni_setup_observables( calibration_setup_t *setup )
 			| CR_ALT_SOURCE | CR_ALT_FILTER;
 		o->reference_source = REF_DAC0_GND;
 		set_target( setup, ni_ao0_zero_offset,0.0);
-		setup->n_observables++;
 
 		/* ao 0, gain */
 		o = setup->observables + ni_ao0_reference;
@@ -302,7 +306,6 @@ static void ni_setup_observables( calibration_setup_t *setup )
 		o->reference_source = REF_DAC0_CALSRC;
 		set_target( setup, ni_ao0_reference,5.0);
 		o->target -= voltage_reference;
-		setup->n_observables++;
 
 		/* ao 1, zero offset */
 		o = setup->observables + ni_ao1_zero_offset;
@@ -316,7 +319,6 @@ static void ni_setup_observables( calibration_setup_t *setup )
 			| CR_ALT_SOURCE | CR_ALT_FILTER;
 		o->reference_source = REF_DAC1_GND;
 		set_target( setup, ni_ao1_zero_offset,0.0);
-		setup->n_observables++;
 
 		/* ao 1, gain */
 		o = setup->observables + ni_ao1_reference;
@@ -331,7 +333,6 @@ static void ni_setup_observables( calibration_setup_t *setup )
 		o->reference_source = REF_DAC1_CALSRC;
 		set_target( setup, ni_ao1_reference,5.0);
 		o->target -= voltage_reference;
-		setup->n_observables++;
 	}
 }
 
@@ -463,7 +464,7 @@ static int cal_ni_at_mio_16e_2(calibration_setup_t *setup)
 	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,1);
 	cal1( setup, ni_zero_offset_high,0);
 	cal1( setup, ni_reference_low,3);
-	cal1( setup, ni_unip_offset_low,2);
+	cal1( setup, ni_unip_zero_offset_low,2);
 	if(setup->do_output){
 		cal1( setup, ni_ao0_zero_offset,5);
 		cal1( setup, ni_ao0_reference,6);
@@ -555,7 +556,7 @@ static int cal_ni_pci_mio_16e_1(calibration_setup_t *setup)
 	postgain_cal( setup, ni_zero_offset_low,ni_zero_offset_high,1);
 	cal1( setup, ni_zero_offset_high,0);
 	cal1( setup, ni_reference_low,3);
-	cal1( setup, ni_unip_offset_low,2);
+	cal1( setup, ni_unip_zero_offset_low,2);
 	if(setup->do_output){
 		cal1( setup, ni_ao0_zero_offset,5);
 		//cal1( setup, ni_ao0_zero_offset,4); /* linearity? */
@@ -641,7 +642,7 @@ static int cal_ni_at_mio_16e_10(calibration_setup_t *setup)
 	cal1( setup, ni_zero_offset_high,10);
 	cal1( setup, ni_zero_offset_high,0);
 	cal1( setup, ni_reference_low,3);
-	cal1( setup, ni_unip_offset_low,2);
+	cal1( setup, ni_unip_zero_offset_low,2);
 	if(setup->do_output){
 		cal1( setup, ni_ao0_zero_offset,5); // guess
 		cal1( setup, ni_ao0_reference,6); // guess
@@ -757,8 +758,8 @@ static int cal_ni_pci_6052e(calibration_setup_t *setup)
 	cal_binary( setup, ni_reference_low,4);
 	cal1_fine( setup, ni_reference_low,4);
 	cal1( setup, ni_reference_low,5);
-	cal1( setup, ni_unip_offset_low,6);
-	cal1_fine( setup, ni_unip_offset_low,6);
+	cal1( setup, ni_unip_zero_offset_low,6);
+	cal1_fine( setup, ni_unip_zero_offset_low,6);
 	if(setup->do_output){
 		cal1( setup, ni_ao0_zero_offset,12+11);
 		cal1_fine( setup, ni_ao0_zero_offset,12+11);
@@ -783,8 +784,8 @@ static int cal_ni_pci_mio_16e_4(calibration_setup_t *setup)
 	cal_binary( setup, ni_reference_low,2);
 	cal1_fine( setup, ni_reference_low,2);
 
-	cal1( setup, ni_unip_offset_low,7);
-	cal1_fine( setup, ni_unip_offset_low,7);
+	cal1( setup, ni_unip_zero_offset_low,7);
+	cal1_fine( setup, ni_unip_zero_offset_low,7);
 
 	if(setup->do_output){
 		cal_binary( setup, ni_ao0_zero_offset,6);
@@ -812,7 +813,7 @@ static int cal_ni_daqcard_ai_16e_4(calibration_setup_t *setup)
 	cal_binary( setup, ni_reference_low,3);
 	cal1_fine( setup, ni_reference_low,3);
 
-	cal1( setup, ni_unip_offset_low,2);
+	cal1( setup, ni_unip_zero_offset_low,2);
 
 	return 0;
 }
@@ -846,11 +847,11 @@ static int cal_ni_daqcard_6062e( calibration_setup_t *setup )
 	int i, retval;
 	enum caldacs
 	{
-		ADC_PREGAIN_OFFSET = 0,	/* guess */
+		ADC_PREGAIN_OFFSET = 0,
 		DAC1_OFFSET = 1,
 		ADC_GAIN = 2,
 		DAC0_GAIN = 3,
-		ADC_POSTGAIN_OFFSET = 4,	/* guess */
+		ADC_POSTGAIN_OFFSET = 4,
 		DAC1_GAIN = 5,
 		DAC0_OFFSET = 6,
 	};
