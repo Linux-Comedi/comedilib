@@ -9,7 +9,7 @@ comedi_calibrate_CFLAGS = $(COMEDILIB_CFLAGS)
 comedi_calibrate_LDADD = $(COMEDILIB_LIBS)
 
 install-data-local:
-	$(INSTALL) -d $(localstatedir)/calibrations
+	$(INSTALL) -d $(localstatedir)/lib/comedi/calibrations
 
 EXTRA_DIST = results
 
