@@ -279,6 +279,8 @@ int comedi_set_calibration( comedi_t *dev, unsigned int subdev, unsigned int cha
 	if( retval < 0 ) return retval;
 
 	cal_index = find_calibration( file_path, subdev, channel, range, aref );
+	if( cal_index < 0 ) return cal_index;
+	
 	retval = set_calibration( dev, file_path, cal_index );
 	if( retval < 0 ) return retval;
 
