@@ -69,6 +69,7 @@ struct option options[] = {
 	{ "verbose", 0, 0, 'v' },
 	{ "quiet", 0, 0, 'q' },
 	{ "file", 1, 0, 'f' },
+	{ "help", 0, 0, 'h' },
 	{ "driver-name", 1, 0, 0x1000 },
 	{ "device-name", 1, 0, 0x1001 },
 	{ "reset", 0, &do_reset, 1 },
@@ -83,6 +84,22 @@ struct option options[] = {
 	{ "no-output", 0, &do_output, 0 },
 	{ 0 },
 };
+
+void help(void)
+{
+	printf("comedi_calibrate [options] - autocalibrates a Comedi device\n");
+	printf("  --verbose, -v  \n");
+	printf("  --quiet, -q  \n");
+	printf("  --help, -h  \n");
+	printf("  --file, -f [/dev/comediN] \n");
+	printf("  --driver-name [driver]  \n");
+	printf("  --device-name [device]  \n");
+	printf("  --[no-]reset  \n");
+	printf("  --[no-]calibrate  \n");
+	printf("  --[no-]dump  \n");
+	printf("  --[no-]results  \n");
+	printf("  --[no-]output  \n");
+}
 
 int main(int argc, char *argv[])
 {
@@ -106,6 +123,10 @@ int main(int argc, char *argv[])
 		switch (c) {
 		case 0:
 			continue;
+		case 'h':
+			help();
+			exit(0);
+			break;
 		case 'f':
 			fn = optarg;
 			break;
@@ -122,7 +143,7 @@ int main(int argc, char *argv[])
 			devicename = optarg;
 			break;
 		default:
-			//printf("bad option %d\n",c);
+			help();
 			exit(1);
 		}
 	}
@@ -204,6 +225,8 @@ ok:
 	if(do_dump) observe( &setup );
 	if(do_calibrate && setup.do_cal) setup.do_cal( &setup );
 	if(do_results) observe( &setup );
+
+	comedi_close(dev);
 
 	return 0;
 }
