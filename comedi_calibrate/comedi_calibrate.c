@@ -516,7 +516,6 @@ void cal_binary( calibration_setup_t *setup, int obs, int dac)
 		new_sv_measure( setup->dev, &sv);
 		y2 = sv.average;
 		DPRINT(3,"trying %d, result %g, target %g\n",x2,y2,target);
-DPRINT(0,"trying %d, result %g, target %g\n",x2,y2,target);
 
 		if( (y2 - target) * polarity < 0.0 ){
 			x1 = x2;
@@ -614,7 +613,6 @@ void cal_relative_binary( calibration_setup_t *setup, int obs1, int obs2, int da
 
 		DPRINT(3,"trying %d, result %g, target %g\n",x2,y2,target);
 
-DPRINT(0,"trying %d, result %g, target %g\n",x2,y2,target);
 		if( (y2 - target) * polarity < 0.0 ){
 			x1 = x2;
 			y1 = y2;
