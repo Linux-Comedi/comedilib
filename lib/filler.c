@@ -127,7 +127,7 @@ comedi_range *get_rangeinfo(int fd,unsigned int range_type)
 	for(i=0;i<RANGE_LENGTH(range_type);i++){
 		r[i].min=kr[i].min*1e-6;
 		r[i].max=kr[i].max*1e-6;
-		r[i].unit=RF_UNIT(kr[i].flags);
+		r[i].unit=kr[i].flags;
 	}
 	free(kr);
 
