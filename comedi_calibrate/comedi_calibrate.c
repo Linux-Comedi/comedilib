@@ -170,7 +170,8 @@ int main(int argc, char *argv[])
 
 	dev = comedi_open(fn);
 	if (dev == NULL ) {
-		perror(fn);
+		fprintf( stderr, "comedi_open() failed, with device file name: %s\n", fn );
+		comedi_perror("comedi_open");
 		exit(0);
 	}
 
@@ -763,7 +764,7 @@ double check_gain_chan_x( calibration_setup_t *setup, linear_fit_t *l,unsigned i
 	l->y_data=malloc(n*sizeof(double)/step);
 	if(l->y_data == NULL)
 	{
-		perror("check_gain_chan_x");
+		perror( __FUNCTION__ );
 		exit(1);
 	}
 
@@ -834,7 +835,7 @@ double check_gain_chan_fine( calibration_setup_t *setup, linear_fit_t *l,unsigne
 	l->y_data=malloc(n*sizeof(double)/step);
 	if(l->y_data == NULL)
 	{
-		perror("comedi_calibrate");
+		perror( __FUNCTION__ );
 		exit(1);
 	}
 
@@ -1042,7 +1043,7 @@ int new_sv_measure( comedi_t *dev, new_sv_t *sv)
 	data=malloc(sizeof(lsampl_t)*n);
 	if(data == NULL)
 	{
-		perror("comedi_calibrate");
+		perror( __FUNCTION__ );
 		exit(1);
 	}
 
@@ -1090,7 +1091,7 @@ int new_sv_measure_order( comedi_t *dev, new_sv_t *sv,int order)
 	data=malloc(sizeof(lsampl_t)*n);
 	if(data == NULL)
 	{
-		perror("comedi_calibrate");
+		perror( __FUNCTION__ );
 		exit(1);
 	}
 
