@@ -192,7 +192,8 @@ int main(int argc, char *argv[])
 	options.do_output = 1;
 	options.file_path = "/dev/comedi0";
 	parse_options( argc, argv, &options );
-
+	verbose = options.verbose;
+	
 	setup.dev = comedi_open( options.file_path );
 	if( setup.dev == NULL ) {
 		fprintf( stderr, "comedi_open() failed, with device file name: %s\n",
