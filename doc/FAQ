@@ -55,7 +55,59 @@ and send the information to David Schleef <ds@schleef.org>.
 6. Could you please add a search engine to the mailing list archive?
 
 No.  Please use generic web search engines such as Google, where you
-can add the search term "host:www.comedi.org" to limit the search to
+can add the search term "site:stm.lbl.gov" to limit the search to
 the site where the Comedi archives are located.
 
+
+7. I apply a signal to channel 0, but I see the signal on other
+channels.
+
+Typically, this is an electrical problem that can come from multiple
+sources.  First, any inputs that are not specifically driven or
+grounded will tend to float around, measuring random electrical
+signals in their environment -- the strongest of which are usually
+nearby channels, 50/60 Hz line noise, or the A/D converter itself.
+
+
+8. An FFT of measured data shows lots of sharp peaks.
+
+Yep.  Not much that can be done about that.  Well, actually, there is.
+Peaks near multiples of 50 or 60 Hz are electromagnetic coupling from
+the power mains.  Almost all the time, this indicates a ground loop
+in the measurement path.  Peaks that are multiples of 100 or 120 Hz
+on photodetectors are because of the room lights.  Peaks in the 100-1000
+Hz range, with harmonics, are sometimes stray fields from electric
+motors.  Strong, sharp peaks in the 1-100 kHz range are typically due
+to the horizontal refresh of CRT displays (like your computer monitor).
+Less strong peaks can be due to electronics in a computer or other
+device.
+
+However, a sharp peak in an FFT does not always indicate a problem.
+Remember that you always have noise, and that some of it will be
+periodic.  You just have to make sure that the particular type of
+noise that you have does not affect your analysis.
+
+
+9. Ok, I'm getting good results.  What should I look at to get great
+results?
+
+ - Make sure that all unused inputs are grounded.  Electrically floating
+   wires act as antennas, picking up stray electrical signals, and often
+   strongly coupling them into the signals you actually want to measure.
+
+ - Get a flat panel monitor.  CRT displays emit strong magnetic fields
+   oscillating at the horizontal refresh rate.  It is most easily
+   observable in a Fourier transform of an input signal.
+
+ - Calibrate your board.
+
+ - Read up on ground loops.  Make sure that all your electrical
+   shielding has exactly one path to a common ground.
+
+ - If you use a laptop for data acquisition, make sure it is grounded
+   properly.  Laptops usually are not grounded, and you generally 
+   don't want your data acquisition cable to also be your grounding
+   wire.
+
+ - 
 
