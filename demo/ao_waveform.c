@@ -67,7 +67,7 @@ double offset			= 2048;
 /* This is the size of chunks we deal with when creating and
    outputting data.  This *could* be 1, but that would be
    inefficient */
-#define BUF_LEN		4096
+#define BUF_LEN		8192	
 
 int subdevice;
 int external_trigger_number = 0;
