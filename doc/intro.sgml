@@ -197,6 +197,8 @@ device drivers faster and with better documentation.
 </listitem>
 
 </itemizedlist>
+</para>
+<para>
 In the case of Linux as the host operating system, device driver
 writers must keep the following Linux-specific issues in mind:
 <itemizedlist>
@@ -262,7 +264,7 @@ each device.
 Input/Output (PIO).</emphasis>
   Almost all devices can be interfaced in PIO mode: the processor is
   responsible for directly accessing the bus addresses allocated to
-the device whenever it needs 
+the device whenever it needs
   to read or write data. Some devices also allow DMA: the device and the
   memory <quote>talk</quote> to each other directly, without needing the processor.
   DMA is a feature of the bus, not of the operating system (which, of
@@ -293,7 +295,7 @@ memory allocation, registration of interrupt handlers, etc.
 </listitem>
 
 </itemizedlist>
-
+</para>
 </section>
 
 <section id="comediosignals">
