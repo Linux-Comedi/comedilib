@@ -11,7 +11,7 @@ all-local: html $(DOC).pdf man
 
 install-data-local:
 	$(INSTALL) -d $(mandir)/man3
-	$(INSTALL_DATA) man/*.3 $(mandir)/man3
+	-$(INSTALL_DATA) man/*.3 $(mandir)/man3
 	$(INSTALL) -d $(pkgdatadir)/html
 	$(INSTALL_DATA) html/* $(pkgdatadir)/html
 else
