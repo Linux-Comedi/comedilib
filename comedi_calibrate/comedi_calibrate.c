@@ -207,8 +207,11 @@ ok:
 	device_status = setup.status;
 
 	if(device_status<STATUS_DONE){
-		printf("Warning: device not fully calibrated due to insufficient information\n");
-		printf("Please send this output to <ds@schleef.org>\n");
+		printf("Warning: device may not be not fully calibrated due to "
+			"insufficient information.\n"
+			"Please send this output to <ds@schleef.org>.\n"
+			"This output will also allow comedi_calibrate to execute more\n"
+			"quickly in the future.");
 		if(verbose<1)verbose=1;
 		if(device_status==STATUS_UNKNOWN){
 			do_reset=1;
@@ -463,9 +466,9 @@ void cal1_fine( calibration_setup_t *setup, int obs, int dac )
 
 void cal_binary( calibration_setup_t *setup, int obs, int dac)
 {
-	int x0, x;
+	int x0, x1, x2, x;
 	unsigned int bit;
-	double y0, y;
+	double y0, y1, y2;
 	new_sv_t sv;
 	double target = setup->observables[obs].target;
 	unsigned int chanspec = setup->observables[obs].observe_insn.chanspec;
@@ -474,49 +477,46 @@ void cal_binary( calibration_setup_t *setup, int obs, int dac)
 	DPRINT(0,"binary: %s\n", setup->observables[obs].name);
 	preobserve( setup, obs);
 
-	bit = 1;
-	while( ( bit << 1 ) < setup->caldacs[dac].maxdata )
-		bit <<= 1;
-
 	new_sv_init(&sv, setup->dev, setup->ad_subdev, chanspec);
 	sv.settling_time_ns = setup->settling_time_ns;
 
-	x0 = 0;
+	x0 = x1 = x2 = 0;
 	update_caldac( setup, dac, x0 );
 	usleep(100000);
 	new_sv_measure( setup->dev, &sv);
-	y0 = sv.average;
+	y0 = y1 = y2 = sv.average;
 
-	x = bit;
-	update_caldac( setup, dac, x );
-	usleep(100000);
-	new_sv_measure( setup->dev, &sv);
-	y = sv.average;
+	bit = 1;
+	while( ( bit << 1 ) < setup->caldacs[dac].maxdata )
+		bit <<= 1;
+	for( ; bit; bit >>= 1 ){
+		x2 = x1 | bit;
 
-	if( y > y0 ) polarity = 1;
-	else polarity = -1;
-
-	if( (y - target) * polarity > 0.0 )
-		x &= ~bit;
-
-	for( bit = bit >> 1; bit; bit >>= 1 ){
-		x |= bit;
-		DPRINT(3,"trying %d\n",x);
-
-		update_caldac( setup, dac, x );
+		update_caldac( setup, dac, x2 );
 		usleep(100000);
-
 		new_sv_measure( setup->dev, &sv);
-		y = sv.average;
+		y2 = sv.average;
+		DPRINT(3,"trying %d, result %g, target %g\n",x2,y2,target);
 
-		if( (y - target) * polarity > 0.0 )
-			x &= ~bit;
+		if( (y2 - y0) > 0.0 ) polarity = 1;
+		else polarity = -1;
+
+		if( (y2 - target) * polarity < 0.0 ){
+			x1 = x2;
+			y1 = y2;
+		}
 
 		if(verbose>=3){
 			measure_observable( setup, obs);
 		}
 	}
 
+	// get that least signficant bit right
+	if( fabs( y1 - target ) < fabs( y2 - target ) )
+		x = x1;
+	else x = x2;
+
+	update_caldac( setup, dac, x );
 	DPRINT(0,"caldac[%d] set to %d\n",dac,x);
 	if(verbose>=3){
 		measure_observable( setup, obs);
