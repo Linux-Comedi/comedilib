@@ -632,6 +632,7 @@ Param: comedi_sv_t * sv
 Param: comedi_t * device
 Param: unsigned int subdevice
 Param: unsigned int channel
+Status: deprecated
 Description:
  The function comedi_sv_init() initializes the slow varying Comedi
  structure sv to use the device device, the analog input subdevice
@@ -644,6 +645,7 @@ Description:
 Function: comedi_sv_update -- slowly-varying inputs
 Retval: int
 Param: comedi_sv_t * sv
+Status: deprecated
 Description:
  The function comedi_sv_update() updates internal parameters of
  the slowly varying Comedi structure sv.
@@ -652,6 +654,7 @@ Function: comedi_sv_measure -- slowly-varying inputs
 Retval: int
 Param: comedi_sv_t * sv
 Param: double * data
+Status: deprecated
 Description:
  The function comedi_sv_measure() uses the slowly varying Comedi
  structure sv to measure a slowly varying signal.  If sucessful,
