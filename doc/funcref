@@ -846,9 +846,40 @@ Status: alpha
 Description:
  This function sets the calibration of the specified subdevice
  so that it is in proper calibration when using the specified
- channel, range and aref.  Depending on the hardware, the
+ channel, range and aref.  It does so by performing writes
+ to the appropriate channels of the board's calibration
+ subdevice(s).  Depending on the hardware, the
  calibration settings used may or may not depend on the channel,
- range, or aref.  The file_path parameter can be used
+ range, or aref.  Furthermore, the calibrations for different
+ channels, ranges, or arefs may not be independent.
+ For example, some boards cannot have their analog inputs calibrated
+ for multiple input
+ ranges simultaneously.  Applying a calibration for range 1 may
+ blow away a previously applied calibration for range 0.  Applying
+ a calibration for analog input channel 0 may cause the same
+ calibration to be applied to all the
+ other analog input channels as well.
+ Your only guarantee is that calls to comedi_apply_calibration()
+ on different subdevices will not interfere with each other.
+
+ In practice, their are some rules of thumb on how
+ calibrations behave.  No calibrations depend on the aref.
+ A multiplexed analog input will have calibration settings that
+ do not depend on the channel, and applying a setting for one
+ channel will affect
+ all channels equally.  Analog outputs, and analog inputs
+ with independent a/d converters for each input channel, will have
+ calibrations settings which do depend on the channel, and the
+ settings for each channel will be independent of the other
+ channels.
+
+ If you wish to investigate exactly what comedi_apply_calibration()
+ is doing, you can perform reads on your board's calibration
+ subdevice to see which calibration channels it is changing.
+ You can also try to decipher the calibration file directly (it's a
+ text file).
+
+ The file_path parameter can be used
  to specify the file which contains the calibration information.
  If <parameter>file_path</parameter> is NULL, then comedilib
  will use a default
