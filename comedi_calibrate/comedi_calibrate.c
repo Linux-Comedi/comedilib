@@ -57,6 +57,8 @@ void write_caldac(comedi_t *dev,int subdev,int addr,int val);
 void check_gain(int ad_chan,int range);
 double check_gain_chan(int ad_chan,int range,int cdac);
 
+int dump_flag;
+
 
 void update_caldac(int i);
 void reset_caldacs(void);
@@ -152,7 +154,8 @@ int main(int argc, char *argv[])
 
 	drivername=comedi_get_driver_name(dev);
 
-	if(!strcmp(drivername,"atmio-E") || !strcmp(drivername,"pcimio-E"))
+	if(!strcmp(drivername,"atmio-E") || !strcmp(drivername,"pcimio-E") 
+	   || !strcmp(drivername,"ni_mio_cs"))
 		cal_ni_mio_E();
 
 	return 0;
@@ -163,6 +166,7 @@ void cal_ni_mio_E(void)
 {
 	char *boardname;
 	double ref;
+	int uv;
 	int i;
 
 	boardname=comedi_get_board_name(dev);
@@ -297,7 +301,9 @@ void cal_ni_mio_E(void)
 
 		printf("lsb=%d msb=%d\n",read_eeprom(430),read_eeprom(431));
 
-		ref=5.000+(0.001*(read_eeprom(430)+read_eeprom(431)));
+		uv=read_eeprom(430)+256*read_eeprom(431);
+		if(uv>=0x8000)uv-=0x10000;
+		ref=5.000+1.0e-6*uv;
 		printf("ref=%g\n",ref);
 
 		reset_caldacs();
@@ -324,7 +330,68 @@ void cal_ni_mio_E(void)
 			read_chan(0,i);
 		}
 
-		//return;
+		return;
+	}
+	if(!strcmp(boardname,"DAQCard-ai-16xe-50")){
+/*
+ * results of channel dependence test:
+ *
+ * 		[0]	[1]	[2]	[3]	[8]
+ * offset, lo	-2.2e-6		1.5e-4*		2.5e-7
+ * offset, hi			7.8e-7*		1.3e-7
+ * offset, unip	7.4e-4	1.1e-5	1.5e-4		5.5e-7
+ * ref		-3.7e-4	-5.4e-6	1.5e-4*		5.5e-7
+ *
+ * thus, 2 is postgain offset, 8 is pregain, 0 is
+ * unipolar offset, 1 is gain
+ * 
+ * layout
+ *
+ * 0	AI unipolar offset	7.4e-4
+ * 1	AI gain			-5.4e-6
+ * 2	AI postgain offset	1.5e-4
+ * 3	unknown
+ * 4	AO
+ * 5	AO
+ * 6	AO
+ * 7	AO
+ * 8	AI pregain offset	2.5e-7
+ * 9	unknown
+ * 10	unknown
+ */
+		printf("last factory calibration %02d/%02d/%02d\n",
+			read_eeprom(508),read_eeprom(507),read_eeprom(506));
+
+		printf("lsb=%d msb=%d\n",read_eeprom(446),read_eeprom(447));
+
+		uv=read_eeprom(446)+256*read_eeprom(447);
+		if(uv>=0x8000)uv-=0x10000;
+		ref=5.000+1.0e-6*uv;
+		printf("ref=%g\n",ref);
+
+		reset_caldacs();
+
+		printf("postgain offset\n");
+		ni_mio_ai_postgain_cal_2(0,2,0,7,200.0);
+
+		printf("pregain offset\n");
+		chan_cal(0,8,7,0.0);
+		chan_cal(0,8,7,0.0);
+
+		printf("unipolar offset\n");
+		chan_cal(0,0,8,0.0);
+		chan_cal(0,0,8,0.0);
+
+		printf("gain offset\n");
+		chan_cal(5,1,0,5.0);
+		chan_cal(5,1,0,5.0);
+
+		printf("results (offset)\n");
+		for(i=0;i<16;i++){
+			read_chan(0,i);
+		}
+
+		return;
 	}
 
 	{
@@ -449,8 +516,6 @@ void caldac_dependence(int caldac)
 	}
 }
 
-int dump_flag;
-
 void dump_curve(int adc,int caldac)
 {
 	linear_fit_t l;
@@ -527,6 +592,7 @@ double check_gain_chan(int ad_chan,int range,int cdac)
 double check_gain_chan_x(linear_fit_t *l,int ad_chan,int range,int cdac)
 {
 	int orig,i,n;
+	int step;
 	new_sv_t sv;
 	double sum_err;
 	int sum_err_count=0;
@@ -539,9 +605,18 @@ double check_gain_chan_x(linear_fit_t *l,int ad_chan,int range,int cdac)
 
 	new_sv_init(&sv,dev,0,ad_chan,range,AREF_OTHER);
 
+	step=n/256;
+	if(step<1)step=1;
+	l->n=0;
+
+	caldacs[cdac].current=0;
+	update_caldac(cdac);
+
+	new_sv_measure(&sv);
+
 	sum_err=0;
-	for(i=0;i<n;i++){
-		caldacs[cdac].current=i;
+	for(i=0;i*step<n;i++){
+		caldacs[cdac].current=i*step;
 		update_caldac(cdac);
 
 		new_sv_measure(&sv);
@@ -551,14 +626,14 @@ double check_gain_chan_x(linear_fit_t *l,int ad_chan,int range,int cdac)
 			sum_err+=sv.error;
 			sum_err_count++;
 		}
+		l->n++;
 	}
 
 	caldacs[cdac].current=orig;
 	update_caldac(cdac);
 
 	l->yerr=sum_err/sum_err_count;
-	l->n=n;
-	l->dx=1;
+	l->dx=step;
 	l->x0=0;
 
 	linear_fit_monotonic(l);
