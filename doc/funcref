@@ -202,6 +202,24 @@ Description:
  XXX "subdevice not found".  If there is an error, the function
  returns -1 and sets the appropriate error.
 
+Function: comedi_get_read_subdevice -- find streaming input subdevice
+Retval: int
+Param: comedi_t * device
+Description:
+ The function comedi_get_read_subdevice() returns the subdevice
+ that allows streaming input for device dev.  If no subdevice
+ supports streaming input, -1 is returned and the Comedilib error
+ number is set to XXX "subdevice not found".
+
+Function: comedi_get_write_subdevice -- find streaming output subdevice
+Retval: int
+Param: comedi_t * device
+Description:
+ The function comedi_get_write_subdevice() returns the subdevice
+ that allows streaming output for device dev.  If no subdevice
+ supports streaming output, -1 is returned and the Comedilib error
+ number is set to XXX "subdevice not found".
+
 Function: comedi_get_subdevice_flags -- properties of subdevice
 Retval: int
 Param: comedi_t * device
