@@ -1,16 +1,16 @@
 This directory contains files for building a Ruby extension library
 for Comedi.
 
-Instructions for building:
+Instructions for building by hand (you shouldn't need to do this):
 
     1.  Type 'ruby setup.rb config'. This configures for the local
-	environment.
+        environment.
 
     2.  Type 'ruby setup.rb setup'. This builds the extension library.
 
     3.  Type 'ruby setup.rb install'. This installs the extension
-	library and the file lib/comedi.rb, which provides more
-	Ruby-like method syntax.
+        library and the file lib/comedi.rb, which provides more
+        Ruby-like method syntax.
 
 The file 'lib/comedi.rb' provides syntactic sugar in three forms:
 
