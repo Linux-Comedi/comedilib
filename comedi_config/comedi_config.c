@@ -289,7 +289,7 @@ int main(int argc,char *argv[])
 			exit(1);
 		}
 		if(devinfo.version_code < ((7<<8) | (57))){
-			fprintf(stderr,"Buffer resizing requires Comedi version >= 0.7.56\n");
+			fprintf(stderr,"Buffer resizing requires Comedi version >= 0.7.57\n");
 			exit(1);
 		}
 	}
