@@ -24,8 +24,6 @@
 #include <sys/mman.h>
 #include "examples.h"
 
-int comedi_get_front_count(comedi_t *it, unsigned int subdev);
-
 unsigned int chanlist[256];
 
 void *map;
@@ -83,7 +81,7 @@ int main(int argc, char *argv[])
 
 	back = 0;
 	while(1){
-		front = comedi_get_front_count(dev,subdevice);
+		front = comedi_get_buffer_offset(dev,subdevice);
 		if(verbose)fprintf(stderr,"front = %d, back = %d\n",front,back);
 		if(front<back)break;
 		if(front==back){
