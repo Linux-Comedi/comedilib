@@ -78,6 +78,7 @@ char *comedi_get_board_name(comedi_t *it);
 
 int comedi_get_subdevice_type(comedi_t *it,unsigned int subdevice);
 int comedi_find_subdevice_by_type(comedi_t *it,int type,unsigned int subd);
+int comedi_get_subdevice_flags(comedi_t *it,unsigned int subdevice);
 int comedi_get_n_channels(comedi_t *it,unsigned int subdevice);
 lsampl_t comedi_get_maxdata(comedi_t *it,unsigned int subdevice,unsigned int chan);
 int comedi_get_rangetype(comedi_t *it,unsigned int subdevice,unsigned int chan);
@@ -129,7 +130,14 @@ int comedi_dio_write(comedi_t *it,unsigned int subd,unsigned int chan,unsigned i
 int comedi_dio_bitfield(comedi_t *it,unsigned int subd,unsigned int write_mask,
 	unsigned int *bits);
 
-/* timer stuff */
+/* functions related to streaming I/O (commands) */
+ 
+int comedi_get_cmd_src_mask(comedi_t *dev,unsigned int subdevice, comedi_cmd *cmd);
+int comedi_get_cmd_generic_timed(comedi_t *dev,unsigned int subdevice, comedi_cmd *cmd);
+
+int comedi_poll(comedi_t *dev,unsigned int subdevice);
+
+/* timer stuff (deprecated) */
 
 int comedi_get_timer(comedi_t *it,unsigned int subdev,double freq,unsigned int *trigvar,
 	double *actual_freq);
@@ -149,6 +157,8 @@ enum comedi_oor_behavior {
 };
 
 enum comedi_oor_behavior comedi_set_global_oor_behavior(enum comedi_oor_behavior behavior);
+
+
 
 // changes maximum size (in bytes) of preallocated buffer, requires root priviledge, returns new max size
 int comedi_set_max_buffer_size(comedi_t *it, unsigned int subdev, unsigned int max_size);
