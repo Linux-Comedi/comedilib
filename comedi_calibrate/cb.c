@@ -50,7 +50,6 @@ static int cal_cb_pci_1xxx( calibration_setup_t *setup );
 static int cal_cb_pci_1602_16( calibration_setup_t *setup );
 
 static int init_observables_1xxx( calibration_setup_t *setup );
-static int init_observables_1602_16( calibration_setup_t *setup );
 
 static struct board_struct boards[]={
 	{ "pci-das1000",	STATUS_GUESS,	setup_cb_pci_1xxx },
@@ -180,8 +179,8 @@ static int source_eeprom_addr_1xxx( calibration_setup_t *setup, unsigned int ran
 	enum source_eeprom_addr
 	{
 		EEPROM_7V_CHAN = 0x80,
-		EEPROM_3500mV_CHAN_1002 = 0x84,
-		EEPROM_1750mV_CHAN_1002 = 0x88,
+		EEPROM_3500mV_CHAN = 0x84,
+		EEPROM_1750mV_CHAN = 0x88,
 		EEPROM_88600uV_CHAN_1001 = 0x88,
 		EEPROM_875mV_CHAN = 0x8c,
 		EEPROM_8600uV_CHAN = 0x90,
@@ -194,9 +193,9 @@ static int source_eeprom_addr_1xxx( calibration_setup_t *setup, unsigned int ran
 	if( range->max > 7.0 )
 		return EEPROM_7V_CHAN;
 	else if( range->max > 3.5 )
-		return EEPROM_3500mV_CHAN_1002;
+		return EEPROM_3500mV_CHAN;
 	else if( range->max > 1.750 )
-		return EEPROM_1750mV_CHAN_1002;
+		return EEPROM_1750mV_CHAN;
 	else if( range->max > 0.875 )
 		return EEPROM_875mV_CHAN;
 	else if( range->max > .0886 )
@@ -347,70 +346,6 @@ static int init_observables_1xxx( calibration_setup_t *setup )
 
 	return 0;
 }
-
-#if 0
-static int init_observables_1602_16( calibration_setup_t *setup )
-{
-	comedi_insn tmpl;//, po_tmpl;
-	observable *o;
-#if 0
-// XXX need to figure out eeprom map
-	int retval;
-	float target;
-	enum source_eeprom_addr
-	{
-		EEPROM_7V_CHAN = 0x30,
-		EEPROM_3500mV_CHAN = 0x32,
-		EEPROM_1750mV_CHAN = 0x34,
-		EEPROM_875mV_CHAN = 0x36,
-		EEPROM_8600uV_CHAN = 0x38,
-	};
-#endif
-	enum calibration_source
-	{
-		CAL_SRC_GROUND = 0,
-		CAL_SRC_7V = 1,
-		CAL_SRC_3500mV = 2,
-		CAL_SRC_1750mV = 3,
-		CAL_SRC_875mV = 4,
-		CAL_SRC_minus_10V = 5,
-		CAL_SRC_DAC0 = 6,
-		CAL_SRC_DAC1 = 7,
-	};
-#if 0
-	memset( &po_tmpl, 0, sizeof(po_tmpl) );
-	po_tmpl.insn = INSN_CONFIG;
-	po_tmpl.n = 2;
-	po_tmpl.subdev = setup->ad_subdev;
-#endif
-	memset( &tmpl, 0, sizeof(tmpl) );
-	tmpl.insn = INSN_READ;
-	tmpl.n = 1;
-	tmpl.subdev = setup->ad_subdev;
-
-	o = setup->observables + OBS_0V_RANGE_10V_BIP_1602_16;
-	o->name = "ground calibration source, 10V bipolar range, ground referenced";
-	o->reference_source = CAL_SRC_GROUND;
-	o->observe_insn = tmpl;
-	o->observe_insn.chanspec = CR_PACK( 0, 0, AREF_GROUND) | CR_ALT_SOURCE | CR_ALT_FILTER;
-	o->target = 0.0;
-
-	o = setup->observables + OBS_7V_RANGE_10V_BIP_1602_16;
-	o->name = "7V calibration source, 10V bipolar range, ground referenced";
-	o->reference_source = CAL_SRC_7V;
-	o->observe_insn = tmpl;
-	o->observe_insn.chanspec = CR_PACK( 0, 0, AREF_GROUND) | CR_ALT_SOURCE | CR_ALT_FILTER;
-	o->target = 7.0;
-#if 0
-	retval = cb_actual_source_voltage( setup->dev, setup->eeprom_subdev, EEPROM_7V_CHAN, &target );
-	if( retval == 0 )
-		o->target = target;
-#endif
-	setup->n_observables = 2;
-
-	return 0;
-}
-#endif
 
 enum cal_knobs_1xxx
 {
