@@ -212,7 +212,7 @@ void prepare_cmd(comedi_t *dev,comedi_cmd *cmd)
 	cmd->start_arg =	0;
 
 	cmd->scan_begin_src =	TRIG_EXT;
-	cmd->scan_begin_arg =	(1<<31)|(1<<30)|pin_clk;
+	cmd->scan_begin_arg =	CR_EDGE | CR_INVERT | pin_clk;
 
 #if 1
 	cmd->convert_src =	TRIG_TIMER;
