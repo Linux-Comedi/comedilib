@@ -23,6 +23,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <string.h>
 #include "examples.h"
 
 unsigned int chanlist[256];

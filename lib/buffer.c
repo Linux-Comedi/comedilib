@@ -24,6 +24,7 @@
 #include <comedi.h>
 
 #include <libinternal.h>
+#include <string.h>
 
 EXPORT_SYMBOL(comedi_set_buffer_size,0.7.18);
 int comedi_set_buffer_size(comedi_t *it, unsigned int subdev, unsigned int size)
