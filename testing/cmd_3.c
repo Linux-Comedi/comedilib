@@ -53,7 +53,8 @@ static int do_continuous(int multiplier)
 		return 0;
 	}
 
-	cmd.flags = TRIG_RT;
+	if(realtime)cmd.flags |= TRIG_RT;
+
 	cmd.chanlist = chanlist;
 	cmd.scan_end_arg = 1;
 	cmd.stop_src = TRIG_NONE;
