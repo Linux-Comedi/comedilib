@@ -86,6 +86,9 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 
 	dump_cmd(cmd);
 
+	/* restoring the chanlist stuff in this way is only required
+	 * for comedi versions before 0.7.56
+	 */ 
 	cmd->chanlist =		chanlist;
 	cmd->chanlist_len =	n_chans;
 
@@ -149,6 +152,10 @@ void do_cmd_1(comedi_t *dev)
 
 	/* flags */
 	cmd.flags =	0;
+	/* the TRIG_RT flag will ask that the driver's interrupt handler be
+	 * run at hard real time priority if you have a real time OS
+	 */ 
+	//cmd.flags |= TRIG_RT; 
 
 	/* each event requires a trigger, which is specified
 	   by a source and an argument.  For example, to specify
