@@ -24,12 +24,9 @@
     USA.
 */
 
+#include <string.h>
 #include "libinternal.h"
 #include "calib_yacc.h"
-
-YYLTYPE yylloc;
-char string_buf[ 100 ];
-char *string_buf_ptr;
 
 %}
 
@@ -38,25 +35,20 @@ char *string_buf_ptr;
 
 %%
 
-<STRING,INITIAL>\n { yylloc.first_line++; }
+<STRING,INITIAL>\n { calib_llocp->first_line++; }
 
-"#" BEGIN(COMMENT);
-<COMMENT>\n { yylloc.first_line++; BEGIN(INITIAL); }
+"#" { BEGIN(COMMENT); }
+<COMMENT>\n { calib_llocp->first_line++; BEGIN(INITIAL); }
 <COMMENT>.
 
-\" { string_buf_ptr = string_buf; BEGIN(STRING); }
-<STRING>\" {
-		*string_buf_ptr = 0;
-		BEGIN(INITIAL);
-		calib_lvalp->sval = string_buf;
-		return ( T_STRING );
-	}
-<STRING>[^\n\"]+ {
-		char *yptr = yytext;
-
-		while ( *yptr && ( string_buf_ptr - string_buf ) < sizeof( string_buf ) - 1 )
-			*string_buf_ptr++ = *yptr++;
-	}
+\" { BEGIN(STRING); }
+<STRING>[^\"]*\" {
+	if( strlen( yytext ) > 0 )
+		yytext[ strlen( yytext ) - 1 ] = 0;
+	calib_lvalp->sval = yytext;
+	BEGIN(INITIAL);
+	return ( T_STRING );
+}
 
 driver_name	{ return ( T_DRIVER_NAME ); }
 board_name	{ return ( T_BOARD_NAME ); }

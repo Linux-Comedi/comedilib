@@ -37,7 +37,6 @@ typedef struct
 	int cal_index;
 } calib_yyparse_private_t;
 
-FILE *calib_yyin;
 YY_DECL;
 
 static inline calib_yyparse_private_t* priv( calib_yyparse_private_t *parse_arg)
@@ -200,10 +199,10 @@ extern struct calibration_file_contents* parse_calibration_file( FILE *file )
 {
 	calib_yyparse_private_t priv;
 
-	calib_yyin = file;
 	priv.parsed_file = alloc_calib_parse();
 	if( priv.parsed_file == NULL ) return priv.parsed_file;
 	priv.cal_index = 0;
+	calib_yyrestart( file );
 	if( calib_yyparse( &priv ) )
 	{
 		cleanup_calibration_parse( priv.parsed_file );

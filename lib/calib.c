@@ -32,13 +32,15 @@ static int check_cal_file( comedi_t *dev, struct calibration_file_contents *pars
 {
 	if( strcmp( comedi_get_driver_name( dev ), parsed_file->driver_name ) )
 	{
-		COMEDILIB_DEBUG( 3, "driver name does not match calibration file\n" );
+		COMEDILIB_DEBUG( 3, "driver name does not match '%s' from calibration file\n",
+			parsed_file->driver_name );
 		return -1;
 	}
 
 	if( strcmp( comedi_get_board_name( dev ), parsed_file->board_name ) )
 	{
-		COMEDILIB_DEBUG( 3, "board name does not match calibration file\n" );
+		COMEDILIB_DEBUG( 3, "board name does not match '%s' from calibration file\n",
+			parsed_file->board_name );
 		return -1;
 	}
 
