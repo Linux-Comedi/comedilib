@@ -497,11 +497,11 @@ static unsigned int cal_gain_register_bits_611x( double reference, double *volta
 {
 	int bits;
 
-	bits = 201.0 * ( *voltage / reference ) - 1.0;
+	bits = 200.0 * ( *voltage / reference );
 	if( bits > 200 ) bits = 200;
 	if( bits < 0 ) bits = 0;
 
-	*voltage = reference * ( ( bits + 1 ) / 201.0 );
+	*voltage = reference * ( bits / 200.0 );
 	return bits;
 }
 
@@ -540,7 +540,7 @@ static void ni_setup_observables_611x( calibration_setup_t *setup )
 	int num_ai_channels, num_ai_ranges;
 	static const int num_ao_channels = 2;
 
-	setup->settling_time_ns = 1000000;
+	setup->settling_time_ns = 10000000;
 
 	master_reference = ni_get_reference( setup,
 		ni_board( setup )->ref_eeprom_lsb, ni_board( setup )->ref_eeprom_msb );
