@@ -150,7 +150,11 @@ enum comedi_oor_behavior {
 
 enum comedi_oor_behavior comedi_set_global_oor_behavior(enum comedi_oor_behavior behavior);
 
-
+int comedi_buf_resize(comedi_t *it, unsigned int subdev, unsigned int size);
+int comedi_buf_resize_max(comedi_t *it, unsigned int subdev, unsigned int max_size);
+int comedi_buf_size(comedi_t *it, unsigned int subdev);
+int comedi_buf_contents(comedi_t *it, unsigned int subdev);
+int comedi_buf_mark_read(comedi_t *it, unsigned int subdev, unsigned int bytes);
 
 
 #ifdef __cplusplus

@@ -2,7 +2,7 @@
 CFLAGS = -fPIC -Wall -Wstrict-prototypes -O2 -I../include -I.
 
 OBJS=comedi.o timer.o sv.o range.o ioctl.o filler.o timed.o error.o \
-	dio.o data.o get.o
+	dio.o data.o get.o buffer.o
 
 libcomedi.a: $(OBJS)
 	#gcc -shared -Wl,-soname,libcomedi.so,-T,version_script -o libcomedi.so.${VERSION_CODE} $(OBJS) -lm

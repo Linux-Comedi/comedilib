@@ -75,4 +75,12 @@ int ioctl_rangeinfo(int fd,int range_type,comedi_krange *range_ptr)
 	return ioctl(fd,COMEDI_RANGEINFO,&it);
 }
 
+int ioctl_bufconfig(int fd, comedi_bufconfig *bc)
+{
+	return ioctl(fd, COMEDI_BUFCONFIG, bc);
+}
 
+int ioctl_bufinfo(int fd, comedi_bufinfo *bi)
+{
+	return ioctl(fd, COMEDI_BUFINFO, bi);
+}

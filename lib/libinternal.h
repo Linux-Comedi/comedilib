@@ -100,6 +100,8 @@ int ioctl_chaninfo(int fd,unsigned int subdev,lsampl_t *maxdata_list,
 		                unsigned int *flaglist,unsigned int *rangelist);
 int ioctl_trigger(int fd,comedi_trig *it);
 int ioctl_rangeinfo(int fd,int range_type,comedi_krange *range_ptr);
+int ioctl_bufconfig(int fd, comedi_bufconfig *bc);
+int ioctl_bufinfo(int fd, comedi_bufinfo *bi);
 
 /* filler routines */
 
