@@ -68,6 +68,14 @@ char *comedi_get_board_name(comedi_t *it)
 	return it->devinfo.board_name;
 }
 
+int comedi_get_subdevice_flags(comedi_t *it,unsigned int subd)
+{
+	if(!valid_dev(it))
+		return 0;
+
+	return it->subdevices[subd].subd_flags;
+}
+
 int comedi_get_subdevice_type(comedi_t *it,unsigned int subd)
 {
 	if(!valid_dev(it))
