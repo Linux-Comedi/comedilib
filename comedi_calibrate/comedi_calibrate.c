@@ -211,7 +211,7 @@ ok:
 			"insufficient information.\n"
 			"Please send this output to <ds@schleef.org>.\n"
 			"This output will also allow comedi_calibrate to execute more\n"
-			"quickly in the future.");
+			"quickly in the future.\n");
 		if(verbose<1)verbose=1;
 		if(device_status==STATUS_UNKNOWN){
 			do_reset=1;
@@ -525,70 +525,61 @@ void cal_binary( calibration_setup_t *setup, int obs, int dac)
 
 void cal_postgain_binary( calibration_setup_t *setup, int obs1, int obs2, int dac)
 {
-	int x1, x2, x;
-	double y1, y2, y;
+	int x0, x1, x2, x, polarity;
+	double y0, y1, y2;
 	new_sv_t sv1, sv2;
 	double target = setup->observables[obs1].target - setup->observables[obs2].target;
 	unsigned int chanspec1 = setup->observables[obs1].observe_insn.chanspec;
 	unsigned int chanspec2 = setup->observables[obs2].observe_insn.chanspec;
+	unsigned int bit;
 
 	DPRINT(0,"postgain binary: %s, %s\n", setup->observables[obs1].name,
 		setup->observables[obs2].name);
 
-	x1 = 0;
-	x2 = setup->caldacs[dac].maxdata;
-
-	update_caldac( setup, dac, x1 );
+	x0 = x1 = x2 = 0;
+	update_caldac( setup, dac, x0 );
 	usleep(100000);
 	preobserve( setup, obs1);
 	new_sv_init(&sv1, setup->dev, setup->ad_subdev,chanspec1);
 	sv1.settling_time_ns = setup->settling_time_ns;
 	new_sv_measure( setup->dev, &sv1);
-	y1 = sv1.average;
+	y0 = sv1.average;
 	preobserve( setup, obs2);
 	new_sv_init(&sv2, setup->dev, setup->ad_subdev,chanspec2);
 	sv2.settling_time_ns = setup->settling_time_ns;
 	new_sv_measure( setup->dev, &sv2);
-	y1 -= sv2.average;
+	y0 -= sv2.average;
+	y1 = y2 = y0;
 
-	update_caldac( setup, dac, x2 );
-	usleep(100000);
-	preobserve( setup, obs1);
-	new_sv_init(&sv1, setup->dev, setup->ad_subdev,chanspec1);
-	sv1.settling_time_ns = setup->settling_time_ns;
-	new_sv_measure( setup->dev, &sv1);
-	y2 = sv1.average;
-	preobserve( setup, obs2);
-	new_sv_init(&sv2, setup->dev, setup->ad_subdev,chanspec2);
-	sv2.settling_time_ns = setup->settling_time_ns;
-	new_sv_measure( setup->dev, &sv2);
-	y2 -= sv2.average;
+	bit = 1;
+	while( ( bit << 1 ) < setup->caldacs[dac].maxdata )
+		bit <<= 1;
+	for( ; bit; bit >>= 1 )
+	{
+		x2 = x1 | bit;
 
-	x = 0;
-	while(x2-x1 > 1){
-		x = (x1 + x2 + 1)/2;
-		DPRINT(3,"trying %d\n",x);
-
-		update_caldac( setup, dac, x );
+		update_caldac( setup, dac, x2 );
 		usleep(100000);
 
 		preobserve( setup, obs1);
 		new_sv_init(&sv1, setup->dev, setup->ad_subdev,chanspec1);
 		sv1.settling_time_ns = setup->settling_time_ns;
 		new_sv_measure( setup->dev, &sv1);
-		y = sv1.average;
+		y2 = sv1.average;
 		preobserve( setup, obs2);
 		new_sv_init(&sv2, setup->dev, setup->ad_subdev,chanspec2);
 		sv2.settling_time_ns = setup->settling_time_ns;
 		new_sv_measure( setup->dev, &sv2);
-		y -= sv2.average;
+		y2 -= sv2.average;
 
-		if(fabs(y2 - target) > fabs(y1 - target)){
-			x2 = x;
-			y2 = y;
-		}else{
-			x1 = x;
-			y1 = y;
+		DPRINT(3,"trying %d, result %g, target %g\n",x2,y2,target);
+
+		if( (y2 - y0) > 0.0 ) polarity = 1;
+		else polarity = -1;
+
+		if( (y2 - target) * polarity < 0.0 ){
+			x1 = x2;
+			y1 = y2;
 		}
 
 		if(verbose>=3){
@@ -599,6 +590,11 @@ void cal_postgain_binary( calibration_setup_t *setup, int obs1, int obs2, int da
 		}
 	}
 
+	if( fabs( y1 - target ) < fabs( y2 - target ) )
+		x = x1;
+	else
+		x = x2;
+	update_caldac( setup, dac, x );
 	DPRINT(0,"caldac[%d] set to %d\n",dac,x);
 	if(verbose>=3){
 		preobserve( setup, obs1);
