@@ -11,6 +11,7 @@
 #include <ctype.h>
 #include <malloc.h>
 
+#include "comedi_test.h"
 
 char *filename="/dev/comedi0";
 int verbose_flag;
@@ -21,46 +22,33 @@ int channel;
 int aref;
 int range;
 
+int test_info(void);
+int test_mode0_read(void);
+int test_insn_read(void);
 
-int parse_options(int argc, char *argv[])
+struct test_struct{
+	char *name;
+	int (*do_test)(void);
+};
+struct test_struct tests[]={
+	{ "info", test_info },
+	{ "mode0_read", test_mode0_read },
+	{ "insn_read", test_insn_read },
+};
+static int n_tests = sizeof(tests)/sizeof(tests[0]);
+
+int main(int argc, char *argv[])
 {
 	int c;
-
+	int i;
 
 	while (1) {
-		c = getopt(argc, argv, "acsrfvdgom");
+		c = getopt(argc, argv, "f");
 		if (c == -1)
 			break;
 		switch (c) {
 		case 'f':
 			filename = argv[optind];
-			break;
-		case 's':
-			sscanf(argv[optind],"%d",&subdevice);
-			break;
-		case 'c':
-			sscanf(argv[optind],"%d",&channel);
-			break;
-		case 'a':
-			sscanf(argv[optind],"%d",&aref);
-			break;
-		case 'r':
-			sscanf(argv[optind],"%d",&range);
-			break;
-		case 'v':
-			verbose_flag = 1;
-			break;
-		case 'd':
-			aref=AREF_DIFF;
-			break;
-		case 'g':
-			aref=AREF_GROUND;
-			break;
-		case 'o':
-			aref=AREF_OTHER;
-			break;
-		case 'm':
-			aref=AREF_COMMON;
 			break;
 		default:
 			printf("bad option\n");
@@ -68,7 +56,18 @@ int parse_options(int argc, char *argv[])
 		}
 	}
 
-	return argc;
+	device = comedi_open(filename);
+
+	for(subdevice=0;subdevice<comedi_get_n_subdevices(device);subdevice++){
+		printf("I:\n");
+		printf("I: subdevice %d\n",subdevice);
+		for(i=0;i<n_tests;i++){
+			printf("I: testing %s...\n",tests[i].name);
+			tests[i].do_test();
+		}
+	}
+
+	return 0;
 }
 
 
