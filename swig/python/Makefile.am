@@ -16,10 +16,10 @@ pyexec_SCRIPTS = comedi.py
 EXTRA_DIST = README.txt comedi.py setup.py test_comedi.py
 
 if HAVE_SWIG
-comedi_python_wrap.c: ../comedi.i
-	$(SWIG) -python -o ./comedi_python_wrap.c ../comedi.i
+$(srcdir)/comedi_python_wrap.c: $(srcdir)/../comedi.i
+	$(SWIG) -python -o $(srcdir)/comedi_python_wrap.c $(srcdir)/../comedi.i
 else
-comedi_python_wrap.c:
+$(srcdir)/comedi_python_wrap.c:
 	echo WARNING: creating bogus comedi_python_wrap.c because you don\'t have swig.
-	touch comedi_python_wrap.c
+	touch $(srcdir)/comedi_python_wrap.c
 endif

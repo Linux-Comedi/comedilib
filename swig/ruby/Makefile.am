@@ -1,34 +1,31 @@
 
 EXTRA_DIST = demo lib
 
-#BUILT_SOURCES = ext/comedi_ruby_wrap.c
+BUILT_SOURCES = ext/comedi_ruby_wrap.c
 
 if HAVE_SWIG
-ext/comedi_ruby_wrap.c: $(srcdir)/../comedi.i
-	mkdir -p ext
-	cp $(srcdir)/../comedi.i ext/comedi.i
-	$(SWIG) -ruby -o ext/comedi_ruby_wrap.c ext/comedi.i
+$(srcdir)/ext/comedi_ruby_wrap.c: $(srcdir)/../comedi.i
+	$(SWIG) -ruby -o $(srcdir)/ext/comedi_ruby_wrap.c $(srcdir)/../comedi.i
 else
-ext/comedi_ruby_wrap.c:
-	mkdir -p ext
+$(srcdir)/ext/comedi_ruby_wrap.c:
 	echo WARNING: creating bogus comedi_ruby_wrap.c because you don\'t have swig.
-	touch ext/comedi_ruby_wrap.c
+	touch $(srcdir)/ext/comedi_ruby_wrap.c
 endif
 
 if HAVE_RUBY
 all-local: ext/comedi.so
 install-data-local:
-	$(RUBY) setup.rb install
+	$(RUBY) $(srcdir)/setup.rb install
 else
 all-local:
 install-data-local:
 endif
 
 ext/Makefile:
-	$(RUBY) setup.rb config $(RUBY_CONFIG_OPTIONS)
+	$(RUBY) $(srcdir)/setup.rb config $(RUBY_CONFIG_OPTIONS)
 
-ext/comedi.so ext/comedi_ruby_wrap.o: ext/Makefile ext/comedi_ruby_wrap.c
-	$(RUBY) setup.rb setup
+ext/comedi.so ext/comedi_ruby_wrap.o: ext/Makefile $(srcdir)/ext/comedi_ruby_wrap.c
+	$(RUBY) $(srcdir)/setup.rb setup
 
 clean-local:
 	$(RM) ext/comedi.so ext/Makefile ext/*.o
