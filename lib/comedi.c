@@ -148,17 +148,26 @@ int comedi_trigger(comedi_t *it,comedi_trig *t)
 
 int comedi_command(comedi_t *it,comedi_cmd *t)
 {
-	return ioctl(it->fd,COMEDI_CMD,t);
+	int ret;
+	ret = ioctl(it->fd,COMEDI_CMD,t);
+	__comedi_errno = errno;
+	return ret;
 }
 
 int comedi_command_test(comedi_t *it,comedi_cmd *t)
 {
-	return ioctl(it->fd,COMEDI_CMDTEST,t);
+	int ret;
+	ret = ioctl(it->fd,COMEDI_CMDTEST,t);
+	__comedi_errno = errno;
+	return ret;
 }
 
 int comedi_do_insnlist(comedi_t *it,comedi_insnlist *il)
 {
-	return ioctl(it->fd,COMEDI_INSNLIST,il);
+	int ret;
+	ret = ioctl(it->fd,COMEDI_INSNLIST,il);
+	__comedi_errno = errno;
+	return ret;
 }
 
 int comedi_do_insn(comedi_t *it,comedi_insn *insn)
