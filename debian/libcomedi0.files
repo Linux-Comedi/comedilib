@@ -1,7 +1,5 @@
 usr/lib/libcomedi*.so
 usr/lib/libcomedi.so.*
-usr/lib/python2.2/site-packages/*.so
-usr/lib/python2.2/site-packages/comedi.py
 usr/sbin/*
 usr/bin/comedi_calibrate
 usr/bin/comedi_test
