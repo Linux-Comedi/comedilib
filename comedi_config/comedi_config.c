@@ -112,9 +112,9 @@ int main(int argc,char *argv[])
 	int remove=0;
 	int index;
 
-#ifdef CONFIG_I18N
+#ifdef I18N
 	setlocale(LC_ALL, "");
-	bindtextdomain("comedilib", "/home/ds/cvs/comedilib/doc");
+	bindtextdomain("comedilib", "/usr/share/locale");
 	textdomain("comedilib");
 #endif
 
