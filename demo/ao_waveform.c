@@ -178,16 +178,18 @@ int main(int argc, char *argv[])
 	}
 
 	dds_output(data,BUF_LEN);
-	n=BUF_LEN*sizeof(sampl_t);
-	while(n>0){
-		m=write(comedi_fileno(dev),(void *)data+(BUF_LEN*sizeof(sampl_t)-n),n);
-		if(m<0){
-			perror("write");
-			exit(0);
-		}
-		printf("m=%d\n",m);
-		n-=m;
+	n = BUF_LEN * sizeof(sampl_t);
+	m = write(comedi_fileno(dev), (void *)data, n);
+	if(m < 0){
+		perror("write");
+		exit(1);
+	}else if(m < n)
+	{
+		fprintf(stderr, "failed to preload output buffer with %i bytes, is it too small?\n"
+			"See the --write-buffer option of comedi_config\n", n);
+		exit(1);
 	}
+	printf("m=%d\n",m);
 
 	ret = comedi_internal_trigger(dev, subdevice, 0);
 	if(ret<0){
