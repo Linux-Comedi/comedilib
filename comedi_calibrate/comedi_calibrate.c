@@ -33,7 +33,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DPRINT(level,fmt,args...) do{if(verbose>=level)printf(fmt,args);}while(0)
+#define DPRINT(level,fmt,args...) do{if(verbose>=level)printf(fmt, ## args);}while(0)
 
 #define N_CALDACS 32
 #define N_OBSERVABLES 32
@@ -83,6 +83,9 @@ void check_gain(int ad_chan,int range);
 double check_gain_chan(int ad_chan,int range,int cdac);
 
 int verbose = 0;
+
+/* tmep */
+void do_cal(void);
 
 void observe(void);
 void preobserve(int obs);
@@ -298,6 +301,10 @@ int main(int argc, char *argv[])
 	reset_caldacs();
 
 	observe();
+
+	do_cal();
+
+	observe();
 #if 0
 	for(i=0;i<n_boards;i++){
 		if(!strcmp(boards[i].name,devicename)){
@@ -373,6 +380,14 @@ void ni_setup(void)
 		observables[i].observe_insn.chanspec =
 			CR_PACK(0,unipolar_lowgain,AREF_OTHER);
 		observables[i].target = 0;
+		i++;
+
+		/* unip gain */
+		observables[i].name = "ai, unipolar voltage reference, low gain";
+		observables[i].observe_insn = tmpl;
+		observables[i].observe_insn.chanspec =
+			CR_PACK(5,unipolar_lowgain,AREF_OTHER);
+		observables[i].target = voltage_reference;
 		i++;
 	}
 
@@ -501,6 +516,95 @@ void observable_dependence(int obs)
 	}
 
 }
+
+
+void postgain_cal(int obs1, int obs2, int dac)
+{
+	double offset1,offset2;
+	linear_fit_t l;
+	double slope1,slope2;
+	double a;
+	double gain;
+	comedi_range *range1,*range2;
+
+	DPRINT(0,"postgain calibration\n");
+	preobserve(obs1);
+	check_gain_chan_x(&l,observables[obs1].observe_insn.chanspec,dac);
+	offset1=linear_fit_func_y(&l,caldacs[dac].current);
+	DPRINT(1,"obs1: [%d] offset %g\n",obs1,offset1);
+	range1 = comedi_get_range(dev,observables[obs1].observe_insn.subdev,
+		CR_CHAN(observables[obs1].observe_insn.chanspec),
+		CR_RANGE(observables[obs1].observe_insn.chanspec));
+	slope1=l.slope;
+
+	preobserve(obs2);
+	check_gain_chan_x(&l,observables[obs2].observe_insn.chanspec,dac);
+	offset2=linear_fit_func_y(&l,caldacs[dac].current);
+	DPRINT(1,"obs2: [%d] offset %g\n",obs2,offset2);
+	range2 = comedi_get_range(dev,observables[obs2].observe_insn.subdev,
+		CR_CHAN(observables[obs2].observe_insn.chanspec),
+		CR_RANGE(observables[obs2].observe_insn.chanspec));
+	slope2=l.slope;
+
+	gain = (range1->max-range1->min)/(range2->max-range2->min);
+	DPRINT(3,"range1 %g range2 %g\n", range1->max-range1->min,
+		range2->max-range2->min);
+	DPRINT(2,"gain: %g\n",gain);
+
+	DPRINT(2,"difference: %g\n",offset2-offset1);
+
+	a = (offset1-offset2)/(slope1-slope2);
+	a=caldacs[dac].current-a;
+
+	DPRINT(0,"caldac[%d] set to %g\n",dac,a);
+
+	caldacs[dac].current=rint(a);
+	update_caldac(dac);
+	usleep(100000);
+
+	if(verbose>=2){
+		preobserve(obs1);
+		measure_observable(obs1);
+		preobserve(obs2);
+		measure_observable(obs2);
+	}
+}
+
+void cal1(int obs, int dac)
+{
+	linear_fit_t l;
+	double offset;
+	double target;
+	double gain;
+	double a;
+
+	DPRINT(0,"cal1\n");
+	preobserve(obs);
+	check_gain_chan_x(&l,observables[obs].observe_insn.chanspec,dac);
+	offset=linear_fit_func_y(&l,caldacs[dac].current);
+	gain=l.slope;
+	
+	target = observables[obs].target;
+	a=caldacs[dac].current+(target-offset)/gain;
+
+	caldacs[dac].current=rint(a);
+	update_caldac(dac);
+	usleep(100000);
+
+	DPRINT(0,"caldac[%d] set to %g\n",dac,a);
+	if(verbose>=2){
+		measure_observable(obs);
+	}
+}
+
+void do_cal(void)
+{
+	// daqcard
+	postgain_cal(0,1,2);
+	cal1(1,8);
+	cal1(2,0);
+}
+
 
 double ni_get_reference(int lsb_loc,int msb_loc)
 {
@@ -1210,6 +1314,16 @@ void update_caldac(int i)
 	int ret;
 	
 	DPRINT(3,"update %d %d %d\n",caldacs[i].subdev,caldacs[i].chan,caldacs[i].current);
+	if(caldacs[i].current<0){
+		DPRINT(0,"caldac set out of range (%d<0)\n",caldacs[i].current);
+		caldacs[i].current=0;
+	}
+	if(caldacs[i].current>caldacs[i].maxdata){
+		DPRINT(0,"caldac set out of range (%d>%d)\n",
+			caldacs[i].current,caldacs[i].maxdata);
+		caldacs[i].current=caldacs[i].maxdata;
+	}
+
 	ret = comedi_data_write(dev,caldacs[i].subdev,caldacs[i].chan,0,0,
 		caldacs[i].current);
 	if(ret<0)perror("update_caldac()");
