@@ -36,6 +36,8 @@
 #include "calib.h"
 
 
+char ni_id[] = "$Id$";
+
 struct board_struct{
 	char *name;
 	int status;
@@ -72,7 +74,7 @@ struct board_struct boards[]={
 	{ "pci-6071e",		STATUS_SOME,	cal_ni_pci_6071e },
 	{ "pxi-6071e",		STATUS_GUESS,	cal_ni_pxi_6071e },
 	{ "at-mio-16e-10",	STATUS_GUESS,	cal_ni_at_mio_16e_10 },
-	//{ "pci-mio-16xe-50",	STATUS_GUESS,	cal_ni_pci_mio_16xe_50 },
+	{ "pci-mio-16xe-50",	STATUS_SOME,	cal_ni_pci_mio_16xe_50 },
 	{ "pci-6023e",		STATUS_SOME,	cal_ni_pci_6023e },
 	{ "pci-mio-16xe-10",	STATUS_SOME,	cal_ni_pci_mio_16xe_10 },
 	{ "pci-6052e",		STATUS_SOME,	cal_ni_pci_6052e },
@@ -419,7 +421,18 @@ void cal_ni_at_mio_16e_10(void)
 
 void cal_ni_pci_mio_16xe_50(void)
 {
-	// broken
+	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,2);
+	cal1(ni_zero_offset_high,8);
+	cal1(ni_reference_low,0);
+	cal1_fine(ni_reference_low,0);
+	cal1(ni_reference_low,1);
+	
+	if(do_output){
+		cal1(ni_ao0_zero_offset,6);
+		cal1(ni_ao0_reference,4);
+		cal1(ni_ao1_zero_offset,7);
+		cal1(ni_ao1_reference,5);
+	}
 }
 
 void cal_ni_pci_6023e(void)
@@ -470,16 +483,16 @@ void cal_ni_pci_6052e(void)
 	 *
 	 * The NI documentation says:
 	 *   0, 8   AI pregain  (coarse, fine)		3, 11
-	 *   4, 12  AI postgain				7
+	 *   4, 12  AI postgain				15,7
 	 *   2, 10  AI reference			1, 9
-	 *   14, 7  AI unipolar offset			5
+	 *   14, 7  AI unipolar offset			5, 13
 	 *
 	 *   0      AO0 linearity
-	 *   8, 4   AO0 reference			19, 15
-	 *   12     AO0 offset				23
+	 *   8, 4   AO0 reference		23, 19	7, 3
+	 *   12     AO0 offset			27	11
 	 *   2      AO1 linearity			
-	 *   10, 6  AO1 reference			21, 17
-	 *   14     AO1 offset				13
+	 *   10, 6  AO1 reference		25, 21	9, 5
+	 *   14     AO1 offset			29, 17	13, 1
 	 *
 	 *   0	3	x	0011
 	 *
@@ -499,20 +512,22 @@ void cal_ni_pci_6052e(void)
 	 *
 	 */
 
-	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,3);
-	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,11);
-	// cal1(ni_zero_offset_high,7); // wrong
-	cal1(ni_reference_low,1);
-	cal1_fine(ni_reference_low,1);
-	cal1(ni_reference_low,9);  // maybe
-	cal1(ni_unip_offset_low,5);
+	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,0);
+	postgain_cal(ni_zero_offset_low,ni_zero_offset_high,8);
+	cal1(ni_zero_offset_high,4);
+	cal1(ni_zero_offset_high,12);
+	cal1(ni_reference_low,2);
+	cal1_fine(ni_reference_low,2);
+	cal1(ni_reference_low,10);
+	cal1(ni_unip_offset_low,14);
+	cal1(ni_unip_offset_low,7);
 	if(do_output){
-		cal1(ni_ao0_zero_offset,23);
-		cal1(ni_ao0_reference,19);
-		cal1(ni_ao0_reference,15); // maybe
-		cal1(ni_ao1_zero_offset,13);
-		cal1(ni_ao1_reference,21);
-		cal1(ni_ao1_reference,17); // maybe
+		cal1(ni_ao0_zero_offset,12+11);
+		cal1(ni_ao0_reference,12+7);
+		cal1(ni_ao0_reference,12+3);
+		cal1(ni_ao1_zero_offset,12+13);
+		cal1(ni_ao1_reference,12+9);
+		cal1(ni_ao1_reference,12+5);
 	}
 }
 
