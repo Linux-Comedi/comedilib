@@ -163,6 +163,7 @@ int test_cmd_write_fast_1chan(void)
 	unsigned int flags = comedi_get_subdevice_flags(device,subdevice);
 	static const int num_samples = 100000;
 	int num_bytes;
+	int wc;
 	
 	if((flags & SDF_LSAMPL))
 	{
@@ -197,14 +198,17 @@ int test_cmd_write_fast_1chan(void)
 
 	go = 1;
 	while(go){
-		ret = write(comedi_fileno(device), buf, BUFSZ);
+		wc = num_bytes-total;
+		if(wc>BUFSZ){
+			wc = BUFSZ;
+		}
+		ret = write(comedi_fileno(device), buf, wc);
 		if(ret<0){
 			perror("write");
 			return 0;
 		}
-		if(ret<BUFSZ){
+		if(ret<wc){
 			go = 0;
-			break;
 		}
 
 		total += ret;
@@ -219,9 +223,13 @@ int test_cmd_write_fast_1chan(void)
 	}
 	if(verbose)printf("inttrig\n");
 
-	go=1;
+	go=(total<num_bytes);
 	while(go){
-		ret = write(comedi_fileno(device),buf,BUFSZ);
+		wc = num_bytes-total;
+		if(wc>BUFSZ){
+			wc = BUFSZ;
+		}
+		ret = write(comedi_fileno(device),buf,wc);
 		if(ret<0){
 			if(errno==EAGAIN){
 				usleep(10000);
