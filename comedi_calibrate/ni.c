@@ -985,7 +985,7 @@ static int cal_ni_pci_6052e(calibration_setup_t *setup)
 	layout.adc_pregain_offset_fine = 1;
 	layout.adc_postgain_offset_fine = 3;
 	layout.adc_gain_fine = 5;
-#if 1
+#if 0
 /* this seems broken, i think we need to change
  * second caldac in driver to ad8804_debug */
 	layout.dac_offset[ 0 ] = 12 + 11;
@@ -995,6 +995,8 @@ static int cal_ni_pci_6052e(calibration_setup_t *setup)
 	layout.dac_gain[ 1 ] = 12 + 9;
 	layout.dac_gain_fine[ 1 ] = 12 + 5;
 #else
+	DPRINT(0, "WARNING: you need comedi driver version 0.7.67 or later\n"
+	 "for this calibration to work properly\n" );
 /* this should work if the first two caldacs were ad8804_debug */
 	layout.dac_offset[ 0 ] = 16 + 3;
 	layout.dac_gain[ 0 ] = 16 + 1;
