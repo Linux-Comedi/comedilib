@@ -197,7 +197,7 @@ ok:
 
 	if(do_reset)reset_caldacs( &setup );
 	if(do_dump) observe( &setup );
-	if(do_calibrate && do_cal) setup.do_cal( &setup );
+	if(do_calibrate && setup.do_cal) setup.do_cal( &setup );
 	if(do_results) observe( &setup );
 
 	return 0;
@@ -216,7 +216,7 @@ void set_target( calibration_setup_t *setup, int obs,double target)
 
 	data = comedi_from_phys(target,range,maxdata);
 
-	setup->observables[obs].preobserve_data = data;
+	setup->observables[obs].preobserve_data[0] = data;
 	setup->observables[obs].target = comedi_to_phys(data,range,maxdata);
 }
 
@@ -235,11 +235,17 @@ void observe( calibration_setup_t *setup )
 
 }
 
-void preobserve( calibration_setup_t *setup, int obs)
+int preobserve( calibration_setup_t *setup, int obs)
 {
+	int retval = 0;
+
 	if( setup->observables[obs].preobserve_insn.n != 0){
-		comedi_do_insn( setup->dev, &setup->observables[obs].preobserve_insn);
+		retval = comedi_do_insn( setup->dev, &setup->observables[obs].preobserve_insn);
 	}
+	if( retval < 0 )
+		perror("preobserve()");
+
+	return retval;
 }
 
 void measure_observable( calibration_setup_t *setup, int obs)
@@ -811,6 +817,14 @@ int new_sv_measure( comedi_t *dev, new_sv_t *sv)
 		perror("comedi_calibrate");
 		exit(1);
 	}
+
+	ret = comedi_data_read_hint(dev, sv->subd, sv->chan | sv->cr_flags, sv->range,
+		sv->aref);
+	if(ret<0){
+		printf("hint barf\n");
+		goto out;
+	}
+	usleep( 1000 );
 
 	ret = comedi_data_read_n(dev, sv->subd, sv->chan | sv->cr_flags, sv->range,
 		sv->aref, data, n);

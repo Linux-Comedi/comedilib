@@ -19,6 +19,7 @@
 
 #define N_CALDACS 64
 #define N_OBSERVABLES 32
+#define PREOBSERVE_DATA_LEN 10
 
 typedef struct{
 	int subdev;
@@ -35,7 +36,7 @@ typedef struct{
 	char *name;
 
 	comedi_insn preobserve_insn;
-	lsampl_t preobserve_data;
+	lsampl_t preobserve_data[ PREOBSERVE_DATA_LEN ];
 
 	comedi_insn observe_insn;
 
@@ -78,7 +79,7 @@ extern int do_output;
 /* high level */
 
 void observe( calibration_setup_t *setup );
-void preobserve( calibration_setup_t *setup, int obs);
+int preobserve( calibration_setup_t *setup, int obs);
 void observable_dependence( calibration_setup_t *setup, int obs);
 void measure_observable( calibration_setup_t *setup, int obs);
 void reset_caldacs( calibration_setup_t *setup);
@@ -113,7 +114,6 @@ void set_ao(comedi_t *dev,int subdev,int chan,int range,double value);
 void check_gain(int ad_chan,int range);
 double check_gain_chan(int ad_chan,int range,int cdac);
 
-void (*do_cal)(void);
 void cal_ni_results(void);
 
 /* helper functions */

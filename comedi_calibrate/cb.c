@@ -17,6 +17,11 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/*
+	TODO:
+	read calibration voltage targets from eeprom
+	calibrate all possible ranges and save to file
+*/
 
 #define _GNU_SOURCE
 
@@ -90,6 +95,7 @@ int cb_setup( calibration_setup_t *setup, const char *device_name )
 	{
 		if( !strcmp( devicename, boards[i].name ) )
 		{
+			setup->status = boards[i].status;
 			return boards[i].setup( setup );
 			break;
 		}
@@ -140,14 +146,11 @@ int init_observables_60xx( calibration_setup_t *setup )
 	comedi_insn tmpl, po_tmpl;
 	observable *o;
 	static const int ai_subdev = 0;
-	lsampl_t cal_src_data[2];
 
 	memset( &po_tmpl, 0, sizeof(po_tmpl) );
 	po_tmpl.insn = INSN_CONFIG;
 	po_tmpl.n = 2;
 	po_tmpl.subdev = ai_subdev;
-	po_tmpl.data = cal_src_data;
-	cal_src_data[0] = INSN_CONFIG_ALT_SOURCE;
 
 	memset( &tmpl, 0, sizeof(tmpl) );
 	tmpl.insn = INSN_READ;
@@ -155,19 +158,23 @@ int init_observables_60xx( calibration_setup_t *setup )
 	tmpl.subdev = ai_subdev;
 
 	o = setup->observables + 0;
-	o->name = "ground calibration source, 10V bipolar range, ground reference";
+	o->name = "ground calibration source, 10V bipolar range, differential referenced";
 	o->preobserve_insn = po_tmpl;
+	o->preobserve_insn.data = o->preobserve_data;
+	o->preobserve_insn.data[0] = INSN_CONFIG_ALT_SOURCE;
 	o->preobserve_insn.data[1] = 0;
 	o->observe_insn = tmpl;
-	o->observe_insn.chanspec = CR_PACK_FLAGS( 0, 0, AREF_GROUND, CR_ALT_SOURCE);
+	o->observe_insn.chanspec = CR_PACK( 0, 0, AREF_DIFF);
 	o->target = 0.0;
 
 	o = setup->observables + 1;
-	o->name = "5V calibration source, 10V bipolar range, ground reference";
+	o->name = "5V calibration source, 10V bipolar range, differential referenced";
 	o->preobserve_insn = po_tmpl;
+	o->preobserve_insn.data = o->preobserve_data;
+	o->preobserve_insn.data[0] = INSN_CONFIG_ALT_SOURCE;
 	o->preobserve_insn.data[1] = 2;
 	o->observe_insn = tmpl;
-	o->observe_insn.chanspec = CR_PACK_FLAGS( 0, 0, AREF_GROUND, CR_ALT_SOURCE);
+	o->observe_insn.chanspec = CR_PACK( 0, 0, AREF_DIFF);
 	o->target = 5.0;
 
 	setup->n_observables = 2;
@@ -177,6 +184,102 @@ int init_observables_60xx( calibration_setup_t *setup )
 
 int init_observables_4020( calibration_setup_t *setup )
 {
+	comedi_insn tmpl, po_tmpl;
+	observable *o;
+	static const int ai_subdev = 0;
+
+	memset( &po_tmpl, 0, sizeof(po_tmpl) );
+	po_tmpl.insn = INSN_CONFIG;
+	po_tmpl.n = 2;
+	po_tmpl.subdev = ai_subdev;
+
+	memset( &tmpl, 0, sizeof(tmpl) );
+	tmpl.insn = INSN_READ;
+	tmpl.n = 1;
+	tmpl.subdev = ai_subdev;
+
+	o = setup->observables + 0;
+	o->name = "ground calibration source, ch 0, 5V bipolar range, ground referenced";
+	o->preobserve_insn = po_tmpl;
+	o->preobserve_insn.data = o->preobserve_data;
+	o->preobserve_insn.data[0] = INSN_CONFIG_ALT_SOURCE;
+	o->preobserve_insn.data[1] = 7;
+	o->observe_insn = tmpl;
+	o->observe_insn.chanspec = CR_PACK( 0, 0, AREF_GROUND);
+	o->target = 0.0;
+
+	o = setup->observables + 1;
+	o->name = "ground calibration source, ch 1, 5V bipolar range, ground referenced";
+	o->preobserve_insn = po_tmpl;
+	o->preobserve_insn.data = o->preobserve_data;
+	o->preobserve_insn.data[0] = INSN_CONFIG_ALT_SOURCE;
+	o->preobserve_insn.data[1] = 7;
+	o->observe_insn = tmpl;
+	o->observe_insn.chanspec = CR_PACK( 1, 0, AREF_GROUND);
+	o->target = 0.0;
+
+	o = setup->observables + 2;
+	o->name = "ground calibration source, ch 2, 5V bipolar range, ground referenced";
+	o->preobserve_insn = po_tmpl;
+	o->preobserve_insn.data = o->preobserve_data;
+	o->preobserve_insn.data[0] = INSN_CONFIG_ALT_SOURCE;
+	o->preobserve_insn.data[1] = 7;
+	o->observe_insn = tmpl;
+	o->observe_insn.chanspec = CR_PACK( 2, 0, AREF_GROUND);
+	o->target = 0.0;
+
+	o = setup->observables + 3;
+	o->name = "ground calibration source, ch 3, 5V bipolar range, ground referenced";
+	o->preobserve_insn = po_tmpl;
+	o->preobserve_insn.data = o->preobserve_data;
+	o->preobserve_insn.data[0] = INSN_CONFIG_ALT_SOURCE;
+	o->preobserve_insn.data[1] = 7;
+	o->observe_insn = tmpl;
+	o->observe_insn.chanspec = CR_PACK( 3, 0, AREF_GROUND);
+	o->target = 0.0;
+
+	o = setup->observables + 4;
+	o->name = "4.375V calibration source, ch 0, 5V bipolar range, ground referenced";
+	o->preobserve_insn = po_tmpl;
+	o->preobserve_insn.data = o->preobserve_data;
+	o->preobserve_insn.data[0] = INSN_CONFIG_ALT_SOURCE;
+	o->preobserve_insn.data[1] = 5;
+	o->observe_insn = tmpl;
+	o->observe_insn.chanspec = CR_PACK( 0, 0, AREF_GROUND);
+	o->target = 4.375;
+
+	o = setup->observables + 5;
+	o->name = "4.375V calibration source, ch 1, 5V bipolar range, ground referenced";
+	o->preobserve_insn = po_tmpl;
+	o->preobserve_insn.data = o->preobserve_data;
+	o->preobserve_insn.data[0] = INSN_CONFIG_ALT_SOURCE;
+	o->preobserve_insn.data[1] = 5;
+	o->observe_insn = tmpl;
+	o->observe_insn.chanspec = CR_PACK( 1, 0, AREF_GROUND);
+	o->target = 4.375;
+
+	o = setup->observables + 6;
+	o->name = "4.375V calibration source, ch 2, 5V bipolar range, ground referenced";
+	o->preobserve_insn = po_tmpl;
+	o->preobserve_insn.data = o->preobserve_data;
+	o->preobserve_insn.data[0] = INSN_CONFIG_ALT_SOURCE;
+	o->preobserve_insn.data[1] = 5;
+	o->observe_insn = tmpl;
+	o->observe_insn.chanspec = CR_PACK( 2, 0, AREF_GROUND);
+	o->target = 4.375;
+
+	o = setup->observables + 7;
+	o->name = "4.375V calibration source, ch 3, 5V bipolar range, ground referenced";
+	o->preobserve_insn = po_tmpl;
+	o->preobserve_insn.data = o->preobserve_data;
+	o->preobserve_insn.data[0] = INSN_CONFIG_ALT_SOURCE;
+	o->preobserve_insn.data[1] = 5;
+	o->observe_insn = tmpl;
+	o->observe_insn.chanspec = CR_PACK( 3, 0, AREF_GROUND);
+	o->target = 4.375;
+
+	setup->n_observables = 8;
+
 	return 0;
 }
 
@@ -187,11 +290,71 @@ int cal_cb_pci_64xx( calibration_setup_t *setup )
 
 int cal_cb_pci_60xx( calibration_setup_t *setup )
 {
+	enum caldacs_60xx
+	{
+		DAC0_OFFSET = 0,
+		DAC0_GAIN,
+		DAC1_OFFSET,
+		DAC1_GAIN,
+		ADC_OFFSET_FINE,
+		ADC_OFFSET_COARSE,
+		ADC_GAIN_COARSE,
+		ADC_GAIN_FINE,
+	};
+
+	cal1( setup, 0, ADC_OFFSET_COARSE );
+	cal1_fine( setup, 0, ADC_OFFSET_COARSE );
+
+	cal1( setup, 0, ADC_OFFSET_FINE );
+	cal1_fine( setup, 0, ADC_OFFSET_FINE );
+
+	cal1( setup, 1, ADC_GAIN_COARSE );
+	cal1_fine( setup, 1, ADC_GAIN_COARSE );
+
+	cal1( setup, 1, ADC_GAIN_FINE );
+	cal1_fine( setup, 1, ADC_GAIN_FINE );
+
 	return 0;
 }
 
 int cal_cb_pci_4020( calibration_setup_t *setup )
 {
+	enum caldacs_4020
+	{
+		ADC0_OFFSET = 0,
+		ADC1_OFFSET,
+		ADC2_OFFSET,
+		ADC3_OFFSET,
+		ADC0_GAIN,
+		ADC1_GAIN,
+		ADC2_GAIN,
+		ADC3_GAIN,
+	};
+
+	cal1( setup, 0, ADC0_OFFSET );
+	cal1_fine( setup, 0, ADC0_OFFSET );
+
+	cal1( setup, 1, ADC1_OFFSET );
+	cal1_fine( setup, 1, ADC1_OFFSET );
+
+	cal1( setup, 2, ADC2_OFFSET );
+	cal1_fine( setup, 2, ADC2_OFFSET );
+
+	cal1( setup, 3, ADC3_OFFSET );
+	cal1_fine( setup, 3, ADC3_OFFSET );
+
+	cal1( setup, 4, ADC0_GAIN );
+	cal1_fine( setup, 4, ADC0_GAIN );
+
+	cal1( setup, 5, ADC1_GAIN );
+	cal1_fine( setup, 5, ADC1_GAIN );
+
+	cal1( setup, 6, ADC2_GAIN );
+	cal1_fine( setup, 6, ADC2_GAIN );
+
+	cal1( setup, 7, ADC3_GAIN );
+	cal1_fine( setup, 7, ADC3_GAIN );
+
 	return 0;
 }
 

@@ -218,7 +218,7 @@ void ni_setup_observables( calibration_setup_t *setup )
 		o->name = "ao 0, zero offset, low gain";
 		o->preobserve_insn = po_tmpl;
 		o->preobserve_insn.chanspec = CR_PACK(0,0,0);
-		o->preobserve_insn.data = &o->preobserve_data;
+		o->preobserve_insn.data = o->preobserve_data;
 		o->observe_insn = tmpl;
 		o->observe_insn.chanspec =
 			CR_PACK(2,bipolar_lowgain,AREF_OTHER);
@@ -229,7 +229,7 @@ void ni_setup_observables( calibration_setup_t *setup )
 		o->name = "ao 0, reference voltage, low gain";
 		o->preobserve_insn = po_tmpl;
 		o->preobserve_insn.chanspec = CR_PACK(0,0,0);
-		o->preobserve_insn.data = &o->preobserve_data;
+		o->preobserve_insn.data = o->preobserve_data;
 		o->observe_insn = tmpl;
 		o->observe_insn.chanspec =
 			CR_PACK(6,bipolar_lowgain,AREF_OTHER);
@@ -241,7 +241,7 @@ void ni_setup_observables( calibration_setup_t *setup )
 		o->name = "ao 1, zero offset, low gain";
 		o->preobserve_insn = po_tmpl;
 		o->preobserve_insn.chanspec = CR_PACK(1,0,0);
-		o->preobserve_insn.data = &o->preobserve_data;
+		o->preobserve_insn.data = o->preobserve_data;
 		o->observe_insn = tmpl;
 		o->observe_insn.chanspec =
 			CR_PACK(3,bipolar_lowgain,AREF_OTHER);
@@ -252,7 +252,7 @@ void ni_setup_observables( calibration_setup_t *setup )
 		o->name = "ao 1, reference voltage, low gain";
 		o->preobserve_insn = po_tmpl;
 		o->preobserve_insn.chanspec = CR_PACK(1,0,0);
-		o->preobserve_insn.data = &o->preobserve_data;
+		o->preobserve_insn.data = o->preobserve_data;
 		o->observe_insn = tmpl;
 		o->observe_insn.chanspec =
 			CR_PACK(7,bipolar_lowgain,AREF_OTHER);
