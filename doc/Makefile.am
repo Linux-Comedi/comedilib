@@ -5,7 +5,11 @@ SGML= drivers.sgml funcref.sgml glossary.sgml \
 
 EXTRA_DIST=$(SGML) comedilib.sgml funcref mkref drivers.txt mkdr
 
+if HAVE_DOCBOOK
 all-local: html $(DOC).pdf man
+else
+all-local:
+endif
 
 clean-local:
 	rm -rf comedilib.pdf drivers.sgml funcref.sgml
@@ -20,15 +24,15 @@ install-data-local:
 locales = de
 
 $(DOC).pdf: $(DOC).sgml $(SGML)
-	-docbook2pdf $(DOC).sgml
+	-$(JW_PATH) -f docbook -b pdf $(DOC).sgml
 
 html: $(DOC).sgml $(SGML)
 	-mkdir -p html
-	-docbook2html -o html $(DOC).sgml && touch html
+	-$(JW_PATH) -f docbook -b html -o html $(DOC).sgml && touch html
 
 man: $(DOC).sgml $(SGML)
 	-mkdir -p man
-	-docbook2man -o man $(DOC).sgml && touch man
+	-$(JW_PATH) -f docbook -b man -o man $(DOC).sgml && touch man
 
 funcref.sgml: funcref mkref
 	./mkref funcref >funcref.sgml
