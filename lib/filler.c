@@ -49,12 +49,13 @@ int get_subdevices(comedi_t *it)
 	int i,j;
 	int ret;
 	comedi_subdinfo *s;
+	comedi_chaninfo ci;
 	subdevice *r;
 
 	s=malloc(sizeof(comedi_subdinfo)*it->n_subdevices);
 	debug_ptr(s);
 
-	ret=ioctl_subdinfo(it->fd,s);
+	ret = ioctl(it->fd, COMEDI_SUBDINFO, s);
 	debug_int(ret);
 
 	r=it->subdevices=realloc(it->subdevices,
@@ -87,7 +88,11 @@ int get_subdevices(comedi_t *it)
 			r[i].range_type_list=malloc(sizeof(*r[i].range_type_list)*r[i].n_chan);
 			debug_ptr(r[i].range_type_list);
 		}
-		ret=ioctl_chaninfo(it->fd,i,r[i].maxdata_list,r[i].flags_list,r[i].range_type_list);
+		ci.subdev = i;
+		ci.flaglist = r[i].flags_list;
+		ci.rangelist = r[i].range_type_list;
+		ci.maxdata_list = r[i].maxdata_list;
+		ret = ioctl(it->fd, COMEDI_CHANINFO, &ci);
 		debug_int(ret);
 
 		if(r[i].subd_flags&SDF_RANGETYPE){
@@ -117,15 +122,18 @@ comedi_range *get_rangeinfo(int fd,unsigned int range_type)
 {
 	comedi_krange *kr;
 	comedi_range *r;
+	comedi_rangeinfo ri;
 	int ret;
 	int i;
 
 	kr=malloc(sizeof(comedi_krange)*RANGE_LENGTH(range_type));
 	r=malloc(sizeof(comedi_range)*RANGE_LENGTH(range_type));
 
-	ret=ioctl_rangeinfo(fd,range_type,kr);
+	ri.range_type = range_type;
+	ri.range_ptr = kr;
+	ret = ioctl(fd, COMEDI_RANGEINFO, &ri);
 	if(ret<0){
-		fprintf(stderr,"ioctl_rangeinfo(%d,0x%08x,%p)\n",fd,range_type,kr);
+		fprintf(stderr,"ioctl(%d,COMEDI_RANGEINFO,0x%08x,%p)\n",fd,range_type,kr);
 	}
 
 	for(i=0;i<RANGE_LENGTH(range_type);i++){

@@ -65,7 +65,7 @@ comedi_t *comedi_open(const char *fn)
 		goto cleanup;
 	}
 
-	if(ioctl_devinfo(it->fd,&it->devinfo)<0)
+	if(ioctl(it->fd, COMEDI_DEVINFO, &it->devinfo)<0)
 		goto cleanup;
 
 	it->n_subdevices=it->devinfo.n_subdevs;
@@ -145,7 +145,7 @@ int comedi_trigger(comedi_t *it,comedi_trig *t)
 	if(!it || !t)
 		return -1;
 
-	return ioctl_trigger(it->fd,t);
+	return ioctl(it->fd, COMEDI_TRIG, t);
 }
 
 int comedi_command(comedi_t *it,comedi_cmd *t)

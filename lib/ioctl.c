@@ -38,49 +38,4 @@
 
 /* ioctl wrappers */
 
-int ioctl_devinfo(int fd,comedi_devinfo *it)
-{
-	return ioctl(fd,COMEDI_DEVINFO,it);
-}
 
-int ioctl_subdinfo(int fd,comedi_subdinfo *it)
-{
-	return ioctl(fd,COMEDI_SUBDINFO,it);
-}
-
-int ioctl_chaninfo(int fd,unsigned int subdev,lsampl_t *maxdata_list,unsigned int *flaglist,unsigned int *rangelist)
-{
-	comedi_chaninfo ci;
-
-	ci.subdev=subdev;
-	ci.flaglist=flaglist;
-	ci.rangelist=rangelist;
-	ci.maxdata_list=maxdata_list;
-
-	return ioctl(fd,COMEDI_CHANINFO,&ci);
-}
-
-int ioctl_trigger(int fd,comedi_trig *it)
-{
-	return ioctl(fd,COMEDI_TRIG,it);
-}
-
-int ioctl_rangeinfo(int fd,int range_type,comedi_krange *range_ptr)
-{
-	comedi_rangeinfo it;
-
-	it.range_type=range_type;
-	it.range_ptr=range_ptr;
-
-	return ioctl(fd,COMEDI_RANGEINFO,&it);
-}
-
-int ioctl_bufconfig(int fd, comedi_bufconfig *bc)
-{
-	return ioctl(fd, COMEDI_BUFCONFIG, bc);
-}
-
-int ioctl_bufinfo(int fd, comedi_bufinfo *bi)
-{
-	return ioctl(fd, COMEDI_BUFINFO, bi);
-}

@@ -119,17 +119,6 @@ struct subdevice_struct{
 
 
 
-/* ioctl wrappers */
-
-int ioctl_devinfo(int fd,comedi_devinfo *it);
-int ioctl_subdinfo(int fd,comedi_subdinfo *it);
-int ioctl_chaninfo(int fd,unsigned int subdev,lsampl_t *maxdata_list,
-		                unsigned int *flaglist,unsigned int *rangelist);
-int ioctl_trigger(int fd,comedi_trig *it);
-int ioctl_rangeinfo(int fd,int range_type,comedi_krange *range_ptr);
-int ioctl_bufconfig(int fd, comedi_bufconfig *bc);
-int ioctl_bufinfo(int fd, comedi_bufinfo *bi);
-
 /* filler routines */
 
 int get_subdevices(comedi_t *it);
