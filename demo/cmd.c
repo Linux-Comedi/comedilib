@@ -21,6 +21,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 #include <errno.h>
+#include <string.h>
 #include "examples.h"
 
 #define BUFSZ 10000
@@ -204,7 +205,7 @@ int prepare_cmd_lib(comedi_t *dev,int subdevice,comedi_cmd *cmd)
  */
 int prepare_cmd(comedi_t *dev,int subdevice,comedi_cmd *cmd)
 {
-	memset(cmd,0,sizeof(cmd));
+	memset(cmd,0,sizeof(*cmd));
 
 	/* the subdevice that the command is sent to */
 	cmd->subdev =	subdevice;
