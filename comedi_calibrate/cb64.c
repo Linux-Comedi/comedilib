@@ -21,7 +21,6 @@
 #define _GNU_SOURCE
 
 #include <stdio.h>
-#include "comedilib.h"
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
@@ -127,15 +126,6 @@ enum cal_knobs_64xx
 	ADC_GAIN_64XX = 8,
 	ADC_OFFSET_64XX = 9,
 };
-
-static inline unsigned int ADC_OFFSET_4020( unsigned int channel )
-{
-	return channel;
-}
-static inline unsigned int ADC_GAIN_4020( unsigned int channel )
-{
-	return 4 + channel;
-}
 
 int cb64_setup( calibration_setup_t *setup, const char *device_name )
 {
@@ -615,13 +605,13 @@ static int init_observables_60xx( calibration_setup_t *setup )
 	return 0;
 }
 
-static unsigned int ai_low_observable_index_4020( unsigned int channel,
+static int ai_low_observable_index_4020( unsigned int channel,
 	unsigned int ai_range )
 {
 	return 4 * channel + 2 * ai_range;
 }
 
-static unsigned int ai_high_observable_index_4020( unsigned int channel,
+static int ai_high_observable_index_4020( unsigned int channel,
 	unsigned int ai_range )
 {
 	return ai_low_observable_index_4020( channel, ai_range ) + 1;
@@ -1032,73 +1022,24 @@ static int cal_cb_pci_60xx( calibration_setup_t *setup )
 	return retval;
 }
 
-static void prep_adc_caldacs_4020( calibration_setup_t *setup,
-	unsigned int channel, unsigned int range )
+static int adc_offset_4020( unsigned int channel )
 {
-	int retval;
-
-	if( setup->do_reset )
-	{
-		reset_caldac( setup, ADC_OFFSET_4020( channel ) );
-		reset_caldac( setup, ADC_GAIN_4020( channel ) );
-	}else
-	{
-		retval = comedi_apply_calibration( setup->dev, setup->ad_subdev,
-			channel, range, AREF_GROUND, setup->cal_save_file_path);
-		if( retval < 0 )
-		{
-			reset_caldac( setup, ADC_OFFSET_4020( channel ) );
-			reset_caldac( setup, ADC_GAIN_4020( channel ) );
-		}
-	}
+	return channel;
+}
+static int adc_gain_4020( unsigned int channel )
+{
+	return 4 + channel;
 }
 
 static int cal_cb_pci_4020( calibration_setup_t *setup )
 {
-	int range, channel, num_ranges, num_channels, retval,
-		num_calibrations, i;
-	saved_calibration_t *saved_cals, *current_cal;
+	generic_layout_t layout;
 
-	num_ranges = comedi_get_n_ranges( setup->dev, setup->ad_subdev, 0 );
-	if( num_ranges < 0 ) return -1;
-
-	num_channels = comedi_get_n_channels( setup->dev, setup->ad_subdev );
-	if( num_channels < 0 ) return -1;
-
-	num_calibrations = num_ranges * num_channels;
-
-	saved_cals = malloc( num_calibrations * sizeof( saved_calibration_t ) );
-	if( saved_cals == NULL ) return -1;
-
-	current_cal = saved_cals;
-
-	for( channel = 0; channel < num_channels; channel++ )
-	{
-		for( range = 0; range < num_ranges; range++ )
-		{
-			prep_adc_caldacs_4020( setup, channel, range );
-
-			cal_binary( setup, ai_low_observable_index_4020( channel, range ),
-				ADC_OFFSET_4020( channel ) );
-
-			cal_binary( setup, ai_high_observable_index_4020( channel, range ),
-				ADC_GAIN_4020( channel ) );
-
-			current_cal->subdevice = setup->ad_subdev;
-			sc_push_caldac( current_cal, setup->caldacs[ ADC_GAIN_4020( channel ) ] );
-			sc_push_caldac( current_cal, setup->caldacs[ ADC_OFFSET_4020( channel ) ] );
-			sc_push_channel( current_cal, channel );
-			sc_push_range( current_cal, range );
-			sc_push_aref( current_cal, SC_ALL_AREFS );
-
-			current_cal++;
-		}
-	}
-
-	retval = write_calibration_file( setup, saved_cals, num_calibrations );
-	for( i = 0; i < num_calibrations; i++ )
-		clear_saved_calibration( &saved_cals[ i ] );
-	free( saved_cals );
-	return retval;
+	init_generic_layout( &layout );
+	layout.adc_offset = adc_offset_4020;
+	layout.adc_gain = adc_gain_4020;
+	layout.adc_high_observable = ai_high_observable_index_4020;
+	layout.adc_ground_observable = ai_low_observable_index_4020;
+	return generic_cal_by_channel_and_range( setup, &layout );
 }
 

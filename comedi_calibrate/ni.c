@@ -26,7 +26,6 @@
 #define _GNU_SOURCE
 
 #include <stdio.h>
-#include "comedilib.h"
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
@@ -173,17 +172,20 @@ static inline unsigned int ni_ao_unip_linearity( unsigned int channel )
 	else return ni_ao0_unip_linearity;
 }
 
-enum observables_611x{
-	ni_ao0_zero_offset_611x = 0,
-	ni_ao0_reference_611x = 1,
-	ni_ao1_zero_offset_611x = 2,
-	ni_ao1_reference_611x = 3,
+static const int num_ao_observables_611x = 4;
+static int ni_ao_zero_offset_611x( unsigned int channel, unsigned int range ) {
+	assert( range = 0 );
+	return 2 * channel;
 };
-static inline unsigned int ni_zero_offset_611x( unsigned int channel ) {
-	return 4 + 2 * channel;
+static int ni_ao_reference_611x( unsigned int channel, unsigned int range ) {
+	assert( range = 0 );
+	return 2 * channel + 1;
 };
-static inline unsigned int ni_reference_611x( unsigned int channel ) {
-	return 5 + 2 * channel;
+static int ni_zero_offset_611x( unsigned int channel, unsigned int range ) {
+	return num_ao_observables_611x + 8 * range + 2 * channel;
+};
+static int ni_reference_611x( unsigned int channel, unsigned int range ) {
+	return num_ao_observables_611x + 8 * range + 2 * channel + 1;
 };
 
 enum reference_sources {
@@ -490,7 +492,7 @@ static void ni_setup_observables( calibration_setup_t *setup )
 		ni_setup_ao_observables( setup );
 }
 
-/* XXX for +-50V and +-20V ranges, the reference source goes 0V
+/* for +-50V and +-20V ranges, the reference source goes 0V
  * to 50V instead of 0V to 5V */
 static unsigned int cal_gain_register_bits_611x( double reference, double *voltage )
 {
@@ -508,52 +510,76 @@ static unsigned int ref_source_611x( unsigned int ref_source, unsigned int cal_g
 	return ( ref_source & 0xf ) | ( ( cal_gain_bits << 4 ) & 0xff0 );
 }
 
+static void reference_target_611x( calibration_setup_t *setup,
+	observable *o, double master_reference, unsigned int range )
+{
+	int cal_gain_reg_bits;
+	double reference;
+	double target;
+	comedi_range *range_ptr;
+
+	range_ptr = comedi_get_range( setup->dev, setup->ad_subdev, 0, range );
+	assert( range_ptr != NULL );
+	if( range_ptr->max > 19.0 ) reference = 10 * master_reference;
+	else reference = master_reference;
+	target = range_ptr->max * 0.9;
+
+	cal_gain_reg_bits = cal_gain_register_bits_611x( reference, &target );
+
+	o->reference_source = ref_source_611x( REF_CALSRC_GND, cal_gain_reg_bits );
+	o->target = target;
+}
+
 static void ni_setup_observables_611x( calibration_setup_t *setup )
 {
 	comedi_insn tmpl;
 	comedi_insn po_tmpl;
-	int range, ai_range_for_ao;
-	double voltage_reference, master_reference;
+	int range, channel;
+	double master_reference;
 	observable *o;
-	int ai_chan;
-	int num_chans;
-	int cal_gain_reg_bits;
+	int num_ai_channels, num_ai_ranges;
+	static const int num_ao_channels = 2;
 
 	setup->settling_time_ns = 1000000;
 
-	range = 2;
-
 	master_reference = ni_get_reference( setup,
 		ni_board( setup )->ref_eeprom_lsb, ni_board( setup )->ref_eeprom_msb );
-	voltage_reference = 5.0;
-	cal_gain_reg_bits = cal_gain_register_bits_611x( master_reference, &voltage_reference );
 
 	memset(&tmpl,0,sizeof(tmpl));
 	tmpl.insn = INSN_READ;
 	tmpl.n = 1;
 	tmpl.subdev = setup->ad_subdev;
 
-	num_chans = comedi_get_n_channels( setup->dev, setup->ad_subdev );
+	num_ai_channels = comedi_get_n_channels( setup->dev, setup->ad_subdev );
+	assert( num_ai_channels >= 0 );
+	num_ai_ranges = comedi_get_n_ranges( setup->dev, setup->ad_subdev, 0 );
+	assert( num_ai_ranges >= 0 );
 
-	for( ai_chan = 0; ai_chan < num_chans; ai_chan++ )
+	for( channel = 0; channel < num_ai_channels; channel++ )
 	{
-		/* 0 offset */
-		o = setup->observables + ni_zero_offset_611x( ai_chan );
-		o->name = "ai, bipolar zero offset";
-		o->observe_insn = tmpl;
-		o->observe_insn.chanspec = CR_PACK(ai_chan, range, AREF_DIFF)
-			| CR_ALT_SOURCE | CR_ALT_FILTER;
-		o->reference_source = REF_GND_GND;
-		o->target = 0.0;
+		for( range = 0; range < num_ai_ranges; range++ )
+		{
+			/* 0 offset */
+			o = setup->observables + ni_zero_offset_611x( channel, range );
+			assert( o->name == NULL );
+			asprintf( &o->name, "ai, ch %i, range %i, zero offset",
+				channel, range );
+			o->observe_insn = tmpl;
+			o->observe_insn.chanspec = CR_PACK( channel, range, AREF_DIFF )
+				| CR_ALT_SOURCE | CR_ALT_FILTER;
+			o->reference_source = REF_GND_GND;
+			o->target = 0.0;
 
-		/* voltage reference */
-		o = setup->observables + ni_reference_611x( ai_chan );
-		o->name = "ai, bipolar voltage reference";
-		o->observe_insn = tmpl;
-		o->observe_insn.chanspec = CR_PACK(ai_chan, range, AREF_DIFF)
-			| CR_ALT_SOURCE | CR_ALT_FILTER;
-		o->reference_source = ref_source_611x( REF_CALSRC_GND, cal_gain_reg_bits );
-		o->target = voltage_reference;
+			/* voltage reference */
+			o = setup->observables + ni_reference_611x( channel, range );
+			assert( o->name == NULL );
+			asprintf( &o->name, "ai, ch %i, range %i, voltage reference",
+				channel, range );
+			o->observe_insn = tmpl;
+			o->observe_insn.chanspec = CR_PACK( channel, range, AREF_DIFF )
+				| CR_ALT_SOURCE | CR_ALT_FILTER;
+			reference_target_611x( setup, o, master_reference, range );
+		}
 	}
 
 	memset(&po_tmpl,0,sizeof(po_tmpl));
@@ -561,57 +587,38 @@ static void ni_setup_observables_611x( calibration_setup_t *setup )
 	po_tmpl.n = 1;
 	po_tmpl.subdev = setup->da_subdev;
 
-	ai_range_for_ao = 2;
+	for( channel = 0; channel < num_ao_channels; channel ++ )
+	{
+		static const int ai_range_for_ao = 2;
 
-	/* ao 0, zero offset */
-	o = setup->observables + ni_ao0_zero_offset_611x;
-	o->name = "ao 0, zero offset";
-	o->preobserve_insn = po_tmpl;
-	o->preobserve_insn.chanspec = CR_PACK( 0, 0, AREF_GROUND );
-	o->preobserve_insn.data = o->preobserve_data;
-	o->observe_insn = tmpl;
-	o->observe_insn.chanspec = CR_PACK( 0, ai_range_for_ao, AREF_DIFF )
-		| CR_ALT_SOURCE | CR_ALT_FILTER;
-	o->reference_source = REF_DAC0_GND;
-	set_target( setup, ni_ao0_zero_offset_611x, 0.0 );
+		/* ao zero offset */
+		o = setup->observables + ni_ao_zero_offset_611x( channel, 0 );
+		assert( o->name == NULL );
+		asprintf( &o->name, "ao ch %i, zero offset", channel );
+		o->preobserve_insn = po_tmpl;
+		o->preobserve_insn.chanspec = CR_PACK( channel, 0, AREF_GROUND );
+		o->preobserve_insn.data = o->preobserve_data;
+		o->observe_insn = tmpl;
+		o->observe_insn.chanspec = CR_PACK( 0, ai_range_for_ao, AREF_DIFF )
+			| CR_ALT_SOURCE | CR_ALT_FILTER;
+		o->reference_source = REF_DAC0_GND;
+		set_target( setup, ni_ao_zero_offset_611x( channel, 0 ), 0.0 );
 
-	/* ao 0, gain */
-	o = setup->observables + ni_ao0_reference_611x;
-	o->name = "ao 0, reference voltage";
-	o->preobserve_insn = po_tmpl;
-	o->preobserve_insn.chanspec = CR_PACK( 0, 0, AREF_GROUND );
-	o->preobserve_insn.data = o->preobserve_data;
-	o->observe_insn = tmpl;
-	o->observe_insn.chanspec = CR_PACK( 0, ai_range_for_ao, AREF_DIFF )
-		| CR_ALT_SOURCE | CR_ALT_FILTER;
-	o->reference_source = REF_DAC0_GND;
-	set_target( setup, ni_ao0_reference_611x, 5.0 );
+		/* ao gain */
+		o = setup->observables + ni_ao_reference_611x( channel, 0 );
+		assert( o->name == NULL );
+		asprintf( &o->name, "ao ch %i, reference voltage", channel );
+		o->preobserve_insn = po_tmpl;
+		o->preobserve_insn.chanspec = CR_PACK( channel, 0, AREF_GROUND );
+		o->preobserve_insn.data = o->preobserve_data;
+		o->observe_insn = tmpl;
+		o->observe_insn.chanspec = CR_PACK( 0, ai_range_for_ao, AREF_DIFF )
+			| CR_ALT_SOURCE | CR_ALT_FILTER;
+		o->reference_source = REF_DAC0_GND;
+		set_target( setup, ni_ao_reference_611x( channel, 0 ), 5.0 );
+	}
 
-	/* ao 1, zero offset */
-	o = setup->observables + ni_ao1_zero_offset_611x;
-	o->name = "ao 1, zero offset";
-	o->preobserve_insn = po_tmpl;
-	o->preobserve_insn.chanspec = CR_PACK( 1, 0, AREF_GROUND );
-	o->preobserve_insn.data = o->preobserve_data;
-	o->observe_insn = tmpl;
-	o->observe_insn.chanspec = CR_PACK( 0, ai_range_for_ao, AREF_DIFF)
-		| CR_ALT_SOURCE | CR_ALT_FILTER;
-	o->reference_source = REF_DAC1_GND;
-	set_target( setup, ni_ao1_zero_offset_611x, 0.0 );
-
-	/* ao 1, gain */
-	o = setup->observables + ni_ao1_reference_611x;
-	o->name = "ao 1, reference voltage";
-	o->preobserve_insn = po_tmpl;
-	o->preobserve_insn.chanspec = CR_PACK( 1, 0, AREF_GROUND );
-	o->preobserve_insn.data = o->preobserve_data;
-	o->observe_insn = tmpl;
-	o->observe_insn.chanspec = CR_PACK( 0, ai_range_for_ao, AREF_DIFF )
-		| CR_ALT_SOURCE | CR_ALT_FILTER;
-	o->reference_source = REF_DAC1_GND;
-	set_target( setup, ni_ao1_reference_611x, 5.0 );
-
-	setup->n_observables = 4 + 2 * num_chans;
+	setup->n_observables = num_ao_observables_611x + 2 * num_ai_ranges * num_ai_channels;
 }
 
 static int cal_ni_at_mio_16e_2(calibration_setup_t *setup)
@@ -890,34 +897,41 @@ static int cal_ni_pci_6052e(calibration_setup_t *setup)
 	/*
 	 * This board has noisy caldacs
 	 *
-	 * The NI documentation says:
-	 *   0, 8   AI pregain  (coarse, fine)		3, 11
-	 *   4, 12  AI postgain				15,7
-	 *   2, 10  AI reference			1, 9
-	 *   14, 7  AI unipolar offset			5, 13
+	 * The NI documentation says (true mb88341 addressing):
+	 *   0, 8   AI pregain  (coarse, fine)
+	 *   4, 12  AI postgain
+	 *   2, 10  AI reference
+	 *   14, 7  AI unipolar offset
 	 *
 	 *   0      AO0 linearity
-	 *   8, 4   AO0 reference		23, 19	7, 3
-	 *   12     AO0 offset			27	11
+	 *   8, 4   AO0 reference
+	 *   12     AO0 offset
 	 *   2      AO1 linearity
-	 *   10, 6  AO1 reference		25, 21	9, 5
-	 *   14     AO1 offset			29, 17	13, 1
+	 *   10, 6  AO1 reference
+	 *   14     AO1 offset
 	 *
-	 *   0	3	x	0011
+	 *  For us, these map to (ad8804 channels)
 	 *
-	 *   2	1	x	0001
+	 *   0, 1   AI pregain  (coarse, fine)
+	 *   2, 3  AI postgain
+	 *   4, 5  AI reference
+	 *   7  AI unipolar offset
 	 *
-	 *   4	7	15 3	0111 0011
+	 *   0      AO0 linearity
+	 *   1, 2   AO0 reference
+	 *   3      AO0 offset
+	 *   4      AO1 linearity
+	 *   5, 6   AO1 reference
+	 *   7      AO1 offset
 	 *
-	 *   6		17 5	     0101
-	 *   7	x
-	 *   8	11	19 7	1011 0111
+	 *  or, with mb88341 channels
 	 *
-	 *   10	9	21 9	1001 1001
-	 *
-	 *   12	x	23 11	     1011
-	 *
-	 *   14 5	13 1	0101 0001
+	 *   xxx    AO0 linearity
+	 *   7, 3   AO0 reference
+	 *   11     AO0 offset
+	 *   1      AO1 linearity
+	 *   9, 5   AO1 reference
+	 *   xxx    AO1 offset
 	 *
 	 */
 	ni_caldac_layout_t layout;
@@ -966,26 +980,37 @@ static int cal_ni_daqcard_ai_16e_4(calibration_setup_t *setup)
 	return cal_ni_generic( setup, &layout );
 }
 
+static int adc_offset_611x( unsigned int channel )
+{
+	return 2 * channel + 2;
+}
+static int adc_gain_611x( unsigned int channel )
+{
+	return 2 * channel + 1;
+}
+static int dac_offset_611x( unsigned int channel )
+{
+	return 12 + 2 + 2 * channel;
+}
+static int dac_gain_611x( unsigned int channel )
+{
+	return 12 + 1 + 2 * channel;
+}
 static int cal_ni_pci_611x( calibration_setup_t *setup )
 {
-	int i;
-	int num_chans;
+	generic_layout_t layout;
 
-	num_chans = comedi_get_n_channels( setup->dev, setup->ad_subdev );
+	init_generic_layout( &layout );
+	layout.adc_offset = adc_offset_611x;
+	layout.adc_gain = adc_gain_611x;
+	layout.dac_offset = dac_offset_611x;
+	layout.dac_gain = dac_gain_611x;
+	layout.adc_high_observable = ni_reference_611x;
+	layout.adc_ground_observable = ni_zero_offset_611x;
+	layout.dac_high_observable = ni_ao_reference_611x;
+	layout.dac_ground_observable = ni_ao_zero_offset_611x;
 
-	for( i = 0; i < num_chans; i++ ){
-		cal_binary( setup, ni_zero_offset_611x( i ), ( 2 * i + 2 ) );
-		cal_binary( setup, ni_reference_611x( i ), ( 2 * i + 1 ) );
-	}
-
-	if(setup->do_output){
-		cal_binary( setup, ni_ao0_zero_offset_611x, 14 );
-		cal_binary( setup, ni_ao0_reference_611x, 13 );
-		cal_binary( setup, ni_ao1_zero_offset_611x, 16 );
-		cal_binary( setup, ni_ao1_reference_611x, 15 );
-	}
-
-	return 0;
+	return generic_cal_by_channel_and_range( setup, &layout );
 }
 
 static int cal_ni_pci_mio_16e_4( calibration_setup_t *setup )
@@ -1026,13 +1051,6 @@ static int cal_ni_daqcard_6062e( calibration_setup_t *setup )
 	return cal_ni_generic( setup, &layout );
 }
 
-static void ni_generic_reset_caldac( calibration_setup_t *setup,
-	int caldac )
-{
-	if( caldac < 0 ) return;
-	reset_caldac( setup, caldac );
-}
-
 static void prep_adc_caldacs_generic( calibration_setup_t *setup,
 	const ni_caldac_layout_t *layout )
 {
@@ -1040,13 +1058,13 @@ static void prep_adc_caldacs_generic( calibration_setup_t *setup,
 
 	if( setup->do_reset )
 	{
-		ni_generic_reset_caldac( setup, layout->adc_pregain_offset );
-		ni_generic_reset_caldac( setup, layout->adc_postgain_offset );
-		ni_generic_reset_caldac( setup, layout->adc_gain );
-		ni_generic_reset_caldac( setup, layout->adc_pregain_offset_fine );
-		ni_generic_reset_caldac( setup, layout->adc_postgain_offset_fine );
-		ni_generic_reset_caldac( setup, layout->adc_gain_fine );
-		ni_generic_reset_caldac( setup, layout->adc_unip_offset );
+		reset_caldac( setup, layout->adc_pregain_offset );
+		reset_caldac( setup, layout->adc_postgain_offset );
+		reset_caldac( setup, layout->adc_gain );
+		reset_caldac( setup, layout->adc_pregain_offset_fine );
+		reset_caldac( setup, layout->adc_postgain_offset_fine );
+		reset_caldac( setup, layout->adc_gain_fine );
+		reset_caldac( setup, layout->adc_unip_offset );
 	}else
 	{
 		retval = comedi_apply_calibration( setup->dev, setup->ad_subdev,
@@ -1054,19 +1072,19 @@ static void prep_adc_caldacs_generic( calibration_setup_t *setup,
 		if( retval < 0 )
 		{
 			DPRINT( 0, "Failed to apply existing calibration, reseting adc caldacs.\n" );
-			ni_generic_reset_caldac( setup, layout->adc_pregain_offset );
-			ni_generic_reset_caldac( setup, layout->adc_postgain_offset );
-			ni_generic_reset_caldac( setup, layout->adc_gain );
-			ni_generic_reset_caldac( setup, layout->adc_pregain_offset_fine );
-			ni_generic_reset_caldac( setup, layout->adc_postgain_offset_fine );
-			ni_generic_reset_caldac( setup, layout->adc_gain_fine );
-			ni_generic_reset_caldac( setup, layout->adc_unip_offset );
+			reset_caldac( setup, layout->adc_pregain_offset );
+			reset_caldac( setup, layout->adc_postgain_offset );
+			reset_caldac( setup, layout->adc_gain );
+			reset_caldac( setup, layout->adc_pregain_offset_fine );
+			reset_caldac( setup, layout->adc_postgain_offset_fine );
+			reset_caldac( setup, layout->adc_gain_fine );
+			reset_caldac( setup, layout->adc_unip_offset );
 		}
 	}
 }
 
 static void prep_dac_caldacs_generic( calibration_setup_t *setup,
-	const ni_caldac_layout_t *layout, unsigned int channel )
+	const ni_caldac_layout_t *layout, unsigned int channel, unsigned int range )
 {
 	int retval;
 
@@ -1074,51 +1092,23 @@ static void prep_dac_caldacs_generic( calibration_setup_t *setup,
 
 	if( setup->do_reset )
 	{
-		ni_generic_reset_caldac( setup, layout->dac_offset[ channel ] );
-		ni_generic_reset_caldac( setup, layout->dac_gain[ channel ] );
-		ni_generic_reset_caldac( setup, layout->dac_gain_fine[ channel ] );
-		ni_generic_reset_caldac( setup, layout->dac_linearity[ channel ] );
+		reset_caldac( setup, layout->dac_offset[ channel ] );
+		reset_caldac( setup, layout->dac_gain[ channel ] );
+		reset_caldac( setup, layout->dac_gain_fine[ channel ] );
+		reset_caldac( setup, layout->dac_linearity[ channel ] );
 	}else
 	{
 		retval = comedi_apply_calibration( setup->dev, setup->da_subdev,
-			channel, 0, AREF_GROUND, setup->cal_save_file_path);
+			channel, range, AREF_GROUND, setup->cal_save_file_path);
 		if( retval < 0 )
 		{
 			DPRINT( 0, "Failed to apply existing calibration, reseting dac caldacs.\n" );
-			ni_generic_reset_caldac( setup, layout->dac_offset[ channel ] );
-			ni_generic_reset_caldac( setup, layout->dac_gain[ channel ] );
-			ni_generic_reset_caldac( setup, layout->dac_gain_fine[ channel ] );
-			ni_generic_reset_caldac( setup, layout->dac_linearity[ channel ] );
+			reset_caldac( setup, layout->dac_offset[ channel ] );
+			reset_caldac( setup, layout->dac_gain[ channel ] );
+			reset_caldac( setup, layout->dac_gain_fine[ channel ] );
+			reset_caldac( setup, layout->dac_linearity[ channel ] );
 		}
 	}
-}
-
-static void ni_generic_binary( calibration_setup_t *setup,
-	saved_calibration_t *saved_cal, int observable, int caldac )
-{
-	if( caldac < 0 ) return;
-
-	cal_binary( setup, observable, caldac );
-	sc_push_caldac( saved_cal, setup->caldacs[ caldac ] );
-}
-
-static void ni_generic_relative( calibration_setup_t *setup,
-	saved_calibration_t *saved_cal, int observable1, int observable2, int caldac )
-{
-	if( caldac < 0 ) return;
-
-	cal_relative_binary( setup, observable1, observable2, caldac );
-	sc_push_caldac( saved_cal, setup->caldacs[ caldac ] );
-}
-
-static void ni_generic_linearity( calibration_setup_t *setup,
-	saved_calibration_t *saved_cal, int observable1, int observable2,
-	int observable3, int caldac )
-{
-	if( caldac < 0 ) return;
-
-	cal_linearity_binary( setup, observable1, observable2, observable3, caldac );
-	sc_push_caldac( saved_cal, setup->caldacs[ caldac ] );
 }
 
 static int cal_ni_generic( calibration_setup_t *setup, const ni_caldac_layout_t *layout )
@@ -1134,18 +1124,18 @@ static int cal_ni_generic( calibration_setup_t *setup, const ni_caldac_layout_t 
 	prep_adc_caldacs_generic( setup, layout );
 
 	current_cal->subdevice = setup->ad_subdev;
-	ni_generic_relative( setup, current_cal, ni_zero_offset_low,
+	generic_do_relative( setup, current_cal, ni_zero_offset_low,
 		ni_reference_low, layout->adc_gain );
-	ni_generic_relative( setup, current_cal, ni_zero_offset_low,
+	generic_do_relative( setup, current_cal, ni_zero_offset_low,
 		ni_zero_offset_high, layout->adc_postgain_offset );
-	ni_generic_binary( setup, current_cal, ni_zero_offset_high, layout->adc_pregain_offset );
-	ni_generic_relative( setup, current_cal, ni_zero_offset_low,
+	generic_do_cal( setup, current_cal, ni_zero_offset_high, layout->adc_pregain_offset );
+	generic_do_relative( setup, current_cal, ni_zero_offset_low,
 		ni_reference_low, layout->adc_gain_fine );
-	ni_generic_relative( setup, current_cal, ni_zero_offset_low,
+	generic_do_relative( setup, current_cal, ni_zero_offset_low,
 		ni_zero_offset_high, layout->adc_postgain_offset_fine );
-	ni_generic_binary( setup, current_cal, ni_zero_offset_high,
+	generic_do_cal( setup, current_cal, ni_zero_offset_high,
 		layout->adc_pregain_offset_fine );
-	ni_generic_binary( setup, current_cal, ni_unip_zero_offset_high, layout->adc_unip_offset );
+	generic_do_cal( setup, current_cal, ni_unip_zero_offset_high, layout->adc_unip_offset );
 	sc_push_channel( current_cal, SC_ALL_CHANNELS );
 	sc_push_range( current_cal, SC_ALL_RANGES );
 	sc_push_aref( current_cal, SC_ALL_AREFS );
@@ -1155,22 +1145,23 @@ static int cal_ni_generic( calibration_setup_t *setup, const ni_caldac_layout_t 
 	{
 		unsigned int channel, range;
 		int ao_unipolar_lowgain = get_unipolar_lowgain( setup->dev, setup->da_subdev );
+		int ao_bipolar_lowgain = get_bipolar_lowgain( setup->dev, setup->da_subdev );
 		int num_ao_ranges;
 
 		for( channel = 0; channel < 2; channel++ )
 		{
 			num_ao_ranges = comedi_get_n_ranges( setup->dev, setup->da_subdev, channel );
-			prep_dac_caldacs_generic( setup, layout, channel );
+			prep_dac_caldacs_generic( setup, layout, channel, ao_bipolar_lowgain );
 
 			current_cal->subdevice = setup->da_subdev;
-			ni_generic_linearity( setup, current_cal, ni_ao_linearity( channel ),
+			generic_do_linearity( setup, current_cal, ni_ao_linearity( channel ),
 				ni_ao_zero_offset( channel ), ni_ao_reference( channel ),
 				layout->dac_linearity[ channel ] );
-			ni_generic_binary( setup, current_cal, ni_ao_zero_offset( channel ),
+			generic_do_cal( setup, current_cal, ni_ao_zero_offset( channel ),
 				layout->dac_offset[ channel ] );
-			ni_generic_binary( setup, current_cal, ni_ao_reference( channel ),
+			generic_do_cal( setup, current_cal, ni_ao_reference( channel ),
 				layout->dac_gain[ channel ] );
-			ni_generic_binary( setup, current_cal, ni_ao_reference( channel ),
+			generic_do_cal( setup, current_cal, ni_ao_reference( channel ),
 				layout->dac_gain_fine[ channel ] );
 			sc_push_channel( current_cal, channel );
 			for( range = 0; range < num_ao_ranges; range++ )
@@ -1183,17 +1174,17 @@ static int cal_ni_generic( calibration_setup_t *setup, const ni_caldac_layout_t 
 
 			if( ao_unipolar_lowgain >= 0 )
 			{
-				prep_dac_caldacs_generic( setup, layout, channel );
+				prep_dac_caldacs_generic( setup, layout, channel, ao_unipolar_lowgain );
 
 				current_cal->subdevice = setup->da_subdev;
-				ni_generic_linearity( setup, current_cal, ni_ao_unip_zero_offset( channel ),
+				generic_do_linearity( setup, current_cal, ni_ao_unip_zero_offset( channel ),
 					ni_ao_unip_linearity( channel ), ni_ao_unip_reference( channel ),
 					layout->dac_linearity[ channel ] );
-				ni_generic_binary( setup, current_cal, ni_ao_unip_zero_offset( channel),
+				generic_do_cal( setup, current_cal, ni_ao_unip_zero_offset( channel),
 					layout->dac_offset[ channel ] );
-				ni_generic_binary( setup, current_cal, ni_ao_unip_reference( channel ),
+				generic_do_cal( setup, current_cal, ni_ao_unip_reference( channel ),
 					layout->dac_gain[ channel ] );
-				ni_generic_binary( setup, current_cal, ni_ao_unip_reference( channel ),
+				generic_do_cal( setup, current_cal, ni_ao_unip_reference( channel ),
 					layout->dac_gain_fine[ channel ] );
 				sc_push_channel( current_cal, channel );
 				for( range = 0; range < num_ao_ranges; range++ )

@@ -786,9 +786,10 @@ void setup_caldacs( calibration_setup_t *setup, int caldac_subdev )
 	setup->n_caldacs += n_chan;
 }
 
-void reset_caldac( calibration_setup_t *setup, unsigned int caldac_index )
+void reset_caldac( calibration_setup_t *setup, int caldac_index )
 {
 	assert( caldac_index < setup->n_caldacs );
+	if( caldac_index < 0 ) return;
 	update_caldac( setup, caldac_index, setup->caldacs[ caldac_index ].maxdata / 2 );
 }
 
@@ -1441,4 +1442,5 @@ double very_low_target( comedi_t *dev, unsigned int subdevice,
 
 	return comedi_to_phys( 1, range_ptr, max_data ) / 2.0;
 }
+
 

@@ -11,7 +11,7 @@
 #ifndef __CALIB_H_
 #define __CALIB_H_
 
-#include <comedilib.h>
+#include "comedilib.h"
 #if 0
 #include <stdio.h>
 #include <fcntl.h>
@@ -93,7 +93,7 @@ void observe( calibration_setup_t *setup );
 int preobserve( calibration_setup_t *setup, int obs);
 void observable_dependence( calibration_setup_t *setup, int obs);
 void measure_observable( calibration_setup_t *setup, int obs);
-void reset_caldac( calibration_setup_t *setup, unsigned int caldac_index );
+void reset_caldac( calibration_setup_t *setup, int caldac_index );
 void reset_caldacs( calibration_setup_t *setup);
 
 /* drivers */
@@ -245,6 +245,33 @@ void sc_push_channel( saved_calibration_t *saved_cal, int channel );
 void sc_push_range( saved_calibration_t *saved_cal, int range );
 void sc_push_aref( saved_calibration_t *saved_cal, int aref );
 void clear_saved_calibration( saved_calibration_t *saved_cal );
+
+/* generic calibration support */
+typedef struct
+{
+	int (*adc_offset)( unsigned int channel );
+	int (*adc_gain)( unsigned int channel );
+	int (*dac_offset)( unsigned int channel );
+	int (*dac_gain)( unsigned int channel );
+	int (*adc_high_observable)( unsigned int channel, unsigned int range );
+	int (*adc_ground_observable)( unsigned int channel, unsigned int range );
+	int (*dac_high_observable)( unsigned int channel, unsigned int range );
+	int (*dac_ground_observable)( unsigned int channel, unsigned int range );
+} generic_layout_t;
+void init_generic_layout( generic_layout_t *layout );
+int generic_cal_by_channel_and_range( calibration_setup_t *setup,
+	const generic_layout_t *layout  );
+void generic_do_cal( calibration_setup_t *setup,
+	saved_calibration_t *saved_cal, int observable, int caldac );
+void generic_do_relative( calibration_setup_t *setup,
+	saved_calibration_t *saved_cal, int observable1, int observable2, int caldac );
+void generic_do_linearity( calibration_setup_t *setup,
+	saved_calibration_t *saved_cal, int observable1, int observable2,
+	int observable3, int caldac );
+void generic_prep_adc_caldacs( calibration_setup_t *setup,
+	const generic_layout_t *layout, unsigned int channel, unsigned int range );
+void generic_prep_dac_caldacs( calibration_setup_t *setup,
+	const generic_layout_t *layout, unsigned int channel, unsigned int range );
 
 #endif
 
