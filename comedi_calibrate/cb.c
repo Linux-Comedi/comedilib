@@ -110,10 +110,12 @@ int cb_setup( calibration_setup_t *setup, const char *device_name )
 
 static int setup_cb_pci_1xxx( calibration_setup_t *setup )
 {
+	int retval;
 	static const int caldac_subdev = 4;
 	static const int calpot_subdev = 5;
 
-	init_observables_1xxx( setup );
+	retval = init_observables_1xxx( setup );
+	if( retval < 0 ) return retval;
 	setup_caldacs( setup, caldac_subdev );
 	setup_caldacs( setup, calpot_subdev );
 	setup->do_cal = cal_cb_pci_1xxx;
@@ -122,11 +124,13 @@ static int setup_cb_pci_1xxx( calibration_setup_t *setup )
 
 static int setup_cb_pci_1602_16( calibration_setup_t *setup )
 {
+	int retval;
 	static const int caldac_subdev = 4;
 	static const int calpot_subdev = 5;
 	static const int dac08_subdev = 6;
 
-	init_observables_1xxx( setup );
+	retval = init_observables_1xxx( setup );
+	if( retval < 0 ) return retval;
 	setup_caldacs( setup, caldac_subdev );
 	setup_caldacs( setup, calpot_subdev );
 	setup_caldacs( setup, dac08_subdev );
