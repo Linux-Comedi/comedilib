@@ -123,6 +123,10 @@ int comedi_get_cmd_src_mask(comedi_t *it,unsigned int s,comedi_cmd *cmd)
 {
 	memset(cmd,0,sizeof(*cmd));
 
+	if(!(comedi_get_subdevice_flags(it,s)&SDF_CMD)){
+		return -1;
+	}
+
 	cmd->subdev = s;
 
 	cmd->flags = 0;
@@ -141,7 +145,8 @@ int comedi_get_cmd_fast_1chan(comedi_t *it,unsigned int s,comedi_cmd *cmd)
 {
 	int ret;
 
-	comedi_get_cmd_src_mask(it,s,cmd);
+	ret = comedi_get_cmd_src_mask(it,s,cmd);
+	if(ret<0)return ret;
 
 	cmd->chanlist_len = 1;
 
