@@ -157,6 +157,20 @@ comedi_calibration_setting_t* sc_alloc_calibration_setting( calibration_setup_t 
 
 void sc_push_caldac( comedi_calibration_setting_t *saved_cal, caldac_t caldac )
 {
+	int i;
+
+	/* check if caldac is already listed, in which case we just update */
+	for( i = 0; i < saved_cal->num_caldacs; i++ )
+	{
+		if( saved_cal->caldacs[ i ].subdevice != caldac.subdev ) continue;
+		if( saved_cal->caldacs[ i ].channel != caldac.chan ) continue;
+		break;
+	}
+	if( i < saved_cal->num_caldacs )
+	{
+		saved_cal->caldacs[ i ].value = caldac.current;
+		return;
+	}
 	saved_cal->caldacs = realloc( saved_cal->caldacs,
 		( saved_cal->num_caldacs + 1 ) * sizeof( caldac_t ) );
 	if( saved_cal->caldacs == NULL )
