@@ -2,12 +2,12 @@
 include ../Config
 
 
-CFLAGS += -I../include
+CFLAGS += -I../include 
 LDFLAGS += -L../lib/ -lcomedi -lm
 
 
 BINS = comedi_calibrate
-objs = comedi_calibrate.o ni.o cb.o other.o
+objs = comedi_calibrate.o ni.o cb.o other.o save_cal.o
 
 all: $(BINS)
 

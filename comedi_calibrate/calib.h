@@ -30,7 +30,7 @@ typedef struct{
 
 	int type;
 	double gain;
-}caldac;
+}caldac_t;
 
 typedef struct{
 	char *name;
@@ -57,7 +57,7 @@ struct calibration_setup_struct {
 	unsigned int settling_time_ns;
 	observable observables[ N_OBSERVABLES ];
 	unsigned int n_observables;
-	caldac caldacs[ N_CALDACS ];
+	caldac_t caldacs[ N_CALDACS ];
 	unsigned int n_caldacs;
 	int (*do_cal) ( calibration_setup_t *setup );
 };

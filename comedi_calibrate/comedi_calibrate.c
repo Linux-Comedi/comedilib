@@ -661,7 +661,7 @@ void reset_caldacs( calibration_setup_t *setup )
 void update_caldac( calibration_setup_t *setup, unsigned int caldac_index )
 {
 	int ret;
-	caldac *dac = &setup->caldacs[ caldac_index ];
+	caldac_t *dac = &setup->caldacs[ caldac_index ];
 
 	if( caldac_index > setup->n_caldacs )
 	{
