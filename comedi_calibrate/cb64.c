@@ -68,7 +68,7 @@ static struct board_struct boards[]={
 	{ "pci-das6031",	STATUS_GUESS,	setup_cb_pci_603x },
 	{ "pci-das6032",	STATUS_GUESS,	setup_cb_pci_603x },
 	{ "pci-das6033",	STATUS_GUESS,	setup_cb_pci_603x },
-	{ "pci-das6034",	STATUS_GUESS,	setup_cb_pci_603x },
+	{ "pci-das6034",	STATUS_DONE,	setup_cb_pci_603x },
 	{ "pci-das6035",	STATUS_GUESS,	setup_cb_pci_603x },
 	{ "pci-das6036",	STATUS_GUESS,	setup_cb_pci_603x },
 	{ "pci-das6040",	STATUS_GUESS,	setup_cb_pci_60xx },
