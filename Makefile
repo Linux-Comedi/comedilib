@@ -99,12 +99,9 @@ subdirs:	dummy
 
 clean:	dummy
 	set -e;for i in $(SUBDIRS);do ${MAKE} clean -C $$i ; done
-ifeq ($(with_python),yes)
+	# These will fail if nothing was built, but that's not a problem
 	-$(MAKE) -C python distclean
-endif
-ifeq ($(with_perl),yes)
 	-$(MAKE) -C perl distclean
-endif
 
 distclean:	clean
 
