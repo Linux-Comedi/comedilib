@@ -57,6 +57,11 @@ typedef unsigned short sampl_t;
 #define CR_RANGE(a)	(((a)>>16)&0xff)
 #define CR_AREF(a)	(((a)>>24)&0x03)
 
+#define CR_ALT_FILTER	(1<<26)
+#define CR_DITHER		CR_ALT_FILTER
+#define CR_DEGLITCH		CR_ALT_FILTER
+#define CR_INVERT	(1<<31)
+
 #define AREF_GROUND	0x00		/* analog ref = analog ground */
 #define AREF_COMMON	0x01		/* analog ref = analog common */
 #define AREF_DIFF	0x02		/* analog ref = differential */
@@ -108,7 +113,7 @@ typedef unsigned short sampl_t;
 //#define TRIG_RT	0x0008		/* perform op in real time */
 #define TRIG_CONFIG	0x0010		/* perform configuration, not triggering */
 //#define TRIG_WAKE_EOS	0x0020		/* wake up on end-of-scan events */
-#define TRIG_WRITE	0x0040		/* write to bidirectional devices */
+//#define TRIG_WRITE	0x0040		/* write to bidirectional devices */
 
 /* command flags */
 /* These flags are used in comedi_cmd structures */
@@ -117,6 +122,11 @@ typedef unsigned short sampl_t;
 
 #define TRIG_RT		CMDF_PRIORITY /* compatibility definition */
 #define TRIG_WAKE_EOS		0x00000020 /* legacy definition for COMEDI_EV_SCAN_END */
+
+#define CMDF_WRITE		0x00000040
+#define TRIG_WRITE	CMDF_WRITE /* compatibility definition */
+
+#define CMDF_RAWDATA		0x00000080
 
 #define COMEDI_EV_START		0x00040000
 #define COMEDI_EV_SCAN_BEGIN	0x00080000
@@ -190,9 +200,16 @@ typedef unsigned short sampl_t;
 #define COMEDI_SUBD_CALIB               9	/* calibration DACs */
 #define COMEDI_SUBD_PROC                10	/* processor, DSP */
 
+/* configuration instructions */
 
 #define COMEDI_INPUT			0
 #define COMEDI_OUTPUT			1
+#define COMEDI_OPENDRAIN		2
+
+#define INSN_CONFIG_ANALOG_TRIG		0x10
+//#define INSN_CONFIG_WAVEFORM		0x11
+//#define INSN_CONFIG_TRIG		0x12
+//#define INSN_CONFIG_COUNTER		0x13
 
 /* ioctls */
 
@@ -367,6 +384,7 @@ struct comedi_bufinfo_struct{
 #define UNIT_mA			1
 #define UNIT_none		2
 
+#define COMEDI_MIN_SPEED	((unsigned int)0xffffffff)
 
 /* callback stuff */
 /* only relevant to kernel modules. */
