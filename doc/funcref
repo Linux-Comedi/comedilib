@@ -711,8 +711,10 @@ Param: comedi_cmd * command
 Description:
  The function comedi_command() starts streaming input or output.  The
  command structure pointed to by the parameter command specifies the
- acquisition.  For input subdevices, sample values are read using the
- function read().  For output subdevices, sample vlaues are written
+ acquisition.  The command must be able to pass comedi_command_test()
+ with a return value of 0, or comedi_command() will fail.
+ For input subdevices, sample values are read using the
+ function read().  For output subdevices, sample values are written
  using the function write().
 
  If sucessful, 0 is returned, otherwise -1.
@@ -729,7 +731,35 @@ Description:
  elements are modified to remove invalid source triggers.  Argument
  elements are adjusted or rounded to the nearest valid value.
 
- XXX return values.
+ The meanings of the return value are as follows.
+
+ 0 indicates a valid command.
+
+ 1 indicates that one of the *_src
+ members of the command contained an
+ unsupported trigger.  The bits corresponding to the unsupported
+ triggers are zeroed.
+
+ 2 indicates that the particular combination
+ of *_src settings is not supported by the driver, or that
+ one of the *_src members has the bit corresponding to
+ multiple trigger sources set at the same time.
+
+ 3 indicates that one of the *_arg members
+ of the command is set outside the range of allowable values.
+ For instance, an argument for a TRIG_TIMER source which
+ exceeds the board's maximum speed.  The invalid *_arg
+ members will be adjusted to valid values.
+
+ 4 indicates that one of the *_arg members
+ required adjustment.  For instance, the argument of a
+ TRIG_TIMER source may have been rounded to the nearest
+ timing period supported by the board.
+
+ 5 indicates that some aspect of the
+ command's chanlist is unsupported by the board.  For example,
+ some board's require that all channels in the chanlist
+ use the same range.
 
 Function: comedi_poll -- force updating of streaming buffer
 Retval: int
