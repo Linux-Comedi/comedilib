@@ -44,7 +44,7 @@ void initialize(void)
 	__comedi_init=1;
 
 	if( (s=getenv("COMEDILIB_LOGLEVEL")) ){
-		sscanf(s,"%d",&__comedi_loglevel);
+		__comedi_loglevel=strtol(s,NULL,10);
 		fprintf(stderr,"setting loglevel to %d\n",__comedi_loglevel);
 	}
 }
