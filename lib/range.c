@@ -140,7 +140,7 @@ int comedi_range_is_chan_specific(comedi_t *it,unsigned int subd)
 	return (it->subdevices[subd].subd_flags&SDF_RANGETYPE)?1:0;
 }
 
-EXPORT_SYMBOL(comedi_sampl_to_phys,0.7.19);
+EXPORT_SYMBOL(comedi_sampl_to_phys,0.7.18);
 int comedi_sampl_to_phys(double *dest, int dst_stride, sampl_t *src,
 	int src_stride, comedi_range *rng, lsampl_t maxdata, int n)
 {
@@ -177,7 +177,7 @@ int comedi_sampl_to_phys(double *dest, int dst_stride, sampl_t *src,
 	return oor;
 }
 
-EXPORT_SYMBOL(comedi_sampl_from_phys,0.7.19);
+EXPORT_SYMBOL(comedi_sampl_from_phys,0.7.18);
 int comedi_sampl_from_phys(sampl_t *dest,int dst_stride,double *src,
 	int src_stride, comedi_range *rng, lsampl_t maxdata, int n)
 {

@@ -90,7 +90,7 @@ int comedi_get_subdevice_type(comedi_t *it,unsigned int subd)
 	return it->subdevices[subd].type;
 }
 
-EXPORT_SYMBOL(comedi_get_subdevice_type,0.7.18);
+EXPORT_SYMBOL(comedi_find_subdevice_by_type,0.7.18);
 int comedi_find_subdevice_by_type(comedi_t *it,int type,unsigned int subd)
 {
 	if(!valid_subd(it,subd))
@@ -103,7 +103,7 @@ int comedi_find_subdevice_by_type(comedi_t *it,int type,unsigned int subd)
 	return -1;
 }
 
-EXPORT_SYMBOL(comedi_get_read_subdevice,0.7.18);
+EXPORT_SYMBOL(comedi_get_read_subdevice,0.7.19);
 int comedi_get_read_subdevice(comedi_t *dev)
 {
 	if(!valid_dev(dev))
@@ -112,7 +112,7 @@ int comedi_get_read_subdevice(comedi_t *dev)
 	return dev->devinfo.read_subdevice;
 }
 
-EXPORT_SYMBOL(comedi_get_write_subdevice,0.7.18);
+EXPORT_SYMBOL(comedi_get_write_subdevice,0.7.19);
 int comedi_get_write_subdevice(comedi_t *dev)
 {
 	if(!valid_dev(dev))

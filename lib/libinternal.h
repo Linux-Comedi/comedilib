@@ -128,9 +128,9 @@ struct subdevice_struct{
 
 
 #define comedi_ioctl ioctl
-//#define comedi_ioctl comedi_ioctl_debug
+//#define comedi_ioctl _comedi_ioctl_debug
 
-int comedi_ioctl_debug(int,int,unsigned long);
+int _comedi_ioctl_debug(int,int,unsigned long);
 
 /* filler routines */
 

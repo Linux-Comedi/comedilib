@@ -143,7 +143,7 @@ static inline int comedi_internal_data_read_n(comedi_t *it,
 	}
 }
 
-EXPORT_SYMBOL(comedi_data_read_n,0.7.19);
+EXPORT_SYMBOL(comedi_data_read_n,0.7.18);
 int comedi_data_read_n(comedi_t *it, unsigned int subdev,
 	unsigned int chan, unsigned int range,
 	unsigned int aref, lsampl_t *data, unsigned int n)

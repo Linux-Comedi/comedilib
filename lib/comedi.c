@@ -83,7 +83,7 @@ cleanup:
 	return NULL;
 }
 
-EXPORT_SYMBOL(comedi_open,0.7.18);
+EXPORT_SYMBOL(comedi_close,0.7.18);
 int comedi_close(comedi_t *it)
 {
 	subdevice *s;

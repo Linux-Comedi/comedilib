@@ -59,7 +59,7 @@ int comedi_errno(void)
 	return __comedi_errno;
 }
 
-EXPORT_SYMBOL(comedi_strerr,0.7.18);
+EXPORT_SYMBOL(comedi_strerror,0.7.18);
 char *comedi_strerror(int errnum)
 {
 	if(errnum<COMEDI_NOERROR || errnum>=COMEDI_NOERROR+n_errors)

@@ -39,7 +39,7 @@
 /* ioctl wrappers */
 
 
-int comedi_ioctl_debug(int fd, int request, unsigned long arg)
+int _comedi_ioctl_debug(int fd, int request, unsigned long arg)
 {
 	int ret;
 
