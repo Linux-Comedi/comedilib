@@ -32,13 +32,13 @@ static int check_cal_file( comedi_t *dev, struct calibration_file_contents *pars
 {
 	if( strcmp( comedi_get_driver_name( dev ), parsed_file->driver_name ) )
 	{
-		fprintf( stderr, "driver name does not match calibration file\n" );
+		COMEDILIB_DEBUG( 3, "driver name does not match calibration file\n" );
 		return -1;
 	}
 
 	if( strcmp( comedi_get_board_name( dev ), parsed_file->board_name ) )
 	{
-		fprintf( stderr, "board name does not match calibration file\n" );
+		COMEDILIB_DEBUG( 3, "board name does not match calibration file\n" );
 		return -1;
 	}
 
@@ -108,7 +108,11 @@ static int find_calibration( struct calibration_file_contents *parsed_file,
 		if( valid_aref( parsed_file, i, aref ) == 0 ) continue;
 		break;
 	}
-	if( i == num_cals ) return -1;
+	if( i == num_cals )
+	{
+		COMEDILIB_DEBUG( 3, "failed to find matching calibration\n" );
+		return -1;
+	}
 
 	return i;
 }
@@ -119,13 +123,15 @@ static int set_calibration( comedi_t *dev, struct calibration_file_contents *par
 	int i, retval, num_caldacs;
 
 	num_caldacs = parsed_file->calibrations[ cal_index ].num_caldacs;
+	COMEDILIB_DEBUG( 4, "num_caldacs %i\n", num_caldacs );
 
 	for( i = 0; i < num_caldacs; i++ )
 	{
 		struct caldac_setting caldac;
 
 		caldac = parsed_file->calibrations[ cal_index ].caldacs[ i ];
-
+		COMEDILIB_DEBUG( 4, "subdev %i, ch %i, val %i\n", caldac.subdevice,
+			caldac.channel,caldac.value);
 		retval = comedi_data_write( dev, caldac.subdevice, caldac.channel,
 			0, 0, caldac.value );
 		if( retval < 0 ) return retval;
@@ -152,7 +158,7 @@ int comedi_apply_calibration( comedi_t *dev, unsigned int subdev, unsigned int c
 	{
 		if( fstat( comedi_fileno( dev ), &file_stats ) < 0 )
 		{
-			fprintf( stderr, "failed to get file stats of comedi device file\n" );
+			COMEDILIB_DEBUG( 3, "failed to get file stats of comedi device file\n" );
 			return -1;
 		}
 
@@ -162,10 +168,18 @@ int comedi_apply_calibration( comedi_t *dev, unsigned int subdev, unsigned int c
 	}
 
 	cal_file = fopen( file_path, "r" );
-	if( cal_file == NULL ) return -1;
+	if( cal_file == NULL )
+	{
+		COMEDILIB_DEBUG( 3, "failed to open file\n" );
+		return -1;
+	}
 
 	parsed_file = parse_calibration_file( cal_file );
-	if( parsed_file == NULL ) return -1;
+	if( parsed_file == NULL )
+	{
+		COMEDILIB_DEBUG( 3, "failed to parse calibration file\n" );
+		return -1;
+	}
 
 	fclose( cal_file );
 
@@ -184,7 +198,7 @@ int comedi_apply_calibration( comedi_t *dev, unsigned int subdev, unsigned int c
 	}
 
 	retval = set_calibration( dev, parsed_file, cal_index );
-	if( retval < 0 );
+	if( retval < 0 )
 	{
 		cleanup_calibration_parse( parsed_file );
 		return retval;
