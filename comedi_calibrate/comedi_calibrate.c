@@ -967,7 +967,7 @@ double check_gain_chan_x( calibration_setup_t *setup, linear_fit_t *l,unsigned i
 	n = setup->caldacs[cdac].maxdata+1;
 	memset(l,0,sizeof(*l));
 
-	step=n/256;
+	step=n/16;
 	if(step<1)step=1;
 	l->n=0;
 
@@ -1005,7 +1005,7 @@ double check_gain_chan_x( calibration_setup_t *setup, linear_fit_t *l,unsigned i
 
 	update_caldac( setup, cdac, orig );
 
-	l->yerr=sum_err/sum_err_count;
+	l->yerr=sum_err/sqrt(sum_err_count);
 	l->dx=step;
 	l->x0=0;
 
@@ -1076,7 +1076,7 @@ double check_gain_chan_fine( calibration_setup_t *setup, linear_fit_t *l,unsigne
 
 	update_caldac( setup, cdac, orig );
 
-	l->yerr=sum_err/sum_err_count;
+	l->yerr=sum_err/sqrt(sum_err_count);
 	l->dx=1;
 	l->x0=orig-fine_size;
 
@@ -1294,7 +1294,7 @@ int new_sv_measure( comedi_t *dev, new_sv_t *sv)
 	lsampl_t *data;
 	int n,i,ret;
 
-	double a,x,s,s2;
+	double x,s,s2;
 
 	n=1<<sv->order;
 
@@ -1320,15 +1320,16 @@ int new_sv_measure( comedi_t *dev, new_sv_t *sv)
 
 	s=0;
 	s2=0;
-	a=comedi_to_phys(data[0],sv->rng,sv->maxdata);
-	for(i=0;i<n;i++){
-		x=comedi_to_phys(data[i],sv->rng,sv->maxdata);
-		s+=x-a;
-		s2+=(x-a)*(x-a);
+	for(i = 0; i < n; i++){
+		x = comedi_to_phys(data[i], sv->rng, sv->maxdata);
+		s += x;
+		s2 += x * x;
 	}
-	sv->average=a+s/n;
-	sv->stddev=sqrt(n*s2-s*s)/n;
-	sv->error=sv->stddev/sqrt(n);
+	s /= n;
+	s2 /= n;
+	sv->average=s;
+	sv->stddev=sqrt( ( ( n + 1 ) / n ) * ( s2 - s * s ) );
+	sv->error=sv->stddev / sqrt( n );
 
 	ret=n;
 
@@ -1342,7 +1343,7 @@ int new_sv_measure_order( comedi_t *dev, new_sv_t *sv,int order)
 {
 	lsampl_t *data;
 	int n,i,ret;
-	double a,x,s,s2;
+	double x,s,s2;
 
 	n=1<<order;
 
@@ -1361,15 +1362,16 @@ int new_sv_measure_order( comedi_t *dev, new_sv_t *sv,int order)
 
 	s=0;
 	s2=0;
-	a=comedi_to_phys(data[0],sv->rng,sv->maxdata);
-	for(i=0;i<n;i++){
-		x=comedi_to_phys(data[i],sv->rng,sv->maxdata);
-		s+=x-a;
-		s2+=(x-a)*(x-a);
+	for(i = 0; i < n; i++){
+		x = comedi_to_phys(data[i], sv->rng, sv->maxdata);
+		s += x;
+		s2 += x * x;
 	}
-	sv->average=a+s/n;
-	sv->stddev=sqrt(n*s2-s*s)/n;
-	sv->error=sv->stddev/sqrt(n);
+	s /= n;
+	s2 /= n;
+	sv->average = s;
+	sv->stddev=sqrt( ( ( n + 1 ) / n ) * ( s2 - s * s ) );
+	sv->error=sv->stddev / sqrt( n );
 
 	ret=n;
 
