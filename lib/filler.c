@@ -248,7 +248,7 @@ static int do_test_for_insn_bits(comedi_t *dev,unsigned int subdevice)
 		return 0;
 	}
 	if(ret<0){
-		fprintf(stderr,"BUG in do_test_for_insn_bits()\n");
+		perror("BUG in do_test_for_insn_bits()\n");
 		return 0;
 	}
 	return 1;
