@@ -28,7 +28,7 @@
 
 jmp_buf jump_env;
 
-void segv_handler(int num,siginfo_t *si,void *x)
+void segv_handler(int num)
 {
 	longjmp(jump_env,1);
 }
@@ -48,8 +48,7 @@ void setup_segfaulter(void)
 	struct sigaction act;
 
 	memset(&act,0,sizeof(act));
-	act.sa_sigaction=&segv_handler;
-	act.sa_flags = SA_SIGINFO;
+	act.sa_handler=&segv_handler;
 	sigaction(SIGSEGV,&act,NULL);
 }
 
