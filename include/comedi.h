@@ -3,7 +3,7 @@
     header file for comedi
 
     COMEDI - Linux Control and Measurement Device Interface
-    Copyright (C) 1998 David A. Schleef <ds@stm.lbl.gov>
+    Copyright (C) 1998-2000 David A. Schleef <ds@schleef.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -70,8 +70,7 @@ typedef unsigned short sampl_t;
 
 #define INSN_READ		( 0 | INSN_MASK_READ)
 #define INSN_WRITE		( 1 | INSN_MASK_WRITE)
-#define INSN_READBITS		( 2 | INSN_MASK_READ)
-#define INSN_WRITEBITS		( 3 | INSN_MASK_WRITE)
+#define INSN_BITS		( 2 | INSN_MASK_READ|INSN_MASK_WRITE)
 #define INSN_GTOD		( 4 | INSN_MASK_READ|INSN_MASK_SPECIAL)
 #define INSN_WAIT		( 5 | INSN_MASK_WRITE|INSN_MASK_SPECIAL)
 
@@ -207,6 +206,7 @@ struct comedi_insn_struct{
 	lsampl_t *data;
 	unsigned int subdev;
 	unsigned int chanspec;
+	unsigned int unused[3];
 };
 
 struct comedi_insnlist_struct{
@@ -346,7 +346,30 @@ int comedi_dio_write(unsigned int dev,unsigned int subdev,unsigned int chan,
 	unsigned int val);
 int comedi_dio_bitfield(unsigned int dev,unsigned int subdev,unsigned int mask,
 	unsigned int *bits);
+int comedi_get_n_subdevices(unsigned int dev);
+int comedi_get_version_code(unsigned int dev);
+char *comedi_get_driver_name(unsigned int dev);
+char *comedi_get_board_name(unsigned int minor);
+int comedi_get_subdevice_type(unsigned int minor,unsigned int subdevice);
+int comedi_find_subdevice_by_type(unsigned int minor,int type,unsigned int subd);
+int comedi_get_n_channels(unsigned int minor,unsigned int subdevice);
+lsampl_t comedi_get_maxdata(unsigned int minor,unsigned int subdevice,unsigned
+	int chan);
+int comedi_get_n_ranges(unsigned int minor,unsigned int subdevice,unsigned int
+	chan);
 
+
+
+/* ALPHA functions */
+unsigned int comedi_get_subdevice_flags(unsigned int minor,unsigned int
+	subdevice);
+int comedi_get_len_chanlist(unsigned int minor,unsigned int subdevice);
+int comedi_get_krange(unsigned int minor,unsigned int subdevice,unsigned int
+	chan, unsigned int range, comedi_krange *krange);
+unsigned int comedi_get_buf_head_pos(unsigned int minor,unsigned int
+	subdevice);
+int comedi_set_user_int_count(unsigned int minor,unsigned int subdevice,
+	unsigned int buf_user_count);
 
 #endif
 
