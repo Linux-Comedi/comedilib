@@ -230,24 +230,30 @@ ok:
 			"Please file a bug report at http://bugs.comedi.org/ and attach this output.\n"
 			"This output will also allow comedi_calibrate to execute more\n"
 			"quickly in the future.\n");
-		if(verbose<1)verbose=1;
+		if(verbose<1){
+			verbose=1;
+			printf("Forcing option: --verbose\n");
+		}
 		if(device_status==STATUS_UNKNOWN){
 			options.do_reset=1;
 			options.do_dump=1;
 			options.do_calibrate=0;
 			options.do_results=0;
+			printf("Forcing options: --reset --dump --no-calibrate --no-results\n");
 		}
 		if(device_status==STATUS_SOME){
 			options.do_reset=1;
 			options.do_dump=1;
 			options.do_calibrate=1;
 			options.do_results=1;
+			printf("Forcing options: --reset --dump --calibrate --results\n");
 		}
 		if(device_status==STATUS_GUESS){
 			options.do_reset=1;
 			options.do_dump=1;
 			options.do_calibrate=1;
 			options.do_results=1;
+			printf("Forcing options: --reset --dump --calibrate --results\n");
 		}
 	}
 	if(verbose>=0){
