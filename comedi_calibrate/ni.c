@@ -436,7 +436,9 @@ int cal_ni_pci_6071e(calibration_setup_t *setup)
 	if(do_output){
 		cal1( setup, ni_ao0_zero_offset,5);
 		//cal1( setup, ni_ao0_zero_offset,4); /* linearity? */
-		cal1( setup, ni_ao0_reference,6); /* guess.  Doesn't show up correctly in dump */
+		/* caldac 6 should most likely be AO0 reference, but it
+		 * isn't. */
+		/*cal1( setup, ni_ao0_reference,6);*/
 		cal1( setup, ni_ao1_zero_offset,8);
 		//cal1( setup, ni_ao1_zero_offset,7); /* linearity? */
 		cal1( setup, ni_ao1_reference,9);
