@@ -165,7 +165,13 @@ int _comedi_apply_parsed_calibration( comedi_t *dev, unsigned int subdev, unsign
 static void fixup_board_name( char *name )
 {
 	while( ( name = strchr( name, '/' ) ) )
-		if( name ) *name = '-';
+	{
+		if( name )
+		{
+			*name = '-';
+			name++;
+		}
+	}
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_get_default_calibration_path,comedi_get_default_calibration_path,0.7.20);
