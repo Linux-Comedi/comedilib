@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 <HTML>
 <HEAD>
- <META NAME="GENERATOR" CONTENT="LinuxDoc-Tools 0.9.7.4">
+ <META NAME="GENERATOR" CONTENT="LinuxDoc-Tools 0.9.8.1">
  <TITLE>Comedi Documentation: Libcomedi Reference</TITLE>
  <LINK HREF="comedilib-5.html" REL=previous>
  <LINK HREF="comedilib.html#toc6" REL=contents>
@@ -20,10 +20,36 @@ Next
 
 
 
-<H3><A NAME="CR_PACK"></A> CR_PACK(channel, range, aref)</H3>
+<H3><A NAME="CR_PACK"></A> CR_PACK()</H3>
 
 
-<P>undocumented</P>
+<P><CODE>CR_PACK(channel, range, aref)</CODE></P>
+<P><CODE>CR_PACK</CODE> is used to initialize the elements of the <CODE>chanlist array</CODE> in the
+<A HREF="#comedi_cmd">comedi_cmd</A> structure, and the <CODE>chanspec</CODE> member
+of the 
+<A HREF="#comedi_insn">comedi_insn</A> structure.</P>
+<P>The <CODE>channel</CODE> argument is the channel you wish to use, with the channel numbering
+starting at zero.</P>
+<P>The <CODE>range</CODE> is an index, starting at zero, whose meaning
+is device dependent.  The
+<A HREF="#comedi_get_n_ranges">comedi_get_n_ranges()</A> and
+<A HREF="#comedi_get_range">comedi_get_range()</A> functions
+are useful in discovering information about the available ranges.</P>
+<P>The <CODE>aref</CODE> argument indicates what reference you want the device to use.  It
+can be any of the following:
+<UL>
+<LI>AREF_GROUND is for inputs/outputs referenced to ground</LI>
+<LI>AREF_COMMON is for a `common' reference (the low inputs of all the channels are tied
+together, but are isolated from ground)</LI>
+<LI>AREF_DIFF   is for differential inputs/outputs</LI>
+<LI>AREF_OTHER  is for any reference that does not fit into the above categories</LI>
+</UL>
+
+Particular drivers may or may not use the AREF flags.  If they are not supported, they
+are silently ignored.</P>
+
+<P>Source: <CODE>/include/comedi.h</CODE></P>
+
 
 <H3>RANGE_LENGTH() <I>(deprecated)</I></H3>
 
@@ -142,9 +168,42 @@ details.</P>
 <H3><A NAME="comedi_cmd"></A> comedi_cmd</H3>
 
 
-<P>undocumented</P>
+<P>
+<BLOCKQUOTE><CODE>
+<PRE>
+typedef struct comedi_cmd_struct comedi_cmd;
 
-<P>Related functions are described in section XXX.</P>
+struct comedi_cmd_struct{
+        unsigned int subdev;
+        unsigned int flags;
+
+        unsigned int start_src;
+        unsigned int start_arg;
+
+        unsigned int scan_begin_src;
+        unsigned int scan_begin_arg;
+
+        unsigned int convert_src;
+        unsigned int convert_arg;
+
+        unsigned int scan_end_src;
+        unsigned int scan_end_arg;
+
+        unsigned int stop_src;
+        unsigned int stop_arg;
+
+        unsigned int *chanlist;
+        unsigned int chanlist_len;
+
+        sampl_t *data;
+        unsigned int data_len;
+};
+</PRE>
+</CODE></BLOCKQUOTE>
+</P>
+
+<P>More information on using commands can be found in the
+<A HREF="comedilib-5.html#command_section">command</A> section.</P>
 
 <P>This structure is defined as part of the Comedi kernel interface.</P>
 
@@ -189,7 +248,14 @@ order to match <CODE>fclose</CODE>.</P>
 
 
 <P><CODE>int comedi_command(comedi_t *it, comedi_cmd *cmd);</CODE></P>
-<P>undocumented</P>
+<P>Issues the command pointed at by <CODE>cmd</CODE> to the open device <CODE>it</CODE>.  It
+is usually necessary to pass the command through
+<A HREF="#comedi_command_test">comedi_command_test()</A> to
+fix up the command before it can be successfully executed with
+<CODE>comedi_command()</CODE>.
+See
+<A HREF="comedilib-5.html#command_section">commands</A> for more information.</P>
+
 <P>Source: <CODE>/lib/comedi.c</CODE></P>
 
 
@@ -197,7 +263,36 @@ order to match <CODE>fclose</CODE>.</P>
 
 
 <P><CODE>int comedi_command_test(comedi_t *it, comedi_cmd *cmd);</CODE></P>
-<P>undocumented</P>
+
+<P>Tests and fixes up the command pointed at by <CODE>cmd</CODE> according
+to the limitations of the driver configured on the open device <CODE>it</CODE>.
+The return value has the following meaning:
+<UL>
+<LI>0:  the command passed the test and can be successfully executed
+by 
+<A HREF="#comedi_command">comedi_command()</A>.  The one exception
+to this rule is that the test will allow a NULL chanlist for the command.</LI>
+<LI>1: invalid trigger.  One or more of the trigger sources (the *_src members
+of the 
+<A HREF="#comedi_cmd">comedi_cmd</A> structure) is not
+supported by the driver.</LI>
+<LI>2: incompatible triggers.  Two or more of the triggers selected are
+incompatible with each other.  For example, a driver might allow either
+the scan_begin_src or the convert_src to be TRIG_TIMER, but not both.</LI>
+<LI>3: argument invalid.  One or more argument is invalid, for example
+a timing argument might be in excess of the card's maximum speed.  The
+command test will correct the arguments by modifying the command pointed
+at by <CODE>cmd</CODE>.</LI>
+<LI>4: argument fix up.  The command underwent minor adjustment and should
+now be valid.  For example, a timing argument might not be exactly achievable
+by the card so the timing argument will be adjusted to the actual timing
+the card will use.</LI>
+<LI>negative: some other error has occured.</LI>
+</UL>
+
+See
+<A HREF="comedilib-5.html#command_section">commands</A> for more information.</P>
+
 <P>Source: <CODE>/lib/comedi.c</CODE></P>
 
 
@@ -417,7 +512,7 @@ is the same as the C library.</P>
 
 
 
-<H3>comedi_find_subdevice_by_type()</H3>
+<H3><A NAME="comedi_find_subdevice_by_type"></A> comedi_find_subdevice_by_type()</H3>
 
 
 <P><CODE>int comedi_find_subdevice_by_type(comedi_t *it,int type,unsigned int
@@ -512,7 +607,7 @@ and having index <CODE>subdevice</CODE>.  This function returns -1 on error.</P>
 
 
 
-<H3>comedi_get_n_ranges()</H3>
+<H3><A NAME="comedi_get_n_ranges"></A> comedi_get_n_ranges()</H3>
 
 
 <P><CODE>int comedi_get_n_ranges(comedi_t *it,unsigned int subdevice, unsigned int
@@ -535,7 +630,7 @@ number of subdevices associated with the comedi descriptor
 
 
 
-<H3>comedi_get_range()</H3>
+<H3><A NAME="comedi_get_range"></A> comedi_get_range()</H3>
 
 
 <P><CODE>comedi_range * comedi_get_range(comedi_t *it,unsigned int subdevice,unsigned int chan,unsigned int
@@ -907,8 +1002,6 @@ returns 0.  On error, this function returns -1.</P>
 <LI>comedi_get_cmd_src_mask()</LI>
 <LI>comedi_get_cmd_generic_timed()</LI>
 <LI>comedi_cancel()</LI>
-<LI>comedi_command()</LI>
-<LI>comedi_command_test()</LI>
 <LI>comedi_poll()</LI>
 <LI>comedi_get_buffer_contents()</LI>
 <LI>comedi_mark_buffer_read()</LI>

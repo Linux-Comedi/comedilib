@@ -270,12 +270,11 @@
        int main(int argc,char *argv[])
        {
                comedi_t *it;
-               int chan=0;
                lsampl_t data;
 
                it=comedi_open("/dev/comedi0");
 
-               comedi_data_read(it,subdev,chan,range,aref,XXX data);
+               comedi_data_read(it,subdev,chan,range,aref,&data);
 
                printf("%d\n",data);
 
@@ -284,9 +283,9 @@
 
 
 
-  Should be understandable.  Open the device, get the data, print it
-  out.  This is basically the guts of demo/inp.c, without error checking
-  or fancy options.  Compile it using
+  Should be understandable: open the device, get the data, print it out.
+  This is basically the guts of demo/inp.c, without error checking or
+  fancy options.  Compile it using
 
 
 
@@ -305,8 +304,8 @@
   44..22..  CCoonnvveerrttiinngg ssaammpplleess ttoo vvoollttaaggeess
 
 
-  If you selected an analog input subdevice, you should notice that the
-  output of tut1 is a number between 0 and 4095, or 0 and 65535,
+  If you selected an analog input subdevice, you probably noticed that
+  the output of tut1 is a number between 0 and 4095, or 0 and 65535,
   depending on the number of bits in the A/D converter.  Comedi samples
   are aallwwaayyss unsigned, with 0 representing the lowest voltage of the
   ADC, and 4095 the highest.  Comedi compensates for anything else the
@@ -318,8 +317,8 @@
   Most devices give you a choice of gain and unipolar/bipolar input, and
   Comedi allows you to select which of these to use.  This parameter is
   called the "range parameter", since it specifies the "input range" for
-  analog input (or "output range" analog output.)  The range parameter
-  represents both the gain and the unipolar/bipolar aspects.
+  analog input (or "output range" for analog output.)  The range
+  parameter represents both the gain and the unipolar/bipolar aspects.
 
   Comedi keeps the number of available ranges and the largest sample
   value for each subdevice/channel combination.  (Some devices allow
@@ -425,7 +424,7 @@
   added what we've learned.
        #include <stdio.h>      /* for printf() */
        #include <comedi.h>     /* also included by comedilib.h */
-       #include <comedilib.h>  /* for comedi_get() */
+       #include <comedilib.h>  /* 'cuz we're using comedilib */
 
        int subdev = 0;         /* change this to your input subdevice */
        int chan = 0;           /* change this to your channel */
@@ -446,7 +445,7 @@
 
                rangetype=comedi_get_rangetype(cf,subdev,chan);
 
-               comedi_data_read(cf->fd,subdev,chan,range,aref,XXX data);
+               comedi_data_read(cf->fd,subdev,chan,range,aref,&data);
 
                volts=comedi_to_phys(data,rangetype,range,maxdata);
 
@@ -570,67 +569,87 @@
   The source types are:
 
 
-  +o  TRIG_NONE:      don't ever cause an event, sometimes used as a
-     stop_src.
+  +o  TRIG_NONE:      don't ever cause an event
 
-  +o  TRIG_NOW:       cause event to occur immediately, the most common
-     start_src.  It is also used sometimes as a convert_src for 'burst
-     mode' aquisition where the individual channels in a scan are
-     scanned through as quickly as possible.
+  +o  TRIG_NOW:       cause event to occur immediately
 
-  +o  TRIG_FOLLOW:    see notes below, usually used as a scan_begin_src.
+  +o  TRIG_FOLLOW:    see notes below
 
   +o  TRIG_TIME:      cause event to occur at a particular time
 
-  +o  TRIG_TIMER:     cause event to occur repeatedly at a specific rate,
-     often used as a scan_begin_src or convert_src.
+  +o  TRIG_TIMER:     cause event to occur repeatedly at a specific rate
 
-  +o  TRIG_COUNT:     cause event when count reaches specific value,
-     almost always used as the scan_end_src and often for stop_src.
+  +o  TRIG_COUNT:     cause event when count reaches specific value
 
-  +o  TRIG_EXT:       external signal causes event, used as start_src for
-     externally triggered conversions, and as scan_begin_src or
-     convert_src for externally paced conversions.
+  +o  TRIG_EXT:       external signal causes event
 
-  +o  TRIG_INT:       internal signal causes event, will probably be used
-     as start_src for output commands in the future.
+  +o  TRIG_INT:       internal signal causes event
+
+  +o  TRIG_OTHER:     driver-specific meaning
+
+  Not all triggers are applicable to all events.  Supported triggers for
+  specific events depend significantly on your particular device.  The
+  ``comedi_get_cmd_src_mask()'' function is useful for determining what
+  triggers a subdevice supports.
 
   For every trigger, there is a corresponding argument (the *_arg
   members of the ``comedi_cmd'' structure) whose meaning depends on the
   type of trigger.  The meanings of the arguments are as follows:
 
+  TRIG_NONE is typically used only as a stop_src.  The argument for
+  TRIG_NONE is reserved and should be set to 0.
 
-  +o  trigger src = TRIG_NONE: argument has no meaning
+  TRIG_NOW is most often used as a start_src.  The argument for TRIG_NOW
+  is the number of nanoseconds between when the command is issued and
+  when the event should occur.  In the case of using TRIG now as a
+  start_src, it indicates a delay between issuing the command and the
+  start of acquisition.  Most drivers only support a delay of 0.
 
-  +o  trigger src = TRIG_NOW: argument is the delay in nanoseconds before
-     triggering
+  TRIG_FOLLOW is a special type of trigger for events that trigger on
+  the completion of some other, logically connected event.  The argument
+  is reserved and should be set to 0.  When used as a scan_begin_src, it
+  indicates that a trigger should occur as a logical continuation of
+  convert events.  This is done in order to properly describe boards
+  that do not have separate timers for convert and scan_begin events.
+  When used as a start_src for analog output subdevices, it indicates
+  that conversion of output samples should begin when samples are
+  written to the buffer.
 
-  +o  trigger src = TRIG_FOLLOW: argument has no meaning
+  TRIG_TIME is reserved for future use.
 
-  +o  trigger src = TRIG_TIME: argument is the time at which to trigger
-     (in what units??), but no drivers support this yet.
+  TRIG_TIMER is most often used as a convert_src, a scan_begin_src, or
+  both.  It indicates that triggers should occur at a specific rate.
+  The argument specifies the interval between triggers in nanoseconds.
 
-  +o  trigger src = TRIG_TIMER: argument is the period in nanoseconds
-     between triggers
+  TRIG_COUNT is used for scan_end_src and stop_src.  It indicates that a
+  trigger should occur when the specified number of corresponding lower-
+  level triggers (convert and scan_begin, respectively) occur.  The
+  argument is the count of lower-level triggers.
 
+  TRIG_EXT can be useful as any of the trigger sources.  It indicates
+  that an external digital line should be used to trigger the event.
+  The exact meaning of digital line is device-dependent.  Some devices
+  have one dedicated line, others may allow generic digital input lines
+  to be used.  The argument indicates the particular external line to
+  use as the trigger.
 
-  +o  trigger src = TRIG_COUNT: argument is the number of 'counts' per
-     trigger.  For comedi_cmd.stop_arg, this is the number of scans to
-     perform before ending aquisition.  For comedi_cmd.scan_end_arg,
-     this is the number of conversions to perform per scan.
+  TRIG_INT is typically used as a start_src.  This trigger occurs when
+  the application performs an INSN_INTTRIG instruction.  Using TRIG_INT
+  is a method by which the application can accurately record the time of
+  the start of acquisition, since the parsing and setup time of a
+  particular command may be significant.  The argument associated with
+  TRIG_INT is reserved and should be set to 0.
 
-  +o  trigger src = TRIG_EXT: argument is the digital input channel to
-     trigger on.
+  TRIG_OTHER can be useful as any of the trigger sources.  The exact
+  meaning of TRIG_OTHER is driver-specific, and implements a feature
+  that otherwise does not fit into the command interface.  Configuration
+  of TRIG_OTHER features are done by INSN_CONFIG insns.  The argument is
+  reserved and should be set to 0.
 
-  +o  trigger src = TRIG_INT: argument meaning is unknown??
-
-  Not all triggers are applicable to all events.  Supported triggers for
-  specific events depends significantly on your particular device.
-
-  TRIG_FOLLOW is a special type of trigger for scan_begin events that
-  triggers on the next lower level trigger, in this case, the trigger
-  for convert events.  It may or may not be supported.  Later, it may
-  also be used for start events if you want to chain multiple commands.
+  Ths subdev member of the ``comedi_cmd'' structure is the index of the
+  subdevice the command is intended for.  The
+  ``comedi_find_subdevice_by_type()'' function can be useful in
+  discovering the index of your desired subdevice.
 
   The chanlist member of the ``comedi_cmd'' structure should point to an
   array whose number of elements is specificed by chanlist_len (this
@@ -638,10 +657,15 @@
   specifies the sequence of channels and gains (and analog references)
   that should be stepped through for each scan.  The elements of the
   chanlist array should be initialized by packing the channel, range and
-  reference information together with the ``CR_PACK(channel, range,
-  aref)'' macro.
+  reference information together with the ``CR_PACK()'' macro.
 
-  The final member of the ``comedi_cmd'' structure is 'flags'.  The
+  The data and data_len members can be safely ignored when issueing
+  commands from a user-space program.  They only have meaning when a
+  command is sent from a kernel module using the kcomedilib interface,
+  in which case they specify the buffer where the driver should
+  write/read its data to/from.
+
+  The final member of the ``comedi_cmd'' structure is flags.  The
   following flags are valid, and can be bitwise-or'd together.
 
 
@@ -658,13 +682,15 @@
      must have a real-time kernel (RTAI or RTLinux) and must compile
      comedi with real-time support or this flag will do nothing.
 
-  +o  TRIG_CONFIG:    perform configuration, not triggering.
+  +o  TRIG_CONFIG:    perform configuration, not triggering.  This is a
+     legacy of the deprecated comedi_trig_struct, and has no function at
+     present.
 
   +o  TRIG_WAKE_EOS:  some drivers will change their behaviour when this
      flag is set, trying to transfer data at the end of every scan
      (instead of, for example, passing data in chunks whenever the
      board's onboard fifo is half full).  This flag may degrade a
-     driver's performance at higher frequencies.
+     driver's performance at high frequencies.
 
   +o  TRIG_WRITE:     write to bidirectional devices.  Could be useful in
      principle, if someone wrote a driver that supported commands for a
@@ -679,12 +705,21 @@
 
   +o  TRIG_ROUND_DOWN: round period down.
 
-
   +o  TRIG_ROUND_UP: round period up.
 
   +o  TRIG_ROUND_UP_NEXT: this one doesn't do anything, and I don't know
      what it was intended to do??
 
+
+
+  The typical sequence for executing a command is to first send the
+  command through ``comedi_command_test()'' once or twice.  The test
+  will check that the command is valid for the particular device, and
+  often makes some adjustments to the command arguments, which can then
+  be read back by the user to see the actual values used.  The command
+  is executed with ``comedi_command()''.  For input/output commands,
+  data is read from or written to the device file /dev/comedi[0..3] you
+  are using.
 
 
   66..  LLiibbccoommeeddii RReeffeerreennccee
@@ -695,10 +730,42 @@
 
 
 
-  66..11..11..  CCRR__PPAACCKK((cchhaannnneell,, rraannggee,, aarreeff))
+  66..11..11..  CCRR__PPAACCKK(())
 
 
-  undocumented
+  CR_PACK(channel, range, aref)
+
+  CR_PACK is used to initialize the elements of the chanlist array in
+  the ``comedi_cmd'' structure, and the chanspec member of the
+  ``comedi_insn'' structure.
+
+  The channel argument is the channel you wish to use, with the channel
+  numbering starting at zero.
+
+  The range is an index, starting at zero, whose meaning is device
+  dependent.  The ``comedi_get_n_ranges()'' and ``comedi_get_range()''
+  functions are useful in discovering information about the available
+  ranges.
+
+  The aref argument indicates what reference you want the device to use.
+  It can be any of the following:
+
+  +o  AREF_GROUND     is for inputs/outputs referenced to ground
+
+  +o  AREF_COMMON     is for a `common' reference (the low inputs of all
+     the channels are tied together, but are isolated from ground)
+
+  +o  AREF_DIFF       is for differential inputs/outputs
+
+  +o  AREF_OTHER      is for any reference that does not fit into the
+     above categories
+
+     Particular drivers may or may not use the AREF flags.  If they are
+     not supported, they are silently ignored.
+
+
+  Source: /include/comedi.h
+
 
 
   66..11..22..  RRAANNGGEE__LLEENNGGTTHH(()) ((ddeepprreeccaatteedd))
@@ -812,10 +879,39 @@
   66..22..66..  ccoommeeddii__ccmmdd
 
 
-  undocumented
+
+       typedef struct comedi_cmd_struct comedi_cmd;
+
+       struct comedi_cmd_struct{
+               unsigned int subdev;
+               unsigned int flags;
+
+               unsigned int start_src;
+               unsigned int start_arg;
+
+               unsigned int scan_begin_src;
+               unsigned int scan_begin_arg;
+
+               unsigned int convert_src;
+               unsigned int convert_arg;
+
+               unsigned int scan_end_src;
+               unsigned int scan_end_arg;
+
+               unsigned int stop_src;
+               unsigned int stop_arg;
+
+               unsigned int *chanlist;
+               unsigned int chanlist_len;
+
+               sampl_t *data;
+               unsigned int data_len;
+       };
 
 
-  Related functions are described in section XXX.
+
+  More information on using commands can be found in the ``command''
+  section.
 
 
   This structure is defined as part of the Comedi kernel interface.
@@ -868,7 +964,12 @@
 
   int comedi_command(comedi_t *it, comedi_cmd *cmd);
 
-  undocumented
+  Issues the command pointed at by cmd to the open device it.  It is
+  usually necessary to pass the command through
+  ``comedi_command_test()'' to fix up the command before it can be
+  successfully executed with comedi_command().  See ``commands'' for
+  more information.
+
 
   Source: /lib/comedi.c
 
@@ -879,7 +980,38 @@
 
   int comedi_command_test(comedi_t *it, comedi_cmd *cmd);
 
-  undocumented
+
+  Tests and fixes up the command pointed at by cmd according to the
+  limitations of the driver configured on the open device it.  The
+  return value has the following meaning:
+
+  +o  0:      the command passed the test and can be successfully
+     executed by ``comedi_command()''.  The one exception to this rule
+     is that the test will allow a NULL chanlist for the command.
+
+  +o  1: invalid trigger.  One or more of the trigger sources (the *_src
+     members of the ``comedi_cmd'' structure) is not supported by the
+     driver.
+
+  +o  2: incompatible triggers.  Two or more of the triggers selected are
+     incompatible with each other.  For example, a driver might allow
+     either the scan_begin_src or the convert_src to be TRIG_TIMER, but
+     not both.
+
+  +o  3: argument invalid.  One or more argument is invalid, for example
+     a timing argument might be in excess of the card's maximum speed.
+     The command test will correct the arguments by modifying the
+     command pointed at by cmd.
+
+  +o  4: argument fix up.  The command underwent minor adjustment and
+     should now be valid.  For example, a timing argument might not be
+     exactly achievable by the card so the timing argument will be
+     adjusted to the actual timing the card will use.
+
+  +o  negative: some other error has occured.
+
+     See ``commands'' for more information.
+
 
   Source: /lib/comedi.c
 
@@ -1697,10 +1829,6 @@
   +o  comedi_get_cmd_generic_timed()
 
   +o  comedi_cancel()
-
-  +o  comedi_command()
-
-  +o  comedi_command_test()
 
   +o  comedi_poll()
 
