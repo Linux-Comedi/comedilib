@@ -1,12 +1,12 @@
 #!/bin/sh
 
-if ! -f NEWS ; then
+if [ ! -f NEWS ] ; then
 	touch NEWS
 fi
-if ! -f AUTHORS ; then
+if [ ! -f AUTHORS ] ; then
 	touch AUTHORS
 fi
-if ! -f ChangeLog ; then
+if [ ! -f ChangeLog ] ; then
 	touch ChangeLog
 fi
 
