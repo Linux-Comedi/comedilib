@@ -29,15 +29,24 @@ if [ -e /usr/local/share/usb/usbdux_firmware.hex ]; then
 fi
 #
 #
-# please modify if needed
+# in 2.6 there might be a race condition between
+# the usbdevfs and this hotplug script.
+# Therefore we wait a bit to make sure that /proc/bus/usb/... is there.
+sleep 1
+#
 #
 # firmware upload into the usb device
 fxload -v -2 -I $USBDUX_FIRMWARE
+#
+#
+# If you have more than one device please add/uncomment
 # 
 # just to make sure we remove the comedi device
 $COMEDI_CONFIG -r /dev/comedi0
+# $COMEDI_CONFIG -r /dev/comedi1
 #
 # connecting the comedi device comedi0 with the module usbdux
 $COMEDI_CONFIG /dev/comedi0 usbdux
+# $COMEDI_CONFIG /dev/comedi1 usbdux
 #
 #
