@@ -55,7 +55,7 @@ else
 	ENABLE_RUBY="no"
 fi
 AM_CONDITIONAL(HAVE_RUBY, [test "$ENABLE_RUBY" == "yes"])
-AC_ARG_VAR(RUBY_PREFIX,[path prefix for Ruby binding [PREFIX/]])
+AC_ARG_VAR(RUBY_PREFIX,[path prefix for Ruby binding])
 AC_ARG_VAR(RUBY_SO_DIR,[path for Ruby extensions])
 if test "$RUBY_PREFIX" != "" ; then
 	RUBY_CONFIG_OPTIONS="$RUBY_CONFIG_OPTIONS --prefix=\$(RUBY_PREFIX)"

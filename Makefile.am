@@ -9,6 +9,8 @@ EXTRA_DIST = debian m4 comedilib.spec
 
 ACLOCAL_AMFLAGS = -I m4
 
+DISTCHECK_CONFIGURE_FLAGS = RUBY_PREFIX='$${prefix}'
+
 dist-hook:
 	rm -rf `find $(distdir) -name CVS`
 
