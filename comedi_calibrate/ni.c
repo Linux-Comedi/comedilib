@@ -82,7 +82,7 @@ static struct board_struct boards[]={
 	{ "pci-6025e", STATUS_SOME, cal_ni_pci_6025e, ni_setup_observables, 0x1af, 0x1b0 },
 	{ "pci-6034e", STATUS_UNKNOWN, NULL, ni_setup_observables, -1, -1 },
 	{ "pci-6035e", STATUS_DONE, cal_ni_pci_6035e, ni_setup_observables, 0x1af, 0x1b0 },
-	{ "pci-6036e", STATUS_GUESS, cal_ni_pci_6036e, ni_setup_observables, -1, -1 },
+	{ "pci-6036e", STATUS_DONE, cal_ni_pci_6036e, ni_setup_observables, -1, -1 },
 	{ "pci-6071e", STATUS_DONE, cal_ni_pci_6071e, ni_setup_observables, 0x1a9, 0x1aa },
 	{ "pxi-6071e", STATUS_GUESS, cal_ni_pxi_6071e, ni_setup_observables, -1, -1 },
 	{ "at-mio-16e-10", STATUS_GUESS, cal_ni_at_mio_16e_10, ni_setup_observables, 0x1a7, 0x1a8 },
