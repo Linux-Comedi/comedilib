@@ -45,6 +45,7 @@ struct board_struct{
 
 static int setup_cb_pci_64xx( calibration_setup_t *setup );
 static int setup_cb_pci_60xx( calibration_setup_t *setup );
+static int setup_cb_pci_603x( calibration_setup_t *setup );
 static int setup_cb_pci_4020( calibration_setup_t *setup );
 
 static int cal_cb_pci_64xx( calibration_setup_t *setup );
@@ -64,12 +65,12 @@ static struct board_struct boards[]={
 	{ "pci-das6023",	STATUS_DONE,	setup_cb_pci_60xx },
 	{ "pci-das6025",	STATUS_DONE,	setup_cb_pci_60xx },
 	{ "pci-das6030",	STATUS_GUESS,	setup_cb_pci_60xx },
-	{ "pci-das6031",	STATUS_GUESS,	setup_cb_pci_60xx },
-	{ "pci-das6032",	STATUS_GUESS,	setup_cb_pci_60xx },
-	{ "pci-das6033",	STATUS_GUESS,	setup_cb_pci_60xx },
-	{ "pci-das6034",	STATUS_GUESS,	setup_cb_pci_60xx },
-	{ "pci-das6035",	STATUS_GUESS,	setup_cb_pci_60xx },
-	{ "pci-das6036",	STATUS_GUESS,	setup_cb_pci_60xx },
+	{ "pci-das6031",	STATUS_GUESS,	setup_cb_pci_603x },
+	{ "pci-das6032",	STATUS_GUESS,	setup_cb_pci_603x },
+	{ "pci-das6033",	STATUS_GUESS,	setup_cb_pci_603x },
+	{ "pci-das6034",	STATUS_GUESS,	setup_cb_pci_603x },
+	{ "pci-das6035",	STATUS_GUESS,	setup_cb_pci_603x },
+	{ "pci-das6036",	STATUS_GUESS,	setup_cb_pci_603x },
 	{ "pci-das6040",	STATUS_GUESS,	setup_cb_pci_60xx },
 	{ "pci-das6052",	STATUS_GUESS,	setup_cb_pci_60xx },
 	{ "pci-das6070",	STATUS_GUESS,	setup_cb_pci_60xx },
@@ -169,12 +170,18 @@ static int setup_cb_pci_64xx( calibration_setup_t *setup )
 static int setup_cb_pci_60xx( calibration_setup_t *setup )
 {
 	static const int caldac_subdev = 6;
-	//extra delay not needed by 6023 and 6024, but is needed by 6034
-	setup->sv_settling_time_ns = 10000000;
 	init_observables_60xx( setup );
 	setup_caldacs( setup, caldac_subdev );
 	setup->do_cal = cal_cb_pci_60xx;
 	return 0;
+}
+
+static int setup_cb_pci_603x(calibration_setup_t *setup)
+{
+	int retval = setup_cb_pci_60xx(setup);
+	//extra delay not needed by 6023 and 6024, but is needed by 6034
+	setup->sv_settling_time_ns = 100000000;
+	return retval;
 }
 
 static int setup_cb_pci_4020( calibration_setup_t *setup )
