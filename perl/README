@@ -4,7 +4,7 @@ Comedi and Comedi::Lib: A Perl API for comedi and comedilib
 Version 0.02 16-Nov-1999
 
 This is a first pass at a Perl extension for using comedi and comedilib
-(http://stm.lbl.gov/comedi).
+(http://www.comedi.org/comedi).
 
 This is also my first attempt at a Perl extension, so be warned!  I
 started with h2xs and hacked away at it from there.  Please pass the

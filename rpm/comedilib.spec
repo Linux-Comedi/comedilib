@@ -4,7 +4,7 @@ Version: 0.7.18
 Release: 1
 Copyright: GPL
 Group: System Environment/Kernel
-Source: http://stm.lbl.gov/comedi/download/comedilib-0.7.18.tgz
+Source: http://www.comedi.org/comedi/download/comedilib-0.7.18.tgz
 Patch: comedilib.patch
 BuildRoot: /var/tmp/%{name}-buildroot
 requires: comedi >= 0.7.63, kernel = 2.4.7, kernel-source = 2.4.7
