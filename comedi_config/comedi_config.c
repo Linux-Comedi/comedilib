@@ -3,7 +3,7 @@
     configuration program for comedi kernel module
 
     COMEDI - Linux Control and Measurement Device Interface
-    Copyright (C) 1998 David A. Schleef <ds@stm.lbl.gov>
+    Copyright (C) 1998,2000 David A. Schleef <ds@stm.lbl.gov>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 
 */
 
-#define CC_VERSION	"0.6.13"
+#define CC_VERSION	"0.7.49"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -36,9 +36,12 @@
 
 #include <comedi.h>
 
-int quiet=0,verbose=0,script=0;
+int quiet=0,verbose=0;
 
-void do_script(void);
+int init_fd;
+char *init_file;
+void *init_data;
+int init_size;
 
 void do_help(int i)
 {
@@ -52,6 +55,14 @@ void do_help(int i)
 	exit(i);
 }
 
+struct option options[] = {
+	{ "verbose", 0, 0, 'v' },
+	{ "quite", 0, 0, 'q' },
+	{ "version", 0, 0, 'V' },
+	{ "init-data", 1, 0, 'i' },
+	{ "remove", 0, 0, 'r' },
+};
+
 int main(int argc,char *argv[])
 {
 	comedi_devconfig it;
@@ -64,7 +75,7 @@ int main(int argc,char *argv[])
 	int remove=0;
 	
 	while(1){
-		c=getopt(argc,argv,"rvVq");
+		c=getopt(argc,argv,"rvVqf");
 		if(c==-1)break;
 		switch(c){
 		case 'v':
@@ -77,25 +88,17 @@ int main(int argc,char *argv[])
 		case 'q':
 			quiet=1;
 			break;
-		case 'a':
-			script=1;
-			break;
 		case 'r':
 			remove=1;
+			break;
+		case 'i':
+			init_file=optarg;
 			break;
 		default:
 			do_help(1);
 		}
 	}
 
-	if(script){
-		if( (argc-optind)>0 ){
-			do_help(1);
-		}else{
-			do_script();
-		}
-	}
-	
 	if((argc-optind)!=2 && (argc-optind)!=3){
 		do_help(1);
 	}
@@ -141,6 +144,34 @@ int main(int argc,char *argv[])
 	}
 #endif
 	
+	if(init_file){
+		struct stat buf;
+
+		init_fd = open(init_file,O_RDONLY);
+		if(init_fd<0){
+			perror(init_file);
+			exit(1);
+		}
+
+		fstat(init_fd,&buf);
+		
+		init_size = buf.st_size;
+		init_data = malloc(init_size);
+		if(init_data==NULL){
+			perror("allocating initialization data\n");
+			exit(1);
+		}
+
+		ret = read(init_fd,init_data,init_size);
+		if(ret<0){
+			perror("reading initialization data\n");
+			exit(1);
+		}
+
+		it.options[0]=(int)init_data;
+		it.options[1]=init_size;
+	}
+
 	fd=open(fn,O_RDWR);
 	if(fd<0){
 		perror(fn);
@@ -155,15 +186,33 @@ int main(int argc,char *argv[])
 		printf("\n");
 	}
 	if(ioctl(fd,COMEDI_DEVCONFIG,remove?NULL:&it)<0){
+		int err=errno;
 		perror("Configure failed!");
+		fprintf(stderr,"Check kernel log for more information\n");
+		fprintf(stderr,"Possible reasons for failure:\n");
+		switch(err){
+		case -EINVAL:
+			fprintf(stderr,"  \n");
+			break;
+		case -EBUSY:
+			fprintf(stderr,"  Already configured\n");
+			break;
+		case -EIO:
+			fprintf(stderr,"  Driver not found\n");
+			break;
+		case -EPERM:
+			fprintf(stderr,"  Not root\n");
+			break;
+		case -EFAULT:
+			fprintf(stderr,"  Comedi bug\n");
+			break;
+		default:
+			fprintf(stderr,"  Unknown\n");
+			break;
+		}
+
 		exit(1);
 	}
-	exit(0);
-}
-
-void do_script(void)
-{
-	printf("comedi_config: -a option not supported (yet).\n");
 	exit(0);
 }
 
