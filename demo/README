@@ -1,0 +1,68 @@
+
+Examples
+
+
+ao_waveform:
+
+	You need a device (and driver) capable of streaming analog output,
+	which currently is some of the members of the NI AT-MIO and PCI-MIO
+	E series.  Creates a sine wave on an analog output channel.
+
+cmd:
+	Example of how to use the new 0.8 command structure.  Not functional.
+
+eeprom_dump:
+	Dumps the EEPROM of a card, if it has one.  Useful for debugging
+	devices/drivers.
+
+info:
+	Displays some information that Comedi knows about a device.
+
+inp:
+	Simple input demo.  Reads one sample from an input line.
+
+inpn:
+	Slightly more complicated input demo.  (It has a for() loop.)
+	Reads each channel on a subdevice, at every possible input
+	range, and converts the data to a voltage.
+
+mode1:
+	Doesn't work.
+
+mode2:
+	Demo for streaming analog input.  Only works for boards/drivers
+	with that capability.
+
+mode3:
+	Doesn't work.
+
+mode4:
+	Same as mode2, except using an external trigger.
+
+sv:
+	Similar to inp, but measures the input using the comedi_sv_*()
+	functions, which average many samples to try to get a more accurate
+	estimate of the actual input.
+
+tut1:
+tut2:
+	Tutorial examples.
+
+
+Many of these demos are linked with the file main.c, which parses
+command line options.  Some options don't make sense with all programs.
+The options are:
+
+
+-a <aref>	uses analog reference <aref> (default: 0)
+-c <chan>	uses channel <chan>
+-s <subd>	uses subdevice <subd>
+-r <range>	uses voltage range <range>
+-f <file>	uses device file <file> (default: /dev/comedi0)
+-v		verbose
+-d		set analog reference to differential
+-g		set analog reference to ground
+-o		set analog reference to other
+-m		set analog reference to common
+
+

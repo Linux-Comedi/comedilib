@@ -1,0 +1,432 @@
+
+Comedi tutorial
+
+0.  Compiling and Installing
+0.  Insmod'ding the kernel module
+0.  Configuring comedi to use your hardware
+0.  Getting information from comedi
+0.  Your first comedi program
+0.  Converting samples to voltages
+
+
+
+0.  Compiling and Installing
+
+needs to be written
+
+
+
+
+0.  Insmod'ding the kernel module
+
+needs to be written
+
+
+
+0.  Configuring comedi to use your hardware
+
+
+I assume that your hardware device is in your computer, and that
+you know the relevant details about it, i.e., what kind of card
+it is, the I/O base, the IRQ, jumper settings related to input
+ranges, etc.
+
+To tell the comedi kernel module that you have a particular device, and
+some information about it, you will be running the 'comedi_config'
+command.  Perhaps you should read the man page now.
+
+For this tutorial, I have two devices, a National Instruments AT-MIO-16E-10
+and a Data Translation DT2821-F-8DI.
+
+The NI board is plug-and-play, and the man page tells me that I need
+to configure the PnP part of the board with isapnptools.  The isapnptools
+package is a little cryptic, but the concepts are simple.  Once I
+learned how to use it, I settled on a /etc/isapnp.conf file that
+contained the lines:
+
+
+# ANSI string -->National Instruments, AT-MIO-16E-10<--
+(CONFIGURE NIC2400/10725401 (LD 0
+	(IO 0 (BASE 0x0260))
+	(INT 0 (IRQ 3 (MODE +E)))
+#	(DMA 0 (CHANNEL 5))
+#	(DMA 1 (CHANNEL 6))
+	(ACT Y)
+))
+
+
+It also contains a few lines about overall configuration and about my
+sound card.  I found out after a bit of trial-and-error that the NI
+board does not always work with interrupts other than IRQ 3.  YMMV.
+Currently, the driver doesn't use DMA, but it may in the future, so
+I commented out the DMA lines.  It is a curious fact that the device
+ignores the IRQ and DMA information given here, however, I keep the
+information here to remind myself that the numbers aren't arbitrary.
+
+When I run comedi_config (as root, of course), I provide the same
+information.  Since I want to have the board configured every time
+I boot, I put the line
+
+   /usr/sbin/comedi_config /dev/comedi0 atmio-E 0x260,3
+
+into /etc/rc.d/rc.local.  You can, of course, run this command at
+a command prompt.  The man page tells me that the option list
+is supposed to be "<I/O base>,<IRQ>", so I used the same numbers
+as I put in /etc/isapnp.conf, i.e., 0x260,3.
+
+For the Data Translation board, I need to have a list of the
+jumper settings.  Fortunately, I wrote them all down in the
+manual -- I hope they are still correct.  However, I had to
+open the case to figure out which board in the series I had.
+It is a DT2821-f-8di.  The man page of comedi_config tells
+me that I need to know the I/O base, IRQ, DMA 1, DMA 2.  However,
+since I wrote the driver, I know that it also recognizes the
+differential/single-ended and unipolar/bipolar jumpers.  As always,
+the source is the final authority, and looking in module/dt282x.c
+tells me that the options list is interpreted as:
+
+        i/o base
+        irq
+        1=differential, 0=single ended
+        ai 0=unipolar, 1=bipolar
+        ao0 0=unipolar, 1=bipolar
+        ao1 0=unipolar, 1=bipolar
+        dma1
+        dma2
+
+(ai=analog input, ao=analog output.)  From this, I decide that
+the appropriate options list is
+
+	0x200,4,,1,1,1
+
+I left the differential/single-ended number blank, since the
+driver already knowns (from the board name), that it is
+differential.  I  also left the DMA numbers blank, since I
+don't want the driver to use DMA.  (Don't want it to interfere
+with my sound card -- life is full of difficult choices.)
+Keep in mind that things commented in the source, but not in
+the documentation are about as likely to change as the weather,
+so I put good comments next to the following line when I put
+it in rc.local.
+
+   /usr/sbin/comedi_config /dev/comedi1 dt2821-f-8di 0x200,4,,1,1,1
+
+So now I think that I have my boards configured correctly.
+Since data acquisition boards are not typically well-engineered,
+comedi sometimes can't figure out if the board is actually there.
+If it can't, it assumes you are right.  Both of these boards
+are well-made, so comedi will give me an error message if it
+can't find them.  The comedi kernel module, since it is a part
+of the kernel, prints messages to the kernel logs, which you
+can access through the command 'dmesg' or /var/log/messages.
+Here is a configuration failure (from dmesg):
+
+  comedi0: ni_E: 0x0200 can't find board
+
+When it does work, I get:
+
+  comedi0: ni_E: 0x0260 at-mio-16e-10 ( irq = 3 )
+
+Note that it also correctly identified my board.
+
+
+
+
+0.  Getting information from comedi
+
+
+So now that we have comedi talking to the hardware, we want to
+talk to comedi.  Here's some pretty low-level information --
+it's sometimes useful for debugging:
+
+   cat /proc/comedi
+
+Right now, on my computer, this command gives:
+
+   comedi version 0.6.4
+   format string
+    0: atmio-E              at-mio-16e-10           7
+    1: dt282x               dt2821-f-8di            4
+
+This is a feature that is not well-developed yet.  Basically, it
+currently tells you driver name, device name, and number of
+subdevices.
+
+In the demo/ directory, there is a command called
+'info', which provides information about each subdevice on the
+board.  The output of it is rather long, since I have 7
+subdevices  (4 or fewer is more common.)
+Here's part of the output of the NI board (which
+is on /dev/comedi0.)  ('demo/info /dev/comedi0')
+
+overall info:
+  version code: 0x000604
+  driver name: atmio-E
+  board name: at-mio-16e-10
+  number of subdevices: 7
+subdevice 0:
+  type: 1 (unknown)
+  number of channels: 16
+  max data value: 4095
+
+
+The overall info gives information about the device -- basically
+the same information as /proc/comedi.
+
+This board has 7 subdevices.  Devices are separated into
+subdevices that each have a distinct purpose -- e.g., analog
+input, analog output, digital input/output.  This board also
+has an EEPROM and calibration DACs that are also subdevices.
+
+Subdevice 0 is the analog input subdevice.  You would have
+known this from the 'type: 1 (unknown)' line, if I've updated
+demo/info recently, because it would say 'type: 1 (analog input)'
+instead.  The other lines should be self-explanitory.  Comedi
+has more information about the device, but demo/info doesn't
+currently display this.
+
+
+
+0.  Your first comedi program
+
+This example requires a card that has analog or
+digital input.  Right to the source:
+
+#include <stdio.h>	/* for printf() */
+#include <comedilib.h>
+
+int subdev = 0;		/* change this to your input subdevice */
+int chan = 0;		/* change this to your channel */
+int range = 0;		/* more on this later */
+int aref = AREF_GROUND;	/* more on this later */
+
+int main(int argc,char *argv[])
+{
+	comedi_t *it;
+	int chan=0;
+	lsampl_t data;
+	
+	it=comedi_open("/dev/comedi0");
+	
+	comedi_data_read(it,subdev,chan,range,aref,&data);
+	
+	printf("%d\n",data);
+	
+	return 0;
+}
+
+
+Should be understandable.  Open the device, get the data,
+print it out.  This is basically the guts of demo/inp.c,
+without error checking or fancy options.  Including all
+the appropriate headers is sometimes a little tricky.
+Compile it using 'cc tut1.c -lcomedi -o tut1'.  Hopefully
+it works.
+
+A few notes:  The range variable tells comedi which gain
+to use when measuring an analog voltage.  Since we don't
+know (yet) which numbers are valid, or what each means,
+we'll use 0, because it won't cause errors.  Likewise with
+aref, which determines the analog reference used.
+
+
+0.  Converting samples to voltages
+
+
+If you selected an analog input subdevice, you should notice
+that the output of tut1 is a number between
+0 and 4095, or 0 and 65535, depending on the number of bits
+in the A/D converter.  Comedi samples are *always* unsigned,
+with 0 representing the lowest voltage of the ADC, and 4095
+the highest.  The hardware driver compensates for
+anything else the manual for your device says.  However,
+you probably prefer to have this number translated to
+a voltage.  Naturally, as a good programmer, your first
+question is: "How do I do this in a device-independent
+manner?"
+
+For each subdevice, the comedi kernel module keeps a
+'range_type' variable.  This variable contains the number
+of available ranges (i.e., gains) that you can select,
+along with an offset in a list of range information
+structures.  If you know the range_type variable, you
+can use these macros:
+
+   RANGE_OFFSET(range_type)
+   RANGE_LENGTH(range_type)
+
+to extract such information.  However, you want the
+actual voltage information, not some integer offset
+in a table.  Rather than messing with the library
+internals, use the function
+
+   ptr=comedi_get_range(comedi_file,subdevice,channel,
+	range)
+
+which returns a pointer to a comedi_range structure.
+The comedi_range structure looks like
+
+   typedef struct{
+           double min;
+           double max;
+           unsigned int unit;
+   }comedi_range;
+
+As you might expect, ptr[range] is for range 'range',
+which you provided to comedi_data_read() above.  'min' represents
+the voltage corresponding to comedi_data_read() returning 0,
+and 'max' represents comedi_data_read() returning 'maxdata',
+(i.e., 4095 for 12 bit A/C converters, 65535 for 16 bit,
+or, 1 for digital input -- more on this in a bit.)  The
+'unit' entry tells you if min and
+max refer to voltage, current, etc.
+
+"Could it get easier?", you say.  Well, yes.  Use
+the function comedi_to_phys(), which converts data
+values to physical units.  Call it using something like
+
+   volts=comedi_to_phys(it,data,range,maxdata);
+
+and the opposite
+
+   data=comedi_from_phys(it,volts,range,maxdata);
+
+You probably noticed (and were worried) that we haven't
+discussed how to determine maxdata and range_type.  Well,
+you could ask the kernel this information each time you need
+it, but since there are other variables, special cases,
+and several subdevices to worry about, it would be nice
+if the library could take care of this...  (read on...)
+
+
+
+0.
+
+
+In addition to providing low level routines for data
+access, the comedi library provides higher-level access,
+much like the standard C library provides fopen(), etc.
+as a high-level (and portable) alternative to the direct
+UNIX system calls open(), etc.  Similarily to fopen(),
+we have comedi_open():
+
+	file=comedi_open("/dev/comedi0");
+
+where file is of type (comedi_t *).  This function
+calls open(), like we did explicitly in a previous
+section, but also fills the comedi_t structure with
+lots of goodies -- information that we will need to use
+soon.
+
+Specifically, we needed to know maxdata for a specific
+subdevice/channel.  How about:
+
+   maxdata=comedi_get_maxdata(file,subdevice,channel);
+
+Wow.  How easy.  And the range type?
+
+   range_type=comedi_get_rangetype(file,subdevice,channel);
+
+Cool.  Other information you need to know about a channel
+can be gotten in a similar way.
+
+
+
+0. Your second comedi program
+
+
+Actually, this is the first comedi program again, just
+that we've added what we've learned.
+
+
+#include <stdio.h>      /* for printf() */
+#include <comedi.h>     /* also included by comedilib.h */
+#include <comedilib.h>  /* for comedi_get() */
+
+int subdev = 0;         /* change this to your input subdevice */
+int chan = 0;           /* change this to your channel */
+int range = 0;          /* more on this later */
+int aref = 0;           /* more on this later */
+
+int main(int argc,char *argv[])
+{
+        comedi_t *cf;
+        int chan=0;
+        int data;
+	int maxdata,rangetype;
+	double volts;
+
+        cf=comedi_open("/dev/comedi0");
+
+	maxdata=comedi_get_maxdata(cf,subdev,chan);
+
+	rangetype=comedi_get_rangetype(cf,subdev,chan);
+
+        data=comedi_get(cf->fd,subdev,chan,range,aref);
+
+	volts=comedi_to_phys(data,rangetype,range,maxdata);
+
+        printf("%d %g\n",data,volts);
+
+        return 0;
+}
+
+
+By now, the comedi_read_data() line looks a little archaic, using
+the UNIX file descriptor cf->fd instead of just cf.  (By the
+way, somewhere in the heart of comedi_open() is the line
+cf->fd=open(filename,O_RDWR).)  Well, there isn't one good
+replacement, since it highly depends on your application
+what additional features you might want in a comedi_get()
+replacement.  But this is the topic of a different section.
+
+
+0. stuff
+
+
+
+0. Slowly-varying inputs
+
+
+Sometimes, your input channels change slowly enough that
+you are able to average many sucessive input values to get a
+more accurate measurement of the actual value.  In general,
+the more samples you average, the better your estimate
+gets, roughly by a factor of sqrt(number_of_samples).
+Obviously, there are limitations to this:
+
+ - you are ultimately limited by "spurious free dynamic range"
+
+ - you need to have _some_ noise on the input channel,
+   otherwise you will be averaging the same number N times.
+
+ - the more noise you have, the greater your SFDR, but it
+   takes many more samples to compensate for the increased
+   noise
+
+ - if you feel the need to average samples for 2 seconds,
+   your signal will need to be _very_ slowly-varying, i.e.,
+   not varying more than your target uncertainty for the
+   entire 2 seconds.
+
+As you might have guessed, the comedi library has functions
+to help you in your quest to accurately measure slowly varying
+inputs.  I use these functions to measure thermocouple voltages
+-- actually, the library functions came from a section of code
+that was previously part of the thermocouple reading program.
+
+The comedi self-calibration utility also uses these functions.
+On some hardware, it is possible to tell it to measure an
+internal stable voltage reference, which is typically going
+to be very slowly varying -- on the kilosecond time scale
+or more.  So it is reasonable to measure millions of samples,
+to get a very accurate measurement of the A/D converter output
+value that corresponds to the voltage reference.  Sometimes,
+however, this is overkill, since there is no need to
+perform a part-per-million calibration to a standard that
+is only accurate to part-per-thousand.
+
+
+
+
+
