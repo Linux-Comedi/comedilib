@@ -490,11 +490,20 @@ void cal_binary( calibration_setup_t *setup, int obs, int dac)
 	new_sv_init(&sv, setup->dev, setup->ad_subdev, chanspec);
 	sv.settling_time_ns = setup->settling_time_ns;
 
-	x0 = x1 = x2 = 0;
+	x0 = setup->caldacs[dac].maxdata;
 	update_caldac( setup, dac, x0 );
 	usleep(100000);
 	new_sv_measure( setup->dev, &sv);
-	y0 = y1 = y2 = sv.average;
+	y0 = sv.average;
+
+	x1 = x2 = 0;
+	update_caldac( setup, dac, x1 );
+	usleep(100000);
+	new_sv_measure( setup->dev, &sv);
+	y1 = y2 = sv.average;
+
+	if( (y0 - y1) > 0.0 ) polarity = 1;
+	else polarity = -1;
 
 	bit = 1;
 	while( ( bit << 1 ) < setup->caldacs[dac].maxdata )
@@ -507,9 +516,7 @@ void cal_binary( calibration_setup_t *setup, int obs, int dac)
 		new_sv_measure( setup->dev, &sv);
 		y2 = sv.average;
 		DPRINT(3,"trying %d, result %g, target %g\n",x2,y2,target);
-
-		if( (y2 - y0) > 0.0 ) polarity = 1;
-		else polarity = -1;
+DPRINT(0,"trying %d, result %g, target %g\n",x2,y2,target);
 
 		if( (y2 - target) * polarity < 0.0 ){
 			x1 = x2;
@@ -553,7 +560,7 @@ void cal_relative_binary( calibration_setup_t *setup, int obs1, int obs2, int da
 
 	comedi_set_global_oor_behavior( COMEDI_OOR_NUMBER );
 
-	x0 = x1 = x2 = 0;
+	x0 = setup->caldacs[dac].maxdata;
 	update_caldac( setup, dac, x0 );
 	usleep(100000);
 	preobserve( setup, obs1);
@@ -565,7 +572,24 @@ void cal_relative_binary( calibration_setup_t *setup, int obs1, int obs2, int da
 	new_sv_init(&sv2, setup->dev, setup->ad_subdev,chanspec2);
 	sv2.settling_time_ns = setup->settling_time_ns;
 	new_sv_measure( setup->dev, &sv2);
-	y0 = y1 = y2 = sv1.average - sv2.average;
+	y0 = sv1.average - sv2.average;
+
+	x1 = x2 = 0;
+	update_caldac( setup, dac, x1 );
+	usleep(100000);
+	preobserve( setup, obs1);
+	new_sv_init(&sv1, setup->dev, setup->ad_subdev,chanspec1);
+	sv1.settling_time_ns = setup->settling_time_ns;
+	new_sv_measure( setup->dev, &sv1);
+
+	preobserve( setup, obs2);
+	new_sv_init(&sv2, setup->dev, setup->ad_subdev,chanspec2);
+	sv2.settling_time_ns = setup->settling_time_ns;
+	new_sv_measure( setup->dev, &sv2);
+	y1 = y2 = sv1.average - sv2.average;
+
+	if( (y0 - y1) > 0.0 ) polarity = 1;
+	else polarity = -1;
 
 	bit = 1;
 	while( ( bit << 1 ) < setup->caldacs[dac].maxdata )
@@ -590,9 +614,7 @@ void cal_relative_binary( calibration_setup_t *setup, int obs1, int obs2, int da
 
 		DPRINT(3,"trying %d, result %g, target %g\n",x2,y2,target);
 
-		if( (y2 - y0) > 0.0 ) polarity = 1;
-		else polarity = -1;
-
+DPRINT(0,"trying %d, result %g, target %g\n",x2,y2,target);
 		if( (y2 - target) * polarity < 0.0 ){
 			x1 = x2;
 			y1 = y2;
@@ -637,7 +659,7 @@ void cal_linearity_binary( calibration_setup_t *setup, int obs1, int obs2, int o
 
 	comedi_set_global_oor_behavior( COMEDI_OOR_NUMBER );
 
-	x0 = x1 = x2 = 0;
+	x0 = setup->caldacs[dac].maxdata;
 	update_caldac( setup, dac, x0 );
 	usleep(100000);
 
@@ -657,7 +679,30 @@ void cal_linearity_binary( calibration_setup_t *setup, int obs1, int obs2, int o
 	new_sv_measure( setup->dev, &sv3);
 
 	y0 = ( sv3.average - sv2.average ) / ( sv2.average - sv1.average );
-	y1 = y2 = y0;
+
+	x1 = x2 = 0;
+	update_caldac( setup, dac, x1 );
+	usleep(100000);
+
+	preobserve( setup, obs1);
+	new_sv_init(&sv1, setup->dev, setup->ad_subdev,chanspec1);
+	sv1.settling_time_ns = setup->settling_time_ns;
+	new_sv_measure( setup->dev, &sv1);
+
+	preobserve( setup, obs2);
+	new_sv_init(&sv2, setup->dev, setup->ad_subdev,chanspec2);
+	sv2.settling_time_ns = setup->settling_time_ns;
+	new_sv_measure( setup->dev, &sv2);
+
+	preobserve( setup, obs3);
+	new_sv_init(&sv3, setup->dev, setup->ad_subdev,chanspec3);
+	sv3.settling_time_ns = setup->settling_time_ns;
+	new_sv_measure( setup->dev, &sv3);
+
+	y1 = y2 = ( sv3.average - sv2.average ) / ( sv2.average - sv1.average );
+
+	if( (y0 - y1) > 0.0 ) polarity = 1;
+	else polarity = -1;
 
 	bit = 1;
 	while( ( bit << 1 ) < setup->caldacs[dac].maxdata )
@@ -687,9 +732,6 @@ void cal_linearity_binary( calibration_setup_t *setup, int obs1, int obs2, int o
 		y2 = ( sv3.average - sv2.average ) / ( sv2.average - sv1.average );
 
 		DPRINT(3,"trying %d, result %g, target %g\n",x2,y2,target);
-
-		if( (y2 - y0) > 0.0 ) polarity = 1;
-		else polarity = -1;
 
 		if( (y2 - target) * polarity < 0.0 ){
 			x1 = x2;
