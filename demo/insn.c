@@ -48,7 +48,12 @@ int main(int argc, char *argv[])
 	struct timeval t1,t2;
 	lsampl_t data[MAX_SAMPLES];
 
+	n_scan = 10;	/* override default n_scan value to something more suitable */
 	parse_options(argc,argv);
+	if( n_scan > MAX_SAMPLES ){
+		fprintf( stderr, "Requested too many samples, reducing to %i\n", MAX_SAMPLES );
+		n_scan = MAX_SAMPLES;
+	}
 
 	device=comedi_open(filename);
 	if(!device){
