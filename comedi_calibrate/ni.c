@@ -77,7 +77,7 @@ static struct board_struct boards[]={
 	{ "pci-mio-16xe-50",	STATUS_SOME,	cal_ni_pci_mio_16xe_50 },
 	{ "pci-6023e",		STATUS_SOME,	cal_ni_pci_6023e },
 	{ "pci-mio-16xe-10",	STATUS_DONE,	cal_ni_pci_mio_16xe_10 },
-	{ "pci-6052e",		STATUS_SOME,	cal_ni_pci_6052e },
+	{ "pci-6052e",		STATUS_DONE,	cal_ni_pci_6052e },
 	{ "pci-6024e",		STATUS_SOME,	cal_ni_pci_6024e },
 #if 0
 //	{ "at-mio-16de-10",	cal_ni_unknown },
