@@ -576,6 +576,22 @@ Description:
 
  If sucessful, 1 is returned, otherwise -1.
 
+Function: comedi_dio_get_config -- query input/output properties of channel
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int channel
+Param: unsigned int * direction
+Description:
+ The function comedi_dio_get_config() querys the configuration of
+ an individual channel
+ in a digital I/O subdevice (see comedi_dio_config()).
+ On success, the variable specified by the "direction" pointer will
+ be set to either COMEDI_INPUT or COMEDI_OUTPUT.
+
+ If sucessful, 0 is returned, otherwise -1.
+
+
 Function: comedi_dio_read -- read single bit from digital channel
 Retval: int
 Param: comedi_t * device

@@ -79,6 +79,38 @@ int _comedi_dio_config(comedi_t *it,unsigned int subdev,unsigned int chan,unsign
 	}
 }
 
+EXPORT_ALIAS_DEFAULT(_comedi_dio_get_config, comedi_dio_get_config, 0.7.23);
+int _comedi_dio_get_config(comedi_t *it,unsigned int subdev, unsigned int chan, unsigned int *io)
+{
+	subdevice *s;
+	comedi_insn insn;
+	lsampl_t data[2];
+	int retval;
+	
+	if(!valid_chan(it,subdev,chan))
+		return -1;
+	
+	s=it->subdevices+subdev;
+	if(s->type!=COMEDI_SUBD_DIO)
+		return -1;
+
+	if(it->has_insnlist_ioctl == 0)
+		return -1;
+	
+	memset(&insn,0,sizeof(insn));
+	insn.insn = INSN_CONFIG;
+	insn.n = sizeof(data) / sizeof(data[0]);
+	insn.data = data;
+	insn.subdev = subdev;
+	insn.chanspec = CR_PACK(chan,0,0);
+	data[0] = INSN_CONFIG_DIO_QUERY;
+
+	retval = comedi_do_insn(it,&insn);
+	if(retval < 0) return retval;
+	*io = data[1];
+	return 0;
+}
+
 EXPORT_ALIAS_DEFAULT(_comedi_dio_read,comedi_dio_read,0.7.18);
 int _comedi_dio_read(comedi_t *it,unsigned int subdev,unsigned int chan,
 	unsigned int *val)
