@@ -161,12 +161,19 @@ int _comedi_apply_parsed_calibration( comedi_t *dev, unsigned int subdev, unsign
 	return retval;
 }
 
+/* munge characters in board name that will cause problems with file paths */
+static void fixup_board_name( char *name )
+{
+	while( ( name = strchr( name, '/' ) ) )
+		if( name ) *name = '-';
+}
+
 EXPORT_ALIAS_DEFAULT(_comedi_get_default_calibration_path,comedi_get_default_calibration_path,0.7.20);
 char* _comedi_get_default_calibration_path( comedi_t *dev )
 {
 	struct stat file_stats;
 	char *file_path;
-	char *board_name;
+	char *board_name, *temp;
 	char *driver_name;
 
 	if( fstat( comedi_fileno( dev ), &file_stats ) < 0 )
@@ -175,19 +182,23 @@ char* _comedi_get_default_calibration_path( comedi_t *dev )
 		return NULL;
 	}
 
-	board_name = comedi_get_board_name( dev );
-	if( board_name == NULL )
-	{
-		return NULL;
-	}
 	driver_name = comedi_get_driver_name( dev );
 	if( driver_name == NULL )
 	{
 		return NULL;
 	}
+	temp = comedi_get_board_name( dev );
+	if( temp == NULL )
+	{
+		return NULL;
+	}
+	board_name = strdup( temp );
+
+	fixup_board_name( board_name );
 	asprintf( &file_path, "/etc/comedi/calibrations/%s_%s_comedi%li",
 		driver_name, board_name, ( unsigned long ) minor( file_stats.st_rdev ) );
 
+	free( board_name );
 	return file_path;
 }
 
