@@ -2,6 +2,7 @@ Source: comedilib
 Section: devel
 Priority: optional
 Maintainer: David Schleef <ds@schleef.org>
+Build-Depends: debhelper
 Standards-Version: 3.0.1
 
 Package: libcomedi-dev
