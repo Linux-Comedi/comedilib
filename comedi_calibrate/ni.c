@@ -847,13 +847,16 @@ static int cal_ni_daqcard_6062e( calibration_setup_t *setup )
 	int i, retval;
 	enum caldacs
 	{
-		ADC_PREGAIN_OFFSET = 0,
-		DAC1_OFFSET = 1,
-		ADC_GAIN = 2,
-		DAC0_GAIN = 3,
+		DAC1_LINEARITY = 1, /* not sure exactly what this does */
+		ADC_GAIN = 2,	/* couples strongly to offset */
 		ADC_POSTGAIN_OFFSET = 4,
 		DAC1_GAIN = 5,
 		DAC0_OFFSET = 6,
+		ADC_UNIPOLAR_OFFSET = 7,
+		ADC_PREGAIN_OFFSET = 8,
+		DAC1_OFFSET = 9,
+		DAC0_LINEARITY = 10, /* not sure exactly what this does */
+		DAC0_GAIN = 11,
 	};
 
 	comedi_set_global_oor_behavior( COMEDI_OOR_NUMBER );
@@ -862,14 +865,16 @@ static int cal_ni_daqcard_6062e( calibration_setup_t *setup )
 
 	memset( saved_cals, 0, sizeof( saved_cals ) );
 
+	cal_postgain_binary( setup, ni_zero_offset_low, ni_reference_low, ADC_GAIN );
 	cal_postgain_binary( setup, ni_zero_offset_low, ni_zero_offset_high, ADC_POSTGAIN_OFFSET );
 	cal_binary( setup, ni_zero_offset_high, ADC_PREGAIN_OFFSET );
-	cal_binary( setup, ni_reference_low, ADC_GAIN );
+	cal_binary( setup, ni_unip_zero_offset_high, ADC_UNIPOLAR_OFFSET );
 
 	current_cal->subdevice = setup->ad_subdev;
 	sc_push_caldac( current_cal, setup->caldacs[ ADC_PREGAIN_OFFSET ] );
 	sc_push_caldac( current_cal, setup->caldacs[ ADC_GAIN ] );
 	sc_push_caldac( current_cal, setup->caldacs[ ADC_POSTGAIN_OFFSET ] );
+	sc_push_caldac( current_cal, setup->caldacs[ ADC_UNIPOLAR_OFFSET ] );
 	sc_push_channel( current_cal, SC_ALL_CHANNELS );
 	sc_push_range( current_cal, SC_ALL_RANGES );
 	sc_push_aref( current_cal, SC_ALL_AREFS );
@@ -882,6 +887,7 @@ static int cal_ni_daqcard_6062e( calibration_setup_t *setup )
 		current_cal->subdevice = setup->da_subdev;
 		sc_push_caldac( current_cal, setup->caldacs[ DAC0_OFFSET ] );
 		sc_push_caldac( current_cal, setup->caldacs[ DAC0_GAIN ] );
+		sc_push_caldac( current_cal, setup->caldacs[ DAC0_LINEARITY ] );
 		sc_push_channel( current_cal, 0 );
 		sc_push_range( current_cal, SC_ALL_RANGES );
 		sc_push_aref( current_cal, SC_ALL_AREFS );
@@ -893,6 +899,7 @@ static int cal_ni_daqcard_6062e( calibration_setup_t *setup )
 		current_cal->subdevice = setup->da_subdev;
 		sc_push_caldac( current_cal, setup->caldacs[ DAC1_OFFSET ] );
 		sc_push_caldac( current_cal, setup->caldacs[ DAC1_GAIN ] );
+		sc_push_caldac( current_cal, setup->caldacs[ DAC1_LINEARITY ] );
 		sc_push_channel( current_cal, 1 );
 		sc_push_range( current_cal, SC_ALL_RANGES );
 		sc_push_aref( current_cal, SC_ALL_AREFS );
