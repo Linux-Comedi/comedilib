@@ -70,6 +70,7 @@ struct option options[] = {
 	{ "verbose", 0, 0, 'v' },
 	{ "quiet", 0, 0, 'q' },
 	{ "file", 1, 0, 'f' },
+	{ "save-file", 1, 0, 's' },
 	{ "help", 0, 0, 'h' },
 	{ "driver-name", 1, 0, 0x1000 },
 	{ "device-name", 1, 0, 0x1001 },
@@ -93,6 +94,7 @@ void help(void)
 	printf("  --quiet, -q  \n");
 	printf("  --help, -h  \n");
 	printf("  --file, -f [/dev/comediN] \n");
+	printf("  --save-file, -s [filepath] \n");
 	printf("  --driver-name [driver]  \n");
 	printf("  --device-name [device]  \n");
 	printf("  --[no-]reset  \n");
@@ -118,6 +120,8 @@ int main(int argc, char *argv[])
 	int caldac_subdev;
 	int retval;
 
+	memset( &setup, 0, sizeof( setup ) );
+
 	fn = "/dev/comedi0";
 	while (1) {
 		c = getopt_long(argc, argv, "f:vq", options, &index);
@@ -131,6 +135,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'f':
 			fn = optarg;
+			break;
+		case 's':
+			setup.cal_save_file_path = optarg;
 			break;
 		case 'v':
 			verbose++;
@@ -176,8 +183,6 @@ int main(int argc, char *argv[])
 	return 1;
 
 ok:
-	memset( &setup, 0, sizeof( setup ) );
-
 	setup.dev = dev;
 	setup.ad_subdev = ad_subdev;
 	setup.da_subdev = da_subdev;

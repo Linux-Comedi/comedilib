@@ -19,6 +19,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -106,15 +108,15 @@ int write_calibration_perl_hash( FILE *file, comedi_t *dev,
 	return 0;
 }
 
-int write_calibration_file( comedi_t *dev, saved_calibration_t settings[],
+int write_calibration_file( calibration_setup_t *setup, saved_calibration_t settings[],
 	unsigned int num_settings )
 {
 	FILE *file;
 	int retval;
 	static const char *save_dir = "/etc/comedi/calibrations";
-	char file_path[ 100 ];
 	char command[ 100 ];
 	struct stat file_stats;
+	comedi_t *dev = setup->dev;
 
 	if( fstat( comedi_fileno( dev ), &file_stats ) < 0 )
 	{
@@ -129,13 +131,17 @@ int write_calibration_file( comedi_t *dev, saved_calibration_t settings[],
 		return -1;
 	}
 
-	snprintf( file_path, sizeof( file_path ), "%s/%s_0x%lx",
-		save_dir, comedi_get_board_name( dev ),
-		( unsigned long ) file_stats.st_ino );
-	file = fopen( file_path, "w" );
+	if( setup->cal_save_file_path == NULL )
+	{
+		asprintf( &setup->cal_save_file_path, "%s/%s_0x%lx",
+			save_dir, comedi_get_board_name( dev ),
+			( unsigned long ) file_stats.st_ino );
+	}
+	file = fopen( setup->cal_save_file_path, "w" );
 	if( file == NULL )
 	{
-		fprintf( stderr, "failed to open file %s for writing\n", file_path );
+		fprintf( stderr, "failed to open file %s for writing\n",
+			setup->cal_save_file_path );
 		return -1;
 	}
 
@@ -148,29 +154,62 @@ int write_calibration_file( comedi_t *dev, saved_calibration_t settings[],
 
 void sc_push_caldac( saved_calibration_t *saved_cal, caldac_t caldac )
 {
-	assert( saved_cal->caldacs_length < N_CALDACS );
-
+	saved_cal->caldacs = realloc( saved_cal->caldacs,
+		( saved_cal->caldacs_length + 1 ) * sizeof( caldac_t ) );
+	if( saved_cal->caldacs == NULL )
+	{
+		fprintf( stderr, "memory allocation failure\n" );
+		abort();
+	}
 	saved_cal->caldacs[ saved_cal->caldacs_length++ ] = caldac;
 }
 
 void sc_push_channel( saved_calibration_t *saved_cal, int channel )
 {
-	assert( saved_cal->channels_length < SC_MAX_CHANNELS_LENGTH );
-
 	if( channel == SC_ALL_CHANNELS )
+	{
 		saved_cal->channels_length = 0;
-	else
+		if( saved_cal->channels )
+		{
+			free( saved_cal->channels );
+			saved_cal->channels = NULL;
+		}
+	}else
+	{
+		saved_cal->channels = realloc( saved_cal->channels,
+			( saved_cal->channels_length + 1 ) * sizeof( int ) );
+		if( saved_cal->channels == NULL )
+		{
+			fprintf( stderr, "memory allocation failure\n" );
+			abort();
+		}
 		saved_cal->channels[ saved_cal->channels_length++ ] = channel;
+	}
 }
 
 void sc_push_range( saved_calibration_t *saved_cal, int range )
 {
-	assert( saved_cal->ranges_length < SC_MAX_RANGES_LENGTH );
-
 	if( range == SC_ALL_RANGES )
+	{
 		saved_cal->ranges_length = 0;
+		if( saved_cal->ranges )
+		{
+			free( saved_cal->ranges );
+			saved_cal->ranges = NULL;
+		}
+	}
 	else
+	{
+		saved_cal->ranges = realloc( saved_cal->ranges,
+			( saved_cal->ranges_length + 1 ) * sizeof( int ) );
+		if( saved_cal->ranges == NULL )
+		{
+			fprintf( stderr, "memory allocation failure\n" );
+			abort();
+		}
 		saved_cal->ranges[ saved_cal->ranges_length++ ] = range;
+	}
+
 }
 
 void sc_push_aref( saved_calibration_t *saved_cal, int aref )
@@ -181,4 +220,26 @@ void sc_push_aref( saved_calibration_t *saved_cal, int aref )
 		saved_cal->arefs_length = 0;
 	else
 		saved_cal->arefs[ saved_cal->arefs_length++ ] = aref;
+}
+
+void clear_saved_calibration( saved_calibration_t *saved_cal )
+{
+	if( saved_cal->caldacs )
+	{
+		free( saved_cal->caldacs );
+		saved_cal->caldacs = NULL;
+		saved_cal->caldacs_length = 0;
+	}
+	if( saved_cal->channels )
+	{
+		free( saved_cal->channels );
+		saved_cal->channels = NULL;
+		saved_cal->channels_length = 0;
+	}
+	if( saved_cal->ranges )
+	{
+		free( saved_cal->ranges );
+		saved_cal->ranges = NULL;
+		saved_cal->ranges_length = 0;
+	}
 }

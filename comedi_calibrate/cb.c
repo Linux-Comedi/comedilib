@@ -870,7 +870,9 @@ int cal_cb_pci_60xx( calibration_setup_t *setup )
 		sc_push_aref( &saved_cals[ i ], SC_ALL_AREFS );
 	}
 
-	retval = write_calibration_file( setup->dev, saved_cals, num_ranges );
+	retval = write_calibration_file( setup, saved_cals, num_ranges );
+	for( i = 0; i < num_ranges; i++ )
+		clear_saved_calibration( &saved_cals[ i ] );
 	free( saved_cals );
 	return retval;
 }
