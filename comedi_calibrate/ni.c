@@ -1211,15 +1211,18 @@ static int cal_ni_generic( calibration_setup_t *setup, const ni_caldac_layout_t 
 
 	current_cal = sc_alloc_calibration_setting( setup );
 	current_cal->subdevice = setup->ad_subdev;
+	reset_caldac( setup, layout->adc_gain_fine );
 	generic_do_relative( setup, current_cal, ni_zero_offset_low,
 		ni_reference_low, layout->adc_gain );
+	reset_caldac( setup, layout->adc_postgain_offset_fine );
 	generic_do_relative( setup, current_cal, ni_zero_offset_low,
 		ni_zero_offset_high, layout->adc_postgain_offset );
+	generic_do_relative( setup, current_cal, ni_zero_offset_low,
+		ni_zero_offset_high, layout->adc_postgain_offset_fine );
+	reset_caldac( setup, layout->adc_pregain_offset_fine );
 	generic_do_cal( setup, current_cal, ni_zero_offset_high, layout->adc_pregain_offset );
 	generic_do_relative( setup, current_cal, ni_zero_offset_low,
 		ni_reference_low, layout->adc_gain_fine );
-	generic_do_relative( setup, current_cal, ni_zero_offset_low,
-		ni_zero_offset_high, layout->adc_postgain_offset_fine );
 	generic_do_cal( setup, current_cal, ni_zero_offset_high,
 		layout->adc_pregain_offset_fine );
 	sc_push_channel( current_cal, SC_ALL_CHANNELS );
@@ -1248,19 +1251,21 @@ static int cal_ni_generic( calibration_setup_t *setup, const ni_caldac_layout_t 
 		}else
 		{
 			prep_adc_caldacs_generic( setup, layout, ai_unipolar_lowgain );
-			if( setup->old_calibration == NULL )
-				generic_peg( setup, ni_unip_zero_offset_low,
-					layout->adc_pregain_offset, 1 );
+			generic_peg( setup, ni_unip_zero_offset_low,
+				layout->adc_pregain_offset, 1 );
+			reset_caldac( setup, layout->adc_gain_fine );
 			generic_do_relative( setup, current_cal, ni_unip_zero_offset_low,
 				ni_unip_reference_low, layout->adc_gain );
+			reset_caldac( setup, layout->adc_postgain_offset_fine );
 			generic_do_relative( setup, current_cal, ni_unip_zero_offset_low,
 				ni_unip_zero_offset_high, layout->adc_postgain_offset );
+			generic_do_relative( setup, current_cal, ni_unip_zero_offset_low,
+				ni_unip_zero_offset_high, layout->adc_postgain_offset_fine );
+			reset_caldac( setup, layout->adc_pregain_offset_fine );
 			generic_do_cal( setup, current_cal, ni_unip_zero_offset_high,
 				layout->adc_pregain_offset );
 			generic_do_relative( setup, current_cal, ni_unip_zero_offset_low,
 				ni_unip_reference_low, layout->adc_gain_fine );
-			generic_do_relative( setup, current_cal, ni_unip_zero_offset_low,
-				ni_unip_zero_offset_high, layout->adc_postgain_offset_fine );
 			generic_do_cal( setup, current_cal, ni_unip_zero_offset_high,
 				layout->adc_pregain_offset_fine );
 		}
@@ -1292,6 +1297,7 @@ static int cal_ni_generic( calibration_setup_t *setup, const ni_caldac_layout_t 
 				layout->dac_linearity[ channel ] );
 			generic_do_cal( setup, current_cal, ni_ao_zero_offset( channel ),
 				layout->dac_offset[ channel ] );
+			reset_caldac( setup, layout->dac_gain_fine[ channel ] );
 			generic_do_cal( setup, current_cal, ni_ao_reference( channel ),
 				layout->dac_gain[ channel ] );
 			generic_do_cal( setup, current_cal, ni_ao_reference( channel ),
