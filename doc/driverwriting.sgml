@@ -54,8 +54,8 @@ How to use <link linkend="drivercallbacks">DMA and interrupts</link>?
 What are the addresses and meanings of all the card's registers?
 </para>
 <para>
-This information is to be found in the so-called &ldquo;register level
-manual&rdquo; of the card. Without it, coding a device driver is close
+This information is to be found in the so-called <quote>register level
+manual</quote> of the card. Without it, coding a device driver is close
 to hopeless. It is also something that &comedi; (and hence also this
 handbook) cannot give any support or information for: board
 manufacturers all use their own design and nomenclature.
@@ -263,7 +263,7 @@ struct comedi_lrange_struct{
 <function>comedi_subdevice</function>
 <para>
 The subdevice is the smallest &comedi; entity that can be used for
-&ldquo;stand-alone&rdquo; DAQ, so it is no surprise that it is
+<quote>stand-alone</quote> DAQ, so it is no surprise that it is
 quite big:
 <programlisting>
 struct comedi_subdevice_struct{
@@ -516,7 +516,7 @@ the same driver files.
 </para>
 <para>
 To help device driver writers,
-&comedi; provides the &ldquo;skeleton&rdquo; of a new device driver,
+&comedi; provides the <quote>skeleton</quote> of a new device driver,
 in the <filename>comedi/drivers/skel.c</filename> file. Before
 starting to write a new driver, make sure you understand this file,
 and compare it to what you find in the other already available
@@ -544,7 +544,7 @@ module):
   mydriver_attach();
   mydriver_detach();
 </programlisting>
-In the &ldquo;attach&rdquo; function, memory is allocated for the
+In the <quote>attach</quote> function, memory is allocated for the
 necessary <link linkend="driverdatastructures">data structures</link>,
 all properties of a device and its subdevices are defined, and filled
 in in the generic &comedi; data structures. As part of this, pointers
@@ -683,7 +683,7 @@ Continuous acquisition is tyically an
 <emphasis>asynchronous</emphasis> activity: the function call that
 has set the acquisition in motion has returned before the acquisition
 has finished (or even started). So, not only the acquired data must be
-sent back to the user's buffer &ldquo;in the background&rdquo;, but
+sent back to the user's buffer <quote>in the background</quote>, but
 various types of asynchronous <emphasis>event handling</emphasis> can
 be needed during the acquisition: 
 <itemizedlist>
@@ -706,7 +706,7 @@ an acquisition <link linkend="scan">scan</link>, etc.
 <listitem>
 <para>
 The device driver writer can register a driver-supplied
-&rdquo;callback&rdquo; function, that is called at the end of each
+<quote>callback</quote> function, that is called at the end of each
 hardware interrupt routine.
 </para>
 </listitem>
@@ -741,7 +741,7 @@ The possible event bits are:
 <para>
 <anchor id="comedi-cb-eoa">
 <parameter>COMEDI_CB_EOA</parameter>: execute the callback at the
-&ldquo;End Of-Acquisition&rdquo;.
+<quote>End Of-Acquisition</quote>.
 </para>
 </listitem>
 
@@ -749,7 +749,7 @@ The possible event bits are:
 <para>
 <anchor id="comedi-cb-eos">
 <parameter>COMEDI_CB_EOS</parameter>: execute the callback at the
-&ldquo;End-Of-Scan&rdquo;.
+<quote>End-Of-Scan</quote>.
 </para>
 </listitem>
 
@@ -786,7 +786,7 @@ A few things to strive for when writing a new driver:
 
 <listitem>
 <para>
-Some DAQ cards consist of different &ldquo;layers&rdquo; of hardware,
+Some DAQ cards consist of different <quote>layers</quote> of hardware,
 which can each be given their own device driver. Examples are:
 some of the National Instruments cards, that all share the same
 <emphasis>Mite</emphasis> PCI driver chip; the ubiquitous parallel
@@ -846,20 +846,20 @@ things have to be done:
 <listitem>
 <para>
 Choose a senseful name for the source code file. Let's assume here
-that you call it &ldquo;mydriver.c&rdquo;
+that you call it <quote>mydriver.c</quote>
 </para>
 </listitem>
 
 <listitem>
 <para>
-Put your new driver into &ldquo;comedi/drivers/mydriver.c&rdquo;.
+Put your new driver into <quote>comedi/drivers/mydriver.c</quote>.
 </para>
 </listitem>
                                                                                 
 <listitem>
 <para>
-Edit &ldquo;comedi/Config.in&rdquo; and add a new
-&ldquo;dep_tristate&rdquo; line (look at the other examples). Invent a
+Edit <quote>comedi/Config.in</quote> and add a new
+<quote>dep_tristate</quote> line (look at the other examples). Invent a
 senseful name for the driver's variable.  For example:
 <programlisting>
      dep_tristate 'MYDRIVER' CONFIG_COMEDI_MYDRIVER $CONFIG_COMEDI
@@ -869,7 +869,7 @@ senseful name for the driver's variable.  For example:
 
 <listitem>
 <para>
-Add a line to &ldquo;comedi/drivers/Makefile.in&rdquo;, using your
+Add a line to <quote>comedi/drivers/Makefile.in</quote>, using your
 freshly defined variable, i.e., CONFIG_COMEDI_MYDRIVER.
 </para>
 </listitem>

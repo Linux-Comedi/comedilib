@@ -56,7 +56,7 @@ The
 </function> can only be successful if the
 <filename>comedi0</filename> device file is configured to point to a
 valid &comedi; driver. <xref linkend="cardconfiguration"> explains
-how this driver is linked to the &ldquo;device file&rdquo;.
+how this driver is linked to the <quote>device file</quote>.
 <para>
 The code above is basically the guts of
 <filename>demo/inp.c</filename>, without error checking or fancy
@@ -98,16 +98,16 @@ and <literal>4095</literal>
 the highest.  &comedi; compensates for anything else the manual for
 your device says.  However, you probably prefer to have this number
 translated to a voltage.  Naturally, as a good programmer, your first
-question is: &ldquo;How do I do this in a device-independent
-manner?&rdquo;
+question is: <quote>How do I do this in a device-independent
+manner?</quote>
 </para>
 
 <para>
 Most devices give you a choice of gain and unipolar/bipolar
 input, and &comedi; allows you to select which of these to use.  This
-parameter is called the &ldquo;range parameter,&rdquo; since it
-specifies the &ldquo;input range&rdquo; for analog input (or
-&ldquo;output range&rdquo; for analog output.)  The range parameter
+parameter is called the <quote>range parameter,</quote> since it
+specifies the <quote>input range</quote> for analog input (or
+<quote>output range</quote> for analog output.)  The range parameter
 represents both the gain and the unipolar/bipolar aspects.
 </para>
 
@@ -163,7 +163,7 @@ or are dimensionless (e.g., for digital I/O).
 </para>
 
 <para>
-&ldquo;Could it get easier?&rdquo; you say.  Well, yes.  Use
+<quote>Could it get easier?</quote> you say.  Well, yes.  Use
 the function <function>comedi_to_phys()</function>
 <link linkend="func-ref-comedi-to-phys">comedi_to_phys()</link>, which
 converts data values to physical units.  Call it using something like

@@ -70,7 +70,7 @@ want the device to use.  It can be any of the following:
     <term>AREF_COMMON <anchor id="aref-common"> </term>
     <listitem>
       <para>
-	 is for a &ldquo;common&rdquo; reference (the low inputs of all the
+	 is for a <quote>common</quote> reference (the low inputs of all the
 channels are tied together, but are isolated from ground).
       </para>
     </listitem>
@@ -155,7 +155,7 @@ subdevice_struct
 <para>
 The data type <parameter>subdevice_struct</parameter> is used to store
 information about a subdevice. This structure is usually filled in
-automatically when the driver is loaded (&ldquo;attached&rdquo;), so
+automatically when the driver is loaded (<quote>attached</quote>), so
 programmers need not access this data structure directly.
 <programlisting>
 typedef struct subdevice_struct <anchor id="ref-type-subdevice">subdevice;
@@ -200,7 +200,7 @@ comedi_devinfo
 <para>
 The data type <parameter>comedi_devinfo</parameter> is used to store
 information about a device. This structure is usually filled in
-automatically when the driver is loaded (&ldquo;attached&rdquo;), so
+automatically when the driver is loaded (<quote>attached</quote>), so
 programmers need not access this data structure directly.
 <programlisting>
 typedef struct comedi_devinfo_struct comedi_devinfo;

@@ -30,7 +30,7 @@ its <command>man</command> page now):
 PATH=/sbin:/usr/sbin:/usr/local/sbin:$PATH
 comedi_config /dev/comedi0 labpc-1200 0x260,3
 </screen>
-This command says that the &ldquo;file&rdquo;
+This command says that the <quote>file</quote>
 <filename>/dev/comedi0</filename> can be used to access the &comedi;
 device that uses the <parameter>labpc-1200</parameter> board, and that
 you give it two run-time parameters (<literal>0x260</literal> and

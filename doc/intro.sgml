@@ -27,9 +27,9 @@ project's source code is distributed in two packages,
 <para>
 <emphasis role="strong">Comedi</emphasis> is a collection of drivers for a variety
 of common data acquisition plug-in boards (which are called
-&ldquo;devices&rdquo; in &comedi; terminology). The drivers are
+<quote>devices</quote> in &comedi; terminology). The drivers are
 implemented as the combination of (i) one single core Linux kernel module
-(called &ldquo;<literal>comedi</literal>&rdquo;) providing common
+(called <quote><literal>comedi</literal></quote>) providing common
 functionality, and (ii) individual low-level driver modules for
 each device.
 </para>
@@ -51,7 +51,7 @@ configuration and calibration utilities, and demonstration programs.
 (distributed with the <literal>comedi</literal> package) that provides
 the same interface as <emphasis>comedilib</emphasis> in kernel space,
 and suitable for <emphasis>real-time</emphasis> tasks. It is
-effectively a &ldquo;kernel library&rdquo; for using &comedi; from
+effectively a <quote>kernel library</quote> for using &comedi; from
 real-time tasks. 
 </para>
 </listitem>
@@ -70,7 +70,7 @@ document.
 
 <section id="whatisdevicedriver">
 <title>
-What is a &ldquo;device driver&rdquo;?
+What is a <quote>device driver</quote>?
 </title>
 <para>
 A device driver is a piece of software that interfaces a particular
@@ -100,7 +100,7 @@ Schleef designed a structure which is a balance between
 <emphasis>modularity</emphasis> and <emphasis>complexity</emphasis>:
 it's fairly easy to integrate a new card because most of the
 infrastructure part of other, similar drivers can be reused, and 
-learning the generic and hence somewhat &ldquo;heavier&rdquo; &comedi;
+learning the generic and hence somewhat <quote>heavier</quote> &comedi;
 API doesn't scare away new contributors from integrating their drivers
 into the &comedi; framework.
 </para>
@@ -188,7 +188,7 @@ standardization effort themselves.
   the device driver code should reflect this fact. For example, many
   different interface cards use the same PCI driver chips, or use the
   parallel port as an intermediate means to connect to the hardware
-device. Hence, &ldquo;lower-level&rdquo; device drivers for
+device. Hence, <quote>lower-level</quote> device drivers for
 these PCI chips and parallel ports allow for an increased modularity
 and re-useability of the software. Finding the generic
 similarities and structure among different cards helps in developing
@@ -232,7 +232,7 @@ events.
 this device driver, however, runs in kernel space, and the user
 application in user space. So, the operating system provides an
 interface between both. In Linux or Unix, these interfaces are in the
-form of &ldquo;files&rdquo;
+form of <quote>files</quote>
   in the <filename class=directory>/dev</filename> directory (2.2.x kernels or
 earlier) or <filename class=directory>/devfs</filename> directory
   (2.4.x kernels and later). Each device supported in the kernel has a
@@ -250,7 +250,7 @@ representative as such a user space device file, and its functionality can
   Linux (and some other UNIX operating systems) offer a file-like
 interface to attached devices (and other OS-related information) via
 the <filename class=directory>/proc</filename> directories. These
-&ldquo;files&rdquo; do not really exist, but it gives a familiar
+<quote>files</quote> do not really exist, but it gives a familiar
 interface to users, with which they can inspect the current status of
 each device.
 </para>
@@ -264,7 +264,7 @@ Input/Output (PIO).</emphasis>
   responsible for directly accessing the bus addresses allocated to
 the device whenever it needs 
   to read or write data. Some devices also allow DMA: the device and the
-  memory &ldquo;talk&rdquo; to each other directly, without needing the processor.
+  memory <quote>talk</quote> to each other directly, without needing the processor.
   DMA is a feature of the bus, not of the operating system (which, of
 course, has
   to support its processes to use the feature).
@@ -341,7 +341,7 @@ functionality is available.
 </listitem>
 
 </itemizedlist>
-In addition to these &ldquo;real&rdquo; DAQ functions, &comedi; also
+In addition to these <quote>real</quote> DAQ functions, &comedi; also
 offers basic timer access.
 </para>
 </section>
@@ -363,7 +363,7 @@ for example, an analog input, or a digital output.
 Each channel has several parameters, such as: the voltage range; the
 reference voltage; the channel polarity (unipolar, bipolar); a
 conversion factor between voltages and physical units; the binary
-values &ldquo;0&rdquo; and &ldquo;1&rdquo;; etc.
+values <quote>0</quote> and <quote>1</quote>; etc.
 </para>
 </listitem>
 
@@ -396,7 +396,7 @@ sub-device with two analog output channels, and a
 Some interface cards have extra components that don't fit in the
 above-mentioned classification, such as an EEPROM to store
 configuration and board parameters, or calibration inputs. These
-special components are also classified as &ldquo;sub-devices&rdquo; in 
+special components are also classified as <quote>sub-devices</quote> in 
 &comedi;.
 </para>
 
@@ -409,7 +409,7 @@ Acquisition terminology
 
 <para>
 This Section introduces the terminology that this document uses when
-talking about &ldquo;acquisitions.&rdquo; <xref linkend="fig-acq-seq">
+talking about <quote>acquisitions.</quote> <xref linkend="fig-acq-seq">
 depicts a typical acquisition <emphasis role="strong">sequence</emphasis>:
 <itemizedlist>
 
@@ -433,7 +433,7 @@ written to it. Each scan also has a
 <emphasis role="strong">end</emphasis>, and a finite
 <emphasis role="strong">setup time</emphasis>. Possibly, there is also
 a settling time
-(&ldquo;<emphasis role="strong">scan delay</emphasis>&rdquo;) at the
+(<quote><emphasis role="strong">scan delay</emphasis></quote>) at the
 end of a scan.
 </para>
 <para>
@@ -454,7 +454,7 @@ channels, and produces a sample, again in a finite
 moment in time called the
 <emphasis role="strong">sample time</emphasis>
 in <xref linkend="fig-acq-seq">
-(sometimes also called the &ldquo;timestamp&rdquo;),
+(sometimes also called the <quote>timestamp</quote>),
 and caused by a
 triggering event, called <emphasis role="strong">convert</emphasis>.
 In addition, each hardware has limits on the minimum
@@ -467,7 +467,7 @@ Some hardware must <emphasis>multiplex</emphasis> the conversions onto
 one single AD/DA hardware, such that the conversions are done serially
 in time (as shown on the <link linkend="fig-acq-seq">Figure</link>);
 other cards have the hardware to do two or more acquisitions in
-parallel.  The begin of each conversion is &ldquo;triggered&rdquo; by
+parallel.  The begin of each conversion is <quote>triggered</quote> by
 some internally or externally generated pulse, e.g., a timer.
 </para>
 </listitem>
@@ -525,7 +525,7 @@ channel: <function>comedi_data_read()</function>,
 <function>comedi_data_write()</function>,
 <function>comedi_dio_read()</function>,
 <function>comedi_dio_write()</function>.
-&ldquo;Synchronous&rdquo; means that the calling process
+<quote>Synchronous</quote> means that the calling process
 blocks until the data acquisition has finished.
 </para>
 </listitem>
@@ -573,10 +573,10 @@ the hardware of the card takes care of the sequencing and the timing of
 the data acquisition,
  and makes sure that the acquired data is delivered
 in a software buffer provided by the calling process. Asynchronous
-operation requires some form of &ldquo;callback&rdquo; functionality
+operation requires some form of <quote>callback</quote> functionality
 to prevent buffer overflow: after the calling process has launched the
 acquisition command, it goes off doing other things, but not after it
-has configured the &ldquo;handler&rdquo;  that the interface card can
+has configured the <quote>handler</quote>  that the interface card can
 use when it needs to put data in the calling process's buffer.
 Interrupt routines or DMA are typical techniques to allow such
 asynchronous operation. Their handlers are configured at driver load
@@ -666,7 +666,7 @@ operating system level.
 As already mentioned before, &comedi; contains more than just
 procedural function calls, since it also offers
 <emphasis role="strong">event-driven</emphasis>
-(&ldquo;asynchronous&rdquo;) functionality:
+(<quote>asynchronous</quote>) functionality:
 the data acquisition can signal
 its completion by means of an interrupt or a
 <emphasis>callback</emphasis> function call.
@@ -691,11 +691,11 @@ structures.
 
 <para>
 Finally, &comedi; offers the previously mentioned
-&ldquo;high-level&rdquo; interaction, i.e., at the level of user space
+<quote>high-level</quote> interaction, i.e., at the level of user space
 device drivers, through file operations on entries in the
 <filename class=directory>/dev</filename> directory (for access to the
 device's functionality), or interactively from the command line
-through the &ldquo;files&rdquo; in the
+through the <quote>files</quote> in the
 <filename class=directory>/proc</filename> directory (which allow to
 inspect the status of a &comedi; device).  
 </para>
