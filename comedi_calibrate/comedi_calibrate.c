@@ -5,15 +5,6 @@
    copyright (C) 1999,2000,2001,2002 by David Schleef
    copyright (C) 2003 by Frank Mori Hess
 
-   A few things need improvement here:
-    - current system gets "close", but doesn't
-      do any fine-tuning
-    - should read (and use) the actual reference
-      voltage value from eeprom
-    - statistics would be nice, to show how good
-      the calibration is.
-    - doesn't check unipolar ranges
-    - more portable
  */
 
  /***************************************************************************
@@ -182,8 +173,9 @@ int main(int argc, char *argv[])
 	parsed_options_t options;
 
 	memset( &setup, 0, sizeof( setup ) );
-	setup.settling_time_ns = 99999;
-
+	setup.sv_settling_time_ns = 99999;
+	setup.sv_order = 10;
+	
 	memset( &options, 0, sizeof( options ) );
 	options.do_dump = 0;
 	options.do_reset = 0;
@@ -361,10 +353,10 @@ static void apply_appropriate_cal( calibration_setup_t *setup, comedi_insn insn 
 		return;
 	}
 	if( retval < 0 )
-		DPRINT( 0, "failed to apply ");
+		DPRINT( 1, "failed to apply ");
 	else
-		DPRINT( 0, "applied ");
-	DPRINT( 0, "calibration for subdev %i, channel %i, range %i, aref %i\n", insn.subdev,
+		DPRINT( 1, "applied ");
+	DPRINT( 1, "calibration for subdev %i, channel %i, range %i, aref %i\n", insn.subdev,
 		CR_CHAN( insn.chanspec ), CR_RANGE( insn.chanspec ),
 		CR_AREF( insn.chanspec ) );
 }
@@ -427,10 +419,9 @@ void measure_observable( calibration_setup_t *setup, int obs)
 	int n;
 	new_sv_t sv;
 
-	new_sv_init(&sv, setup->dev,
+	my_sv_init(&sv, setup,
 		setup->observables[obs].observe_insn.subdev,
 		setup->observables[obs].observe_insn.chanspec);
-	sv.settling_time_ns = setup->settling_time_ns;
 	n = new_sv_measure(setup->dev, &sv);
 
 	sci_sprint_alt(s,sv.average,sv.error);
@@ -490,7 +481,7 @@ void postgain_cal( calibration_setup_t *setup, int obs1, int obs2, int dac)
 	a=setup->caldacs[dac].current-a;
 
 	update_caldac( setup, dac, rint(a) );
-	usleep(100000);
+	usleep(caldac_settle_usec);
 
 	DPRINT(0,"caldac[%d] set to %g (%g)\n",dac,rint(a),a);
 
@@ -513,7 +504,7 @@ void cal1( calibration_setup_t *setup, int obs, int dac)
 	a=linear_fit_func_x(&l, setup->observables[obs].target);
 
 	update_caldac( setup, dac, rint(a) );
-	usleep(100000);
+	usleep(caldac_settle_usec);
 
 	DPRINT(0,"caldac[%d] set to %g (%g)\n",dac,rint(a),a);
 	if(verbose>=3){
@@ -532,7 +523,7 @@ void cal1_fine( calibration_setup_t *setup, int obs, int dac )
 	a=linear_fit_func_x(&l,setup->observables[obs].target);
 
 	update_caldac( setup, dac, rint(a) );
-	usleep(100000);
+	usleep(caldac_settle_usec);
 
 	DPRINT(0,"caldac[%d] set to %g (%g)\n",dac,rint(a),a);
 	if(verbose>=3){
@@ -555,18 +546,17 @@ void cal_binary( calibration_setup_t *setup, int obs, int dac)
 
 	comedi_set_global_oor_behavior( COMEDI_OOR_NUMBER );
 
-	new_sv_init(&sv, setup->dev, setup->ad_subdev, chanspec);
-	sv.settling_time_ns = setup->settling_time_ns;
+	my_sv_init(&sv, setup, setup->ad_subdev, chanspec);
 
 	x0 = setup->caldacs[dac].maxdata;
 	update_caldac( setup, dac, x0 );
-	usleep(100000);
+	usleep(caldac_settle_usec);
 	new_sv_measure( setup->dev, &sv);
 	y0 = sv.average;
 
 	x1 = x2 = 0;
 	update_caldac( setup, dac, x1 );
-	usleep(100000);
+	usleep(caldac_settle_usec);
 	new_sv_measure( setup->dev, &sv);
 	y1 = y2 = sv.average;
 
@@ -580,7 +570,7 @@ void cal_binary( calibration_setup_t *setup, int obs, int dac)
 		x2 = x1 | bit;
 
 		update_caldac( setup, dac, x2 );
-		usleep(100000);
+		usleep(caldac_settle_usec);
 		new_sv_measure( setup->dev, &sv);
 		y2 = sv.average;
 		DPRINT(3,"trying %d, result %g, target %g\n",x2,y2,target);
@@ -631,21 +621,19 @@ void cal_relative_binary( calibration_setup_t *setup, int obs1, int obs2, int da
 
 	x0 = setup->caldacs[dac].maxdata;
 	update_caldac( setup, dac, x0 );
-	usleep(100000);
+	usleep(caldac_settle_usec);
 	preobserve( setup, obs1);
-	new_sv_init(&sv1, setup->dev, setup->ad_subdev,chanspec1);
-	sv1.settling_time_ns = setup->settling_time_ns;
+	my_sv_init(&sv1, setup, setup->ad_subdev,chanspec1);
 	new_sv_measure( setup->dev, &sv1);
 
 	preobserve( setup, obs2);
-	new_sv_init(&sv2, setup->dev, setup->ad_subdev,chanspec2);
-	sv2.settling_time_ns = setup->settling_time_ns;
+	my_sv_init(&sv2, setup, setup->ad_subdev,chanspec2);
 	new_sv_measure( setup->dev, &sv2);
 	y0 = sv1.average - sv2.average;
 
 	x1 = x2 = 0;
 	update_caldac( setup, dac, x1 );
-	usleep(100000);
+	usleep(caldac_settle_usec);
 	preobserve( setup, obs1);
 	new_sv_measure( setup->dev, &sv1);
 
@@ -664,7 +652,7 @@ void cal_relative_binary( calibration_setup_t *setup, int obs1, int obs2, int da
 		x2 = x1 | bit;
 
 		update_caldac( setup, dac, x2 );
-		usleep(100000);
+		usleep(caldac_settle_usec);
 
 		preobserve( setup, obs1);
 		new_sv_measure( setup->dev, &sv1);
@@ -723,28 +711,25 @@ void cal_linearity_binary( calibration_setup_t *setup, int obs1, int obs2, int o
 
 	x0 = setup->caldacs[dac].maxdata;
 	update_caldac( setup, dac, x0 );
-	usleep(100000);
+	usleep(caldac_settle_usec);
 
 	preobserve( setup, obs1);
-	new_sv_init(&sv1, setup->dev, setup->ad_subdev,chanspec1);
-	sv1.settling_time_ns = setup->settling_time_ns;
+	my_sv_init(&sv1, setup, setup->ad_subdev,chanspec1);
 	new_sv_measure( setup->dev, &sv1);
 
 	preobserve( setup, obs2);
-	new_sv_init(&sv2, setup->dev, setup->ad_subdev,chanspec2);
-	sv2.settling_time_ns = setup->settling_time_ns;
+	my_sv_init(&sv2, setup, setup->ad_subdev,chanspec2);
 	new_sv_measure( setup->dev, &sv2);
 
 	preobserve( setup, obs3);
-	new_sv_init(&sv3, setup->dev, setup->ad_subdev,chanspec3);
-	sv3.settling_time_ns = setup->settling_time_ns;
+	my_sv_init(&sv3, setup, setup->ad_subdev,chanspec3);
 	new_sv_measure( setup->dev, &sv3);
 
 	y0 = ( sv3.average - sv2.average ) / ( sv2.average - sv1.average );
 
 	x1 = x2 = 0;
 	update_caldac( setup, dac, x1 );
-	usleep(100000);
+	usleep(caldac_settle_usec);
 
 	preobserve( setup, obs1);
 	new_sv_measure( setup->dev, &sv1);
@@ -768,7 +753,7 @@ void cal_linearity_binary( calibration_setup_t *setup, int obs1, int obs2, int o
 		x2 = x1 | bit;
 
 		update_caldac( setup, dac, x2 );
-		usleep(100000);
+		usleep(caldac_settle_usec);
 
 		preobserve( setup, obs1);
 		new_sv_measure( setup->dev, &sv1);
@@ -980,18 +965,17 @@ double check_gain_chan_x( calibration_setup_t *setup, linear_fit_t *l,unsigned i
 
 	orig = setup->caldacs[cdac].current;
 
-	new_sv_init(&sv, setup->dev, setup->ad_subdev,ad_chanspec);
-	sv.settling_time_ns = setup->settling_time_ns;
+	my_sv_init(&sv, setup, setup->ad_subdev,ad_chanspec);
 
 	update_caldac( setup, cdac, 0 );
-	usleep(100000);
+	usleep(caldac_settle_usec);
 
 	new_sv_measure( setup->dev, &sv);
 
 	sum_err=0;
 	for(i=0;i*step<n;i++){
 		update_caldac( setup, cdac, i*step );
-		//usleep(100000);
+		//usleep(caldac_settle_usec);
 
 		new_sv_measure( setup->dev, &sv);
 
@@ -1051,18 +1035,17 @@ double check_gain_chan_fine( calibration_setup_t *setup, linear_fit_t *l,unsigne
 
 	orig = setup->caldacs[cdac].current;
 
-	new_sv_init(&sv, setup->dev, setup->ad_subdev,ad_chanspec);
-	sv.settling_time_ns = setup->settling_time_ns;
+	my_sv_init(&sv, setup, setup->ad_subdev,ad_chanspec);
 
 	update_caldac( setup, cdac, 0 );
-	usleep(100000);
+	usleep(caldac_settle_usec);
 
 	new_sv_measure( setup->dev, &sv);
 
 	sum_err=0;
 	for(i=0;i<n;i++){
 		update_caldac( setup, cdac, i+orig-fine_size );
-		usleep(100000);
+		usleep(caldac_settle_usec);
 
 		new_sv_measure( setup->dev, &sv);
 
@@ -1229,8 +1212,7 @@ double read_chan( calibration_setup_t *setup, int adc,int range)
 	new_sv_t sv;
 	char str[20];
 
-	new_sv_init(&sv, setup->dev,  setup->ad_subdev,CR_PACK(adc,range,AREF_OTHER));
-	sv.settling_time_ns = setup->settling_time_ns;
+	my_sv_init(&sv, setup,  setup->ad_subdev,CR_PACK(adc,range,AREF_OTHER));
 
 	n=new_sv_measure( setup->dev, &sv);
 
@@ -1245,8 +1227,7 @@ int read_chan2( calibration_setup_t *setup, char *s,int adc,int range)
 	int n;
 	new_sv_t sv;
 
-	new_sv_init(&sv, setup->dev, setup->ad_subdev,CR_PACK(adc,range,AREF_OTHER));
-	sv.settling_time_ns = setup->settling_time_ns;
+	my_sv_init(&sv, setup, setup->ad_subdev,CR_PACK(adc,range,AREF_OTHER));
 
 	n=new_sv_measure( setup->dev, &sv);
 
@@ -1266,6 +1247,15 @@ void set_ao(comedi_t *dev,int subdev,int chan,int range,double value)
 }
 #endif
 
+int my_sv_init( new_sv_t *sv, const calibration_setup_t *setup, int subdev,
+	unsigned int chanspec )
+{
+	int retval;
+	retval = new_sv_init( sv, setup->dev, subdev, chanspec );
+	sv->settling_time_ns = setup->sv_settling_time_ns;
+	sv->order = setup->sv_order;
+	return retval;
+}
 
 int new_sv_init(new_sv_t *sv,comedi_t *dev,int subdev,unsigned int chanspec)
 {
@@ -1318,8 +1308,8 @@ int new_sv_measure( comedi_t *dev, new_sv_t *sv)
 		goto out;
 	}
 
-	s=0;
-	s2=0;
+	s=0.0;
+	s2=0.0;
 	for(i = 0; i < n; i++){
 		x = comedi_to_phys(data[i], sv->rng, sv->maxdata);
 		s += x;

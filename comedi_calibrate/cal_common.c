@@ -130,12 +130,12 @@ static void generic_do_dac_channel( calibration_setup_t *setup, const generic_la
 	generic_prep_adc_for_dac( setup, layout, calibration,
 		layout->dac_ground_observable( setup, channel, range ) );
 
-	generic_do_relative( setup, current_cal, layout->dac_ground_observable( setup, channel, range ),
-		layout->dac_high_observable( setup, channel, range ), layout->dac_gain( channel ) );
+	generic_do_relative( setup, current_cal, layout->dac_high_observable( setup, channel, range ),
+		layout->dac_ground_observable( setup, channel, range ),layout->dac_gain( channel ) );
 	generic_do_cal( setup, current_cal, layout->dac_ground_observable( setup, channel, range ),
 		layout->dac_offset( channel ) );
-	generic_do_relative( setup, current_cal, layout->dac_ground_observable( setup, channel, range ),
-		layout->dac_high_observable( setup, channel, range ), layout->dac_gain_fine( channel ) );
+	generic_do_relative( setup, current_cal, layout->dac_high_observable( setup, channel, range ),
+		layout->dac_ground_observable( setup, channel, range ), layout->dac_gain_fine( channel ) );
 	generic_do_cal( setup, current_cal, layout->dac_ground_observable( setup, channel, range ),
 		layout->dac_offset_fine( channel ) );
 

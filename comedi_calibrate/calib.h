@@ -30,6 +30,8 @@
 #define N_OBSERVABLES 128
 #define PREOBSERVE_DATA_LEN 10
 
+static const int caldac_settle_usec = 100000;
+
 typedef struct{
 	int subdev;
 	int chan;
@@ -63,7 +65,8 @@ struct calibration_setup_struct {
 	int eeprom_subdev;
 	int caldac_subdev;
 	int status;
-	unsigned int settling_time_ns;
+	unsigned int sv_settling_time_ns;
+	unsigned int sv_order;
 	observable observables[ N_OBSERVABLES ];
 	unsigned int n_observables;
 	caldac_t caldacs[ N_CALDACS ];
@@ -212,6 +215,8 @@ typedef struct{
 
 int new_sv_measure(comedi_t *dev, new_sv_t *sv);
 int new_sv_init(new_sv_t *sv,comedi_t *dev,int subdev,unsigned int chanspec);
+int my_sv_init( new_sv_t *sv, const calibration_setup_t *setup, int subdev,
+	unsigned int chanspec );
 
 /* saving calibrations to file */
 static const int SC_ALL_CHANNELS = -1;
