@@ -55,6 +55,9 @@ int comedi_timed_1chan(comedi_t *dev,unsigned int subd,unsigned int chan,unsigne
 	
 	/* check range */
 
+	the_range=comedi_get_range(dev,subd,chan,range);
+	maxdata=comedi_get_maxdata(dev,subd,chan);
+
 	chan=CR_PACK(chan,range,aref);
 
 	t.subdev=subd;
@@ -64,9 +67,6 @@ int comedi_timed_1chan(comedi_t *dev,unsigned int subd,unsigned int chan,unsigne
 	t.n=n_samples;
 	comedi_get_timer(dev,subd,freq,&t.trigvar,&act_freq);
 	t.trigvar1=1;
-	
-	the_range=comedi_get_range(dev,subd,chan,range);
-	maxdata=comedi_get_maxdata(dev,subd,chan);
 	
 	buffer=malloc(sizeof(sampl_t)*BUFSZ);
 	if(!buffer)return -1;
