@@ -55,6 +55,7 @@ static int cal_ni_pci_mio_16e_1(calibration_setup_t *setup);
 static int cal_ni_pci_6024e(calibration_setup_t *setup);
 static int cal_ni_pci_6025e(calibration_setup_t *setup);
 static int cal_ni_pci_6035e(calibration_setup_t *setup);
+static int cal_ni_pci_6036e(calibration_setup_t *setup);
 static int cal_ni_pci_6071e(calibration_setup_t *setup);
 static int cal_ni_pxi_6071e(calibration_setup_t *setup);
 static int cal_ni_at_mio_16e_10(calibration_setup_t *setup);
@@ -79,8 +80,9 @@ static struct board_struct boards[]={
 	{ "at-mio-16e-1", STATUS_SOME, cal_ni_at_mio_16e_1, ni_setup_observables, 0x1a9, 0x1aa },
 	{ "pci-mio-16e-1", STATUS_DONE, cal_ni_pci_mio_16e_1, ni_setup_observables, 0x1a9, 0x1aa },
 	{ "pci-6025e", STATUS_SOME, cal_ni_pci_6025e, ni_setup_observables, 0x1af, 0x1b0 },
+	{ "pci-6034e", STATUS_UNKNOWN, NULL, ni_setup_observables, -1, -1 },
 	{ "pci-6035e", STATUS_DONE, cal_ni_pci_6035e, ni_setup_observables, 0x1af, 0x1b0 },
-	{ "pci-6036e", STATUS_UNKNOWN, NULL, ni_setup_observables, -1, -1 },
+	{ "pci-6036e", STATUS_GUESS, cal_ni_pci_6036e, ni_setup_observables, -1, -1 },
 	{ "pci-6071e", STATUS_SOME, cal_ni_pci_6071e, ni_setup_observables, 0x1a9, 0x1aa },
 	{ "pxi-6071e", STATUS_GUESS, cal_ni_pxi_6071e, ni_setup_observables, -1, -1 },
 	{ "at-mio-16e-10", STATUS_GUESS, cal_ni_at_mio_16e_10, ni_setup_observables, 0x1a7, 0x1a8 },
@@ -107,7 +109,6 @@ static struct board_struct boards[]={
 //	{ "pxi-6030e",		cal_ni_unknown },
 //	{ "pxi-6040e",		cal_ni_unknown },
 	{ "pxi-6025e",		cal_ni_6023e }, // guess
-	{ "pci-6034e",		cal_ni_6023e }, // guess
 //	{ "pci-6711",		cal_ni_unknown },
 //	{ "pci-6713",		cal_ni_unknown },
 //	{ "pxi-6070e",		cal_ni_unknown },
@@ -741,6 +742,33 @@ static int cal_ni_pci_6035e(calibration_setup_t *setup)
 	layout.dac_linearity[ 0 ] = 10;
 	layout.dac_offset[ 1 ] = 9;
 	layout.dac_gain[ 1 ] = 5;
+	layout.dac_linearity[ 1 ] = 1;
+
+	return cal_ni_generic( setup, &layout );
+}
+
+static int cal_ni_pci_6036e(calibration_setup_t *setup)
+{
+	ni_caldac_layout_t layout;
+
+	if( comedi_get_version_code( setup->dev ) <= COMEDI_VERSION_CODE( 0, 7, 66 ) )
+	{
+		DPRINT(0, "WARNING: you need comedi driver version 0.7.67 or later\n"
+		 "for this calibration to work properly\n" );
+	}
+
+	/* this is for the ad8804_debug caldac */
+	init_ni_caldac_layout( &layout );
+	layout.adc_pregain_offset = 0; /* guess */
+	layout.adc_postgain_offset = 4;
+	layout.adc_gain = 2;
+	layout.dac_offset[ 0 ] = 6;
+	layout.dac_gain[ 0 ] = 7; /* guess */
+	layout.dac_gain_fine[ 0 ] = 11; /* guess */
+	layout.dac_linearity[ 0 ] = 10;
+	layout.dac_offset[ 1 ] = 9;
+	layout.dac_gain[ 1 ] = 3;
+	layout.dac_gain_fine[ 1 ] = 5;
 	layout.dac_linearity[ 1 ] = 1;
 
 	return cal_ni_generic( setup, &layout );
