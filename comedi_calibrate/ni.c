@@ -97,7 +97,7 @@ static struct board_struct boards[]={
 	{ "pci-6025e", STATUS_SOME, cal_ni_pci_6025e, ni_setup_observables, 0x1af, 0x1b0 },
 	{ "pci-6031e", STATUS_DONE, cal_ni_pci_mio_16xe_10, ni_setup_observables, 0x1ae, 0x1af },
 	{ "pci-6032e", STATUS_DONE, cal_ni_pci_6032e, ni_setup_observables, 0x1ae, 0x1af },
-	{ "pci-6033e", STATUS_UNKNOWN, NULL, ni_setup_observables, 0x1ae, 0x1af },
+	{ "pci-6033e", STATUS_SOME, cal_ni_pci_6032e, ni_setup_observables, -1, -1 },
 	{ "pci-6034e", STATUS_UNKNOWN, NULL, ni_setup_observables, -1, -1 },
 	{ "pci-6035e", STATUS_DONE, cal_ni_pci_6035e, ni_setup_observables, 0x1af, 0x1b0 },
 	{ "pci-6036e", STATUS_DONE, cal_ni_pci_6036e, ni_setup_observables, 0x1ab, 0x1ac },
@@ -309,7 +309,9 @@ static void ni_setup_ao_observables( calibration_setup_t *setup )
 	int ao_unipolar_lowgain;
 
 	ai_bipolar_lowgain = get_bipolar_lowgain( setup->dev, setup->ad_subdev);
+	assert(ai_bipolar_lowgain >= 0);
 	ao_bipolar_lowgain = get_bipolar_lowgain( setup->dev, setup->da_subdev);
+	assert(ao_bipolar_lowgain >= 0);
 	ao_unipolar_lowgain = get_unipolar_lowgain( setup->dev, setup->da_subdev);
 
 	memset(&tmpl,0,sizeof(tmpl));
