@@ -101,8 +101,10 @@ void generic_prep_dac_caldacs( calibration_setup_t *setup,
 	{
 		reset_caldac( setup, layout->dac_offset( channel ) );
 		reset_caldac( setup, layout->dac_gain( channel ) );
+		reset_caldac( setup, layout->dac_linearity( channel ) );
 		reset_caldac( setup, layout->dac_offset_fine( channel ) );
 		reset_caldac( setup, layout->dac_gain_fine( channel ) );
+		reset_caldac( setup, layout->dac_linearity_fine( channel ) );
 	}else
 	{
 		retval = comedi_apply_parsed_calibration( setup->dev, setup->da_subdev,
@@ -112,8 +114,10 @@ void generic_prep_dac_caldacs( calibration_setup_t *setup,
 			DPRINT( 0, "Failed to apply existing calibration, reseting dac caldacs.\n" );
 			reset_caldac( setup, layout->dac_offset( channel ) );
 			reset_caldac( setup, layout->dac_gain( channel ) );
+			reset_caldac( setup, layout->dac_linearity( channel ) );
 			reset_caldac( setup, layout->dac_offset_fine( channel ) );
 			reset_caldac( setup, layout->dac_gain_fine( channel ) );
+			reset_caldac( setup, layout->dac_linearity_fine( channel ) );
 		}
 	}
 }
@@ -161,10 +165,19 @@ static void generic_do_dac_channel( calibration_setup_t *setup, const generic_la
 
 	for( i = 0; i < max_iterations; i++ )
 	{
+		generic_do_linearity(setup, current_cal, layout->dac_ground_observable( setup, channel, range ),
+			layout->dac_mid_observable( setup, channel, range ),
+			layout->dac_high_observable( setup, channel, range ),
+			layout->dac_linearity(channel));
 		generic_do_relative( setup, current_cal, layout->dac_high_observable( setup, channel, range ),
 			layout->dac_ground_observable( setup, channel, range ),layout->dac_gain( channel ) );
 		generic_do_cal( setup, current_cal, layout->dac_ground_observable( setup, channel, range ),
 			layout->dac_offset( channel ) );
+
+		generic_do_linearity(setup, current_cal, layout->dac_ground_observable( setup, channel, range ),
+			layout->dac_mid_observable( setup, channel, range ),
+			layout->dac_high_observable( setup, channel, range ),
+			layout->dac_linearity_fine(channel));
 		generic_do_relative( setup, current_cal, layout->dac_high_observable( setup, channel, range ),
 			layout->dac_ground_observable( setup, channel, range ), layout->dac_gain_fine( channel ) );
 		generic_do_cal( setup, current_cal, layout->dac_ground_observable( setup, channel, range ),
@@ -411,6 +424,39 @@ int generic_cal_by_range( calibration_setup_t *setup,
 	return retval;
 }
 
+int generic_cal_ao(calibration_setup_t *setup,
+	const generic_layout_t *layout  )
+{
+	int channel, range, num_ao_ranges,
+		num_ao_channels, retval;
+	comedi_calibration_setting_t *current_cal;
+
+
+	if(setup->da_subdev && setup->do_output)
+	{
+		assert( comedi_range_is_chan_specific( setup->dev, setup->da_subdev ) == 0 );
+
+		num_ao_ranges = comedi_get_n_ranges( setup->dev, setup->da_subdev, 0 );
+		if( num_ao_ranges < 0 ) return -1;
+
+		num_ao_channels = comedi_get_n_channels( setup->dev, setup->da_subdev );
+		if( num_ao_channels < 0 ) return -1;
+	}else
+		num_ao_ranges = num_ao_channels = 0;
+	for( channel = 0; channel < num_ao_channels; channel++ )
+	{
+		for( range = 0; range < num_ao_ranges; range++ )
+		{
+			current_cal = sc_alloc_calibration_setting( setup );
+			generic_prep_dac_caldacs( setup, layout, channel, range );
+			generic_do_dac_channel( setup, layout, setup->new_calibration,
+				current_cal, channel, range );
+		}
+	}
+	retval = write_calibration_file( setup );
+	return retval;
+}
+
 static int dummy_caldac( unsigned int channel )
 {
 	return -1;
@@ -429,11 +475,14 @@ void init_generic_layout( generic_layout_t *layout )
 	layout->adc_postgain_offset = dummy_caldac;
 	layout->dac_offset = dummy_caldac;
 	layout->dac_offset_fine = dummy_caldac;
+	layout->dac_linearity = dummy_caldac;
+	layout->dac_linearity_fine = dummy_caldac;
 	layout->dac_gain = dummy_caldac;
 	layout->dac_gain_fine = dummy_caldac;
 	layout->adc_high_observable = dummy_observable;
 	layout->adc_ground_observable = dummy_observable;
 	layout->dac_high_observable = dummy_observable;
+	layout->dac_mid_observable = dummy_observable;
 	layout->dac_ground_observable = dummy_observable;
 	layout->adc_fractional_tolerance = INFINITY;
 	layout->adc_fractional_tolerance = INFINITY;

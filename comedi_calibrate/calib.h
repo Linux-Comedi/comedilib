@@ -51,9 +51,7 @@ typedef struct{
 
 	comedi_insn observe_insn;
 
-	//comedi_range *range;
-	//int maxdata;
-	lsampl_t reference_source;
+	int reference_source;
 	double target;
 }observable;
 
@@ -244,6 +242,8 @@ typedef struct
 	int (*adc_postgain_offset)( unsigned int channel );
 	int (*adc_gain)( unsigned int channel );
 	int (*adc_gain_fine)( unsigned int channel );
+	int (*dac_linearity)( unsigned int channel );
+	int (*dac_linearity_fine)( unsigned int channel );
 	int (*dac_offset)( unsigned int channel );
 	int (*dac_offset_fine)( unsigned int channel );
 	int (*dac_gain)( unsigned int channel );
@@ -253,6 +253,8 @@ typedef struct
 	int (*adc_ground_observable)( const calibration_setup_t *setup,
 		unsigned int channel, unsigned int range );
 	int (*dac_high_observable)( const calibration_setup_t *setup,
+		unsigned int channel, unsigned int range );
+	int (*dac_mid_observable)( const calibration_setup_t *setup,
 		unsigned int channel, unsigned int range );
 	int (*dac_ground_observable)( const calibration_setup_t *setup,
 		unsigned int channel, unsigned int range );
@@ -264,6 +266,8 @@ void init_generic_layout( generic_layout_t *layout );
 int generic_cal_by_channel_and_range( calibration_setup_t *setup,
 	const generic_layout_t *layout  );
 int generic_cal_by_range( calibration_setup_t *setup,
+	const generic_layout_t *layout  );
+int generic_cal_ao(calibration_setup_t *setup,
 	const generic_layout_t *layout  );
 void generic_do_cal( calibration_setup_t *setup,
 	comedi_calibration_setting_t *saved_cal, int observable, int caldac );

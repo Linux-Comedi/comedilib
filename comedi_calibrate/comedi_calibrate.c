@@ -319,7 +319,7 @@ ok:
 	return retval;
 }
 
-void set_target( calibration_setup_t *setup, int obs,double target)
+void set_target( calibration_setup_t *setup, int obs, double target)
 {
 	comedi_range *range;
 	lsampl_t maxdata, data;
@@ -397,19 +397,22 @@ int preobserve( calibration_setup_t *setup, int obs)
 	lsampl_t ref_data[ 2 ];
 
 	// setup reference source
-	memset( &reference_source_config, 0, sizeof(reference_source_config) );
-	reference_source_config.insn = INSN_CONFIG;
-	reference_source_config.n = 2;
-	reference_source_config.subdev = setup->ad_subdev;
-	reference_source_config.data = ref_data;
-	reference_source_config.data[ 0 ] = INSN_CONFIG_ALT_SOURCE;
-	reference_source_config.data[ 1 ] = setup->observables[obs].reference_source;
+	if(setup->observables[obs].reference_source >= 0)
+	{
+		memset( &reference_source_config, 0, sizeof(reference_source_config) );
+		reference_source_config.insn = INSN_CONFIG;
+		reference_source_config.n = 2;
+		reference_source_config.subdev = setup->ad_subdev;
+		reference_source_config.data = ref_data;
+		reference_source_config.data[ 0 ] = INSN_CONFIG_ALT_SOURCE;
+		reference_source_config.data[ 1 ] = setup->observables[obs].reference_source;
 
-	retval = comedi_do_insn( setup->dev, &reference_source_config );
-	/* ignore errors for now since older ni driver doesn't
-	 * support reference config insn */
-	if( retval < 0 )
-		perror("preobserve() ignoring reference config error" );
+		retval = comedi_do_insn( setup->dev, &reference_source_config );
+		/* ignore errors for now since older ni driver doesn't
+		* support reference config insn */
+		if( retval < 0 )
+			perror("preobserve() ignoring reference config error" );
+	}
 	retval = 0;
 
 	if( setup->observables[obs].preobserve_insn.n != 0){
@@ -914,9 +917,10 @@ void setup_caldacs( calibration_setup_t *setup, int caldac_subdev )
 	}
 
 	// XXX check subdevice type is really calibration
-	// XXX check we dont exceed max number of allowable caldacs
 
 	n_chan = comedi_get_n_channels( setup->dev, caldac_subdev );
+	assert(n_chan >= 0);
+	assert(setup->n_caldacs + n_chan < N_CALDACS);
 
 	for(i = 0; i < n_chan; i++){
 		setup->caldacs[ setup->n_caldacs + i ].subdev = caldac_subdev;
@@ -1461,7 +1465,7 @@ int linear_fit_monotonic(linear_fit_t *l)
 		l->sxx+=x*x;
 	}
 	sxp=l->sxx-l->sx*l->sx/l->s1;
-	
+
 	l->ave_x=l->sx/l->s1;
 	l->ave_y=l->sy/l->s1;
 	l->slope=(l->s1*l->sxy-l->sx*l->sy)/(l->s1*l->sxx-l->sx*l->sx);
