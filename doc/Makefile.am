@@ -29,6 +29,7 @@ $(DOC).pdf: $(DOC).sgml $(SGML)
 html: $(DOC).sgml $(SGML)
 	mkdir -p html
 	$(JW_PATH) -f docbook -b html -o html $(DOC).sgml && touch html
+	ln -sf ../acq-seq.gif html/acq-seq.gif
 
 man: $(DOC).sgml $(SGML)
 	mkdir -p man
