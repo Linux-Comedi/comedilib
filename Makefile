@@ -3,11 +3,8 @@
 
 .EXPORT_ALL_VARIABLES:
 
-VERSION = 0
-SUBVERSION = 7
-SUBSUBVERSION = 10
-
-VERSION_CODE = ${VERSION}.${SUBVERSION}.${SUBSUBVERSION}
+include version
+MAJOR=0
 
 CFLAGS = -Wall -O2
 
@@ -29,9 +26,9 @@ install:	dummy
 	install -d ${INSTALLDIR}/include
 	(cd include;install -m 644 comedilib.h ${INSTALLDIR}/include)
 	(cd include;install -m 644 comedi.h ${INSTALLDIR}/include)
-	install lib/libcomedi.so.${VERSION_CODE} ${INSTALLDIR_LIB}
-	(cd $(INSTALLDIR_LIB);ln -s libcomedi.so.${VERSION_CODE} libcomedi.so.${VERSION})
-	(cd $(INSTALLDIR_LIB);ln -s libcomedi.so.${VERSION_CODE} libcomedi.so)
+	install lib/libcomedi.so.${MAJOR} ${INSTALLDIR_LIB}
+	(cd $(INSTALLDIR_LIB);ln -s libcomedi.so.${version} libcomedi.so.${MAJOR})
+	(cd $(INSTALLDIR_LIB);ln -s libcomedi.so.${version} libcomedi.so)
 	install -m 644 lib/libcomedi.a ${INSTALLDIR_LIB}
 	#/sbin/ldconfig -n ${INSTALLDIR}/lib
 	install -d ${INSTALLDIR_DOC}
