@@ -66,14 +66,17 @@ endif
 	install man/*.8 ${INSTALLDIR_MAN}/man8
 
 install_debian: install
-	install -d ${INSTALLDIR_DOC}
-	install -m 644 ${DOCFILES} ${INSTALLDIR_DOC}
 	install -d $(DESTDIR)/etc/pcmcia/
 	install -m 755 etc/pcmcia/comedi $(DESTDIR)/etc/pcmcia/
 	install -m 644 etc/pcmcia/comedi.conf $(DESTDIR)/etc/pcmcia/
 	install -m 644 etc/pcmcia/comedi.opts $(DESTDIR)/etc/pcmcia/
-	install -m 755 etc/das1600.conf $(INSTALLDIR_DOC)/examples
-	install -m 755 etc/dt282x.conf $(INSTALLDIR_DOC)/examples
+	install -d $(INSTALLDIR_DOC)
+	install -m 644 $(DOCFILES) $(INSTALLDIR_DOC)
+	install -d $(INSTALLDIR_DOC)/etc/
+	install -m 755 etc/das1600.conf $(INSTALLDIR_DOC)/etc/
+	install -m 755 etc/dt282x.conf $(INSTALLDIR_DOC)/etc/
+	install -d $(INSTALLDIR_DOC)/examples/
+	install -m 644 demo/README demo/*.c $(INSTALLDIR_DOC)/examples/
 ifeq ($(with_perl),yes)
 	install -d $(INSTALLDIR_PERL)
 	install -m 644 perl/blib/lib/Comedi.pm $(INSTALLDIR_PERL)/
