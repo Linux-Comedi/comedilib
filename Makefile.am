@@ -2,8 +2,8 @@
 SUBDIRS = lib comedi_calibrate comedi_config man testing demo doc swig \
 	include etc scxi
 
-#pkgconfigdir = $(libdir)/pkgconfig
-#pkgconfig_DATA = comedilib.pc
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = comedilib.pc
 
 ## with automake 1.8, putting the m4 directory in EXTRA_DIST is not needed, and
 ## causes 'make distcheck' to fail, by way of 'make distdir' failing when builddir != srcdir 
@@ -17,4 +17,10 @@ DISTCHECK_CONFIGURE_FLAGS = RUBY_PREFIX='$${prefix}' --disable-ruby-binding
 
 dist-hook:
 	rm -rf `find $(distdir) -name CVS`
+
+dev:
+	-for i in `seq 0 15`; do \
+		mknod -m 666 /dev/comedi$$i c 98 $$i \
+		; \
+	done;
 
