@@ -3,24 +3,59 @@ Description: generic 8255 support
 Devices: [standard] 8255 (8255)
 Author: ds
 
-The classic in digital I/O.  Three channels of 8 bit digital I/O,
-each channel is I/O configurable, channels 0 and 1 in 8 bit units,
-channel 2 in 4 bit units.  The driver does not support modes 1 or 2
-yet, since I don't really understand how they would potentially be used.
-(Send me email if you want to use these modes.)  If and when
-modes 1 and 2 are supported, there is a strong possibility that the
-3rd channel will be split into two 4-bit channels.  (Refer to the
-8255 spec for clues as to why.)
+The classic in digital I/O.  The 8255 appears in Comedi as a single
+digital I/O subdevice with 24 channels.  The channel 0 corresponds
+to the 8255's port A, bit 0; channel 23 corresponds to port C, bit
+7.  Direction configuration is done in blocks, with channels 0-7,
+8-15, 16-19, and 20-23 making up the 4 blocks.  The only 8255 mode
+supported is mode 0.
 
-You should configure this driver if you plan to use a board that
-has an 8255 chip.  For multifunction boards, the main driver will
+You should enable compilation this driver if you plan to use a board
+that has an 8255 chip.  For multifunction boards, the main driver will
 configure the 8255 subdevice automatically.
 
 This driver also works independently with ISA cards that directly
 map the 8255 registers to I/O ports, including cards with multiple
 8255 chips.  To configure the driver for such a card, the option
 list should be a list of the I/O port bases for each of the 8255
-chips.
+chips.  For example,
+
+  comedi_config /dev/comedi0 8255 0x200,0x204,0x208,0x20c
+
+
+
+
+Driver: adl_pci9111.o
+Description: Driver for the Adlink PCI-9111HR card.
+Author: Emmanuel Pacaud <emmanuel.pacaud@free.fr>
+Devices: [ADLink] PCI-9111HR (adl_pci9111)
+Status: experimental
+
+Supports:
+
+  - ai_insn read
+  - ao_insn read/write
+  - di_insn read
+  - do_insn read/write
+  - ai_do_cmd mode with the following sources:
+  
+    - start_src 		TRIG_NOW
+    - scan_begin_src 		TRIG_FOLLOW 	TRIG_TIMER	TRIG_EXT
+    - convert_src				TRIG_TIMER	TRIG_EXT
+    - scan_end_src		TRIG_COUNT
+    - stop_src			TRIG_COUNT	TRIG_NONE
+    
+    The scanned channels must be consecutive and start from 0. They must
+    all have the same range and aref.
+    
+Configuration options:
+  
+    [0] - PCI bus number (optional)
+    [1] - PCI slot number (optional)
+    
+    If bus/slot is not specified, the first available PCI
+    device will be used.
+  
 
 
 
@@ -43,19 +78,39 @@ For AI:
 - If return value of cmdtest is 5 then you've bad channel list
   (it isn't possible mixture S.E. and DIFF inputs or bipolar and unipolar
   ranges).
-There is know problem with this driver:
-- If you use scan_begin_src=TRIG_EXT & convert_src=TRIG_TIMER
-  then this mode sometimes discards some samples. :-((
+
+There are some hardware limitations:
+a) You cann't use mixture of unipolar/bipoar ranges or differencial/single 
+   ended inputs.
+b) DMA transfers must have the length aligned to two samples (32 bit),
+   so there is some problems if cmd->chanlist_len is odd. This driver tries
+   bypass this with adding one sample to the end of the every scan and discard
+   it on output but this cann't be used if cmd->scan_begin_src=TRIG_FOLLOW
+   and is used flag TRIG_WAKE_EOS, then driver switch to interrupt driven mode 
+   with interrupt after every sample.
+c) If isn't used DMA then you can use only mode where 
+   cmd->scan_begin_src=TRIG_FOLLOW.
 
 Configuration options:
   [0] - PCI bus of device (optional)
   [1] - PCI slot of device (optional)
-          If bus/slot is not specified, the first available PCI
-          device will be used.
+          If bus/slot is not specified, then first available PCI
+          card will be used.
+  [2] - 0= standard 8 DIFF/16 SE channels configuration
+        n= external multiplexer connected, 1<=n<=256
+  [3] - 0=autoselect DMA or EOC interrupts operation
+        1=disable DMA mode
+        3=disable DMA and INT, only insn interface will work
+  [4] - sample&hold signal - card can generate signal for external S&H board
+        0=use SSHO (pin 45) signal is generated in onboard hardware S&H logic
+        0!=use ADCHN7 (pin 23) signal is generated from driver, number 
+           say how long delay is requested in ns and sign polarity of the hold
+           (in this case external multiplexor can serve only 128 channels)
+  [5] - 0=stop measure on all hardware errors
+        2|=ignore ADOR - A/D Overrun status
+	8|=ignore Bover - A/D Burst Mode Overrun status
+	256|=ignore nFull - A/D FIFO Full status
 
-If you have an external multiplexer, the third option in the option
-list should be used to indicate the number of channels in the
-multiplexer.
 
 
 
@@ -97,6 +152,11 @@ Description: Driver for the ComputerBoards/MeasurementComputing cards
   of the PCI-DAS series with the AMCC S5933 PCI controller.
 Author: Ivan Martinez <ivanmr@altavista.com>,
   Frank Mori Hess <fmhess@uiuc.edu>
+Updated: 2002-1-09
+Devices: [Measurement Computing] PCI-DAS1602/16 (cb_pcidas),
+  PCI-DAS1602/16jr, PCI-DAS1602/12, PCI-DAS1200, PCI-DAS1200jr,
+  PCI-DAS1000, PCI-DAS1001, PCI_DAS1002
+
 Status:
   - PCI-DAS1602/16: Analog input is tested, works.  Analog output untested.
   - PCI-DAS1602/16jr: Driver should work, but untested.  Please
@@ -107,11 +167,6 @@ Status:
     usage.
 
   The boards' autocalibration features are not yet supported.
-
-Updated: 2002-1-09
-Devices: [Measurement Computing] PCI-DAS1602/16 (cb_pcidas),
-  PCI-DAS1602/16jr, PCI-DAS1602/12, PCI-DAS1200, PCI-DAS1200jr,
-  PCI-DAS1000, PCI-DAS1001, PCI_DAS1002
 
 Configuration options:
   [0] - PCI bus of device (optional)
@@ -127,25 +182,23 @@ range and aref.
 
 Driver: cb_pcidas64.o
 Description: Driver for the ComputerBoards/MeasurementComputing
-   PCI-DAS64xxx series with the PLX 9080 PCI controller.
-Author: Frank Mori Hess <fmhess@uiuc.edu>
-Status: Experimental
-Updated: 2001-9-19
+   PCI-DAS64xx, 60XX, and 4020 series with the PLX 9080 PCI controller.
+Author: Frank Mori Hess <fmhess@users.sourceforge.net>
+Status: in development, pci-das6025e analog input works
+Updated: 2002-03-30
 Devices: [Measurement Computing] PCI-DAS6402/16 (cb_pcidas64),
   PCI-DAS6402/12, PCI-DAS64/M1/16, PCI-DAS64/M2/16,
   PCI-DAS64/M3/16, PCI-DAS6402/16/JR, PCI-DAS64/M1/16/JR,
   PCI-DAS64/M2/16/JR, PCI-DAS64/M3/16/JR, PCI-DAS64/M1/14,
-  PCI-DAS64/M2/14, PCI-DAS64/M3/14
+  PCI-DAS64/M2/14, PCI-DAS64/M3/14, PCI-DAS6025E, PCI-DAS6034E,
+  PCI-DAS6035E, PCI-DAS4020/12
+
 Configuration options:
    [0] - PCI bus of device (optional)
    [1] - PCI slot of device (optional)
 
-Basic insn support should work, but untested as far as I know.
-Has command support for analog input, which may also work.  Support
-for pci dma transfers can be enabled by editing the source to #define
-PCIDMA instead of #undef'ing it. This driver is in need of stout-hearted
-testers who aren't afraid to crash their computers in the name of progress.
-Feel free to send and success/failure reports to author.
+Calibration is not yet supported!
+Feel free to send and success/failure reports to Frank Hess.
 
 Some devices are not identified because the PCI device IDs are not known.
 
@@ -166,10 +219,10 @@ Configuration options:
 
 Only simple analog output writing is supported.
 
-SO FAR IT HAS ONLY BEEN TESTED WITH:
+So far it has only been tested with:
   - PCI-DDA08/12
-PLEASE REPORT IF YOU ARE USING IT WITH A DIFFERENT CARD
-<ivanmr@altavista.com>.
+Please report sucess/failure with other different cards to
+<comedi@comedi.org>.
 
 
 
@@ -178,6 +231,7 @@ Description: Standard PC parallel port
 Author: ds
 Status: works in immediate mode
 Devices: [standard] parallel port (comedi_parport)
+Updated: Tue, 30 Apr 2002 21:11:45 -0700
 
 A cheap and easy way to get a few more digital I/O lines.  Steal
 additional parallel ports from old computers or your neighbors'
@@ -212,11 +266,11 @@ pin     subdev  chan    aka
 
 Notes:
 
-Channel 0 and 2 are output, channel 1 is input.  I know that it
-is possible to change this with ECP/EPP parallel ports, but this
-driver is a cheap hack.
+Subdevices 0 and 2 are digital output, subdevice 1 is digital
+input.  I know that it is possible to change this with ECP/EPP
+parallel ports, but this driver is a cheap hack.
 
-Pins 13 and 14 are inverted once by comedi and once by the
+Pins 13 and 14 are inverted once by Comedi and once by the
 hardware, thus cancelling the effect.
 
 Pin 1 is a strobe, thus acts like one.  There's no way in software
@@ -231,7 +285,7 @@ pin, which can be used to wake up tasks.  (or is that pin 10. --ds)
 
 Driver: comedi_rt_timer.o
 Description: Command emulator using real-time tasks
-Authors: ds, fmhess
+Author: ds, fmhess
 Devices:
 Status: works
 
@@ -246,8 +300,43 @@ higher than with a device that has an on-board timer, and maximum
 sample rate is much lower.
 
 Configuration options:
-  [0] - device index
-  [1] - subdevice index
+  [0] - minor number of device you wish to emulate commands for
+  [1] - subdevice number you wish to emulate commands for
+
+
+
+Driver: comedi_test.o
+Description: generates fake waveforms
+Author: Joachim Wuttke <Joachim.Wuttke@icn.siemens.de>, Frank Mori Hess
+  <fmhess@uiuc.edu>, ds
+Devices:
+Status: works
+Updated: Sat, 16 Mar 2002 17:34:48 -0800
+
+This driver is mainly for testing purposes, but can also be used to
+generate sample waveforms on systems that don't have data acquisition
+hardware.
+
+Configuration options:
+  [0] - Amplitude in microvolts for fake waveforms (default 1 volt)
+  [1] - Period in microseconds for fake waveforms (default 0.1 sec)
+
+Generates a sawtooth wave on channel 0, square wave on channel 1, additional
+waveforms could be added to other channels (currently they return flatline
+zero volts).
+
+
+
+
+Driver: pio1616l.o
+Description: Driver for Contec PIO1616L digital io board
+Devices: [Contec] PIO1616L
+Author: Stefano Rivoir <s.rivoir@gts.it>
+Updated: Mon, 18 Mar 2002 15:34:01 -0800
+Status: works
+
+Configuration Options:
+  none
 
 
 
@@ -275,7 +364,7 @@ Configuration options:
 
 Driver: das08.o
 Description: DAS-08 compatible boards
-Authors: Warren Jasper, ds, Frank Hess
+Author: Warren Jasper, ds, Frank Hess
 Devices: [ComputerBoards] DAS08 (das08), DAS08-PGM (das08-pgm),
   DAS08-PGH (das08-pgh), DAS08-PGL (das08-pgl), DAS08-AOH (das08-aoh),
   DAS08-AOL (das08-aol), DAS08-AOM (das08-aom), DAS08/JR-AO (das08/jr-ao),
@@ -306,46 +395,50 @@ driver.
 
 Driver: das16.o
 Description: DAS16 compatible boards
-Authors: Sam Moore, Warren Jasper, ds, Chris Baugher, Frank Hess
+Author: Sam Moore, Warren Jasper, ds, Chris Baugher, Frank Hess, Roman Fietze
 Devices: [Keithley Metrabyte] DAS-16 (das-16), DAS-16G (das-16g),
   DAS-16F (das-16f), DAS-1201 (das-1201), DAS-1202 (das-1202),
   DAS-1401 (das-1401), DAS-1402 (das-1402), DAS-1601 (das-1601),
   DAS-1602 (das-1602),
   [ComputerBoards] PC104-DAS16/JR (pc104-das16jr),
   PC104-DAS16JR/16 (pc104-das16jr/16),
+  CIO-DAS16JR/16 (cio-das16jr/16),
   CIO-DAS16/JR (cio-das16/jr), CIO-DAS1401/12 (cio-das1401/12),
   CIO-DAS1402/12 (cio-das1402/12), CIO-DAS1402/16 (cio-das1402/16),
   CIO-DAS1601/12 (cio-das1601/12), CIO-DAS1602/12 (cio-das1602/12),
   CIO-DAS1602/16 (cio-das1602/16), CIO-DAS16/330 (cio-das16/330)
-Status: works in das16 mode, das-1600 enhanced mode features untested.
-Updated: 2001-8-27
+Status: works
+Updated: 2002-04-17
 
 A rewrite of the das16 and das1600 drivers.
 Options:
-        [0] - base io address
-        [1] - irq (optional)
-        [2] - dma (optional)
-        [3] - master clock speed in MHz (optional, 1 or 10, ignored if
-	        board can probe clock, defaults to 1)
-        [4] - analog input range lowest voltage in microvolts (optional,
-	        only useful if your board does not have software
+	[0] - base io address
+	[1] - irq (optional)
+	[2] - dma (optional)
+	[3] - master clock speed in MHz (optional, 1 or 10, ignored if
+		board can probe clock, defaults to 1)
+	[4] - analog input range lowest voltage in microvolts (optional,
+		only useful if your board does not have software
 		programmable gain)
-        [5] - analog input range highest voltage in microvolts (optional,
-	        only useful if board does not have software programmable
+	[5] - analog input range highest voltage in microvolts (optional,
+		only useful if board does not have software programmable
 		gain)
-        [6] - analog output range lowest voltage in microvolts (optional)
-        [7] - analog output range highest voltage in microvolts (optional)
+	[6] - analog output range lowest voltage in microvolts (optional)
+	[7] - analog output range highest voltage in microvolts (optional)
+	[8] - use timer mode for DMA, needed e.g. for buggy DMA controller 
+		in NS CS5530A (Geode Companion).  If set, also allows 
+		comedi_command() to be run without an irq.
 
 Passing a zero for an option is the same as leaving it unspecified.
 
-Both an irq line and dma channel are required for timed or externally
-triggered conversions.
+Both a dma channel and an irq (or use of 'timer mode', option 8) are required 
+for timed or externally triggered conversions.
 
 
 
 Driver: das16m1.o
 Description: CIO-DAS16/M1
-Authors: Frank Mori Hess <fmhess@uiuc.edu>
+Author: Frank Mori Hess <fmhess@uiuc.edu>
 Devices: [MeasurementComputing] CIO-DAS16/M1 (cio-das16/m1)
 Status: works
 
@@ -406,8 +499,10 @@ Configuration options:
 Driver: das6402.o
 Description: Keithley Metrabyte DAS6402 (& compatibles)
 Author: Oystein Svendsen <svendsen@pvv.org>
-Status: unknown
+Status: bitrotten
 Devices: [Keithley Metrabyte] DAS6402 (das6402)
+
+This driver has suffered bitrot.
 
 
 
@@ -424,6 +519,19 @@ Status: works, cio-das802/16 untested - email me if you have tested it
 Configuration options:
   [0] - I/O port base address
   [1] - IRQ (optional, required for timed or externally triggered conversions)
+
+Notes:
+	IRQ can be omitted, although the cmd interface will not work without it.
+
+	All entries in the channel/gain list must use the same gain and be
+	consecutive channels counting upwards in channel number (these are
+	hardware limitations.)
+
+	I've never tested the gain setting stuff since I only have a
+	DAS-800 board with fixed gain.
+
+	The cio-das802/16 does not have a fifo-empty status bit!  Therefore
+	only fifo-half-full transfers are possible with this card.
 
 
 
@@ -586,7 +694,11 @@ Description: Data Translation DT3000 series
 Author: ds
 Devices: [Data Translation] DT3001 (dt3000), DT3001-PGL, DT3002, DT3003,
   DT3003-PGL, DT3004, DT3005, DT3004-200
-Status: untested
+Status: works
+
+There is code to support AI commands, but it may not work.
+
+AO commands are not supported.
 
 
 
@@ -603,10 +715,14 @@ Configuration options:
 
 
 Driver: icp_multi.o
-Description: Inova ICP Multi
 Author: Anne Smorthit <anne.smorthit@sfwte.ch>
-Devices: [Inova] ICP Multi (icp_multi)
+Devices: [Inova] ICP_MULTI (icp_multi)
+Status: unknown
 
+Options:
+ [0] - PCI bus number - if bus number and slot number are 0, 
+                        then driver search for first unused card
+ [1] - PCI slot number 
 
 
 
@@ -652,9 +768,13 @@ Driver: mpc8260cpm.o
 Description: MPC8260 CPM module generic digital I/O lines
 Devices: [Motorola] MPC8260 CPM (mpc8260cpm)
 Author: ds
+Status: experimental
+Updated: Sat, 16 Mar 2002 17:34:48 -0800
 
 This driver is specific to the Motorola MPC8260 processor, allowing
 you to access the processor's generic digital I/O lines.
+
+It is apparently missing some code.
 
 
 
@@ -672,9 +792,12 @@ Description: National Instruments 670x
 Author: Bart Joris <bjoris@advalvas.be>
 Updated: Wed, 22 Aug 2001 22:47:32 -0700
 Devices: [National Instruments] PCI-6703 (ni_670x), PCI-6704
+Status: unknown
 
 The driver currently does not recognize the 6704, because the PCI
 ID is not known.
+
+Commands are not supported.
 
 
 
@@ -694,23 +817,28 @@ Configuration options:
 
 
 
+Driver: ni_at_ao.o
+Description: National Instruments AT-AO-6/10
+Devices: [National Instruments] AT-AO-6 (at-ao-6), AT-AO-10 (at-ao-10)
+Author: ds
+
+20
+
+
+
 Driver: ni_atmio.o
 Description: National Instruments AT-MIO-E series
 Author: ds
 Devices: [National Instruments] AT-MIO-16E-1 (ni_atmio),
   AT-MIO-16E-2, AT-MIO-16E-10, AT-MIO-16DE-10, AT-MIO-64E-3,
   AT-MIO-16XE-50, AT-MIO-16XE-10, AT-AI-16XE-10
+Status: works
+Updated: Sat, 16 Mar 2002 17:34:48 -0800
 
 The isapnptools package is required to use this board.  Use isapnp to
 configure the I/O base for the board, and then pass the same value as
 a parameter in comedi_config.  A sample isapnp.conf file is included
-in the etc/ directory.
-
-Assuming that the NI spec is correct, the driver should correctly
-identify every board in the series.  Each channel should have the
-appropriate parameters, i.e., input/output ranges, number of bits,
-etc.  If the driver fails to recognize your card or does not have
-the correct parameters, please contact me.
+in the etc/ directory of Comedilib.
 
 Comedilib includes a utility to autocalibrate these boards.  The
 boards seem to boot into a state where the all calibration DACs
@@ -719,6 +847,9 @@ is terrible.  Calibration at boot is strongly encouraged.
 
 External triggering is supported for some events.  The channel index
 (scan_begin_arg, etc.) maps to PFI0 - PFI9.
+
+Some of the more esoteric triggering possibilities of these boards
+are not supported.
 
 
 
@@ -730,15 +861,25 @@ Devices: [National Instruments] AT-MIO-16 (atmio16), AT-MIO-16D (atmio16d)
 
 
 
+Driver: ni_daq_dio24.o
+Description: National Instruments PCMCIA DAQ-Card DIO-24
+Author: Daniel Vecino Castel <dvecino@able.es>
+Devices: National Instruments PCMCIA DAQ-Card DIO-24
+Status: ?
+
+
+
 Driver: ni_labpc.o
 Description: National Instruments Lab-PC (& compatibles)
 Author: Frank Mori Hess <fmhess@users.sourceforge.net>
 Devices: [National Instruments] DAQCard-1200 (daqcard-1200), Lab-PC-1200 (labpc-1200),
   Lab-PC-1200AI (labpc-1200ai), Lab-PC+ (lab-pc+), PCI-1200 (pci-1200)
-Status: Works (tested with lab-pc-1200).  For the older Lab-PC+, not all input
-  ranges and analog references will work, the available
-  ranges/arefs will depend on how you have configured
-  the jumpers on your board (see your owner's manual).
+Status: works
+
+Tested with lab-pc-1200.  For the older Lab-PC+, not all input ranges
+and analog references will work, the available ranges/arefs will
+depend on how you have configured the jumpers on your board
+(see your owner's manual).
 
 Configuration options - ISA boards:
   [0] - I/O port base address
@@ -752,9 +893,10 @@ Configuration options - PCI boards:
 Configuration options - PCMCIA boards:
   none
 
-Lab-pc+ has quirky chanlist when scanning multiple channels.  Scan sequence must start
-at highest channel, then decrement down to channel 0.  1200 series cards can scan down
-like lab-pc+ or scan up from channel zero.
+Lab-pc+ has quirky chanlist when scanning multiple channels.  Scan
+sequence must start at highest channel, then decrement down to
+channel 0.  1200 series cards can scan down like lab-pc+ or scan
+up from channel zero.
 
 
 
@@ -773,19 +915,21 @@ See the notes in the ni_atmio.o driver.
 Driver: ni_pcidio.o
 Description: National Instruments PCI-DIO32HS, PCI-DIO96, PCI-6533, PCI-6503
 Author: ds
-Status: works in immediate mode
+Status: works
 Devices: [National Instruments] PCI-DIO-32HS (ni_pcidio), PXI-6533,
   PCI-DIO-96, PCI-DIO-96B, PXI-6508, PCI-6503, PCI-6503B, PCI-6503X,
-  PXI-6503
+  PXI-6503, PCI-6534, PCI-6533
+Updated: Sun, 21 Apr 2002 21:03:38 -0700
 
 The DIO-96 appears as four 8255 subdevices.  See the 8255
 driver notes for details.
 
 The DIO32HS board appears as one subdevice, with 32 channels.
-Each channel is individually I/O configurable.  The channel order,
-as one might guess, is 0=A0, 1=A1, 2=A2, ... 8=B0, 16=C0, 24=D0.
+Each channel is individually I/O configurable.  The channel order
+is 0=A0, 1=A1, 2=A2, ... 8=B0, 16=C0, 24=D0.  The driver only
+supports simple digital I/O; no handshaking is supported.
 
-DMA is halfway completed, but not operational, for the PCI-DIO32HS.
+DMA mostly works for the PCI-DIO32HS, but only in timed input mode.
 
 This driver could be easily modified to support AT-MIO32HS and
 AT-MIO96.
@@ -795,32 +939,46 @@ AT-MIO96.
 Driver: ni_pcimio.o
 Description: National Instruments PCI-MIO-E series (all boards)
 Author: ds
-Status: mainly limited by Comedi infrastructure
+Status: works
 Devices: [National Instruments] PCI-MIO-16XE-50 (ni_pcimio),
   PCI-MIO-16XE-10, PXI-6030E, PCI-MIO-16E-1, PCI-MIO-16E-4, PCI-6040E,
   PXI-6040E, PCI-6031E, PCI-6032E, PCI-6033E, PCI-6071E, PCI-6023E,
   PCI-6024E, PCI-6025E, PXI-6025E, PCI-6034E, PCI-6035E, PCI-6052E,
-  PCI-6110E, PCI-6111E, PCI-6711, PCI-6713, PXI-6071E, PXI-6070E,
-  PXI-6052E, PCI-6036E
+  PCI-6110, PCI-6111, PCI-6711, PCI-6713, PXI-6071E, PXI-6070E,
+  PXI-6052E, PCI-6036E, PCI-6731, PCI-6733
+Updated: Sat, 16 Mar 2002 17:34:48 -0800
 
 These boards are almost identical to the AT-MIO E series, except that
-they use the PCI bus instead of ISA (i.e., AT).  See the notes above for
-ni_atmio.o for additional information about these boards.
+they use the PCI bus instead of ISA (i.e., AT).  See the notes for
+the ni_atmio.o driver for additional information about these boards.
 
-Comedi knows the PCI ID codes for many of the boards in this series,
-but the NI documentation is incomplete in this matter.  If you have
-a PCI-MIO board that Comedi doesn't recognize, send me the PCI device
-ID, as can be found in /proc/pci or the output of lspci.  The vendor
-code for National Instruments is 0x1093.  I will include the ID in
-the next version.
+Autocalibration is supported on many of the devices, using the
+calibration utility in Comedilib.
 
-DMA is halfway completed, but not yet operational.
+By default, the driver uses DMA to transfer analog input data to
+memory.  When DMA is enabled, not all triggering features are
+supported.
+
+Streaming analog output is not supported on PCI-671x and PCI-673x.
+
+PCI IDs are not known for PCI-6731 and PCI-6733.  Digital I/O may not
+work on 673x.
+
+Information (number of channels, bits, etc.) for some devices may be
+incorrect.  Please check this and submit a bug if there are problems
+for your device.
+
+Bugs:
+ - When DMA is enabled, COMEDI_EV_SCAN_END and COMEDI_EV_CONVERT do
+   not work correctly.
+ - There are reported problems with the 61xx and 67xx boards.
+
 
 
 
 Driver: pcl711.o
 Description: Advantech PCL-711 and 711b, ADLink ACL-8112
-Authors: ds, Janne Jalkanen <jalkanen@cs.hut.fi>, Eric Bunn <ebu@cs.hut.fi>
+Author: ds, Janne Jalkanen <jalkanen@cs.hut.fi>, Eric Bunn <ebu@cs.hut.fi>
 Status: mostly complete
 Devices: [Advantech] PCL-711 (pcl711), PCL-711B (pcl711b),
   [AdLink] ACL-8112HG (acl8112hg), ACL-8112DG (acl8112dg)
@@ -883,11 +1041,10 @@ Interrupts are not supported.
 	       
     Options for ACL-6126:
      [0] - IO Base
-     [1] - IRQ (0=disable, 3, 5, 6, 7, 9, 10, 11, 12, 15)
+     [1] - IRQ (0=disable, 3, 5, 6, 7, 9, 10, 11, 12, 15) (currently ignored)
      [2]...[7] - D/A output range for channel 1-6: 
                0: 0-5V, 1: 0-10V, 2: +/-5V, 3: +/-10V, 
 	       4: 4-20mA
-     NOTE: IRQ operations isn't now supported.
 
 
 
@@ -911,6 +1068,30 @@ becouse their hardware don't allow more (PCL-813/B, ACL-8113, ISO-813).
 Data transfer over DMA is supported only when you measure only one
 channel, this is too hardware limitation of these boards.
 See the head of the source file pcl812.c for configuration options.
+
+
+
+Driver: pcl816.o
+Description: Advantech PCL-816 cards, PCL-814
+Author: Juan Grigera <juan@grigera.com.ar>
+Devices: [Advantech] PCL-816 (pcl816), PCL-814B (pcl814b)
+Status: works
+Updated: Tue,  2 Apr 2002 23:15:21 -0800
+
+PCL 816 and 814B have 16 SE/DIFF ADCs, 16 DACs, 16 DI and 16 DO.
+Differences are at resolution (16 vs 12 bits).
+
+The driver support AI command mode, other subdevices not written.
+
+Analog output and digital input and output are not supported.
+
+Configuration Options:
+  [0] - IO Base
+  [1] - IRQ	(0=disable, 2, 3, 4, 5, 6, 7)
+  [2] - DMA	(0=disable, 1, 3)
+  [3] - 0, 10=10MHz clock for 8254
+            1= 1MHz clock for 8254
+
 
 
 
@@ -945,7 +1126,63 @@ A word or two about DMA. Driver support DMA operations at two ways:
    If you've data dropouts with DMA mode 2 then:
     a) disable IDE DMA
     b) switch text mode console to fb.
-See the head of the source file pcl818.c for configuration options.
+
+   Options for PCL-818L:
+    [0] - IO Base
+    [1] - IRQ	(0=disable, 2, 3, 4, 5, 6, 7)
+    [2] - DMA	(0=disable, 1, 3)
+    [3] - 0, 10=10MHz clock for 8254
+              1= 1MHz clock for 8254
+    [4] - 0,  5=A/D input  -5V.. +5V
+          1, 10=A/D input -10V..+10V
+    [5] - 0,  5=D/A output 0-5V  (internal reference -5V)
+          1, 10=D/A output 0-10V (internal reference -10V)
+	  2    =D/A output unknow (external reference)
+       
+   Options for PCL-818, PCL-818H:
+    [0] - IO Base
+    [1] - IRQ	(0=disable, 2, 3, 4, 5, 6, 7)
+    [2] - DMA	(0=disable, 1, 3)
+    [3] - 0, 10=10MHz clock for 8254
+              1= 1MHz clock for 8254
+    [4] - 0,  5=D/A output 0-5V  (internal reference -5V)
+          1, 10=D/A output 0-10V (internal reference -10V)
+	  2    =D/A output unknow (external reference)
+
+   Options for PCL-818HD, PCL-818HG:
+    [0] - IO Base
+    [1] - IRQ	(0=disable, 2, 3, 4, 5, 6, 7)
+    [2] - DMA/FIFO  (-1=use FIFO, 0=disable both FIFO and DMA, 
+                      1=use DMA ch 1, 3=use DMA ch 3)
+    [3] - 0, 10=10MHz clock for 8254
+              1= 1MHz clock for 8254
+    [4] - 0,  5=D/A output 0-5V  (internal reference -5V)
+          1, 10=D/A output 0-10V (internal reference -10V)
+   	  2    =D/A output unknow (external reference)
+
+   Options for PCL-718:
+    [0] - IO Base
+    [1] - IRQ	(0=disable, 2, 3, 4, 5, 6, 7)
+    [2] - DMA	(0=disable, 1, 3)
+    [3] - 0, 10=10MHz clock for 8254
+              1= 1MHz clock for 8254
+    [4] -     0=A/D Range is +/-10V
+	      1=             +/-5V
+	      2=             +/-2.5V
+	      3=             +/-1V
+	      4=             +/-0.5V 
+	      5=  	     user defined bipolar
+	      6=	     0-10V
+	      7=	     0-5V
+ 	      8=	     0-2V
+	      9=	     0-1V
+	     10=	     user defined unipolar
+    [5] - 0,  5=D/A outputs 0-5V  (internal reference -5V)
+          1, 10=D/A outputs 0-10V (internal reference -10V)
+	      2=D/A outputs unknow (external reference)
+    [6] - 0, 60=max  60kHz A/D sampling
+          1,100=max 100kHz A/D sampling (PCL-718 with Option 001 installed)
+
 
 
 
@@ -984,11 +1221,16 @@ Driver: poc.o
 Description: Generic driver for very simple devices
 Device names: dac02
 Author: ds
-Devices: [Keithley Metrabyte] DAC-02 (dac02)
+Devices: [Keithley Metrabyte] DAC-02 (dac02), [Advantech] PCL-733 (pcl733),
+  PCL-734 (pcl734)
+Updated: Sat, 16 Mar 2002 17:34:48 -0800
+Status: unknown
 
 This driver is indended to support very simple ISA-based devices,
 including:
   dac02 - Keithley DAC-02 analog output board
+  pcl733 - Advantech PCL-733
+  pcl734 - Advantech PCL-734
 
 Configuration options:
   [0] - I/O port base
@@ -1054,15 +1296,29 @@ Author: Anders Blomdell <anders.blomdell@control.lth.se>
 Devices: [Analog Devices] RTI-802 (rti802)
 Status: works
 
+Configuration Options:
+    [0] - i/o base
+    [1] - unused
+    [2] - dac#0  0=two's comp, 1=straight
+    [3] - dac#0  0=bipolar, 1=unipolar
+    [4] - dac#1 ...
+    ...
+    [17] - dac#7 ...
+
 
 
 Driver: skel.o
 Description: Skeleton driver, an example for driver writers
 Devices:
 Author: ds
+Updated: Mon, 18 Mar 2002 15:34:01 -0800
+Status: works
 
 This driver is a documented example on how Comedi drivers are
 written.
+
+Configuration Options:
+  none
 
 
 
