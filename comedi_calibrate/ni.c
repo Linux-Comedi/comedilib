@@ -313,12 +313,13 @@ void ni_setup_observables( calibration_setup_t *setup )
 	}
 }
 
+/* XXX for +-50V and +-20V ranges, the reference source goes 0V
+ * to 50V instead of 0V to 5V */
 static unsigned int cal_gain_register_bits_611x( double *voltage )
 {
 	unsigned int bits;
 
 	bits = 200.0 * ( *voltage / 5.0 );
-	if( bits < 1 ) bits = 1;
 	if( bits > 200 ) bits = 200;
 
 	*voltage = 5.0 * ( bits / 200.0 );
