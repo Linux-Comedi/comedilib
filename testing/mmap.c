@@ -11,7 +11,14 @@
 #include <sys/time.h>
 #include <string.h>
 #include <sys/mman.h>
+#include <signal.h>
+#include <setjmp.h>
+#include <stdlib.h>
+
 #include "comedi_test.h"
+
+/* XXX this should come from elsewhere */
+#define PAGE_SIZE 4096
 
 static int comedi_get_cmd_fast_1chan(comedi_t *it,unsigned int s,comedi_cmd *cmd);
 
@@ -21,16 +28,47 @@ static int comedi_get_cmd_fast_1chan(comedi_t *it,unsigned int s,comedi_cmd *cmd
 
 #define MAPLEN 20480
 
+jmp_buf jump_env;
+
+void segv_handler(int num,siginfo_t *si,void *x)
+{
+	longjmp(jump_env,1);
+}
+
+int test_segfault(void *memptr)
+{
+	volatile char tmp;
+	int ret;
+
+	ret=setjmp(jump_env);
+	if(!ret) tmp = *((char *)(memptr));
+	return ret;
+}
+
+void setup_segfaulter(void)
+{
+	struct sigaction act;
+
+	memset(&act,0,sizeof(act));
+	act.sa_sigaction=&segv_handler;
+	act.sa_flags = SA_SIGINFO;
+	sigaction(SIGSEGV,&act,NULL);
+}
+
 int test_mmap(void)
 {
 	comedi_cmd cmd;
-	char buf[BUFSZ];
+	char *buf;
 	unsigned int chanlist[1];
 	int go;
 	int total=0;
 	int ret;
-	void *b;
+	void *b, *adr;
 	sampl_t *map;
+
+	setup_segfaulter();
+
+	buf=malloc(BUFSZ);
 
 	if(comedi_get_cmd_fast_1chan(device,subdevice,&cmd)<0){
 		printf("  not supported\n");
@@ -41,6 +79,16 @@ int test_mmap(void)
 	if(!map){
 		printf("E: mmap() failed\n");
 		return 0;
+	}
+
+	/* test readability */
+	for(adr=map;adr<(void *)map+MAPLEN;adr+=PAGE_SIZE){
+		ret=test_segfault(adr);
+		if(ret){
+			printf("E: %p failed\n",adr);
+		}else{
+			printf("%p ok\n",adr);
+		}
 	}
 
 	cmd.chanlist = chanlist;
@@ -76,6 +124,8 @@ int test_mmap(void)
 		printf("compare ok\n");
 	}
 	munmap(map,MAPLEN);
+
+	free(buf);
 
 	return 0;
 }
