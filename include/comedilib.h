@@ -61,89 +61,110 @@ typedef struct comedi_sv_struct{
 
 
 comedi_t *comedi_open(const char *fn);
-void comedi_close(comedi_t *it);
+int comedi_close(comedi_t *it);
 
+/* logging */
 int comedi_loglevel(int loglevel);
 void comedi_perror(const char *s);
 char *comedi_strerror(int errnum);
 int comedi_errno(void);
 int comedi_fileno(comedi_t *it);
 
-/* queries */
-
+/* device queries */
 int comedi_get_n_subdevices(comedi_t *it);
 int comedi_get_version_code(comedi_t *it);
 char *comedi_get_driver_name(comedi_t *it);
 char *comedi_get_board_name(comedi_t *it);
 
+/* subdevice queries */
 int comedi_get_subdevice_type(comedi_t *it,unsigned int subdevice);
 int comedi_find_subdevice_by_type(comedi_t *it,int type,unsigned int subd);
 int comedi_get_subdevice_flags(comedi_t *it,unsigned int subdevice);
 int comedi_get_n_channels(comedi_t *it,unsigned int subdevice);
-lsampl_t comedi_get_maxdata(comedi_t *it,unsigned int subdevice,unsigned int chan);
-int comedi_get_rangetype(comedi_t *it,unsigned int subdevice,unsigned int chan);
-comedi_range * comedi_get_range(comedi_t *it,unsigned int subdevice,unsigned int chan,unsigned int range);
-int comedi_find_range(comedi_t *it,unsigned int subd,unsigned int chan,unsigned int unit,double min,double max);
-int comedi_get_n_ranges(comedi_t *it,unsigned int subdevice,unsigned int chan);
-
 int comedi_range_is_chan_specific(comedi_t *it,unsigned int subdevice);
 int comedi_maxdata_is_chan_specific(comedi_t *it,unsigned int subdevice);
 
+/* channel queries */
+lsampl_t comedi_get_maxdata(comedi_t *it,unsigned int subdevice,
+	unsigned int chan);
+//int comedi_get_rangetype(comedi_t *it,unsigned int subdevice,
+//	unsigned int chan);
+int comedi_get_n_ranges(comedi_t *it,unsigned int subdevice,
+	unsigned int chan);
+comedi_range * comedi_get_range(comedi_t *it,unsigned int subdevice,
+	unsigned int chan,unsigned int range);
+int comedi_find_range(comedi_t *it,unsigned int subd,unsigned int chan,
+	unsigned int unit,double min,double max);
+
+/* buffer queries */
 int comedi_get_buffer_size(comedi_t *it,unsigned int subdevice);
 int comedi_get_max_buffer_size(comedi_t *it,unsigned int subdevice);
-int comedi_set_buffer_size(comedi_t *it,unsigned int subdevice,unsigned int len);
+int comedi_set_buffer_size(comedi_t *it,unsigned int subdevice,
+	unsigned int len);
 
-/* triggers and commands */
-
-int comedi_cancel(comedi_t *it,unsigned int subdevice);
-int comedi_trigger(comedi_t *it,comedi_trig *trig);
-int comedi_command(comedi_t *it,comedi_cmd *cmd);
-int comedi_command_test(comedi_t *it,comedi_cmd *cmd);
+/* low-level stuff */
+#ifdef _COMEDILIB_DEPRECATED
+int comedi_trigger(comedi_t *it,comedi_trig *trig); /* deprecated */
+#endif
 int comedi_do_insnlist(comedi_t *it,comedi_insnlist *il);
 int comedi_do_insn(comedi_t *it,comedi_insn *insn);
 int comedi_lock(comedi_t *it,unsigned int subdevice);
 int comedi_unlock(comedi_t *it,unsigned int subdevice);
 
 /* physical units */
-
 double comedi_to_phys(lsampl_t data,comedi_range *rng,lsampl_t maxdata);
 lsampl_t comedi_from_phys(double data,comedi_range *rng,lsampl_t maxdata);
 
-/* synchronous stuff */
-
-int comedi_data_read(comedi_t *it,unsigned int subd,unsigned int chan,unsigned int range,
-	unsigned int aref,lsampl_t *data);
-int comedi_data_write(comedi_t *it,unsigned int subd,unsigned int chan,unsigned int range,
-	unsigned int aref,lsampl_t data);
+/* syncronous stuff */
+int comedi_data_read(comedi_t *it,unsigned int subd,unsigned int chan,
+	unsigned int range,unsigned int aref,lsampl_t *data);
+int comedi_data_write(comedi_t *it,unsigned int subd,unsigned int chan,
+	unsigned int range,unsigned int aref,lsampl_t data);
+int comedi_dio_config(comedi_t *it,unsigned int subd,unsigned int chan,
+	unsigned int dir);
+int comedi_dio_read(comedi_t *it,unsigned int subd,unsigned int chan,
+	unsigned int *bit);
+int comedi_dio_write(comedi_t *it,unsigned int subd,unsigned int chan,
+	unsigned int bit);
+int comedi_dio_bitfield(comedi_t *it,unsigned int subd,
+	unsigned int write_mask, unsigned int *bits);
 
 /* slowly varying stuff */
-
 int comedi_sv_init(comedi_sv_t *it,comedi_t *dev,unsigned int subd,unsigned int chan);
 int comedi_sv_update(comedi_sv_t *it);
 int comedi_sv_measure(comedi_sv_t *it,double *data);
 
-/* dio config */
-
-int comedi_dio_config(comedi_t *it,unsigned int subd,unsigned int chan,unsigned int dir);
-int comedi_dio_read(comedi_t *it,unsigned int subd,unsigned int chan,unsigned int *bit);
-int comedi_dio_write(comedi_t *it,unsigned int subd,unsigned int chan,unsigned int bit);
-int comedi_dio_bitfield(comedi_t *it,unsigned int subd,unsigned int write_mask,
-	unsigned int *bits);
-
-/* functions related to streaming I/O (commands) */
+/* streaming I/O (commands) */
  
-int comedi_get_cmd_src_mask(comedi_t *dev,unsigned int subdevice, comedi_cmd *cmd);
-int comedi_get_cmd_generic_timed(comedi_t *dev,unsigned int subdevice, comedi_cmd *cmd);
-
+int comedi_get_cmd_src_mask(comedi_t *dev,unsigned int subdevice,
+	comedi_cmd *cmd);
+int comedi_get_cmd_generic_timed(comedi_t *dev,unsigned int subdevice,
+	comedi_cmd *cmd);
+int comedi_cancel(comedi_t *it,unsigned int subdevice);
+int comedi_command(comedi_t *it,comedi_cmd *cmd);
+int comedi_command_test(comedi_t *it,comedi_cmd *cmd);
 int comedi_poll(comedi_t *dev,unsigned int subdevice);
 
-/* timer stuff (deprecated) */
+// changes maximum size (in bytes) of preallocated buffer, requires root priviledge, returns new max size
+int comedi_set_max_buffer_size(comedi_t *it, unsigned int subdev,
+	unsigned int max_size);
+// returns number of bytes in buffer waiting to be read by user
+int comedi_get_buffer_contents(comedi_t *it, unsigned int subdev);
+// marks 'bytes' number of bytes in buffer as read by user, returns number of bytes left to be read
+int comedi_mark_buffer_read(comedi_t *it, unsigned int subdev,
+	unsigned int bytes);
+// returns offset in bytes from beginning of buffer for first unread data point in buffer
+int comedi_get_buffer_offset(comedi_t *it, unsigned int subdev);
 
-int comedi_get_timer(comedi_t *it,unsigned int subdev,double freq,unsigned int *trigvar,
-	double *actual_freq);
+/* DEPRECATED */
 
-int comedi_timed_1chan(comedi_t *it,unsigned int subdev,unsigned int chan,unsigned int range,
-	unsigned int aref,double freq,unsigned int n_samples,double *data);
+#ifdef _COMEDILIB_DEPRECATED
+int comedi_get_timer(comedi_t *it,unsigned int subdev,double freq,
+	unsigned int *trigvar,double *actual_freq);
+int comedi_timed_1chan(comedi_t *it,unsigned int subdev,unsigned int chan,
+	unsigned int range, unsigned int aref,double freq,
+	unsigned int n_samples,double *data);
+#endif
 
 
 /*
@@ -160,14 +181,6 @@ enum comedi_oor_behavior comedi_set_global_oor_behavior(enum comedi_oor_behavior
 
 
 
-// changes maximum size (in bytes) of preallocated buffer, requires root priviledge, returns new max size
-int comedi_set_max_buffer_size(comedi_t *it, unsigned int subdev, unsigned int max_size);
-// returns number of bytes in buffer waiting to be read by user
-int comedi_get_buffer_contents(comedi_t *it, unsigned int subdev);
-// marks 'bytes' number of bytes in buffer as read by user, returns number of bytes left to be read
-int comedi_mark_buffer_read(comedi_t *it, unsigned int subdev, unsigned int bytes);
-// returns offset in bytes from beginning of buffer for first unread data point in buffer
-int comedi_get_buffer_offset(comedi_t *it, unsigned int subdev);
 
 #ifdef __cplusplus
 }
