@@ -40,9 +40,7 @@
 
 int quiet=0,verbose=0;
 
-int read_buf_flag=0;
 int read_buf_size=0;
-int write_buf_flag=0;
 int write_buf_size=0;
 
 int init_fd;
@@ -56,8 +54,8 @@ struct option options[] = {
 	{ "version", 0, 0, 'V' },
 	{ "init-data", 1, 0, 'i' },
 	{ "remove", 0, 0, 'r' },
-	{ "read-buffer", 1, &read_buf_flag, 1},
-	{ "write-buffer", 1, &write_buf_flag, 1},
+	{ "read-buffer", 1, NULL, 0x1000},
+	{ "write-buffer", 1, NULL, 0x1001},
 };
 
 void do_help(int i)
@@ -123,10 +121,17 @@ int main(int argc,char *argv[])
 		case 'i':
 			init_file=optarg;
 			break;
-		case 0:
-			if(read_buf_flag) read_buf_size = strtol(optarg, NULL, 0);
-			if(write_buf_flag) write_buf_size = strtol(optarg, NULL, 0);
-			if(read_buf_size < 0 || write_buf_size < 0)
+		case 0x1000:
+			read_buf_size = strtol(optarg, NULL, 0);
+			if(read_buf_size < 0)
+			{
+				fprintf(stderr, "invalid buffer size\n");
+				exit(-1);
+			}
+			break;
+		case 0x1001:
+			write_buf_size = strtol(optarg, NULL, 0);
+			if(write_buf_size < 0)
 			{
 				fprintf(stderr, "invalid buffer size\n");
 				exit(-1);
@@ -138,7 +143,7 @@ int main(int argc,char *argv[])
 	}
 
 	if((argc-optind) < 1 || (argc-optind) > 3 ||
-		((argc-optind) == 1 && read_buf_flag == 0 && write_buf_flag == 0)){
+		((argc-optind) == 1 && read_buf_size == 0 && write_buf_size == 0)){
 		do_help(1);
 	}
 
@@ -258,7 +263,7 @@ int main(int argc,char *argv[])
 	}
 
 	// do buffer resizing
-	if(read_buf_flag || write_buf_flag)
+	if(read_buf_size || write_buf_size)
 	{
 		memset(&bc, 0, sizeof(bc));
 		bc.read_size = read_buf_size * 1024;
