@@ -28,33 +28,50 @@ COMEDILIB_LIBS="$COMEDILIB_LIBS \$(top_builddir)/lib/libcomedi.la -lm"
 AC_SUBST(COMEDILIB_CFLAGS)
 AC_SUBST(COMEDILIB_LIBS)
 
+
+#swig
 AC_PATH_PROG(SWIG, swig, no)
 if test "$SWIG" == no ; then
-  AC_MSG_WARN([swig not found, will not be able to regenerate code for swig bindings])
+	AC_MSG_WARN([swig not found, will not be able to regenerate code for swig bindings])
 fi
 AM_CONDITIONAL(HAVE_SWIG, [test "$SWIG" != "no"])
 
+
+#python
 AC_ARG_ENABLE([python-binding],[  --disable-python-binding	Disable building of Python binding],
 	[ENABLE_PYTHON=$enableval],[ENABLE_PYTHON="yes"])
-AM_PATH_PYTHON
-AM_CHECK_PYTHON_HEADERS(HAVE_PYTHON=yes,[HAVE_PYTHON=no;AC_MSG_WARN([python headers not found, disabling python binding])])
+if test "$ENABLE_PYTHON" == "yes"; then
+	AM_PATH_PYTHON
+	AM_CHECK_PYTHON_HEADERS(HAVE_PYTHON=yes,[HAVE_PYTHON=no;AC_MSG_WARN([python headers not found, disabling python binding])])
+else
+	HAVE_PYTHON="no"
+fi
 AM_CONDITIONAL(HAVE_PYTHON, [test "$HAVE_PYTHON" == "yes" && test "$ENABLE_PYTHON" == "yes"])
+
+
 
 AS_COMPILER_FLAG([-fno-strict-aliasing],[PYTHON_QUIET="$PYTHON_QUIET -fno-strict-aliasing"], true )
 AS_COMPILER_FLAG([-Wno-unused-function],[PYTHON_QUIET="$PYTHON_QUIET -Wno-unused-function"], true )
 AC_SUBST(PYTHON_QUIET)
 
+# ruby
 AC_ARG_ENABLE([ruby-binding], [  --disable-ruby-binding	Disable building of Ruby binding],
 	[ENABLE_RUBY=$enableval], [ENABLE_RUBY="yes"])
-AC_PATH_PROG(RUBY, ruby, no)
-if test "$RUBY" != "no" ; then
-	RUBY_INC_DIR=`$RUBY -e "require 'rbconfig'; c = ::Config::CONFIG; print c[['archdir']];"`
-	AC_CHECK_HEADER([$RUBY_INC_DIR/ruby.h],[],[ENABLE_RUBY="no";AC_MSG_WARN([ruby.h not found, disabling Ruby binding])])
+if test "$ENABLE_RUBY" == "yes"; then
+	AC_PATH_PROG(RUBY, ruby, no)
+	if test "$RUBY" != "no" ; then
+		RUBY_INC_DIR=`$RUBY -e "require 'rbconfig'; c = ::Config::CONFIG; print c[['archdir']];"`
+		AC_CHECK_HEADER([$RUBY_INC_DIR/ruby.h],[],[ENABLE_RUBY="no";AC_MSG_WARN([ruby.h not found, disabling Ruby binding])])
+	else
+		AC_MSG_WARN([ruby not found, disabling ruby binding])
+		ENABLE_RUBY="no"
+	fi
 else
-	AC_MSG_WARN([ruby not found, disabling ruby binding])
 	ENABLE_RUBY="no"
 fi
+
 AM_CONDITIONAL(HAVE_RUBY, [test "$ENABLE_RUBY" == "yes"])
+
 AC_ARG_VAR(RUBY_PREFIX,[path prefix for Ruby binding])
 AC_ARG_VAR(RUBY_SO_DIR,[path for Ruby extensions])
 if test "$RUBY_PREFIX" != "" ; then
@@ -65,27 +82,50 @@ if test "$RUBY_SO_DIR" != "" ; then
 fi
 AC_SUBST(RUBY_CONFIG_OPTIONS)
 
+
+# scxi
 AC_ARG_ENABLE([scxi], [  --enable-scxi  Enable SCXI convenience library],
 	[ENABLE_SCXI=$enableval], [ENABLE_SCXI="no"])
 AM_CONDITIONAL(BUILD_SCXI, [test "$ENABLE_SCXI" == "yes"])
 
-AC_PATH_PROG(DOCBOOK2MAN, docbook2man, no)
-if test "$DOCBOOK2MAN" = "no" ; then
-  AC_MSG_WARN([docbook2man not found, will not be able to rebuild man pages])
+
+# docbook
+AC_ARG_ENABLE([docbook-binding],[  --disable-docbook-binding        Disable docbook],[ENABLE_DOCBOOK=$enableval],[ENABLE_DOCBOOK="yes"])
+
+
+
+if test "$ENABLE_DOCBOOK" == "yes"; then
+	AC_PATH_PROG(DOCBOOK2MAN, docbook2man, no)
+	if test "$DOCBOOK2MAN" = "no" ; then
+  		AC_MSG_WARN([docbook2man not found, will not be able to rebuild man pages])
+	fi
+else
+	DOCBOOK2MAN="no"
 fi
 AM_CONDITIONAL(HAVE_DOCBOOK2MAN, [test "$DOCBOOK2MAN" != "no"])
 
-AC_PATH_PROG(DOCBOOK2PDF, docbook2pdf, no)
-if test "$DOCBOOK2PDF" = "no" ; then
-  AC_MSG_WARN([docbook2pdf not found, will not be able to rebuild pdf documentation])
+
+if test "$ENABLE_DOCBOOK" == "yes"; then
+	AC_PATH_PROG(DOCBOOK2PDF, docbook2pdf, no)
+	if test "$DOCBOOK2PDF" = "no" ; then
+  		AC_MSG_WARN([docbook2pdf not found, will not be able to rebuild pdf documentation])
+	fi
+else
+	DOCBOOK2PDF="no"
 fi
 AM_CONDITIONAL(HAVE_DOCBOOK2PDF, [test "$DOCBOOK2PDF" != "no"])
 
-AC_PATH_PROG(DOCBOOK2HTML, docbook2html, no)
-if test "$DOCBOOK2HTML" = "no" ; then
-  AC_MSG_WARN([docbook2html not found, will not be able to rebuild html documentation])
+
+if test "$ENABLE_DOCBOOK" == "yes"; then
+	AC_PATH_PROG(DOCBOOK2HTML, docbook2html, no)
+	if test "$DOCBOOK2HTML" = "no" ; then
+		AC_MSG_WARN([docbook2html not found, will not be able to rebuild html documentation])
+	fi
+else
+	DOCBOOK2HTML="no"
 fi
 AM_CONDITIONAL(HAVE_DOCBOOK2HTML, [test "$DOCBOOK2HTML" != "no"])
+
 
 pcmciadir="\${sysconfdir}/pcmcia"
 AC_SUBST(pcmciadir)
@@ -124,5 +164,3 @@ comedilib.pc
 )
 
 AC_OUTPUT
-
-
