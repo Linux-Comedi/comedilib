@@ -68,10 +68,10 @@ comedilib.pdf: $(SGML)
 	$(DOCBOOK2PDF) $(srcdir)/comedilib.sgml
 
 funcref.sgml: funcref mkref
-	$(srcdir)/mkref funcref >funcref.sgml
+	$(srcdir)/mkref funcref >$(srcdir)/funcref.sgml
 
 drivers.sgml: drivers.txt mkdr
-	$(srcdir)/mkdr drivers.txt >drivers.sgml
+	$(srcdir)/mkdr drivers.txt >$(srcdir)/drivers.sgml
 
 maintainer-clean-local:
 	$(RM) -r doc_html man
