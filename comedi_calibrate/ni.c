@@ -901,7 +901,6 @@ static int cal_ni_daqcard_6062e( calibration_setup_t *setup )
 	retval = write_calibration_file( setup, saved_cals, num_calibrations );
 	for( i = 0; i < num_calibrations; i++ )
 		clear_saved_calibration( &saved_cals[ i ] );
-	free( saved_cals );
 
 	return retval;
 }
