@@ -2,7 +2,7 @@
 AC_INIT
 AC_CANONICAL_TARGET([])
 
-AS_VERSION(comedilib, COMEDILIB, 0, 7, 19, 1)
+AS_VERSION(comedilib, COMEDILIB, 0, 7, 20, 1)
 #COMEDILIB_DEBUG="-Wall -Werror"
 COMEDILIB_DEBUG="-Wall"
 AM_INIT_AUTOMAKE($PACKAGE,$VERSION)
@@ -35,11 +35,23 @@ AS_COMPILER_FLAG([-fno-strict-aliasing],[PYTHON_QUIET="$PYTHON_QUIET -fno-strict
 AS_COMPILER_FLAG([-Wno-unused-function],[PYTHON_QUIET="$PYTHON_QUIET -Wno-unused-function"], true )
 AC_SUBST(PYTHON_QUIET)
 
-AC_PATH_PROG(JW_PATH, jw, no)
-if test x$JW_PATH = xno ; then
-  AC_MSG_WARN([docbook-tools (jw) not found, disabling documentation])
+AC_PATH_PROG(DOCBOOK2MAN, docbook2man, no)
+if test x$DOCBOOK2MAN = xno ; then
+  AC_MSG_WARN([docbook2man not found, disabling documentation])
 fi
-AM_CONDITIONAL(HAVE_DOCBOOK, [test "x$JW_PATH" != xno])
+AM_CONDITIONAL(HAVE_DOCBOOK2MAN, [test "x$DOCBOOK2MAN" != xno])
+
+AC_PATH_PROG(DOCBOOK2PDF, docbook2pdf, no)
+if test x$DOCBOOK2PDF = xno ; then
+  AC_MSG_WARN([docbook2pdf not found, disabling documentation])
+fi
+AM_CONDITIONAL(HAVE_DOCBOOK2PDF, [test "x$DOCBOOK2PDF" != xno])
+
+AC_PATH_PROG(DOCBOOK2HTML, docbook2html, no)
+if test x$DOCBOOK2HTML = xno ; then
+  AC_MSG_WARN([docbook2html not found, disabling documentation])
+fi
+AM_CONDITIONAL(HAVE_DOCBOOK2HTML, [test "x$DOCBOOK2HTML" != xno])
 
 
 AC_CONFIG_FILES(
@@ -47,6 +59,8 @@ Makefile
 comedi_calibrate/Makefile
 comedi_config/Makefile
 doc/Makefile
+doc/html/Makefile
+doc/man/Makefile
 demo/Makefile
 include/Makefile
 lib/Makefile
