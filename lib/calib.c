@@ -167,6 +167,7 @@ char* comedi_get_default_calibration_path( comedi_t *dev )
 	struct stat file_stats;
 	char *file_path;
 	char *board_name;
+	char *driver_name;
 
 	if( fstat( comedi_fileno( dev ), &file_stats ) < 0 )
 	{
@@ -179,8 +180,13 @@ char* comedi_get_default_calibration_path( comedi_t *dev )
 	{
 		return NULL;
 	}
-	asprintf( &file_path, "/etc/comedi/calibrations/%s_comedi%li",
-		board_name, ( unsigned long ) minor( file_stats.st_rdev ) );
+	driver_name = comedi_get_driver_name( dev );
+	if( driver_name == NULL )
+	{
+		return NULL;
+	}
+	asprintf( &file_path, "/etc/comedi/calibrations/%s_%s_comedi%li",
+		driver_name, board_name, ( unsigned long ) minor( file_stats.st_rdev ) );
 
 	return file_path;
 }
