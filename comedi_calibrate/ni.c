@@ -53,6 +53,7 @@ static int cal_ni_at_mio_16e_2(calibration_setup_t *setup);
 static int cal_ni_daqcard_ai_16xe_50(calibration_setup_t *setup);
 static int cal_ni_at_mio_16e_1(calibration_setup_t *setup);
 static int cal_ni_pci_mio_16e_1(calibration_setup_t *setup);
+static int cal_ni_pci_6014(calibration_setup_t *setup);
 static int cal_ni_pci_6024e(calibration_setup_t *setup);
 static int cal_ni_pci_6025e(calibration_setup_t *setup);
 static int cal_ni_pci_6032e(calibration_setup_t *setup);
@@ -93,7 +94,7 @@ static struct board_struct boards[]={
 	{ "pci-mio-16e-4", STATUS_SOME, cal_ni_pci_mio_16e_4, ni_setup_observables, 0x1a9, 0x1aa },
 	{ "pci-mio-16xe-10", STATUS_DONE,	cal_ni_pci_mio_16xe_10,	ni_setup_observables, 0x1ae, 0x1af },
 	{ "pci-mio-16xe-50", STATUS_SOME, cal_ni_pci_mio_16xe_50, ni_setup_observables, 0x1b5, 0x1b6 },
-	{ "pci-6014", STATUS_UNKNOWN, NULL, ni_setup_observables, -1, -1 },
+	{ "pci-6014", STATUS_SOME, cal_ni_pci_6014, ni_setup_observables, 0x1ab, 0x1ac },
 	{ "pci-6023e", STATUS_DONE, cal_ni_pci_6023e, ni_setup_observables, 0x1bb, 0x1bc },
 	{ "pci-6024e", STATUS_SOME, cal_ni_pci_6024e, ni_setup_observables, 0x1af, 0x1b0 },
 	{ "pci-6025e", STATUS_SOME, cal_ni_pci_6025e, ni_setup_observables, 0x1af, 0x1b0 },
@@ -748,6 +749,26 @@ static int cal_ni_pci_mio_16e_1(calibration_setup_t *setup)
 	layout.dac_gain[ 1 ] = 9;
 	layout.dac_linearity[ 1 ] = 7;
 
+	return cal_ni_generic( setup, &layout );
+}
+
+static int cal_ni_pci_6014(calibration_setup_t *setup)
+{
+	ni_caldac_layout_t layout;
+
+	init_ni_caldac_layout( &layout );
+	layout.adc_pregain_offset = 0;
+	layout.adc_postgain_offset = 4;
+	layout.adc_pregain_offset_fine = 8;
+	layout.adc_gain = 2;
+	layout.dac_offset[0] = 6;
+	layout.dac_gain[0] = 7;
+	layout.dac_gain_fine[0] = 11;
+	layout.dac_linearity[0] = 10;
+	layout.dac_offset[1] = 9;
+	layout.dac_gain[1] = 3;
+	layout.dac_gain_fine[1] = 5;
+	layout.dac_linearity[1] = 1;
 	return cal_ni_generic( setup, &layout );
 }
 
