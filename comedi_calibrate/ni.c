@@ -50,6 +50,7 @@ static void ni_setup_observables_611x( calibration_setup_t *setup );
 static void ni67xx_setup_observables( calibration_setup_t *setup );
 
 static int cal_ni_at_mio_16e_2(calibration_setup_t *setup);
+static int cal_ni_at_mio_64e_3(calibration_setup_t *setup);
 static int cal_ni_daqcard_ai_16xe_50(calibration_setup_t *setup);
 static int cal_ni_at_mio_16e_1(calibration_setup_t *setup);
 static int cal_ni_pci_mio_16e_1(calibration_setup_t *setup);
@@ -86,7 +87,7 @@ static struct board_struct boards[]={
 	{ "at-mio-16e-10", STATUS_DONE, cal_ni_at_mio_16e_10, ni_setup_observables, 0x1a7, 0x1a8 },
 	{ "at-mio-16xe-10", STATUS_UNKNOWN, NULL, ni_setup_observables, 0x1b7, 0x1b8 },
 	{ "at-mio-16xe-50", STATUS_SOME, cal_ni_at_mio_16xe_50, ni_setup_observables, 0x1b5, 0x1b6 },
-	{ "at-mio-64e-3", STATUS_UNKNOWN, NULL, ni_setup_observables, -1, -1},
+	{ "at-mio-64e-3", STATUS_SOME, cal_ni_at_mio_64e_3, ni_setup_observables, -1, -1},
 	{ "DAQCard-ai-16e-4", STATUS_DONE, cal_ni_daqcard_ai_16e_4, ni_setup_observables, 0x1b5, 0x1b6 },
 	{ "DAQCard-ai-16xe-50", STATUS_DONE, cal_ni_daqcard_ai_16xe_50, ni_setup_observables, 0x1be, 0x1bf },
 	{ "DAQCard-6024E", STATUS_SOME, cal_ni_daqcard_6024e, ni_setup_observables, -1, -1 },
@@ -1196,6 +1197,33 @@ static int cal_ni_daqcard_6036e( calibration_setup_t *setup )
 	layout.dac_offset[ 1 ] = 9;
 	layout.dac_gain[ 1 ] = 3;
 	layout.dac_gain_fine[ 1 ] = 5;
+	layout.dac_linearity[1] = 1;
+
+	return cal_ni_generic( setup, &layout );
+}
+
+static int cal_ni_at_mio_64e_3( calibration_setup_t *setup )
+{
+	ni_caldac_layout_t layout;
+
+	if( comedi_get_version_code( setup->dev ) <= COMEDI_VERSION_CODE( 0, 7, 68 ) )
+	{
+		DPRINT(0, "WARNING: you need comedi driver version 0.7.69 or later\n"
+		 "for this calibration to work properly\n" );
+	}
+
+	init_ni_caldac_layout( &layout );
+	
+	layout.adc_pregain_offset = 8;
+	layout.adc_postgain_offset = 4;
+	layout.adc_gain = 2;
+
+	layout.dac_offset[0] = 6;
+	layout.dac_gain[0] = 14;
+	layout.dac_linearity[0] = 10;
+
+	layout.dac_offset[ 1 ] = 9;
+	layout.dac_gain[ 1 ] = 5;
 	layout.dac_linearity[1] = 1;
 
 	return cal_ni_generic( setup, &layout );
