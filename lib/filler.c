@@ -52,6 +52,8 @@ int get_subdevices(comedi_t *it)
 	subdevice *r;
 
 	s=malloc(sizeof(comedi_subdinfo)*it->n_subdevices);
+	debug_ptr(s);
+
 	ret=ioctl_subdinfo(it->fd,s);
 	debug_int(ret);
 
@@ -146,7 +148,7 @@ static int do_test_for_cmd(comedi_t *dev,unsigned int subdevice)
 
 	memset(&it,0,sizeof(it));
 
-	it.subdev = 0;
+	it.subdev = subdevice;
 	it.start_src = TRIG_ANY;
 	it.scan_begin_src = TRIG_ANY;
 	it.convert_src = TRIG_ANY;
