@@ -1,6 +1,9 @@
 
 # Makefile for comedi
 
+with_python = no
+with_perl = no
+
 .EXPORT_ALL_VARIABLES:
 
 include version
@@ -8,7 +11,15 @@ MAJOR=0
 
 CFLAGS = -Wall -O2
 
-all:	comedilib
+TARGETS = comedilib
+ifeq ($(with_python),yes)
+TARGETS += python
+endif
+ifeq ($(with_perl),yes)
+TARGETS += perl
+endif
+
+all:	$(TARGETS)
 
 SUBDIRS= lib demo comedi_calibrate testing comedi_config
 
@@ -56,9 +67,16 @@ subdirs:	dummy
 
 clean:	dummy
 	set -e;for i in $(SUBDIRS);do ${MAKE} clean -C $$i ; done
+ifeq ($(with_python),yes)
+	$(MAKE) -C python distclean
+endif
 
 distclean:	clean
 
+python: dummy
+	$(MAKE) -C python -f Makefile.pre.in boot
+	$(MAKE) -C python all
+	
 debian: dummy
 	chmod 755 debian/rules
 	dpkg-buildpackage -rfakeroot
