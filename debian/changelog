@@ -1,3 +1,9 @@
+comedilib (0.7.19.1-1) unstable; urgency=low
+
+  * snapshot
+
+ -- David Schleef <ds@schleef.org>  Tue, 03 Jun 2003 21:01:30 -0700
+
 comedilib (0.7.18-cvs20020912) unstable; urgency=low
 
   * snapshot
