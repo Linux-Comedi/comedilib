@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
 	parse_options(argc,argv);
 
 	/* Force n_chan to be 1 */
-	n_chan = 2;
+	n_chan = 1;
 
 	if(value){
 		waveform_frequency = value;
@@ -162,6 +162,18 @@ int main(int argc, char *argv[])
 	dds_output(data,BUF_LEN);
 
 	dump_cmd(stdout,&cmd);
+
+	err = comedi_command_test(dev, &cmd);
+	if (err < 0) {
+		comedi_perror("comedi_command_test");
+		exit(1);
+	}
+
+	err = comedi_command_test(dev, &cmd);
+	if (err < 0) {
+		comedi_perror("comedi_command_test");
+		exit(1);
+	}
 
 	if ((err = comedi_command(dev, &cmd)) < 0) {
 		comedi_perror("comedi_command");
