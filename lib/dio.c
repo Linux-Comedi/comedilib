@@ -65,7 +65,7 @@ int _comedi_dio_config(comedi_t *it,unsigned int subdev,unsigned int chan,unsign
 	}else
 	{
 		comedi_trig trig;
-		lsampl_t data=io;
+		sampl_t data=io;
 
 		memset(&trig,0,sizeof(trig));
 		trig.flags=TRIG_CONFIG|TRIG_WRITE;
@@ -73,7 +73,7 @@ int _comedi_dio_config(comedi_t *it,unsigned int subdev,unsigned int chan,unsign
 		trig.n=1;
 		trig.subdev=subdev;
 		trig.chanlist=&chan;
-		trig.data=(sampl_t *)&data;
+		trig.data=&data;
 
 		return comedi_trigger(it,&trig);
 	}
@@ -113,14 +113,14 @@ int _comedi_dio_read(comedi_t *it,unsigned int subdev,unsigned int chan,
 		return ret;
 	}else{
 		comedi_trig trig;
-		lsampl_t data;
+		sampl_t data;
 
 		memset(&trig,0,sizeof(trig));
 		trig.n_chan=1;
 		trig.n=1;
 		trig.subdev=subdev;
 		trig.chanlist=&chan;
-		trig.data=(sampl_t *)&data;
+		trig.data=&data;
 
 		ret=comedi_trigger(it,&trig);
 
@@ -160,7 +160,7 @@ int _comedi_dio_write(comedi_t *it,unsigned int subdev,unsigned int chan,
 		return comedi_do_insn(it,&insn);
 	}else{
 		comedi_trig trig;
-		lsampl_t data;
+		sampl_t data;
 
 		data=val;
 
@@ -170,7 +170,7 @@ int _comedi_dio_write(comedi_t *it,unsigned int subdev,unsigned int chan,
 		trig.flags=TRIG_WRITE;
 		trig.subdev=subdev;
 		trig.chanlist=&chan;
-		trig.data=(sampl_t *)&data;
+		trig.data=&data;
 
 		return comedi_trigger(it,&trig);
 	}
