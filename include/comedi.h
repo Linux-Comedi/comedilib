@@ -62,9 +62,9 @@ typedef unsigned short sampl_t;
 #define AREF_DIFF	0x02		/* analog ref = differential */
 #define AREF_OTHER	0x03		/* analog ref = other (undefined) */
 
-/* GPCT options */
+/* counters -- these are arbitrary values */
 #define GPCT_RESET		0x0001
-#define GPCT_SET_SOURCE	0x0002
+#define GPCT_SET_SOURCE		0x0002
 #define GPCT_SET_GATE		0x0004
 #define GPCT_SET_DIRECTION	0x0008
 #define GPCT_SET_OPERATION	0x0010
@@ -75,7 +75,7 @@ typedef unsigned short sampl_t;
 #define GPCT_INT_CLOCK		0x0001
 #define GPCT_EXT_PIN		0x0002
 #define GPCT_NO_GATE		0x0004
-#define GPCT_UP		0x0008
+#define GPCT_UP			0x0008
 #define GPCT_DOWN		0x0010
 #define GPCT_HWUD		0x0020
 #define GPCT_SIMPLE_EVENT	0x0040
@@ -83,6 +83,7 @@ typedef unsigned short sampl_t;
 #define GPCT_SINGLE_PW		0x0100
 #define GPCT_CONT_PULSE_OUT	0x0200
 #define GPCT_SINGLE_PULSE_OUT	0x0400
+
 
 /* instructions */
 
@@ -194,6 +195,7 @@ typedef unsigned short sampl_t;
 #define COMEDI_INSN _IOR(CIO,12,comedi_insn)
 #define COMEDI_BUFCONFIG _IOR(CIO,13,comedi_bufconfig)
 #define COMEDI_BUFINFO _IOWR(CIO,14,comedi_bufinfo)
+#define COMEDI_POLL _IO(CIO,15)
 
 
 /* structures */
