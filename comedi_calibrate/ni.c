@@ -959,8 +959,6 @@ static int cal_ni_daqcard_6062e( calibration_setup_t *setup )
 	static const int num_calibrations = sizeof( saved_cals ) / sizeof( saved_cals[0] );
 	int i, retval;
 
-	comedi_set_global_oor_behavior( COMEDI_OOR_NUMBER );
-
 	current_cal = saved_cals;
 
 	memset( saved_cals, 0, sizeof( saved_cals ) );

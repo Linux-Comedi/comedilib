@@ -787,8 +787,6 @@ static int cal_cb_pci_64xx( calibration_setup_t *setup )
 	int adc_offset_for_ao = -1, adc_gain_for_ao = -1;
 	int ai_range_for_ao;
 
-	comedi_set_global_oor_behavior( COMEDI_OOR_NUMBER );
-
 	num_ai_ranges = comedi_get_n_ranges( setup->dev, setup->ad_subdev, 0 );
 	if( num_ai_ranges < 1 ) return -1;
 	if( setup->da_subdev >= 0 )
@@ -946,8 +944,6 @@ static int cal_cb_pci_60xx( calibration_setup_t *setup )
 		adc_gain_fine_for_ao = -1, adc_gain_coarse_for_ao = -1;
 	static const int ai_range_for_ao = 0;
 
-	comedi_set_global_oor_behavior( COMEDI_OOR_NUMBER );
-
 	num_ai_ranges = comedi_get_n_ranges( setup->dev, setup->ad_subdev, 0 );
 	if( num_ai_ranges < 1 ) return -1;
 	if( setup->da_subdev >= 0 )
@@ -1062,8 +1058,6 @@ static int cal_cb_pci_4020( calibration_setup_t *setup )
 	int range, channel, num_ranges, num_channels, retval,
 		num_calibrations, i;
 	saved_calibration_t *saved_cals, *current_cal;
-
-	comedi_set_global_oor_behavior( COMEDI_OOR_NUMBER );
 
 	num_ranges = comedi_get_n_ranges( setup->dev, setup->ad_subdev, 0 );
 	if( num_ranges < 0 ) return -1;

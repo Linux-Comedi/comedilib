@@ -477,6 +477,8 @@ void cal_binary( calibration_setup_t *setup, int obs, int dac)
 	DPRINT(0,"binary: %s\n", setup->observables[obs].name);
 	preobserve( setup, obs);
 
+	comedi_set_global_oor_behavior( COMEDI_OOR_NUMBER );
+
 	new_sv_init(&sv, setup->dev, setup->ad_subdev, chanspec);
 	sv.settling_time_ns = setup->settling_time_ns;
 
@@ -540,6 +542,8 @@ void cal_relative_binary( calibration_setup_t *setup, int obs1, int obs2, int da
 
 	DPRINT(0,"relative binary: %s, %s\n", setup->observables[obs1].name,
 		setup->observables[obs2].name);
+
+	comedi_set_global_oor_behavior( COMEDI_OOR_NUMBER );
 
 	x0 = x1 = x2 = 0;
 	update_caldac( setup, dac, x0 );
@@ -622,6 +626,8 @@ void cal_linearity_binary( calibration_setup_t *setup, int obs1, int obs2, int o
 
 	DPRINT(0,"postgain linearity: %s,\n%s,\n%s\n", setup->observables[obs1].name,
 		setup->observables[obs2].name,setup->observables[obs3].name);
+
+	comedi_set_global_oor_behavior( COMEDI_OOR_NUMBER );
 
 	x0 = x1 = x2 = 0;
 	update_caldac( setup, dac, x0 );
