@@ -1,6 +1,6 @@
 Summary: Data Acquisition library for the Comedi DAQ driver.
 Name: comedilib
-Version: 0.7.19.1
+Version: @VERSION@
 Release: 1
 License: LGPL
 Group: System Environment/Kernel

@@ -53,6 +53,7 @@ lib/Makefile
 man/Makefile
 python/Makefile
 testing/Makefile
+comedilib.spec
 )
 
 AC_OUTPUT
