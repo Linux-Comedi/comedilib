@@ -122,17 +122,18 @@ enum observables{
 	ni_ao1_zero_offset,
 	ni_ao1_reference,
 };
+
+enum observables_611x{
+	ni_ao0_zero_offset_611x = 0,
+	ni_ao0_reference_611x = 1,
+	ni_ao1_zero_offset_611x = 2,
+	ni_ao1_reference_611x = 3,
+};
 inline static int ni_zero_offset_611x( int channel ) {
-	return channel;
+	return 4 + 2 * channel;
 };
 inline static int ni_reference_611x( int channel ) {
-	return 4 + channel;
-};
-enum observables_611x{
-	ni_ao0_zero_offset_611x = 8,
-	ni_ao0_reference_611x = 9,
-	ni_ao1_zero_offset_611x = 10,
-	ni_ao1_reference_611x = 11,
+	return 5 + 2 * channel;
 };
 
 enum reference_sources {
@@ -428,7 +429,7 @@ void ni_setup_observables_611x( calibration_setup_t *setup )
 	o->reference_source = REF_DAC1_GND;
 	set_target( setup, ni_ao1_reference_611x, 5.0 );
 
-	setup->n_observables = ni_ao1_reference_611x + 1;
+	setup->n_observables = 4 + 2 * num_chans;
 }
 
 int cal_ni_at_mio_16e_2(calibration_setup_t *setup)
