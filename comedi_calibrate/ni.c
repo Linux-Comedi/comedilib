@@ -57,6 +57,7 @@ static int cal_ni_pci_6014(calibration_setup_t *setup);
 static int cal_ni_pci_6024e(calibration_setup_t *setup);
 static int cal_ni_pci_6025e(calibration_setup_t *setup);
 static int cal_ni_pci_6032e(calibration_setup_t *setup);
+static int cal_ni_pci_6034e(calibration_setup_t *setup);
 static int cal_ni_pci_6035e(calibration_setup_t *setup);
 static int cal_ni_pci_6036e(calibration_setup_t *setup);
 static int cal_ni_pci_6071e(calibration_setup_t *setup);
@@ -101,7 +102,7 @@ static struct board_struct boards[]={
 	{ "pci-6031e", STATUS_DONE, cal_ni_pci_mio_16xe_10, ni_setup_observables, 0x1ae, 0x1af },
 	{ "pci-6032e", STATUS_DONE, cal_ni_pci_6032e, ni_setup_observables, 0x1ae, 0x1af },
 	{ "pci-6033e", STATUS_DONE, cal_ni_pci_6032e, ni_setup_observables, 0x1b7, 0x1b8 },
-	{ "pci-6034e", STATUS_UNKNOWN, NULL, ni_setup_observables, -1, -1 },
+	{ "pci-6034e", STATUS_SOME, cal_ni_pci_6034e, ni_setup_observables, 0x1bb, 0x1bc },
 	{ "pci-6035e", STATUS_DONE, cal_ni_pci_6035e, ni_setup_observables, 0x1af, 0x1b0 },
 	{ "pci-6036e", STATUS_DONE, cal_ni_pci_6036e, ni_setup_observables, 0x1ab, 0x1ac },
 	{ "pci-6052e", STATUS_DONE, cal_ni_pci_6052e, ni_setup_observables, 0x19f, 0x1a0 },
@@ -784,6 +785,19 @@ static int cal_ni_pci_6032e(calibration_setup_t *setup)
 	layout.adc_postgain_offset_fine = 3;
 	layout.adc_gain = 0;
 	layout.adc_gain_fine = 1;
+
+	return cal_ni_generic( setup, &layout );
+}
+
+static int cal_ni_pci_6034e(calibration_setup_t *setup)
+{
+	ni_caldac_layout_t layout;
+
+	init_ni_caldac_layout( &layout );
+	layout.adc_pregain_offset = 0;
+	layout.adc_pregain_offset_fine = 8;
+	layout.adc_postgain_offset = 4;
+	layout.adc_gain = 2;
 
 	return cal_ni_generic( setup, &layout );
 }
