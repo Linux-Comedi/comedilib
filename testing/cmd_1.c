@@ -161,7 +161,16 @@ int test_cmd_write_fast_1chan(void)
 	int total=0;
 	int ret;
 	unsigned int flags = comedi_get_subdevice_flags(device,subdevice);
-
+	static const int num_samples = 100000;
+	int num_bytes;
+	
+	if((flags & SDF_LSAMPL))
+	{
+		num_bytes = num_samples * sizeof(lsampl_t);
+	}else
+	{
+		num_bytes = num_samples * sizeof(sampl_t);
+	}
 	if(!(flags&SDF_CMD) || !(flags&SDF_WRITEABLE)){
 		printf("not applicable\n");
 		return 0;
@@ -175,7 +184,7 @@ int test_cmd_write_fast_1chan(void)
 	if(realtime)cmd.flags |= TRIG_RT;
 	cmd.chanlist = chanlist;
 	cmd.scan_end_arg = 1;
-	cmd.stop_arg = 1000000;
+	cmd.stop_arg = num_samples;
 	cmd.chanlist_len = 1;
 	chanlist[0] = CR_PACK(0,0,0);
 
@@ -202,18 +211,13 @@ int test_cmd_write_fast_1chan(void)
 		if(verbose)printf("write %d %d\n",ret,total);
 	}
 	
-	{
-		comedi_insn insn;
-		memset(&insn, 0, sizeof(comedi_insn));
-		insn.insn = INSN_INTTRIG;
-		insn.subdev = subdevice;
-		ret = comedi_do_insn(device, &insn);
-		if(ret<0){
-			perror("comedi_inttrig");
-			return 0;
-		}
-		if(verbose)printf("inttrig\n");
+	ret = comedi_internal_trigger(device, subdevice, 0);
+	if(ret<0){
+		perror("E: comedi_inttrig");
+		comedi_cancel(device, subdevice);
+		return 0;
 	}
+	if(verbose)printf("inttrig\n");
 
 	go=1;
 	while(go){
@@ -230,9 +234,25 @@ int test_cmd_write_fast_1chan(void)
 		}else{
 			total += ret;
 			if(verbose)printf("write %d %d\n",ret,total);
+			//deal with case where output doesn't support stop_src=TRIG_COUNT
+			if(total >= num_bytes)
+			{
+				go = 0;
+			}
 		}
 	}
-
+	// make sure all samples have been written out
+	while(1)
+	{	
+		ret = comedi_get_buffer_contents(device, subdevice);
+		if(ret < 0)
+		{
+			printf("E: comedi_get_buffer_contents() returned %i\n", ret);
+		}else if(ret == 0) break;
+	}
+	// cancel needed in the case of stop_src==TRIG_NONE
+	if(comedi_cancel(device, subdevice))
+		printf("E: comedi_cancel() failed");
 	return 0;
 }
 
