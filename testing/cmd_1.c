@@ -249,6 +249,7 @@ int test_cmd_write_fast_1chan(void)
 		{
 			printf("E: comedi_get_buffer_contents() returned %i\n", ret);
 		}else if(ret == 0) break;
+		usleep(10000);
 	}
 	// cancel needed in the case of stop_src==TRIG_NONE
 	if(comedi_cancel(device, subdevice))
