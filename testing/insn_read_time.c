@@ -24,6 +24,11 @@ int test_insn_read_time(void)
 
 	printf("rev 1\n");
 
+	if(comedi_get_subdevice_type(device,subdevice)==COMEDI_SUBD_UNUSED){
+		printf("not applicable\n");
+		return 0;
+	}
+
 	memset(&il,0,sizeof(il));
 	memset(insn,0,sizeof(insn));
 

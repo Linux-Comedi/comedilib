@@ -9,5 +9,7 @@ extern int subdevice;
 
 extern int verbose;
 
+extern unsigned int capabilities;
+
 #endif
 

@@ -27,9 +27,11 @@ int test_info(void);
 int test_mode0_read(void);
 int test_insn_read(void);
 int test_insn_read_time(void);
+int test_cmd_no_cmd(void);
 int test_cmd_probe_src_mask(void);
 int test_cmd_probe_fast_1chan(void);
 int test_cmd_read_fast_1chan(void);
+int test_cmd_logic_bug(void);
 int test_cmd_fifo_depth_check(void);
 int test_mmap(void);
 int test_read_select(void);
@@ -49,9 +51,11 @@ struct test_struct tests[]={
 	{ "mode0_read", test_mode0_read, TEST_STD },
 	{ "insn_read", test_insn_read, TEST_STD },
 	{ "insn_read_time", test_insn_read_time, TEST_STD },
+	{ "cmd_no_cmd", test_cmd_no_cmd, TEST_STD },
 	{ "cmd_probe_src_mask", test_cmd_probe_src_mask, TEST_STD },
 	{ "cmd_probe_fast_1chan", test_cmd_probe_fast_1chan, TEST_STD },
 	{ "cmd_read_fast_1chan", test_cmd_read_fast_1chan, TEST_STD },
+	{ "cmd_logic_bug", test_cmd_logic_bug, TEST_STD },
 	{ "cmd_fifo_depth_check", test_cmd_fifo_depth_check, TEST_STD },
 	{ "mmap", test_mmap, TEST_STD },
 	{ "read_select", test_read_select, TEST_STD },
@@ -63,6 +67,9 @@ static int n_tests = sizeof(tests)/sizeof(tests[0]);
 int only_subdevice;
 int verbose;
 char *only_test;
+
+static void get_capabilities(unsigned int subd);
+static void print_device_info(void);
 
 int main(int argc, char *argv[])
 {
@@ -96,11 +103,15 @@ int main(int argc, char *argv[])
 	device = comedi_open(filename);
 	if(!device){
 		printf("E: comedi_open(\"%s\"): %s\n",filename,strerror(errno));
+		exit(0);
 	}
+
+	print_device_info();
 
 	for(;subdevice<comedi_get_n_subdevices(device);subdevice++){
 		printf("I:\n");
 		printf("I: subdevice %d\n",subdevice);
+		get_capabilities(subdevice);
 		if(only_test){
 			for(i=0;i<n_tests;i++){
 				if(!strcmp(tests[i].name,only_test)){
@@ -120,6 +131,32 @@ int main(int argc, char *argv[])
 	}
 
 	return 0;
+}
+
+unsigned int capabilities;
+
+static void get_capabilities(unsigned int subd)
+{
+	int type;
+	int flags;
+
+	capabilities = 0;
+
+	type = comedi_get_subdevice_type(device,subd);
+
+	flags = comedi_get_subdevice_flags(device,subd);
+
+}
+
+static void print_device_info(void)
+{
+	int vers = comedi_get_version_code(device);
+
+	printf("I: Comedi version: %d.%d.%d\n",(vers>>16)&0xff,
+		(vers>>8)&0xff,vers&0xff);
+	printf("I: Comedilib version: unknown =)\n");
+	printf("I: driver name: %s\n",comedi_get_driver_name(device));
+	printf("I: device name: %s\n",comedi_get_board_name(device));
 }
 
 

@@ -12,11 +12,35 @@
 #include <string.h>
 #include "comedi_test.h"
 
-int comedi_get_cmd_src_mask(comedi_t *it,unsigned int s,comedi_cmd *cmd);
-int comedi_get_cmd_fast_1chan(comedi_t *it,unsigned int s,comedi_cmd *cmd);
 void probe_max_1chan(comedi_t *it,int s);
 char *tobinary(char *s,int bits,int n);
 char *cmd_src(int src,char *buf);
+int count_bits(unsigned int bits);
+
+int test_cmd_no_cmd(void)
+{
+	int ret;
+	comedi_cmd cmd;
+
+	if(comedi_get_subdevice_flags(device,subdevice)&SDF_CMD){
+		printf("not applicable\n");
+		return 0;
+	}
+
+	ret = comedi_get_cmd_src_mask(device,subdevice,&cmd);
+	if(ret<0){
+		if(errno == EIO){
+			printf("got EIO, good\n");
+		}else{
+			printf("E: comedi_get_cmd_src_mask: %s\n",
+				strerror(errno));
+		}
+	}else{
+		printf("E: comedi_get_cmd_src_mask returned %d\n",ret);
+	}
+
+	return 0;
+}
 
 int test_cmd_probe_src_mask(void)
 {
@@ -24,11 +48,16 @@ int test_cmd_probe_src_mask(void)
 	char buf[100];
 	int ret;
 
+	if(!(comedi_get_subdevice_flags(device,subdevice)&SDF_CMD)){
+		printf("not applicable\n");
+		return 0;
+	}
+
 	printf("rev 1\n");
 
 	ret = comedi_get_cmd_src_mask(device,subdevice,&cmd);
 	if(ret<0){
-		printf("not supported\n");
+		printf("E: comedi_get_cmd_src_mask failed\n");
 		return 0;
 	}
 	printf("command source mask:\n");
@@ -46,8 +75,13 @@ int test_cmd_probe_fast_1chan(void)
 	comedi_cmd cmd;
 	char buf[100];
 
+	if(!(comedi_get_subdevice_flags(device,subdevice)&SDF_CMD)){
+		printf("not applicable\n");
+		return 0;
+	}
+
 	printf("command fast 1chan:\n");
-	if(comedi_get_cmd_fast_1chan(device,subdevice,&cmd)<0){
+	if(comedi_get_cmd_generic_timed(device,subdevice,&cmd)<0){
 		printf("  not supported\n");
 		return 0;
 	}
@@ -76,7 +110,12 @@ int test_cmd_read_fast_1chan(void)
 	int total=0;
 	int ret;
 
-	if(comedi_get_cmd_fast_1chan(device,subdevice,&cmd)<0){
+	if(!(comedi_get_subdevice_flags(device,subdevice)&SDF_CMD)){
+		printf("not applicable\n");
+		return 0;
+	}
+
+	if(comedi_get_cmd_generic_timed(device,subdevice,&cmd)<0){
 		printf("  not supported\n");
 		return 0;
 	}
@@ -109,6 +148,52 @@ int test_cmd_read_fast_1chan(void)
 	}
 
 	return 0;
+}
+
+int test_cmd_logic_bug(void)
+{
+	comedi_cmd cmd;
+	int ret;
+
+	if(!(comedi_get_subdevice_flags(device,subdevice)&SDF_CMD)){
+		printf("not applicable\n");
+		return 0;
+	}
+
+	printf("rev 1\n");
+
+	ret = comedi_get_cmd_src_mask(device,subdevice,&cmd);
+	if(ret<0){
+		printf("E: comedi_get_cmd_src_mask failed\n");
+		return 0;
+	}
+
+	if(count_bits(cmd.start_src)>1)cmd.start_src=0;
+	if(count_bits(cmd.scan_begin_src)>1)cmd.scan_begin_src=0;
+	if(count_bits(cmd.convert_src)>1)cmd.convert_src=0;
+	if(count_bits(cmd.scan_end_src)>1)cmd.scan_end_src=0;
+	if(count_bits(cmd.stop_src)>1)cmd.stop_src=0;
+
+	ret = comedi_command_test(device,&cmd);
+	if(ret!=1){
+		printf("E: command_test returned %d, expected 1, (allowed src==0)\n",ret);
+	}else{
+		printf("command_test returned %d, good\n",ret);
+	}
+
+
+
+	return 0;
+}
+
+int count_bits(unsigned int bits)
+{
+	int ret=0;
+	while(bits){
+		if(bits&1)ret++;
+		bits>>=1;
+	}
+	return ret;
 }
 
 char *tobinary(char *s,int bits,int n)
@@ -145,70 +230,4 @@ char *cmd_src(int src,char *buf)
 	return buf;
 }
 
-
-int comedi_get_cmd_src_mask(comedi_t *it,unsigned int s,comedi_cmd *cmd)
-{
-	memset(cmd,0,sizeof(*cmd));
-
-	cmd->subdev = s;
-
-	cmd->flags = 0;
-
-	cmd->start_src = TRIG_ANY;
-	cmd->scan_begin_src = TRIG_ANY;
-	cmd->convert_src = TRIG_ANY;
-	cmd->scan_end_src = TRIG_ANY;
-	cmd->stop_src = TRIG_ANY;
-
-	return comedi_command_test(it,cmd);
-}
-
-
-int comedi_get_cmd_fast_1chan(comedi_t *it,unsigned int s,comedi_cmd *cmd)
-{
-	int ret;
-
-	ret = comedi_get_cmd_src_mask(it,s,cmd);
-	if(ret<0)return ret;
-
-	cmd->chanlist_len = 1;
-
-	cmd->scan_end_src = TRIG_COUNT;
-	cmd->scan_end_arg = 1;
-
-	if(cmd->convert_src&TRIG_TIMER){
-		if(cmd->scan_begin_src&TRIG_FOLLOW){
-			cmd->convert_src = TRIG_TIMER;
-			cmd->scan_begin_src = TRIG_FOLLOW;
-		}else{
-			cmd->convert_src = TRIG_TIMER;
-			cmd->scan_begin_src = TRIG_TIMER;
-		}
-	}else{
-		printf("can't do timed?!?\n");
-		return -1;
-	}
-	if(cmd->stop_src&TRIG_COUNT){
-		cmd->stop_src=TRIG_COUNT;
-		cmd->stop_arg=2;
-	}else if(cmd->stop_src&TRIG_NONE){
-		cmd->stop_src=TRIG_NONE;
-		cmd->stop_arg=0;
-	}else{
-		printf("can't find a good stop_src\n");
-		return -1;
-	}
-
-	ret=comedi_command_test(it,cmd);
-	if(ret==3){
-		printf("ret==3\n");
-		/* good */
-		ret=comedi_command_test(it,cmd);
-	}
-	if(ret==4 || ret==0){
-		return 0;
-	}
-	printf("W: comedi_command_test() returned %d\n",ret);
-	return -1;
-}
 

@@ -16,11 +16,13 @@
 int test_insn_read(void)
 {
 	comedi_insn it;
-	lsampl_t data;
-	int save_errno;
+	lsampl_t data = 0xffffffff;
 	int ret;
+	int type;
 
 	printf("rev 1\n");
+
+	type = comedi_get_subdevice_type(device,subdevice);
 
 	memset(&it,0,sizeof(it));
 	it.subdev = subdevice;
@@ -30,11 +32,27 @@ int test_insn_read(void)
 	it.data = &data;
 
 	ret = comedi_do_insn(device,&it);
-	save_errno = errno;
 
-	printf("comedi_do_insn: %d\n",ret);
-	if(ret<0){
-		printf("W: comedi_do_insn: errno=%d %s\n",save_errno,strerror(save_errno));
+	if(type==COMEDI_SUBD_UNUSED){
+		if(ret<0){
+			if(errno==EIO){
+				printf("comedi_do_insn: EIO, good\n");
+			}else{
+				printf("E: comedi_do_insn: %s\n",
+					strerror(errno));
+			}
+		}else{
+			printf("E: comedi_do_insn: returned %d, expected error\n",
+				ret);
+		}
+	}else{
+		if(ret<0){
+			printf("E: comedi_do_insn: %s\n",strerror(errno));
+		}else if(ret==1){
+			printf("comedi_do_insn returned 1, good\n");
+		}else{
+			printf("E: comedi_do_insn returned %d\n",ret);
+		}
 	}
 
 	return 0;
