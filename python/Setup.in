@@ -1,2 +1,0 @@
-*shared*
-comedi compy.c -lcomedi
