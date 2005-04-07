@@ -32,7 +32,7 @@ I/O port base address can be found in the output of 'lspci -v'.
 
 
 Driver: acl7225b.o
-Description: Adlink NuDAQ ACL-7225b (& compatibles as ICP P16R16DIO)
+Description: Adlink NuDAQ ACL-7225b & compatibles
 Author: José Luis Sánchez (jsanchezv@teleline.es)
 Status: testing
 Devices: [Adlink] ACL-7225b (acl7225b), [ICP] P16R16DIO (p16r16dio)
@@ -40,7 +40,7 @@ Devices: [Adlink] ACL-7225b (acl7225b), [ICP] P16R16DIO (p16r16dio)
 
 
 Driver: adl_pci6208.o
-Description: Driver for ADLink PCI-6208A
+Description: ADLink PCI-6208A
 Devices: [ADLink] PCI-6208A (adl_pci6208)
 Author: nsyeow <nsyeow@pd.jaring.my>
 Updated: Fri, 30 Jan 2004 14:44:27 +0800
@@ -57,7 +57,7 @@ References:
 
 
 Driver: adl_pci9111.o
-Description: Driver for the Adlink PCI-9111HR card.
+Description: Adlink PCI-9111HR
 Author: Emmanuel Pacaud <emmanuel.pacaud@univ-poitiers.fr>
 Devices: [ADLink] PCI-9111HR (adl_pci9111)
 Status: experimental
@@ -172,7 +172,7 @@ Configuration options:
 
 Driver: adv_pci_dio.o
 Description: Advantech PCI-1730, PCI-1733, PCI-1734, PCI-1750, PCI-1751,
-             Advantech PCI-1752, PCI-1753/E, PCI-1754, PCI-1756, PCI-1762
+             PCI-1752, PCI-1753/E, PCI-1754, PCI-1756, PCI-1762
 Author: Michal Dobes <dobes@tesnet.cz>
 Devices: [Advantech] PCI-1730 (pci1730), PCI-1733 (pci1733),
   PCI-1734 (pci1734), PCI-1750 (pci1750), PCI-1751 (pci1751),
@@ -290,7 +290,7 @@ no 8255 DIO chips.)
 
 
 Driver: amplc_pc236.o
-Description: Driver for Amplicon PC36AT and PCI236 DIO boards
+Description: Amplicon PC36AT, PCI236
 Author: Ian Abbott <abbotti@mev.co.uk>
 Devices: [Amplicon] PC36AT (pc36at), PCI236 (pci236)
 Updated: Fri, 23 Aug 2002 11:41:11 +0100
@@ -320,7 +320,7 @@ unused.
 
 
 Driver: amplc_pc263.o
-Description: Driver for Amplicon PC263 and PCI263 Relay boards
+Description: Amplicon PC263, PCI263
 Author: Ian Abbott <abbotti@mev.co.uk>
 Devices: [Amplicon] PC263 (pc263), PCI263 (pci263)
 Updated: Tue, 20 Aug 2002 11:41:01 +0100
@@ -422,7 +422,7 @@ Caveats:
 
 
 Driver: amplc_pci230.o
-Description: Driver for Amplicom PCI230 and PCI260 Multifunction I/O boards
+Description: Amplicom PCI230, PCI260 Multifunction I/O boards
 Author: Allan Willcox <allanwillcox@ozemail.com.au>, Steve D Sharples <steve.sharples@nottingham.ac.uk>
 Updated: Fri,  30 April 2004
 Devices: [Amplicon] PCI230 (amplc_pci230), PCI260
@@ -442,9 +442,37 @@ Status: experimental
 
 
 
+Driver: cb_pcidas.o
+Description: MeasurementComputing PCI-DAS series with the AMCC S5933 PCI controller
+Author: Ivan Martinez <imr@oersted.dtu.dk>,
+  Frank Mori Hess <fmhess@users.sourceforge.net>
+Updated: 2003-3-11
+Devices: [Measurement Computing] PCI-DAS1602/16 (cb_pcidas),
+  PCI-DAS1602/16jr, PCI-DAS1602/12, PCI-DAS1200, PCI-DAS1200jr,
+  PCI-DAS1000, PCI-DAS1001, PCI_DAS1002
+
+Status:
+  There are many reports of the driver being used with most of the
+  supported cards. Despite no detailed log is maintained, it can
+  be said that the driver is quite tested and stable.
+
+  The boards may be autocalibrated using the comedi_calibrate
+  utility.
+	
+Configuration options:
+  [0] - PCI bus of device (optional)
+  [1] - PCI slot of device (optional)
+  If bus/slot is not specified, the first supported
+  PCI device found will be used.
+
+For commands, the scanned channels must be consecutive
+(i.e. 4-5-6-7, 2-3-4,...), and must all have the same
+range and aref.
+
+
+
 Driver: cb_pcidas64.o
-Description: Driver for the ComputerBoards/MeasurementComputing
-   PCI-DAS64xx, 60XX, and 4020 series with the PLX 9080 PCI controller.
+Description: MeasurementComputing PCI-DAS64xx, 60XX, and 4020 series with the PLX 9080 PCI controller
 Author: Frank Mori Hess <fmhess@users.sourceforge.net>
 Status: works
 Updated: 2002-10-09
@@ -477,38 +505,8 @@ https://bugs.comedi.org.
 
 
 
-Driver: cb_pcidas.o
-Description: Driver for the ComputerBoards/MeasurementComputing cards
-  of the PCI-DAS series with the AMCC S5933 PCI controller.
-Author: Ivan Martinez <imr@oersted.dtu.dk>,
-  Frank Mori Hess <fmhess@users.sourceforge.net>
-Updated: 2003-3-11
-Devices: [Measurement Computing] PCI-DAS1602/16 (cb_pcidas),
-  PCI-DAS1602/16jr, PCI-DAS1602/12, PCI-DAS1200, PCI-DAS1200jr,
-  PCI-DAS1000, PCI-DAS1001, PCI_DAS1002
-
-Status:
-  There are many reports of the driver being used with most of the
-  supported cards. Despite no detailed log is maintained, it can
-  be said that the driver is quite tested and stable.
-
-  The boards may be autocalibrated using the comedi_calibrate
-  utility.
-	
-Configuration options:
-  [0] - PCI bus of device (optional)
-  [1] - PCI slot of device (optional)
-  If bus/slot is not specified, the first supported
-  PCI device found will be used.
-
-For commands, the scanned channels must be consecutive
-(i.e. 4-5-6-7, 2-3-4,...), and must all have the same
-range and aref.
-
-
-
 Driver: cb_pcidda.o
-Description: ComputerBoards/MeasurementComputing PCI-DDA series
+Description: MeasurementComputing PCI-DDA series
 Author: Ivan Martinez <ivanmr@altavista.com>, Frank Mori Hess <fmhess@users.sourceforge.net>
 Status: Supports 08/16, 04/16, 02/16, 08/12, 04/12, and 02/12
 Devices: [Measurement Computing] PCI-DDA08/12 (cb_pcidda), PCI-DDA04/12,
@@ -530,7 +528,7 @@ Please report sucess/failure with other different cards to
 
 
 Driver: cb_pcimdas.o
-Description: Computer Boards PCI Migration series boards
+Description: Measurement Computing PCI Migration series boards
 Devices: [Computer Boards] PCIM-DAS1602/16 (cb_pcimdas)
 Author: Richard Bytheway
 Updated: Wed, 13 Nov 2002 12:34:56 +0000
@@ -550,8 +548,8 @@ See http://www.measurementcomputing.com/PDFManuals/pcim-das1602_16.pdf for more 
 
 
 Driver: cb_pcimdda.o
-Description: A driver for this relatively new and uniquely designed board
-Devices: [Computer Boards] PCIM-DDA06-16 (cb_pcimdda)
+Description: Measurement Computing PCIM-DDA06-16
+Devices: [Measurement Computing] PCIM-DDA06-16 (cb_pcimdda)
 Author: Calin Culianu <calin@ajvar.org>
 Updated: Thu, 20 Jun 2002 16:19:41 -0500
 Status: works
@@ -697,7 +695,7 @@ zero volts).
 
 
 Driver: contec_pci_dio.o
-Description: Driver for Contec PIO1616L digital io board
+Description: Contec PIO1616L digital I/O board
 Devices: [Contec] PIO1616L (contec_pci_dio)
 Author: Stefano Rivoir <s.rivoir@gts.it>
 Updated: Mon, 18 Mar 2002 15:34:01 -0800
@@ -730,7 +728,7 @@ Configuration options:
 Driver: das08.o
 Description: DAS-08 compatible boards
 Author: Warren Jasper, ds, Frank Hess
-Devices: [Keithley] DAS08 (das08), [ComputerBoards] DAS08 (das08),
+Devices: [Keithley Metrabyte] DAS08 (das08), [ComputerBoards] DAS08 (das08),
   DAS08-PGM (das08-pgm),
   DAS08-PGH (das08-pgh), DAS08-PGL (das08-pgl), DAS08-AOH (das08-aoh),
   DAS08-AOL (das08-aol), DAS08-AOM (das08-aom), DAS08/JR-AO (das08/jr-ao),
@@ -1097,8 +1095,8 @@ Configuration options:
 
 
 Driver: gsc_hpdi.o
-Description: Driver for the General Standards Corporation High
-    Speed Parallel Digital Interface rs485 boards.
+Description: General Standards Corporation High
+    Speed Parallel Digital Interface rs485 boards
 Author: Frank Mori Hess <fmhess@users.sourceforge.net>
 Status: only receive mode works, transmit not supported
 Updated: 2003-02-20
@@ -1196,7 +1194,7 @@ Kolter Electronic PCI Counter Card.
 
 
 Driver: me4000.o
-Description: Source code for the Meilhaus ME-4000 board family.
+Description: Meilhaus ME-4000 series boards
 Devices: [Meilhaus] ME-4650 (me4000), ME-4670i, ME-4680, ME-4680i, ME-4680is
 Author: gg (Guenter Gebhardt <g.gebhardt@meilhaus.com>)
 Updated: Mon, 18 Mar 2002 15:34:01 -0800
@@ -1227,7 +1225,7 @@ broken.
 
 
 Driver: me_daq.o
-Description: Driver for the Meilhaus PCI data acquisition cards.
+Description: Meilhaus PCI data acquisition cards
 Author: Michael Hillmann <hillmann@syscongroup.de>
 Devices: [Meilhaus] ME-2600i (me_daq), ME-2000i
 Status: experimental
@@ -1280,7 +1278,7 @@ Driver: ni_6527.o
 Description: National Instruments 6527
 Author: ds
 Status: works
-Devices: [National Instruments] 6527
+Devices: [National Instruments] PCI-6527 (ni6527), PXI-6527
 Updated: Sat, 25 Jan 2003 13:24:40 -0800
 
 
@@ -1360,14 +1358,6 @@ Configuration options:
 
 
 
-Driver: ni_atmio16d.o
-Description: National Instruments AT-MIO-16D
-Author: Chris R. Baugher <baugher@enteract.com>
-Status: unknown
-Devices: [National Instruments] AT-MIO-16 (atmio16), AT-MIO-16D (atmio16d)
-
-
-
 Driver: ni_atmio.o
 Description: National Instruments AT-MIO-E series
 Author: ds
@@ -1407,6 +1397,14 @@ External triggering is supported for some events.  The channel index
 
 Some of the more esoteric triggering possibilities of these boards
 are not supported.
+
+
+
+Driver: ni_atmio16d.o
+Description: National Instruments AT-MIO-16D
+Author: Chris R. Baugher <baugher@enteract.com>
+Status: unknown
+Devices: [National Instruments] AT-MIO-16 (atmio16), AT-MIO-16D (atmio16d)
 
 
 
@@ -1831,7 +1829,6 @@ Configuration options:
 
 Driver: poc.o
 Description: Generic driver for very simple devices
-Device names: dac02
 Author: ds
 Devices: [Keithley Metrabyte] DAC-02 (dac02), [Advantech] PCL-733 (pcl733),
   PCL-734 (pcl734)
