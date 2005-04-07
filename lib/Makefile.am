@@ -15,7 +15,8 @@ libcomedi_la_SOURCES = \
 	calib_lex.c calib_yacc.c
 
 libcomedi_la_CFLAGS = $(COMEDILIB_CFLAGS) -D_REENTRANT -DLOCALSTATEDIR=\"\$(localstatedir)\"
-libcomedi_la_LDFLAGS = -release $(VERSION) -Wl,--version-script=$(srcdir)/version_script
+libcomedi_la_LDFLAGS = -soname libcomedi \
+	-Wl,--version-script=$(srcdir)/version_script
 
 $(srcdir)/calib_yacc.c + $(srcdir)/calib_yacc.h: $(srcdir)/calib_yacc.y
 	$(YACC) -d -p calib_yy -o $(srcdir)/calib_yacc.c $<
