@@ -846,7 +846,7 @@ things have to be done:
 
 <listitem>
 <para>
-Choose a senseful name for the source code file. Let's assume here
+Choose a sensible name for the source code file. Let's assume here
 that you call it <quote>mydriver.c</quote>
 </para>
 </listitem>
@@ -859,32 +859,32 @@ Put your new driver into <quote>comedi/drivers/mydriver.c</quote>.
                                                                                 
 <listitem>
 <para>
-Edit <quote>comedi/Config.in</quote> and add a new
-<quote>dep_tristate</quote> line (look at the other examples). Invent a
-senseful name for the driver's variable.  For example:
+Edit <quote>comedi/drivers/Makefile.am</quote> and add <quote>mydriver.ko</quote>
+to the <quote>module_PROGRAMS</quote> list.  Also add a line 
 <programlisting>
-     dep_tristate 'MYDRIVER' CONFIG_COMEDI_MYDRIVER $CONFIG_COMEDI
+mydriver_ko_SOURCES = mydriver.c
 </programlisting>
+in the alphabetically appropriate place.
 </para>
 </listitem>
 
 <listitem>
 <para>
-Add a line to <quote>comedi/drivers/Makefile.in</quote>, using your
-freshly defined variable, i.e., CONFIG_COMEDI_MYDRIVER.
+Run ./autogen.sh in the top-level comedi directory.  You will
+need to have (a recent version of) autoconf and automake 
+installed to successfully run autogen.sh.  Afterwards, your driver will
+be built along with the rest of the drivers when you 'make'.
 </para>
 </listitem>
                                                                                 
 <listitem>
 <para>
-Now <command>make distclean</command>, reconfigure &comedi; with a new
-<command>make</command>, rebuild and be happy.
-</para>
-<para>
 If you want to have your driver included in the &comedi; distribution
-(you <emphasis>definitely</emphasis> want to :-) ) send it to David
-Schleef <address><email>ds@schleef.org</email></address> for
-review and integration.
+(you <emphasis>definitely</emphasis> want to :-) ) send it to
+David Schleef <address><email>ds@schleef.org</email></address> or
+Frank Hess <address><email>fmhess@users.sourceforge.net</email></address>
+for review and integration.  Note your work must be licensed under terms
+compatible with the GNU GPL to be distributed as a part of Comedi.
 </para>
 </listitem>
 </itemizedlist>
