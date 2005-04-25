@@ -172,14 +172,13 @@ int _comedi_get_cmd_generic_timed(comedi_t *it,unsigned int subd,comedi_cmd *cmd
 		return -1;
 	}
 
-	if(!s->cmd_timed){
+	if(!s->cmd_timed)
 		s->cmd_timed = malloc(sizeof(comedi_cmd));
 
-		ret = __generic_timed(it,subd,s->cmd_timed,ns);
-		if(ret<0){
-			s->cmd_mask_errno = errno;
-			return -1;
-		}
+	ret = __generic_timed(it,subd,s->cmd_timed,ns);
+	if(ret<0){
+		s->cmd_mask_errno = errno;
+		return -1;
 	}
 	*cmd=*s->cmd_timed;
 	return 0;
