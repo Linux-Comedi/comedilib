@@ -84,8 +84,12 @@ int _comedi_mark_buffer_read(comedi_t *it, unsigned int subdev, unsigned int byt
 	bi.subdevice = subdev;
 	bi.bytes_read = bytes;
 	ret = comedi_ioctl(it->fd, COMEDI_BUFINFO, (unsigned long)&bi);
-	__comedi_errno = errno;
-	if(__comedi_errno == EPIPE)__comedi_errno = EBUF_OVR;
+	if(ret < 0)
+	{
+		__comedi_errno = errno;
+		if(__comedi_errno == EPIPE)__comedi_errno = EBUF_OVR;
+		return ret;
+	}
 	return bi.buf_write_count - bi.buf_read_count;
 }
 
@@ -99,8 +103,12 @@ int _comedi_mark_buffer_written(comedi_t *it, unsigned int subdev, unsigned int 
 	bi.subdevice = subdev;
 	bi.bytes_written = bytes;
 	ret = comedi_ioctl(it->fd, COMEDI_BUFINFO, (unsigned long)&bi);
-	__comedi_errno = errno;
-	if(__comedi_errno == EPIPE)__comedi_errno = EBUF_UNDR;
+	if(ret < 0)
+	{
+		__comedi_errno = errno;
+		if(__comedi_errno == EPIPE)__comedi_errno = EBUF_UNDR;
+		return ret;
+	}
 	return bi.buf_write_count - bi.buf_read_count;
 }
 
