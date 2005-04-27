@@ -1,8 +1,0 @@
-usr/lib/libcomedi.so.*
-usr/sbin/*
-usr/bin/comedi_calibrate
-usr/bin/comedi_test
-usr/share/man/man7/*
-usr/share/man/man8/*
-usr/share/doc/libcomedi0/*.conf
-etc/pcmcia/*
