@@ -78,7 +78,7 @@ the settings in the calibration file \fIcal_file\fR.
 .BI \-a\  aref ,\ \-\-aref\  aref
 Along with \fB--channel\fR, \fB--range\fR
 and \fB--subdevice\fR, this specifies which calibration you want comedi_calibrate
-leave applied to the board.
+leave applied to the board.  The default is 0.
 
 .TP
 .B \-\-[no\-]calibrate
@@ -90,7 +90,7 @@ no existing calibration file is found (see \fB--save-file\fR).
 .BI \-c\  channel, \-\-channel\  channel
 Along with \fB--subdevice\fR, \fB--range\fR
 and \fB--aref\fR, this specifies which calibration you want comedi_calibrate
-to leave applied to the board.
+to leave applied to the board.  The default is 0.
 
 .TP
 .B \-\-[no\-]dump
@@ -113,7 +113,7 @@ Don't generate output to stdout.
 .BI \-r\  range ,\ \-\-range\  range
 Along with \fB--channel\fR, \fB--subdevice\fR
 and \fB--aref\fR, this specifies which calibration you want comedi_calibrate
-to leave applied to the board.
+to leave applied to the board.  The default is 0.
 
 .TP
 .B \-\-[no\-]reset
@@ -143,7 +143,7 @@ will also use its contents as a starting point for the calibration pass (see
 .BI \-s\  subdevice ,\ \-\-subdevice\  subdevice
 Along with \fB--channel\fR, \fB--range\fR
 and \fB--aref\fR, this specifies which calibration you want comedi_calibrate
-to leave applied to the board.
+to leave applied to the board.  The default is 0.
 
 .TP
 .B \-v, \-\-verbose
