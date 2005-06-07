@@ -130,6 +130,10 @@ AC_SUBST(usbhotplugdir)
 usbfirmwaredir="\${datadir}/usb"
 AC_SUBST(usbfirmwaredir)
 
+#documentaion goes here
+doccomedilibdir="\${datadir}/doc/libcomedi0"
+AC_SUBST(doccomedilibdir) 
+
 AC_CONFIG_FILES(
 Makefile
 comedi_calibrate/Makefile
