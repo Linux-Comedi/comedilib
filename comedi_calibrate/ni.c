@@ -49,6 +49,7 @@ static void ni_setup_observables( calibration_setup_t *setup );
 static void ni_setup_observables_611x( calibration_setup_t *setup );
 static void ni67xx_setup_observables( calibration_setup_t *setup );
 
+static int cal_ni_at_mio_16de_10(calibration_setup_t *setup);
 static int cal_ni_at_mio_16e_2(calibration_setup_t *setup);
 static int cal_ni_at_mio_64e_3(calibration_setup_t *setup);
 static int cal_ni_daqcard_ai_16xe_50(calibration_setup_t *setup);
@@ -81,7 +82,7 @@ static double ni_get_reference( calibration_setup_t *setup, int lsb_loc,int msb_
 
 static struct board_struct boards[]={
 	{ "at-ai-16xe-10", STATUS_UNKNOWN, NULL, ni_setup_observables, 0x1b7, 0x1b8 },
-	{ "at-mio-16de-10", STATUS_UNKNOWN, NULL, ni_setup_observables, 0x1a7, 0x1a8 },
+	{ "at-mio-16de-10", STATUS_GUESS, cal_ni_at_mio_16de_10, ni_setup_observables, 0x1a7, 0x1a8 },
 	{ "at-mio-16e-1", STATUS_DONE, cal_ni_at_mio_16e_1, ni_setup_observables, 0x1a9, 0x1aa },
 	{ "at-mio-16e-2", STATUS_DONE, cal_ni_at_mio_16e_2, ni_setup_observables, 0x1a9, 0x1aa },
 	{ "at-mio-16e-10", STATUS_DONE, cal_ni_at_mio_16e_10, ni_setup_observables, 0x1a7, 0x1a8 },
@@ -802,6 +803,16 @@ static int cal_ni_pci_6034e(calibration_setup_t *setup)
 	layout.adc_gain = 2;
 
 	return cal_ni_generic( setup, &layout );
+}
+
+static int cal_ni_at_mio_16de_10(calibration_setup_t *setup)
+{
+	if(comedi_get_version_code(setup->dev) <= COMEDI_VERSION_CODE(0, 7, 70))
+	{
+		DPRINT(0, "WARNING: you need comedi driver version 0.7.71 or later\n"
+		 "for this calibration to work properly\n" );
+	}
+	return cal_ni_pci_6035e(setup);
 }
 
 static int cal_ni_pci_6035e(calibration_setup_t *setup)
