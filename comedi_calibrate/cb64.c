@@ -47,6 +47,7 @@ static int setup_cb_pci_64xx( calibration_setup_t *setup );
 static int setup_cb_pci_60xx( calibration_setup_t *setup );
 static int setup_cb_pci_603x( calibration_setup_t *setup );
 static int setup_cb_pci_4020( calibration_setup_t *setup );
+static int setup_cb_pci_unknown( calibration_setup_t *setup );
 
 static int cal_cb_pci_64xx( calibration_setup_t *setup );
 static int cal_cb_pci_60xx( calibration_setup_t *setup );
@@ -55,6 +56,7 @@ static int cal_cb_pci_4020( calibration_setup_t *setup );
 static int init_observables_64xx( calibration_setup_t *setup );
 static int init_observables_60xx( calibration_setup_t *setup );
 static int init_observables_4020( calibration_setup_t *setup );
+static int init_observables_unknown( calibration_setup_t *setup );
 
 static struct board_struct boards[]={
 	{ "pci-das6402/16",	STATUS_SOME,	setup_cb_pci_64xx },
@@ -72,7 +74,7 @@ static struct board_struct boards[]={
 	{ "pci-das6035",	STATUS_GUESS,	setup_cb_pci_603x },
 	{ "pci-das6036",	STATUS_GUESS,	setup_cb_pci_603x },
 	{ "pci-das6040",	STATUS_GUESS,	setup_cb_pci_60xx },
-	{ "pci-das6052",	STATUS_GUESS,	setup_cb_pci_60xx },
+	{ "pci-das6052",	STATUS_UNKNOWN,	setup_cb_pci_unknown },
 	{ "pci-das6070",	STATUS_GUESS,	setup_cb_pci_60xx },
 	{ "pci-das6071",	STATUS_GUESS,	setup_cb_pci_60xx },
 	{ "pci-das4020/12",	STATUS_DONE,	setup_cb_pci_4020 },
@@ -191,6 +193,15 @@ static int setup_cb_pci_4020( calibration_setup_t *setup )
 	init_observables_4020( setup );
 	setup_caldacs( setup, caldac_subdev );
 	setup->do_cal = cal_cb_pci_4020;
+	return 0;
+}
+
+static int setup_cb_pci_unknown( calibration_setup_t *setup )
+{
+	static const int caldac_subdev = 6;
+	init_observables_unknown( setup );
+	setup_caldacs( setup, caldac_subdev );
+	setup->do_cal = 0;
 	return 0;
 }
 
@@ -887,3 +898,52 @@ static int cal_cb_pci_4020( calibration_setup_t *setup )
 	return generic_cal_by_channel_and_range( setup, &layout );
 }
 
+static int init_observables_unknown( calibration_setup_t *setup )
+{
+	comedi_insn tmpl;
+	observable *o;
+	int retval, num_ranges, i;
+	enum
+	{
+		CAL_SRC_GROUND = 0,
+	};
+	static const int num_cal_sources = 16;
+	static const int range = 0;
+
+	memset( &tmpl, 0, sizeof(tmpl) );
+	tmpl.insn = INSN_READ;
+	tmpl.n = 1;
+	tmpl.subdev = setup->ad_subdev;
+
+	setup->n_observables = 0;
+
+	num_ranges = comedi_get_n_ranges( setup->dev, setup->ad_subdev, 0 );
+	if( num_ranges < 0 ) 
+	{
+		fprintf(stderr, "%s: failed to get number of ai ranges\n", __FUNCTION__);
+		return -1;
+	}
+	for( i = 0; i < num_cal_sources; i++ )
+	{
+		o = setup->observables + i;
+		o->reference_source = i;
+		assert( o->name == NULL );
+		asprintf( &o->name, "calibration source %i, range %i, ground referenced",
+			o->reference_source, range);
+		o->observe_insn = tmpl;
+		o->observe_insn.chanspec = CR_PACK( 0, range, AREF_GROUND) | CR_ALT_SOURCE | CR_ALT_FILTER;
+		o->target = 0.0;
+		setup->n_observables++;
+	}
+	for(i = 0; i < 16; ++i)
+	{
+		int eeprom_channel = 0x30 + i;
+		float voltage;
+		retval = cb_actual_source_voltage(setup->dev, setup->eeprom_subdev, eeprom_channel, &voltage);
+		if(retval == 0)
+			printf("eeprom ch 0x%x gives calibration source of %gV\n", eeprom_channel, voltage);
+		else
+			printf("cb_actual_source_voltage returned %i\n", retval);
+	}
+	return 0;
+}
