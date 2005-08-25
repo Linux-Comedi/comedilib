@@ -82,7 +82,7 @@ static double ni_get_reference( calibration_setup_t *setup, int lsb_loc,int msb_
 
 static struct board_struct boards[]={
 	{ "at-ai-16xe-10", STATUS_UNKNOWN, NULL, ni_setup_observables, 0x1b7, 0x1b8 },
-	{ "at-mio-16de-10", STATUS_GUESS, cal_ni_at_mio_16de_10, ni_setup_observables, 0x1a7, 0x1a8 },
+	{ "at-mio-16de-10", STATUS_DONE, cal_ni_at_mio_16de_10, ni_setup_observables, 0x1a7, 0x1a8 },
 	{ "at-mio-16e-1", STATUS_DONE, cal_ni_at_mio_16e_1, ni_setup_observables, 0x1a9, 0x1aa },
 	{ "at-mio-16e-2", STATUS_DONE, cal_ni_at_mio_16e_2, ni_setup_observables, 0x1a9, 0x1aa },
 	{ "at-mio-16e-10", STATUS_DONE, cal_ni_at_mio_16e_10, ni_setup_observables, 0x1a7, 0x1a8 },
