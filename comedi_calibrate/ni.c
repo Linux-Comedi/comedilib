@@ -683,15 +683,9 @@ static int cal_ni_daqcard_ai_16xe_50(calibration_setup_t *setup)
 static int cal_ni_at_mio_16xe_50(calibration_setup_t *setup)
 {
 	ni_caldac_layout_t layout;
-	if(comedi_get_version_code(setup->dev) < COMEDI_VERSION_CODE(0, 7, 71))
-	{
-		DPRINT(0, "WARNING: you need comedi driver version 0.7.71 or later\n"
-		 "for this calibration to work properly\n" );
-	}
 	init_ni_caldac_layout( &layout );
-	layout.adc_pregain_offset = 16;
-	layout.adc_postgain_offset = 8;
-	layout.adc_postgain_offset_fine = 2;
+	layout.adc_pregain_offset = 8;
+	layout.adc_postgain_offset = 2;
 	layout.adc_gain = 0;
 	layout.adc_gain_fine = 1;
 	layout.dac_offset[ 0 ] = 6;
