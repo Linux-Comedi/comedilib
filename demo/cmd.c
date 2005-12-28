@@ -54,7 +54,8 @@ int main(int argc, char *argv[])
 	int total=0;
 	int i;
 	struct timeval start,end;
-
+	int subdev_flags;
+	
 	parse_options(argc,argv);
 
 	/* The following global variables used in this demo are
@@ -136,7 +137,7 @@ int main(int argc, char *argv[])
 		comedi_perror("comedi_command");
 		exit(1);
 	}
-
+	subdev_flags = comedi_get_subdevice_flags(dev, subdevice);
 	while(1){
 		ret=read(comedi_fileno(dev),buf,BUFSZ);
 		if(ret<0){
@@ -148,10 +149,18 @@ int main(int argc, char *argv[])
 			break;
 		}else{
 			static int col = 0;
+			int bytes_per_sample;
 			total+=ret;
 			if(verbose)fprintf(stderr,"read %d %d\n",ret,total);
-			for(i=0;i<ret/2;i++){
-				printf("%d ",((sampl_t *)buf)[i]);
+			if(subdev_flags & SDF_LSAMPL)
+				bytes_per_sample = sizeof(lsampl_t);
+			else
+				bytes_per_sample = sizeof(sampl_t);
+			for(i = 0; i < ret / bytes_per_sample; i++){
+				if(subdev_flags & SDF_LSAMPL)
+					printf("%d ",((lsampl_t *)buf)[i]);
+				else
+					printf("%d ",((sampl_t *)buf)[i]);
 				col++;
 				if(col==n_chan){
 					printf("\n");
