@@ -285,7 +285,10 @@ int ni_setup( calibration_setup_t *setup , const char *device_name )
 	int retval;
 
 	retval = ni_setup_board( setup, device_name );
-	if( retval < 0 ) return retval;
+	if( retval < 0 )
+	{
+		return ni_m_series_setup(setup, device_name);
+	}
 	setup_caldacs( setup, setup->caldac_subdev );
 
 	return 0;

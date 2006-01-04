@@ -101,11 +101,13 @@ extern char ni_id[];
 extern char cb_id[];
 extern char cb64_id[];
 extern char ni_labpc_id[];
+extern char ni_m_series_id[];
 
 int ni_setup( calibration_setup_t*, const char *device_name );
 int cb_setup( calibration_setup_t*, const char *device_name );
 int cb64_setup( calibration_setup_t*, const char *device_name );
 int ni_labpc_setup( calibration_setup_t*, const char *device_name );
+int ni_m_series_setup(calibration_setup_t*, const char *device_name);
 
 /* low level */
 
