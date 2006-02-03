@@ -1387,12 +1387,15 @@ static int cal_ni_generic( calibration_setup_t *setup, const ni_caldac_layout_t 
 				layout->adc_pregain_offset, 1 );
 			generic_peg( setup, ni_unip_zero_offset_low,
 				layout->adc_postgain_offset, 1 );
+			reset_caldac(setup, layout->adc_gain_fine);
 			generic_do_relative( setup, current_cal, ni_unip_zero_offset_low,
 				ni_unip_reference_low, layout->adc_gain );
+			reset_caldac(setup, layout->adc_postgain_offset_fine);
 			generic_do_relative( setup, current_cal, ni_unip_zero_offset_low,
 				ni_unip_zero_offset_high, layout->adc_postgain_offset );
 			generic_do_relative( setup, current_cal, ni_unip_zero_offset_low,
 				ni_unip_zero_offset_high, layout->adc_postgain_offset_fine );
+			reset_caldac( setup, layout->adc_pregain_offset_fine );
 			generic_do_cal( setup, current_cal, ni_unip_zero_offset_high,
 				layout->adc_pregain_offset );
 			generic_do_relative( setup, current_cal, ni_unip_zero_offset_low,
