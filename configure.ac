@@ -136,7 +136,6 @@ AC_SUBST(doccomedilibdir)
 
 AC_CONFIG_FILES(
 Makefile
-comedi_calibrate/Makefile
 comedi_config/Makefile
 etc/Makefile
 etc/pcmcia/Makefile
