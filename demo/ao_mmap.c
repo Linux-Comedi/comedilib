@@ -171,12 +171,12 @@ int main(int argc, char *argv[])
 	while(1)
 	{
 		int bytes_marked = comedi_get_buffer_contents(dev,subdevice);
+		int bytes_unmarked = size - bytes_marked;
 		if(bytes_marked < 0)
 		{
 			comedi_perror("comedi_get_buffer_contents");
 			exit(1);
 		}
-		int bytes_unmarked = size - bytes_marked;
 		if(bytes_unmarked > 0)
 		{
 			// this keeps comedi from reporting a buffer underrun
