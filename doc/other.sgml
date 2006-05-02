@@ -1695,6 +1695,260 @@ should get latched?
 
 </section>
 
+<section id="RTSI">
+<title>
+National instruments RTSI trigger bus
+</title>
+<para>
+A number of NI boards support the RTSI bus. The RTSI Bus consists of an 48 pin
+IDC connector on the PCI-6143 and special bus signal lines on PXI boards.
+It's primary use is to synchronise multiple DAQ cards together.
+There are 8 digital signal lines that are bi-directional. Each of these signal lines
+can be configured as an input or output also the signal appearing on the output
+can be configured to one of many internal board timing signals. We have added
+basic RSTI support to enable a board to be set as a master and other boards to
+be set as slaves. To simplify the API and code we have hard-coded the actual
+set of internal timing signals that appear on the RTSI lines and just provide
+the ability to set the I/O direction of the lines. It would be good to add a
+new configure command to set up this routing to a different setup. The COMEDI
+API is provided as a Digital I/O subdevice number 10 with an extra config
+command to set up the master clock mode. This provides a number of configure
+commands through the COMEDI config API which can be accessed using the
+comedi_do_insn(), comedi_dio_config() and comedi_dio_get_config() functions.
+The config API calls are:
+</para>
+<informaltable>
+<tgroup cols='2' align='left'>
+<thead>
+<row>
+<entry>API Command</entry>
+<entry>Description</entry>
+</row>
+</thead>
+<tbody>
+<row>
+<entry>INSN_CONFIG_SET_RTSI_CLOCK_MODE</entry>
+<entry>
+This sets the boards main clock
+mode. The argument defines the setting as one of:
+COMEDI_RTSI_CLOCK_MODE_INTERNAL - Internal Clock.
+COMEDI_RTSI_CLOCK_MODE_OUTPUT - Run from internal clock and output this
+on the RTSI bus bit as RTSI_7.
+COMEDI_RTSI_CLOCK_MODE_SLAVE - Run from the clock on the RTSI bus bit
+RTSI_7.
+COMEDI_RTSI_CLOCK_MODE_MASTER - Output the clock on the RTSI bus bit as
+RTSI_7 and run from this external clock.
+</entry>
+</row>
+<row>
+<entry>INSN_CONFIG_DIO_OUTPUT</entry>
+<entry>
+Configure the "channel" bit as
+an output. Channel is one of NI_RTSI_[0-6]
+</entry>
+</row>
+<row>
+<entry>INSN_CONFIG_DIO_INPUT</entry>
+<entry>
+Configure the "channel" bit as
+an input. Channel is one of NI_RTSI_[0-6].
+</entry>
+</row>
+<row>
+<entry>INSN_CONFIG_DIO_QUERY</entry>
+<entry>
+Find the direction of one of the
+RTSI "channels". Channel is one of NI_RTSI_[0-6].
+</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+<para>
+The RTSI bus pins and default output routing is:
+</para>
+
+<informaltable>
+<tgroup cols='2' align='left'>
+<thead>
+<row>
+<entry>Name</entry>
+<entry>Standard Routing</entry>
+<entry>Pin</entry>
+</row>
+</thead>
+<tbody>
+<row>
+<entry>RTSI_0
+</entry>
+<entry>NI_RTSI_STD_AI_START1
+</entry>
+<entry>20
+</entry>
+</row>
+<row>
+<entry>RTSI_1</entry>
+<entry>NI_RTSI_STD_AI_START2
+</entry>
+<entry>22
+</entry>
+</row>
+<row>
+<entry>RTSI_2</entry>
+<entry>NI_RTSI_STD_AI_CONV
+</entry>
+<entry>24
+</entry>
+</row>
+<row>
+<entry>RTSI_3</entry>
+<entry>NI_RTSI_STD_CT1_SRC
+</entry>
+<entry>26
+</entry>
+</row>
+<row>
+<entry>RTSI_4</entry>
+<entry>NI_RTSI_STD_CT1_GATE
+</entry>
+<entry>28
+</entry>
+</row>
+<row>
+<entry>RTSI_5</entry>
+<entry>NI_RTSI_STD_AO_SAMP_CLOCK
+</entry>
+<entry>30
+</entry>
+</row>
+<row>
+<entry>RTSI_6</entry>
+<entry>NI_RTSI_STD_AO_START_TRIG
+</entry>
+<entry>32
+</entry>
+</row>
+<row>
+<entry>RTSI_7 or RTSI_CLK
+</entry>
+<entry>Master Clock
+</entry>
+<entry>34
+</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+
+<para>
+The RTSI bus pins are available to be used as trigger inputs for many of the
+COMEDI trigger functions. To use the RTSI bus pins set the source to be
+TRIG_EXT and the source argument to be a value between 10 and 16 corresponding
+to RTSI_0 through RTSI_6. We have provided the defines NI_EXT_PFI_[0-9] and
+NI_EXT_RTSI_[0-6] to define all the available external trigger sources.
+</para>
+<para>
+A simple example to set up a device as a master is given below.
+</para>
+
+<programlisting><![CDATA[
+void comediEnableMaster(comedi_t* dev){
+    comedi_insn   configCmd;
+    lsampl_t      configData[2];
+    int           ret;
+    unsigned int  d = 0;
+   
+    // Configure the PFI bus device
+    memset(&configCmd, 0, sizeof(configCmd));
+    memset(&configData, 0, sizeof(configData));
+    configCmd.insn = INSN_CONFIG;
+    configCmd.subdev = 10;
+    configCmd.chanspec = 0;
+    configCmd.n = 2;
+    configCmd.data = configData;
+    configCmd.data[0] = INSN_CONFIG_SET_RTSI_CLOCK_MODE;
+    configCmd.data[1] = COMEDI_RTSI_CLOCK_MODE_MASTER;
+
+    ret = comedi_do_insn(dev, &configCmd);
+    if(ret < 0){
+        comedi_perror("comedi_command: INSN_CONFIG");
+        exit(1);
+    }
+
+    // Set direction of the 3 main AI RTSI signals to output
+    ret = comedi_dio_config(dev, 10, NI_RTSI_0, INSN_CONFIG_DIO_OUTPUT);
+    ret = comedi_dio_config(dev, 10, NI_RTSI_1, INSN_CONFIG_DIO_OUTPUT);
+    ret = comedi_dio_config(dev, 10, NI_RTSI_2, INSN_CONFIG_DIO_OUTPUT);
+}
+]]></programlisting>
+
+<para>
+An example to slave a device from this master follows:
+</para>
+<programlisting><![CDATA[
+void comediEnableSlave(comedi_t* dev){
+    comedi_insn   configCmd;
+    lsampl_t      configData[2];
+    int           ret;
+    unsigned int  d = 0;;
+   
+    // Configure the PFI bus device
+    memset(&configCmd, 0, sizeof(configCmd));
+    memset(&configData, 0, sizeof(configData));
+    configCmd.insn = INSN_CONFIG;
+    configCmd.subdev = 10;
+    configCmd.chanspec = 0;
+    configCmd.n = 2;
+    configCmd.data = configData;
+    configCmd.data[0] = INSN_CONFIG_SET_RTSI_CLOCK_MODE;
+    configCmd.data[1] = COMEDI_RTSI_CLOCK_MODE_SLAVE;
+
+    ret = comedi_do_insn(dev, &configCmd);
+    if(ret < 0){
+        comedi_perror("comedi_command: INSN_CONFIG");
+        exit(1);
+    }
+}
+
+int comediSlaveStart(comedi_t* dev){
+    comedi_cmd     cmd;
+    unsigned int   nChannels = 8;
+    double         sampleRate = 50000;
+    unsigned int   chanList[8];
+    int            i;
+
+    // Setup chan list
+    for(i = 0; i < nChannels; i++){
+        chanList[i] = CR_PACK(i,  0, AREF_GROUND);
+    }
+    // Set up command
+    memset(&cmd, 0, sizeof(cmd));
+    ret = comedi_get_cmd_generic_timed(dev, subdevice, &cmd, int(1e9/(nChannels * sampleRate)));
+    if(ret<0){
+        printf("comedi_get_cmd_generic_timed failed\n");
+        return ret;
+    }
+    cmd.chanlist        = chanList;
+    cmd.chanlist_len    = nChannels;
+    cmd.scan_end_arg    = nChannels;
+    cmd.start_src        = TRIG_EXT;
+    cmd.start_arg        = CR_EDGE | NI_EXT_RTSI_0;
+    cmd.convert_src    = TRIG_EXT;
+    cmd.convert_arg    = CR_INVERT | CR_EDGE | NI_EXT_RTSI_2;
+    cmd.stop_src        = TRIG_NONE;
+
+    ret = comedi_command(dev0, &cmd0);
+    if(ret<0){
+        printf("comedi_command failed\n");
+        return ret;
+    }
+    return 0;
+}
+]]></programlisting>
+
+
+</section>
+
 </section>
 
 </section>
