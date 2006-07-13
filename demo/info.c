@@ -47,13 +47,14 @@ int main(int argc,char *argv[])
 	int n_subdevices,type;
 	int chan,n_chans;
 	int n_ranges;
+	int subdev_flags;
 	comedi_range *rng;
 	
 	parse_options(argc,argv);
 
 	it=comedi_open(filename);
 	if(!it){
-		fprintf(stderr,"cannot open %s\n",filename);
+		fprintf(stderr,"cannot open %s: %s\n",filename, strerror(errno));
 		exit(0);
 	}
 
@@ -69,6 +70,8 @@ int main(int argc,char *argv[])
 		printf("  type: %d (%s)\n",type,subdevice_types[type]);
 		if(type==COMEDI_SUBD_UNUSED)
 			continue;
+		subdev_flags = comedi_get_subdevice_flags(it, i);
+		printf("  flags: 0x%08x\n",subdev_flags);
 		n_chans=comedi_get_n_channels(it,i);
 		printf("  number of channels: %d\n",n_chans);
 		if(!comedi_maxdata_is_chan_specific(it,i)){
