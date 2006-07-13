@@ -54,8 +54,8 @@ int main(int argc,char *argv[])
 
 	it=comedi_open(filename);
 	if(!it){
-		fprintf(stderr,"cannot open %s: %s\n",filename, strerror(errno));
-		exit(0);
+		comedi_perror(filename);
+		exit(1);
 	}
 
 	printf("overall info:\n");
