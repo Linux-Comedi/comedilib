@@ -29,13 +29,17 @@
 char buf[BUFSZ];
 
 #define N_CHANS 256
-unsigned int chanlist[N_CHANS];
+static unsigned int chanlist[N_CHANS];
+static comedi_range * range_info[N_CHANS];
+static lsampl_t maxdata[N_CHANS];
 
 
 int prepare_cmd_lib(comedi_t *dev,int subdevice,comedi_cmd *cmd);
 int prepare_cmd(comedi_t *dev,int subdevice,comedi_cmd *cmd);
 
 void do_cmd(comedi_t *dev,comedi_cmd *cmd);
+
+void print_datum(lsampl_t raw, int i);
 
 char *cmdtest_messages[]={
 	"success",
@@ -55,6 +59,7 @@ int main(int argc, char *argv[])
 	int i;
 	struct timeval start,end;
 	int subdev_flags;
+	lsampl_t raw;
 	
 	parse_options(argc,argv);
 
@@ -78,9 +83,14 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
+	// Print numbers for clipped inputs
+	comedi_set_global_oor_behavior(COMEDI_OOR_NUMBER);
+
 	/* Set up channel list */
 	for(i=0;i<n_chan;i++){
 		chanlist[i]=CR_PACK(channel+i,range,aref);
+		range_info[i]=comedi_get_range(dev,subdevice,channel,range);
+		maxdata[i]=comedi_get_maxdata(dev,subdevice,channel);
 	}
 
 	/* prepare_cmd_lib() uses a Comedilib routine to find a
@@ -157,10 +167,12 @@ int main(int argc, char *argv[])
 			else
 				bytes_per_sample = sizeof(sampl_t);
 			for(i = 0; i < ret / bytes_per_sample; i++){
-				if(subdev_flags & SDF_LSAMPL)
-					printf("%d ",((lsampl_t *)buf)[i]);
-				else
-					printf("%d ",((sampl_t *)buf)[i]);
+				if(subdev_flags & SDF_LSAMPL) {
+					raw = ((lsampl_t *)buf)[i];
+				} else {
+					raw = ((sampl_t *)buf)[i];
+				}
+				print_datum(raw,col);
 				col++;
 				if(col==n_chan){
 					printf("\n");
@@ -313,4 +325,12 @@ int prepare_cmd(comedi_t *dev,int subdevice,comedi_cmd *cmd)
 	return 0;
 }
 
-
+void print_datum(lsampl_t raw, int i) {
+	double physical_value;
+	if(!physical) {
+		printf("%d ",raw);
+	} else {
+		physical_value = comedi_to_phys(raw,range_info[i],maxdata[i]);
+		printf("%#8.6g ",physical_value);
+	}
+}

@@ -20,6 +20,7 @@
 #include <errno.h>
 #include <getopt.h>
 #include <ctype.h>
+#include <math.h>
 #include "examples.h"
 
 comedi_t *device;
@@ -29,6 +30,9 @@ int main(int argc, char *argv[])
 {
 	lsampl_t data;
 	int ret;
+	comedi_range * range_info;
+	lsampl_t maxdata;
+	double physical_value;
 
 	parse_options(argc,argv);
 
@@ -49,7 +53,35 @@ int main(int argc, char *argv[])
 		exit(0);
 	}
 
-	printf("%d\n",data);
+	if(physical) {
+		comedi_set_global_oor_behavior(COMEDI_OOR_NAN);
+		range_info = comedi_get_range(device,subdevice,channel,range);
+		maxdata = comedi_get_maxdata(device,subdevice,channel);
+		if(verbose) {
+			printf("[0,%d] -> [%g,%g]\n", maxdata,
+				range_info->min, range_info->max);
+		}
+		physical_value = comedi_to_phys(data,range_info,maxdata);
+		if(isnan(physical_value)) {
+			printf("Out of range [%g,%g]",
+				range_info->min, range_info->max);
+		} else {
+			printf("%g",physical_value);
+			switch(range_info->unit) {
+				case UNIT_volt: printf(" V"); break;
+				case UNIT_mA: printf(" mA"); break;
+				case UNIT_none: break;
+				default: printf(" (unknown unit %d)",
+					range_info->unit);
+			}
+			if(verbose) {
+				printf(" (%d raw units)", data);
+			}
+		}
+	} else {
+		printf("%d",data);
+	}
+	printf("\n");
 
 	return 0;
 }

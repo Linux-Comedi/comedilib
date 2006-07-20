@@ -17,6 +17,7 @@ extern int subdevice;
 extern int channel;
 extern int aref;
 extern int range;
+extern int physical;
 extern int verbose;
 extern int n_chan;
 extern int n_scan;

@@ -127,4 +127,5 @@ The options are:
   -g		set analog reference to ground
   -o		set analog reference to other
   -m		set analog reference to common
+  -p		display values in physical units
 

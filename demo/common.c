@@ -17,7 +17,7 @@
 
 
 char *filename="/dev/comedi0";
-int verbose;
+int verbose = 0;
 
 int value=0;
 int subdevice=0;
@@ -27,6 +27,7 @@ int range=0;
 int n_chan=4;
 int n_scan=1000;
 double freq=1000.0;
+int physical = 0;
 
 
 int parse_options(int argc, char *argv[])
@@ -34,7 +35,7 @@ int parse_options(int argc, char *argv[])
 	int c;
 
 
-	while (-1 != (c = getopt(argc, argv, "a:c:s:r:f:n:N:F:vdgom"))) {
+	while (-1 != (c = getopt(argc, argv, "a:c:s:r:f:n:N:F:pvdgom"))) {
 		switch (c) {
 		case 'f':
 			filename = optarg;
@@ -59,6 +60,9 @@ int parse_options(int argc, char *argv[])
 			break;
 		case 'F':
 			freq = strtoul(optarg,NULL,0);
+			break;
+		case 'p':
+			physical = 1;
 			break;
 		case 'v':
 			verbose = 1;
