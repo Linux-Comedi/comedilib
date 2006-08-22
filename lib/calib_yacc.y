@@ -26,15 +26,27 @@
 #include <string.h>
 #include <stdlib.h>
 #include "calib_yacc.h"
+#include "calib_lex.h"
 
 #define YYERROR_VERBOSE
 #define YYPARSE_PARAM parse_arg
+#define YYLEX_PARAM priv(YYPARSE_PARAM)->yyscanner
+
+enum polynomial_direction
+{
+	POLYNOMIAL_TO_PHYS,
+	POLYNOMIAL_FROM_PHYS
+};
 
 typedef struct
 {
+	yyscan_t yyscanner;
 	comedi_calibration_t *parsed_file;
 	comedi_caldac_t caldac;
 	int cal_index;
+	enum polynomial_direction polynomial_direction;
+	unsigned num_coefficients;
+	comedi_polynomial_t polynomial;
 } calib_yyparse_private_t;
 
 YY_DECL;
@@ -64,6 +76,16 @@ static void free_calibration_setting( comedi_calibration_setting_t *setting )
 		free( setting->caldacs );
 		setting->caldacs = NULL;
 		setting->num_caldacs = 0;
+	}
+	if(setting->soft_calibration.to_phys)
+	{
+		free(setting->soft_calibration.to_phys);
+		setting->soft_calibration.to_phys = NULL;
+	}
+	if(setting->soft_calibration.from_phys)
+	{
+		free(setting->soft_calibration.from_phys);
+		setting->soft_calibration.from_phys = NULL;
 	}
 }
 
@@ -168,6 +190,27 @@ static int add_caldac( calib_yyparse_private_t *priv,
 	return 0;
 }
 
+static int add_polynomial(calib_yyparse_private_t *priv)
+{
+	comedi_calibration_setting_t *setting;
+
+	setting = current_setting( priv );
+	if( setting == NULL ) return -1;
+	if(priv->num_coefficients < 1) return -1;
+	if(priv->polynomial_direction == POLYNOMIAL_TO_PHYS)
+	{
+		if(setting->soft_calibration.to_phys) return -1;
+		setting->soft_calibration.to_phys = malloc(sizeof(comedi_polynomial_t));
+		*setting->soft_calibration.to_phys = priv->polynomial;
+	}else
+	{
+		if(setting->soft_calibration.from_phys) return -1;
+		setting->soft_calibration.from_phys = malloc(sizeof(comedi_polynomial_t));
+		*setting->soft_calibration.from_phys = priv->polynomial;
+	}
+	return 0;
+}
+
 static comedi_calibration_t* alloc_calib_parse( void )
 {
 	comedi_calibration_t *file_contents;
@@ -193,7 +236,6 @@ extern void _comedi_cleanup_calibration( comedi_calibration_t *file_contents )
 	}
 	free_settings( file_contents );
 	free( file_contents );
-	file_contents = NULL;
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_parse_calibration_file,comedi_parse_calibration_file,0.7.20);
@@ -203,7 +245,7 @@ extern comedi_calibration_t* _comedi_parse_calibration_file( const char *cal_fil
 	FILE *file;
 
 	if( cal_file_path == NULL ) return NULL;
-	
+
 	priv.parsed_file = alloc_calib_parse();
 	if( priv.parsed_file == NULL ) return NULL;
 	priv.cal_index = 0;
@@ -214,12 +256,14 @@ extern comedi_calibration_t* _comedi_parse_calibration_file( const char *cal_fil
 		COMEDILIB_DEBUG( 3, "failed to open file\n" );
 		return NULL;
 	}
-	calib_yyrestart( file );
+	calib_yylex_init(&priv.yyscanner);
+	calib_yyrestart(file, priv.yyscanner);
 	if( calib_yyparse( &priv ) )
 	{
 		comedi_cleanup_calibration( priv.parsed_file );
 		priv.parsed_file = NULL;
 	}
+	calib_yylex_destroy(priv.yyscanner);
 	fclose( file );
 	return priv.parsed_file;
 }
@@ -231,15 +275,18 @@ extern comedi_calibration_t* _comedi_parse_calibration_file( const char *cal_fil
 %union
 {
 	int  ival;
+	double dval;
 	char *sval;
 }
 
 %token T_DRIVER_NAME T_BOARD_NAME T_CALIBRATIONS T_SUBDEVICE T_CHANNELS
 %token T_RANGES T_AREFS T_CALDACS T_CHANNEL T_VALUE T_NUMBER T_STRING
-%token T_ASSIGN
+%token T_COEFFICIENTS T_EXPANSION_ORIGIN T_SOFTCAL_TO_PHYS T_SOFTCAL_FROM_PHYS
+%token T_ASSIGN T_FLOAT
 
 %type <ival> T_NUMBER
 %type <sval> T_STRING
+%type <dval> T_FLOAT
 
 %%
 
@@ -290,6 +337,14 @@ extern comedi_calibration_t* _comedi_parse_calibration_file( const char *cal_fil
 		| T_RANGES T_ASSIGN '[' ranges_array ']'
 		| T_AREFS T_ASSIGN '[' arefs_array ']'
 		| T_CALDACS T_ASSIGN '[' caldacs_array ']'
+		| T_SOFTCAL_TO_PHYS T_ASSIGN '{' polynomial '}'
+		{
+			priv(parse_arg)->polynomial_direction = POLYNOMIAL_TO_PHYS;
+		}
+		| T_SOFTCAL_FROM_PHYS T_ASSIGN '{' polynomial '}'
+		{
+			priv(parse_arg)->polynomial_direction = POLYNOMIAL_FROM_PHYS;
+		}
 		;
 
 	channels_array: /* empty */
@@ -329,6 +384,39 @@ extern comedi_calibration_t* _comedi_parse_calibration_file( const char *cal_fil
 	caldac_element: T_SUBDEVICE T_ASSIGN T_NUMBER { priv(parse_arg)->caldac.subdevice = $3; }
 		| T_CHANNEL T_ASSIGN T_NUMBER { priv(parse_arg)->caldac.channel = $3; }
 		| T_VALUE T_ASSIGN T_NUMBER { priv(parse_arg)->caldac.value = $3; }
+		;
+
+	polynomial: /* empty */ { add_polynomial(parse_arg);}
+		| polynomial_element { add_polynomial(parse_arg);}
+		| polynomial_element ',' polynomial
+		;
+
+	polynomial_element: T_COEFFICIENTS T_ASSIGN '[' coefficient_array ']' {priv(parse_arg)->num_coefficients = 0;}
+		| T_EXPANSION_ORIGIN T_ASSIGN expansion_origin
+		;
+
+	coefficient_array: /* empty */
+		| coefficient
+		| coefficient ',' coefficient_array
+		;
+
+	coefficient: T_FLOAT
+		{
+			if(priv(parse_arg)->num_coefficients >= COMEDI_MAX_NUM_POLYNOMIAL_COEFFICIENTS)
+			{
+				fprintf(stderr, "too many coefficients for polynomial on line %i ,\n", @1.first_line );
+				fprintf(stderr, "max is %i .\n", COMEDI_MAX_NUM_POLYNOMIAL_COEFFICIENTS);
+				YYABORT;
+			}
+			priv(parse_arg)->polynomial.order = priv(parse_arg)->num_coefficients;
+			priv(parse_arg)->polynomial.coefficients[priv(parse_arg)->num_coefficients++] = $1;
+		}
+		;
+
+	expansion_origin: T_FLOAT
+		{
+			priv(parse_arg)->polynomial.expansion_origin = $1;
+		}
 		;
 
 %%

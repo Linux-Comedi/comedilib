@@ -205,6 +205,18 @@ typedef struct
 	unsigned int channel;
 	unsigned int value;
 } comedi_caldac_t;
+#define COMEDI_MAX_NUM_POLYNOMIAL_COEFFICIENTS (4)
+typedef struct
+{
+	double coefficients[COMEDI_MAX_NUM_POLYNOMIAL_COEFFICIENTS];
+	double expansion_origin;
+	unsigned order;
+} comedi_polynomial_t;
+typedef struct
+{
+	comedi_polynomial_t *to_phys;
+	comedi_polynomial_t *from_phys;
+} comedi_softcal_t;
 #define CS_MAX_AREFS_LENGTH 4
 typedef struct
 {
@@ -217,6 +229,7 @@ typedef struct
 	unsigned int num_arefs;
 	comedi_caldac_t *caldacs;
 	unsigned int num_caldacs;
+	comedi_softcal_t soft_calibration;
 } comedi_calibration_setting_t;
 
 typedef struct
