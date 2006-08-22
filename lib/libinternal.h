@@ -152,7 +152,7 @@ enum{
 /* used by range.c, was in comedilib.h but apparently deprecated so I put it here - fmhess */
 int comedi_get_rangetype(comedi_t *it,unsigned int subdevice,unsigned int chan);
 
-#define YY_DECL int calib_yylex(YYSTYPE *calib_lvalp, YYLTYPE *calib_llocp, yyscan_t yyscanner)
+#define YY_DECL int calib_yylex(YYSTYPE *calib_lvalp, yyscan_t yyscanner)
 void calib_yyerror(char *s);
 int calib_yyparse(void *parse_arg);
 
