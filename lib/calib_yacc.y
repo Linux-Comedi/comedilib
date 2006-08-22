@@ -44,7 +44,6 @@ typedef struct
 	comedi_calibration_t *parsed_file;
 	comedi_caldac_t caldac;
 	int cal_index;
-	enum polynomial_direction polynomial_direction;
 	unsigned num_coefficients;
 	comedi_polynomial_t polynomial;
 } calib_yyparse_private_t;
@@ -206,7 +205,7 @@ static int add_caldac( calib_yyparse_private_t *priv,
 	return 0;
 }
 
-static int add_polynomial(calib_yyparse_private_t *priv)
+static int add_polynomial(calib_yyparse_private_t *priv, enum polynomial_direction polynomial_direction)
 {
 	comedi_calibration_setting_t *setting;
 
@@ -221,7 +220,7 @@ static int add_polynomial(calib_yyparse_private_t *priv)
 		fprintf(stderr, "%s: polynomial has no coefficients.\n", __FUNCTION__);
 		return -1;
 	}
-	if(priv->polynomial_direction == POLYNOMIAL_TO_PHYS)
+	if(polynomial_direction == POLYNOMIAL_TO_PHYS)
 	{
 		if(setting->soft_calibration.to_phys) return -1;
 		setting->soft_calibration.to_phys = malloc(sizeof(comedi_polynomial_t));
@@ -376,11 +375,13 @@ extern comedi_calibration_t* _comedi_parse_calibration_file( const char *cal_fil
 		| T_CALDACS T_ASSIGN '[' caldacs_array ']'
 		| T_SOFTCAL_TO_PHYS T_ASSIGN '{' polynomial '}'
 		{
-			priv(parse_arg)->polynomial_direction = POLYNOMIAL_TO_PHYS;
+			if(add_polynomial(parse_arg, POLYNOMIAL_TO_PHYS) < 0) YYERROR;
+			priv(parse_arg)->num_coefficients = 0;
 		}
 		| T_SOFTCAL_FROM_PHYS T_ASSIGN '{' polynomial '}'
 		{
-			priv(parse_arg)->polynomial_direction = POLYNOMIAL_FROM_PHYS;
+			if(add_polynomial(parse_arg, POLYNOMIAL_FROM_PHYS) < 0) YYERROR;
+			priv(parse_arg)->num_coefficients = 0;
 		}
 		;
 
@@ -424,15 +425,7 @@ extern comedi_calibration_t* _comedi_parse_calibration_file( const char *cal_fil
 		;
 
 	polynomial: /* empty */
-		{
-			if(add_polynomial(parse_arg) < 0) YYERROR;
-			priv(parse_arg)->num_coefficients = 0;
-		}
 		| polynomial_element
-		{
-			if(add_polynomial(parse_arg) < 0) YYERROR;
-			priv(parse_arg)->num_coefficients = 0;
-		}
 		| polynomial_element ',' polynomial
 		;
 
