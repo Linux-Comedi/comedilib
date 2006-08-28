@@ -69,13 +69,10 @@ softcal_to_phys	{return T_SOFTCAL_TO_PHYS;}
 softcal_from_phys	{return T_SOFTCAL_FROM_PHYS;}
 =>	{ return ( T_ASSIGN ); };
 
-(0[xX])?(00)?[0-9a-fA-F]+ {calib_lvalp->ival = strtol(calib_yyget_text(yyscanner), NULL, 0);
+[+-]?(0[xX])?[0-9a-fA-F]+ {calib_lvalp->ival = strtol(calib_yyget_text(yyscanner), NULL, 0);
 	return( T_NUMBER ); }
 
-[0-9]+\.*[0-9]* { calib_lvalp->dval = strtod(calib_yyget_text(yyscanner), 0);
-	return( T_FLOAT ); }
-
-[0-9]*\.*[0-9]+ { calib_lvalp->dval = strtod(calib_yyget_text(yyscanner), 0);
+[+-]?(([0-9]+\.?[0-9]*)|([0-9]*\.?[0-9]+))([eE][+-]?[0-9]+)? { calib_lvalp->dval = strtod(calib_yyget_text(yyscanner), 0);
 	return( T_FLOAT ); }
 
 [ \t]
