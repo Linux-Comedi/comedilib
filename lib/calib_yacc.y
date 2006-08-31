@@ -21,8 +21,11 @@
     USA.
 */
 
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include "libinternal.h"
+#include <math.h>
 #include <string.h>
 #include <stdlib.h>
 #include "calib_yacc.h"
@@ -274,6 +277,43 @@ extern void _comedi_cleanup_calibration( comedi_calibration_t *file_contents )
 	free( file_contents );
 }
 
+static comedi_polynomial_t* alloc_inverse_linear_polynomial(const comedi_polynomial_t *polynomial)
+{
+	if(polynomial->order != 1) return NULL;
+	comedi_polynomial_t *inverse = malloc(sizeof(comedi_polynomial_t));
+	memset(inverse, 0, sizeof(comedi_polynomial_t));
+	inverse->order = 1;
+	inverse->expansion_origin = polynomial->coefficients[0];
+	inverse->coefficients[0] = polynomial->expansion_origin;
+	inverse->coefficients[1] = 1. / polynomial->coefficients[1];
+	if(isfinite(inverse->coefficients[1]) == 0)
+	{
+		free(inverse);
+		return NULL;
+	}
+	return inverse;
+}
+
+static void fill_inverse_linear_polynomials(comedi_calibration_t *calibration)
+{
+	unsigned i;
+	for(i = 0; i < calibration->num_settings; ++i)
+	{
+		if(calibration->settings[i].soft_calibration.to_phys)
+		{
+			if(calibration->settings[i].soft_calibration.from_phys == NULL)
+			{
+				calibration->settings[i].soft_calibration.from_phys =
+					alloc_inverse_linear_polynomial(calibration->settings[i].soft_calibration.to_phys);
+			}
+		}else if(calibration->settings[i].soft_calibration.from_phys)
+		{
+			calibration->settings[i].soft_calibration.to_phys =
+				alloc_inverse_linear_polynomial(calibration->settings[i].soft_calibration.from_phys);
+		}
+	}
+}
+
 EXPORT_ALIAS_DEFAULT(_comedi_parse_calibration_file,comedi_parse_calibration_file,0.7.20);
 extern comedi_calibration_t* _comedi_parse_calibration_file( const char *cal_file_path )
 {
@@ -300,6 +340,7 @@ extern comedi_calibration_t* _comedi_parse_calibration_file( const char *cal_fil
 	}
 	calib_yylex_destroy(priv.yyscanner);
 	fclose( file );
+	fill_inverse_linear_polynomials(priv.parsed_file);
 	return priv.parsed_file;
 }
 
