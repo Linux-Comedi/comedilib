@@ -8,6 +8,7 @@ CLEANFILES = grammar.output
 EXTRA_DIST = calib_lex.l calib_yacc.y version_script
 
 BUILT_SOURCES = calib_lex.c calib_lex.h calib_yacc.c calib_yacc.h
+MAINTAINERCLEANFILES = calib_lex.c calib_lex.h calib_yacc.c calib_yacc.h
 
 libcomedi_la_SOURCES = \
 	buffer.c calib.c cmd.c comedi.c data.c dio.c error.c \
