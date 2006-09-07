@@ -205,7 +205,7 @@ typedef struct
 	unsigned int channel;
 	unsigned int value;
 } comedi_caldac_t;
-#define COMEDI_MAX_NUM_POLYNOMIAL_COEFFICIENTS (4)
+#define COMEDI_MAX_NUM_POLYNOMIAL_COEFFICIENTS 4
 typedef struct
 {
 	double coefficients[COMEDI_MAX_NUM_POLYNOMIAL_COEFFICIENTS];
@@ -248,7 +248,24 @@ void comedi_cleanup_calibration( comedi_calibration_t *calibration );
 int comedi_apply_calibration( comedi_t *dev, unsigned int subdev, unsigned int channel,
 	unsigned int range, unsigned int aref, const char *cal_file_path);
 
-
+/* New stuff to provide conversion between integers and physical values that
+* can support software calibrations. */
+enum comedi_conversion_direction
+{
+	COMEDI_TO_PHYSICAL,
+	COMEDI_FROM_PHYSICAL
+};
+int comedi_get_softcal_converter(
+	unsigned subdevice, unsigned channel, unsigned range,
+	enum comedi_conversion_direction direction,
+	const comedi_calibration_t *calibration, comedi_polynomial_t* polynomial);
+int comedi_get_hardcal_converter(
+	comedi_t *dev, unsigned subdevice, unsigned channel, unsigned range,
+	enum comedi_conversion_direction direction, comedi_polynomial_t* polynomial);
+double comedi_to_physical(lsampl_t data,
+	const comedi_polynomial_t *conversion_polynomial);
+lsampl_t comedi_from_physical(double data,
+	const comedi_polynomial_t *conversion_polynomial);
 
 #endif
 

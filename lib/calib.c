@@ -22,6 +22,8 @@
 
 #define _GNU_SOURCE
 
+#include <assert.h>
+#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -241,4 +243,100 @@ int _comedi_apply_calibration( comedi_t *dev, unsigned int subdev, unsigned int 
 	comedi_cleanup_calibration( parsed_file );
 
 	return retval;
+}
+
+EXPORT_ALIAS_DEFAULT(_comedi_get_hardcal_converter, comedi_get_hardcal_converter, 0.7.23);
+int _comedi_get_hardcal_converter(
+	comedi_t *dev, unsigned subdevice, unsigned channel, unsigned range,
+	enum comedi_conversion_direction direction,
+	comedi_polynomial_t* polynomial)
+{
+	comedi_range *range_ptr = comedi_get_range(dev, subdevice, channel, range);
+	if(range_ptr == NULL)
+	{
+		return -1;
+	}
+	lsampl_t maxdata = comedi_get_maxdata(dev, subdevice, channel);
+	if(maxdata == 0)
+	{
+		return -1;
+	}
+	polynomial->order = 1;
+	switch(direction)
+	{
+	case COMEDI_TO_PHYSICAL:
+		polynomial->expansion_origin = 0.;
+		polynomial->coefficients[0] = range_ptr->min;
+		polynomial->coefficients[1] = (range_ptr->max - range_ptr->min) / maxdata;
+		break;
+	case COMEDI_FROM_PHYSICAL:
+		polynomial->expansion_origin = range_ptr->min;
+		polynomial->coefficients[0] = 0.;
+		polynomial->coefficients[1] =  maxdata / (range_ptr->max - range_ptr->min);
+		break;
+	}
+	return 0;
+}
+
+EXPORT_ALIAS_DEFAULT(_comedi_get_softcal_converter, comedi_get_softcal_converter, 0.7.23);
+int _comedi_get_softcal_converter(
+	unsigned subdevice, unsigned channel, unsigned range,
+	enum comedi_conversion_direction direction,
+	const comedi_calibration_t *calibration, comedi_polynomial_t* polynomial)
+{
+	unsigned i;
+
+	for(i = 0; i < calibration->num_settings; ++i)
+	{
+		if(calibration->settings[i].subdevice != subdevice) continue;
+		if(valid_channel(calibration, i, channel) == 0) continue;
+		if(valid_range(calibration, i, range) == 0) continue;
+		switch(direction)
+		{
+		case COMEDI_TO_PHYSICAL:
+			if(calibration->settings[i].soft_calibration.to_phys == NULL)
+			{
+				continue;
+			}
+			*polynomial = *calibration->settings[i].soft_calibration.to_phys;
+			break;
+		case COMEDI_FROM_PHYSICAL:
+			if(calibration->settings[i].soft_calibration.from_phys == NULL)
+			{
+				continue;
+			}
+			*polynomial = *calibration->settings[i].soft_calibration.from_phys;
+			break;
+		}
+		return 0;
+	}
+	return -1;
+}
+
+static double apply_polynomial(const comedi_polynomial_t *polynomial, double input)
+{
+	double value = 0.;
+	double term = 1.;
+	unsigned i;
+	assert(polynomial->order < COMEDI_MAX_NUM_POLYNOMIAL_COEFFICIENTS);
+	for(i = 0; i <= polynomial->order; ++i)
+	{
+		value += polynomial->coefficients[i] * term;
+		term *= input - polynomial->expansion_origin;
+	}
+	return value;
+}
+
+EXPORT_ALIAS_DEFAULT(_comedi_to_physical, comedi_to_physical, 0.7.23);
+double _comedi_to_physical(lsampl_t data,
+	const comedi_polynomial_t *conversion_polynomial)
+{
+	return apply_polynomial(conversion_polynomial, data);
+}
+
+EXPORT_ALIAS_DEFAULT(_comedi_from_physical, comedi_from_physical, 0.7.23);
+lsampl_t _comedi_from_physical(double data,
+	const comedi_polynomial_t *conversion_polynomial)
+{
+	return nearbyint(apply_polynomial(conversion_polynomial, data));
 }
