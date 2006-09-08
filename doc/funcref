@@ -131,7 +131,7 @@ Description:
  pointer, the function returns -1 and sets the appropriate
  Comedilib error value.
 
-Function: comedi_get_n_subdevices -- number of subdevices 
+Function: comedi_get_n_subdevices -- number of subdevices
 Retval: int
 Param: comedi_t * device
 Description:
@@ -184,7 +184,7 @@ Description:
  integer describing the type of subdevice that belongs to the comedi
  device device and has the index subdevice.  The
  function returns -1 if there is an error.
- 
+
  XXX Subdevice type table
 
 Function: comedi_find_subdevice_by_type -- search for subdevice type
@@ -228,7 +228,7 @@ Description:
  This function returns a bitfield describing the capabilities of
  the specified subdevice.  If there is an error, -1 is returned,
  and the Comedilib error value is set.
- 
+
  <table COLSEP="1" ROWSEP="1" ORIENT="port" PGWIDE="1">
  <title>subdevice flags</title>
  <tgroup COLS="3" ALIGN="left" >
@@ -345,7 +345,7 @@ Description:
  <row>
  <entry>SDF_PACKED</entry>
  <entry>0x20000000</entry>
- <entry>The subdevice uses bitfield samples for asynchronous command data, 
+ <entry>The subdevice uses bitfield samples for asynchronous command data,
  one bit per channel (otherwise it uses
  one sampl_t or lsampl_t per channel).  Commonly used for digital subdevices.</entry>
  </row>
@@ -492,7 +492,7 @@ Description:
  This function can be used to avoid the overhead of multiple
  system calls, or to ensure that multiple instructions occur
  without significant delay between them.
- 
+
  Preemption may occur if any of the instructions or the data
  arrays of any of the instructions exist in non-resident or
  copy-on-write pages.
@@ -550,7 +550,7 @@ Description:
 
  Conversion of endpoint sample values, that is, sample values
  equal to 0 or maxdata, is affected by the Comedilib out-of-range
- behavior.  If the out-of-range behavior is set to COMEDI_OOR_NAN, 
+ behavior.  If the out-of-range behavior is set to COMEDI_OOR_NAN,
  endpoint values are converted to NAN.  If the out-of-range
  behavior is set to COMEDI_OOR_NUMBER, the endpoint values are
  converted similarly to other values.
@@ -941,8 +941,8 @@ Param: unsigned int num_bytes
 Description:
  The function comedi_mark_buffer_read() is used on a subdevice
  that has a Comedi input command in progress.  It should only be used
- if you are using a mmap() (as opposed 
- to calling read() on the device file) to read data from Comedi's buffer, 
+ if you are using a mmap() (as opposed
+ to calling read() on the device file) to read data from Comedi's buffer,
  since Comedi will automatically keep track of how many bytes have been
  transferred via read() calls.  This function is
  used to indicate that the next num_bytes bytes in the buffer
@@ -957,9 +957,9 @@ Param: unsigned int num_bytes
 Description:
  The function comedi_mark_buffer_written() is used on a subdevice
  that has a Comedi output command in progress.  It should only be used
- if you are using a mmap() (as opposed to calling write() on the device 
+ if you are using a mmap() (as opposed to calling write() on the device
  file) to write data to Comedi's buffer, since Comedi
- will automatically keep track of how many bytes have been 
+ will automatically keep track of how many bytes have been
  transferred via write() calls.  This function is
  used to indicate that the next num_bytes bytes in the buffer
  are valid and may be sent to the device.
@@ -1022,7 +1022,7 @@ Description:
 
  The previous out-of-range behavior is returned.
 
-Function: comedi_apply_calibration -- set calibration from file
+Function: comedi_apply_calibration -- set hardware calibration from file
 Retval: int
 Param: comedi_t *device
 Param: unsigned int subdevice
@@ -1038,12 +1038,12 @@ Description:
  to the appropriate channels of the board's calibration
  subdevice(s).  Depending on the hardware, the
  calibration settings used may or may not depend on the channel,
- range, or aref.  Furthermore, the calibrations for different
- channels, ranges, or arefs may not be independent.
+ range, or aref.  Furthermore, the calibrations appropriate
+ for different channel, range, and aref parameters
+ may not be able to be applied simultaneously.
  For example, some boards cannot have their analog inputs calibrated
- for multiple input
- ranges simultaneously.  Applying a calibration for range 1 may
- blow away a previously applied calibration for range 0.  Applying
+ for more than one input range simultaneously.  Applying a calibration for range 1 may
+ blow away a previously applied calibration for range 0.  Or, applying
  a calibration for analog input channel 0 may cause the same
  calibration to be applied to all the
  other analog input channels as well.
@@ -1107,7 +1107,7 @@ Param: comedi_calibration_t *calibration
 Status: alpha
 Description:
  This function frees the resources associated with a
- <parameter>calibration</parameter> obtained from
+ comedi_calibration_t obtained from
  comedi_parse_calibration_file().  <parameter>calibration</parameter>
  can not be used again after calling this function.
 
@@ -1124,15 +1124,16 @@ Returns:
  A string which contains a file path useable by
  comedi_parse_calibration_file().  On error, NULL is returned.
 
-Function: comedi_parse_calibration_file -- set calibration
+Function: comedi_parse_calibration_file -- load contents of calibration file
 Retval: comedi_calibration_t*
 Param: const char *file_path
 Status: alpha
 Description:
  This function parses a calibration file (produced by the
- comedi_calibrate program) and returns a pointer to a
- comedi_calibration_t which can be passed to the
- comedi_apply_parsed_calibration() function.  When you are
+ comedi_calibrate or comedi_soft_calibrate programs) and returns a pointer
+ to a comedi_calibration_t which can be passed to the
+ comedi_apply_parsed_calibration() or comedi_get_softcal_converter()
+ functions.  When you are
  finished using the comedi_calibration_t, you should
  call comedi_cleanup_calibration() to free the resources
  associated with the comedi_calibration_t.
@@ -1141,3 +1142,71 @@ Description:
  be useful in conjunction with this function.
 Returns:
  A pointer to parsed calibration information on success,  or NULL on failure.
+
+Function: comedi_get_hardcal_converter -- get converter for hardware-calibrated subdevice
+Retval: int
+Param: comedi_t *dev
+Param: unsigned subdevice
+Param: unsigned channel
+Param: unsigned range
+Param: enum comedi_conversion_direction direction
+Param: comedi_polynomial_t *converter
+Status: alpha
+Description:
+ comedi_get_hardcal_converter() initializes <parameter>converter</parameter> so it can be
+ passed to either comedi_to_physical() or comedi_from_physical().  The result can be used to
+ convert data from the specified <parameter>subdevice</parameter>,
+ <parameter>channel</parameter>, and <parameter>range</parameter>.  The <parameter>direction</parameter>
+ parameter specifies whether <parameter>converter</parameter> will be passed to comedi_to_physical()
+ or comedi_from_physical().
+
+ This function initializes <parameter>converter</parameter> as a simple linear function with no
+ calibration information, appropriate
+ for boards which do their gain/offset/nonlinearity corrections in hardware.  If your board
+ needs calibration to be performed in software by the host computer, use comedi_get_softcal_converter()
+ instead.  A subdevice will advertise the fact that it depends on a software calibration
+ with the SDF_SOFT_CALIBRATED subdevice flag.
+
+ The result of this function will only depend on the <parameter>channel</parameter>
+ parameter if either comedi_range_is_chan_specific() or comedi_maxdata_is_chan_specific()
+ is true for the specified <parameter>subdevice</parameter>.
+Returns:
+ Zero on success or -1 on failure.
+
+Function: comedi_get_softcal_converter -- get converter for software-calibrated subdevice
+Retval: int
+Param: unsigned subdevice
+Param: unsigned channel
+Param: unsigned range
+Param: enum comedi_conversion_direction direction
+Param: const comedi_calibration_t *parsed_calibration
+Param: comedi_polynomial_t *converter
+Status: alpha
+Description:
+ comedi_get_softcal_converter() initializes <parameter>converter</parameter> so it can be
+ passed to either comedi_to_physical() or comedi_from_physical().  The <parameter>converter</parameter>
+ parameter can then be used to
+ convert data from the specified <parameter>subdevice</parameter>,
+ <parameter>channel</parameter>, and <parameter>range</parameter>.  The <parameter>direction</parameter>
+ parameter specifies whether <parameter>converter</parameter> will be passed to comedi_to_physical()
+ or comedi_from_physical().  The <parameter>parsed_calibration</parameter> parameter contains the
+ software calibration values for your device, and may be obtained by calling comedi_parse_calibration_file()
+ on a calibration file generated by the comedi_soft_calibrate program.
+
+ This function is only useful for boards that perform their calibrations in software on the host
+ computer.  A subdevice will advertise the fact that it depends on a software calibration
+ with the SDF_SOFT_CALIBRATED subdevice flag.
+
+ Whether or not the result of this function actually depends on the <parameter>channel</parameter>
+ parameter is
+ hardware dependent.  For example, a multiplexed analog input will typically use the same
+ calibration for all input channels.  Analog outputs will typically use different calibrations
+ for each output channel.
+
+ Software calibrations are implemented as polynomials (up to third order).  Since the inverse
+ of polynomials of order higher than one can't be represented exactly as another polynomial, you
+ may not be able to get converters for the "reverse" direction.  For example, you may be
+ able to get a converter for an analog input in the COMEDI_TO_PHYSICAL direction, but not
+ in the COMEDI_FROM_PHYSICAL direction.
+Returns:
+ Zero on success or -1 on failure.
