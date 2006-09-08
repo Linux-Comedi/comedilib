@@ -31,12 +31,12 @@ CR_PACK
 CR_PACK is used to initialize the elements of the
 <parameter>chanlist</parameter> array in the
 <link linkend="ref-type-comedi-cmd">comedi_cmd</link> data structure,
-and the <parameter>chanspec</parameter> member of the 
+and the <parameter>chanspec</parameter> member of the
 <link linkend="ref-type-comedi-insn">comedi_insn</link> structure.
 </para>
 <programlisting>
 <![CDATA[
-#define CR_PACK(chan,rng,aref)      ( (((aref)&0x3)<<24) | (((rng)&0xff)<<16) | (chan) ) 
+#define CR_PACK(chan,rng,aref)      ( (((aref)&0x3)<<24) | (((rng)&0xff)<<16) | (chan) )
 ]]>
 </programlisting>
 <para>
@@ -46,7 +46,7 @@ use, with the channel numbering starting at zero.
 
 <para>
 The range <parameter>rng</parameter> is an index, starting at zero,
-whose meaning is device dependent.  The 
+whose meaning is device dependent.  The
 <link linkend="func-ref-comedi-get-n-ranges">comedi_get_n_ranges()</link>
 and
 <link linkend="func-ref-comedi-get-range">comedi_get_range()</link>
@@ -119,6 +119,28 @@ new applications.  It is scheduled to be removed from the header
 file at version 1.0.  Binary compatibility may be broken for version
 1.1.
 </para>
+</section>
+
+<section id="ref-enum-comedi-conversion-direction">
+<title>
+enum comedi_conversion_direction
+</title>
+
+<para>
+<programlisting>
+enum comedi_conversion_direction
+{
+	COMEDI_TO_PHYSICAL,
+	COMEDI_FROM_PHYSICAL
+};
+</programlisting>
+</para>
+<para>
+A comedi_conversion_direction is used to choose between converting data
+from Comedi's integer sample values to a physical value (COMEDI_TO_PHYSICAL),
+and converting from a physical value to Comedi's integer sample values (COMEDI_FROM_PHYSICAL).
+</para>
+
 </section>
 
 </section>
@@ -247,7 +269,7 @@ A valid <parameter>comedi_t</parameter> pointer is returned by a
 successful call to
 <link linkend="func-ref-comedi-open">comedi_open()</link>,
 and should be used for subsequent access to the device.
-It is a transparent type, and pointers to type 
+It is a transparent type, and pointers to type
 <parameter>comedi_t</parameter>
 should not be dereferenced by the application.
 </para>
@@ -297,7 +319,7 @@ typedef unsigned int lsampl_t;
 </programlisting>
 
 <para>
-The data type 
+The data type
 <link linkend="ref-type-lsampl-t">lsampl_t</link>
 is the data type typically used to represent
 data values in libcomedi.  On most architectures,
