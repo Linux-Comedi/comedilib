@@ -388,9 +388,11 @@ Param: unsigned int subdevice
 Param: unsigned int channel
 Description:
  The function comedi_get_maxdata() returns the maximum
- valid data value for channel chan of subdevice
- subdevice belonging to the comedi device device
- This function returns 0 on error.
+ valid data value for channel <parameter>channel</parameter> of subdevice
+ <parameter>subdevice</parameter> belonging to the comedi device
+ <parameter>device</parameter>.
+Returns:
+ The maximum valid sample value, or 0 on error.
 
 Function: comedi_get_n_ranges -- number of ranges of channel
 Retval: int
@@ -525,7 +527,9 @@ Description:
  allowed to read, write, or configure that subdevice, although
  other processes can read information about the subdevice.  The
  lock is released when comedi_unlock() is called, or the device
- is closed.  If sucessful, 0 is returned.  If there is an error,
+ is closed.
+Returns:
+ If sucessful, 0 is returned.  If there is an error,
  -1 is returned.
 
 Function: comedi_unlock -- subdevice reservation
@@ -557,6 +561,26 @@ Description:
 
  If there is an error, NAN is returned.
 
+Function: comedi_to_physical -- convert sample to physical units
+Retval: double
+Param: lsampl_t data
+Param: const comedi_polynomial_t *conversion_polynomial
+Description:
+ Converts <parameter>data</parameter> given in Comedi's integer
+ sample values (lsampl_t, between 0 and
+ maxdata) into physical units (double).  The
+ <parameter>conversion_polynomial</parameter>
+ parameter is obtained from either comedi_get_hardcal_converter()
+ or comedi_get_softcal_converter().  No range checking of the
+ input <parameter>data</parameter> is performed.  It is up to
+ you to check for <parameter>data</parameter> values of
+ 0 or maxdata if you want to detect possibly out-of-range readings.
+
+ This function is intended to supplant comedi_to_phys(), and was
+ introduced in order to support software calibrations.
+Returns:
+ Physical value corresponding to the input sample value.
+
 Function: comedi_from_phys -- convert physical units to sample
 Retval: lsampl_t
 Param: double data
@@ -571,6 +595,26 @@ Description:
 
  Conversion is not affected by out-of-range behavior.  Out-of-range
  data parameters are silently truncated to the range 0 to maxdata.
+
+Function: comedi_from_physical -- convert physical units to sample
+Retval: lsampl_t
+Param: double data
+Param: const comedi_polynomial_t *conversion_polynomial
+Description:
+ Converts <parameter>data</parameter> given in physical units into Comedi's
+ integer sample values
+ (lsampl_t, between 0 and maxdata).  The <parameter>conversion_polynomial</parameter>
+ parameter is obtained from either comedi_get_hardcal_converter()
+ or comedi_get_softcal_converter().  The result will be rounded
+ using the C library's current rounding direction.
+ No range checking of the input
+ <parameter>data</parameter> is performed.  It is up to you to insure
+ your data is within the limits of the output range you are using.
+
+ This function is intended to supplant comedi_from_phys(), and was
+ introduced in order to support software calibrations.
+Returns:
+ Comedi sample value corresponding to input physical value.
 
 Function: comedi_data_read -- read single sample from channel
 Retval: int
