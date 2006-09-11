@@ -286,6 +286,15 @@ Description:
  <entry>The subdevice supports asynchronous commands.</entry>
  </row>
  <row>
+ <entry>SDF_SOFT_CALIBRATED</entry>
+ <entry>0x00002000</entry>
+ <entry>The subdevice relies on the host to do calibration in software.
+ Software calibration coefficients are determined by the comedi_soft_calibrate
+ utility.  See the description of the comedi_get_softcal_converter() function
+ for more information.
+ </entry>
+ </row>
+ <row>
  <entry>SDF_READABLE</entry>
  <entry>0x00010000</entry>
  <entry>The subdevice can be read (e.g. analog input).</entry>
