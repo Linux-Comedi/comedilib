@@ -84,6 +84,7 @@ v0.7.20 {
 v0.7.23 {
 	global:
 		comedi_from_physical;
+		comedi_dio_bitfield2;
 		comedi_dio_get_config;
 		comedi_get_hardcal_converter;
 		comedi_get_softcal_converter;

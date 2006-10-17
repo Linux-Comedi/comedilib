@@ -181,8 +181,9 @@ char* _comedi_get_default_calibration_path( comedi_t *dev )
 {
 	struct stat file_stats;
 	char *file_path;
-	char *board_name, *temp;
-	char *driver_name;
+	const char *temp;
+	char *board_name;
+	const char *driver_name;
 
 	if( fstat( comedi_fileno( dev ), &file_stats ) < 0 )
 	{

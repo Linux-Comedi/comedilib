@@ -804,18 +804,38 @@ Param: comedi_t * device
 Param: unsigned int subdevice
 Param: unsigned int write_mask
 Param: unsigned int * bits
+Status: deprecated
 Description:
- The function comedi_dio_bitfield() allows multiple channels to
- be read simultaneously from a digital input or digital I/O device.
- The parameter write_mask and the value pointed to by bits
+ This function is deprecated.  Use comedi_dio_bitfield2() instead.
+
+Function: comedi_dio_bitfield2 -- read/write multiple digital channels
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int write_mask
+Param: unsigned int * bits
+Param: unsigned int base_channel
+Description:
+ The function comedi_dio_bitfield2() allows multiple channels to
+ be read or written together on a digital input, output,
+ or configurable digital I/O device.
+ The parameter <parameter>write_mask</parameter>
+ and the value pointed to by <parameter>bits</parameter>
  are interpreted as bit fields, with the least significant bit
- representing channel 0.  For each bit in write_mask that is
- set to 1, the cooresponding bit in *bits is written to the digital
+ representing channel <parameter>base_channel</parameter>.
+ For each bit in <parameter>write_mask</parameter> that is
+ set to 1, the cooresponding bit in <parameter>*bits</parameter>
+ is written to the digital
  output channel.  After writing all the output channels, each
  channel is read, and the result placed in the approprate bits in
- *bits.  The result of reading an output channel is undefined.
- It is not possible to access channels greater than 31 using this
- function.
+ <parameter>*bits</parameter>.  The result of
+ reading an output channel is the last
+ value written to the output channel.
+
+ All the channels may not be read or written at the exact same time.
+ For example, the driver may need to sequentially write to
+ several ports in order to set all the digital channels specified
+ by the <parameter>write_mask</parameter>.
 
 Function: comedi_sv_init -- slowly-varying inputs
 Retval: int

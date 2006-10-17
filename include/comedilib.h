@@ -82,8 +82,8 @@ enum comedi_oor_behavior comedi_set_global_oor_behavior(enum comedi_oor_behavior
 int comedi_get_n_subdevices(comedi_t *it);
 #define COMEDI_VERSION_CODE(a,b,c) (((a)<<16) | ((b)<<8) | (c))
 int comedi_get_version_code(comedi_t *it);
-char *comedi_get_driver_name(comedi_t *it);
-char *comedi_get_board_name(comedi_t *it);
+const char *comedi_get_driver_name(comedi_t *it);
+const char *comedi_get_board_name(comedi_t *it);
 int comedi_get_read_subdevice(comedi_t *dev);
 int comedi_get_write_subdevice(comedi_t *dev);
 
@@ -147,8 +147,8 @@ int comedi_dio_read(comedi_t *it,unsigned int subd,unsigned int chan,
 	unsigned int *bit);
 int comedi_dio_write(comedi_t *it,unsigned int subd,unsigned int chan,
 	unsigned int bit);
-int comedi_dio_bitfield(comedi_t *it,unsigned int subd,
-	unsigned int write_mask, unsigned int *bits);
+int comedi_dio_bitfield2(comedi_t *it,unsigned int subd,
+	unsigned int write_mask, unsigned int *bits, unsigned int base_channel);
 
 /* slowly varying stuff */
 int comedi_sv_init(comedi_sv_t *it,comedi_t *dev,unsigned int subd,unsigned int chan);
@@ -188,6 +188,8 @@ int comedi_timed_1chan(comedi_t *it,unsigned int subdev,unsigned int chan,
 	unsigned int n_samples,double *data);
 int comedi_get_rangetype(comedi_t *it,unsigned int subdevice,
 	unsigned int chan);
+int comedi_dio_bitfield(comedi_t *it,unsigned int subd,
+	unsigned int write_mask, unsigned int *bits);
 #endif
 
 

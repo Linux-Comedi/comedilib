@@ -41,7 +41,7 @@ int _comedi_dio_config(comedi_t *it,unsigned int subdev,unsigned int chan,unsign
 
 	if(!valid_chan(it,subdev,chan))
 		return -1;
-	
+
 	s=it->subdevices+subdev;
 	if(s->type!=COMEDI_SUBD_DIO)
 		return -1;
@@ -52,7 +52,7 @@ int _comedi_dio_config(comedi_t *it,unsigned int subdev,unsigned int chan,unsign
 	if(it->has_insnlist_ioctl){
 		comedi_insn insn;
 		lsampl_t data;
-		
+
 		memset(&insn,0,sizeof(insn));
 		insn.insn = INSN_CONFIG;
 		insn.n = 1;
@@ -86,17 +86,17 @@ int _comedi_dio_get_config(comedi_t *it,unsigned int subdev, unsigned int chan, 
 	comedi_insn insn;
 	lsampl_t data[2];
 	int retval;
-	
+
 	if(!valid_chan(it,subdev,chan))
 		return -1;
-	
+
 	s=it->subdevices+subdev;
 	if(s->type!=COMEDI_SUBD_DIO)
 		return -1;
 
 	if(it->has_insnlist_ioctl == 0)
 		return -1;
-	
+
 	memset(&insn,0,sizeof(insn));
 	insn.insn = INSN_CONFIG;
 	insn.n = sizeof(data) / sizeof(data[0]);
@@ -130,7 +130,7 @@ int _comedi_dio_read(comedi_t *it,unsigned int subdev,unsigned int chan,
 	if(it->has_insnlist_ioctl){
 		comedi_insn insn;
 		lsampl_t data;
-		
+
 		memset(&insn,0,sizeof(insn));
 		insn.insn = INSN_READ;
 		insn.n = 1;
@@ -170,7 +170,7 @@ int _comedi_dio_write(comedi_t *it,unsigned int subdev,unsigned int chan,
 
 	if(!valid_chan(it,subdev,chan))
 		return -1;
-	
+
 	s = it->subdevices+subdev;
 	if(s->type!=COMEDI_SUBD_DIO &&
 	   s->type!=COMEDI_SUBD_DO)
@@ -179,7 +179,7 @@ int _comedi_dio_write(comedi_t *it,unsigned int subdev,unsigned int chan,
 	if(it->has_insnlist_ioctl){
 		comedi_insn insn;
 		lsampl_t data;
-		
+
 		memset(&insn,0,sizeof(insn));
 		insn.insn = INSN_WRITE;
 		insn.n = 1;
@@ -208,60 +208,67 @@ int _comedi_dio_write(comedi_t *it,unsigned int subdev,unsigned int chan,
 	}
 }
 
-EXPORT_ALIAS_DEFAULT(_comedi_dio_bitfield,comedi_dio_bitfield,0.7.18);
-int _comedi_dio_bitfield(comedi_t *it,unsigned int subdev,unsigned int mask,unsigned int *bits)
+EXPORT_ALIAS_DEFAULT(_comedi_dio_bitfield2,comedi_dio_bitfield2,0.7.23);
+int _comedi_dio_bitfield2(comedi_t *it, unsigned int subdev, unsigned int mask, unsigned int *bits, unsigned base_channel)
 {
 	int ret;
 	unsigned int m,bit;
 	subdevice *s;
 
-	if(!valid_subd(it,subdev))
+	if(!valid_subd(it, subdev))
 		return -1;
 
-	s=it->subdevices+subdev;
+	s = it->subdevices + subdev;
 
-	if(s->type!=COMEDI_SUBD_DIO && s->type!=COMEDI_SUBD_DO &&
-	   s->type!=COMEDI_SUBD_DI)
+	if(s->type != COMEDI_SUBD_DIO && s->type != COMEDI_SUBD_DO &&
+		s->type != COMEDI_SUBD_DI)
 		return -1;
 
-	if(s->has_insn_bits){
+	if(s->has_insn_bits)
+	{
 		comedi_insn insn;
 		lsampl_t data[2];
-		
+
 		memset(&insn,0,sizeof(insn));
 
 		insn.insn = INSN_BITS;
+		insn.chanspec = base_channel;
 		insn.n = 2;
 		insn.data = data;
 		insn.subdev = subdev;
 
-		data[0]=mask;
-		data[1]=*bits;
+		data[0] = mask;
+		data[1] = *bits;
 
-		ret = comedi_do_insn(it,&insn);
+		ret = comedi_do_insn(it, &insn);
 
-		if(ret<0)return ret;
+		if(ret < 0) return ret;
 
 		*bits = data[1];
 
 		return 0;
 	}else{
-		unsigned int i,n_chan;
-
-		n_chan=comedi_get_n_channels(it,subdev);
-		if(n_chan>32)n_chan=32;
-		for(i=0,m=1;i<n_chan;i++,m<<=1){
-			if(mask&m){
-				bit=(*bits&m)?1:0;
-				ret=comedi_dio_write(it,subdev,i,bit);
+		unsigned i;
+		for(i = 0, m = 1; i < 32; ++i, m <<= 1)
+		{
+			if(mask & m)
+			{
+				bit = (*bits & m) ? 1 : 0;
+				ret = comedi_dio_write(it, subdev, base_channel + i, bit);
 			}else{
-				ret=comedi_dio_read(it,subdev,i,&bit);
-				if(bit) *bits|=m;
-				else (*bits)&=~m;
+				ret = comedi_dio_read(it, subdev, base_channel + i, &bit);
+				if(bit) *bits |= m;
+				else (*bits) &= ~m;
 			}
-			if(ret<0)return ret;
+			if(ret < 0) return ret;
 		}
-		return (int)n_chan;
+		return 0;
 	}
+}
+
+EXPORT_ALIAS_DEFAULT(_comedi_dio_bitfield,comedi_dio_bitfield,0.7.18);
+int _comedi_dio_bitfield(comedi_t *it, unsigned int subdev, unsigned int mask, unsigned int *bits)
+{
+	return _comedi_dio_bitfield2(it, subdev, mask, bits, 0);
 }
 

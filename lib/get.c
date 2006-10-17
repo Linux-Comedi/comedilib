@@ -54,7 +54,7 @@ int _comedi_get_version_code(comedi_t *it)
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_get_driver_name,comedi_get_driver_name,0.7.18);
-char* _comedi_get_driver_name(comedi_t *it)
+const char* _comedi_get_driver_name(comedi_t *it)
 {
 	if(!valid_dev(it))
 		return NULL;
@@ -63,7 +63,7 @@ char* _comedi_get_driver_name(comedi_t *it)
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_get_board_name,comedi_get_board_name,0.7.18);
-char* _comedi_get_board_name(comedi_t *it)
+const char* _comedi_get_board_name(comedi_t *it)
 {
 	if(!valid_dev(it))
 		return NULL;
@@ -88,13 +88,13 @@ int _comedi_get_subdevice_flags(comedi_t *it,unsigned int subd)
 	if(!valid_dev(it))
 		return -1;
 	s = malloc(sizeof(comedi_subdinfo) * it->n_subdevices);
-	if(s == NULL) 
+	if(s == NULL)
 	{
 		__comedi_errno = errno;
 		return -1;
 	}
 	ret = comedi_ioctl(it->fd, COMEDI_SUBDINFO, (unsigned long)s);
-	if(ret < 0) 
+	if(ret < 0)
 	{
 		free(s);
 		return -1;
