@@ -46,41 +46,16 @@ int main(int argc, char *argv[])
 		exit(0);
 	}
 
-	printf("configuring pin %d for output...\n",channel);
-
-	ret=comedi_dio_config(device,subdevice,channel,COMEDI_OUTPUT);
-	
-	printf("toggling pin %d rapidly...\n",channel);
-
-		comedi_dio_write(device,subdevice,channel,1);
-#if 0
-	for(i=0;i<10000;i++){
-		usleep(1000000);
-		comedi_dio_write(device,subdevice,channel,1);
-		printf("1\n");
-		usleep(1000000);
-		comedi_dio_write(device,subdevice,channel,0);
-		printf("0\n");
-	}
-#endif
-
-#if 0
+	printf("configuring pin %d or subdevice %d ", channel, subdevice);
+	if(value)
 	{
-	unsigned int mask;
-	unsigned int data;
-
-	printf("toggling pin %d rapidly (using bitfield)...\n",channel);
-
-	mask = 1<<channel;
-	for(i=0;i<10000;i++){
-		data = mask;
-		comedi_dio_bitfield(device,subdevice,mask,&data);
-		data = 0;
-		comedi_dio_bitfield(device,subdevice,mask,&data);
+		printf("for output.\n");
+		ret=comedi_dio_config(device,subdevice,channel, COMEDI_OUTPUT);
+	}else
+	{
+		printf("for input.\n");
+		ret=comedi_dio_config(device,subdevice,channel, COMEDI_INPUT);
 	}
-	}
-#endif
-
 	return 0;
 }
 

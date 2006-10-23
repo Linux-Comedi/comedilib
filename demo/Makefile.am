@@ -1,6 +1,7 @@
 
 noinst_PROGRAMS = \
-	antialias ao_waveform ao_mmap apply_cal cmd dio eeprom_dump board_info \
+	antialias ao_waveform ao_mmap apply_cal choose_clock \
+	choose_routing cmd dio eeprom_dump board_info \
 	inp inpn insn ledclock mmap outp poll receiver select \
 	sender sigio sv tut1 tut2
 
@@ -21,6 +22,14 @@ ao_mmap_LDADD = $(COMEDILIB_LIBS)
 apply_cal_SOURCES = apply_cal.c common.c
 apply_cal_CFLAGS = $(COMEDILIB_CFLAGS)
 apply_cal_LDADD = $(COMEDILIB_LIBS)
+
+choose_clock_SOURCES = choose_clock.c common.c
+choose_clock_CFLAGS = $(COMEDILIB_CFLAGS)
+choose_clock_LDADD = $(COMEDILIB_LIBS)
+
+choose_routing_SOURCES = choose_routing.c common.c
+choose_routing_CFLAGS = $(COMEDILIB_CFLAGS)
+choose_routing_LDADD = $(COMEDILIB_LIBS)
 
 cmd_SOURCES = cmd.c common.c
 cmd_CFLAGS = $(COMEDILIB_CFLAGS)
