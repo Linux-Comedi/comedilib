@@ -1,4 +1,4 @@
-<!-- <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook V3.1//EN" "docbook/dtd/3.1/docbook.dtd">  -->
+<!-- <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook V4.2//EN" "docbook/dtd/4.2/docbook.dtd">  -->
 
 <section id="writingprograms">
 <title>
@@ -134,7 +134,7 @@ The number of available ranges can be found using the function:
 For each value of the range parameter for a particular
 subdevice/channel, you can get range information using:
 <programlisting>
- <link linkend="ref-type-comedi-range">comedi_range</link> * <link linkend="func-ref-comedi-get-range">comedi_get_range</link>(<link linkend="ref-type-comedi-t">comedi_t</link> * device, 
+ <link linkend="ref-type-comedi-range">comedi_range</link> * <link linkend="func-ref-comedi-get-range">comedi_get_range</link>(<link linkend="ref-type-comedi-t">comedi_t</link> * device,
                                  unsigned int subdevice, unsigned int channel, unsigned int range);
 </programlisting>
 which returns a pointer to a
@@ -206,12 +206,12 @@ file=<link linkend="func-ref-comedi-open">comedi_open</link>("/dev/comedi0");
 </programlisting>
 
 <para>
-where <parameter class=function>file</parameter> is of type 
+where <parameter class=function>file</parameter> is of type
 <parameter>(<link linkend="ref-type-comedi-t">comedi_t</link> *)</parameter>.
 This function calls <function>open()</function>, as done explicitly in
 a previous section, but also fills the
 <link linkend="ref-type-comedi-t">comedi_t</link>
-structure with lots of goodies; this information will be useful soon.  
+structure with lots of goodies; this information will be useful soon.
 </para>
 
 <para>
@@ -226,7 +226,8 @@ maxdata=<link linkend="func-ref-comedi-get-maxdata">comedi_get_maxdata</link>(fi
 Wow! How easy. And the range information?
 
 <programlisting>
-<link linkend="ref-type-comedi-range">comedi_range</link> * <link linkend="func-ref-comedi-get-range">comedi_get_range(<link linkend="ref-type-comedi-t">comedi_t</link>comedi_t</link> *it,unsigned int subdevice,unsigned int chan,unsigned int range);
+<link linkend="ref-type-comedi-range">comedi_range</link> * <link linkend="func-ref-comedi-get-range">comedi_get_range</link>
+(<link linkend="ref-type-comedi-t">comedi_t</link>comedi_t *it,unsigned int subdevice,unsigned int chan,unsigned int range);
 </programlisting>
 
 </para>
@@ -386,7 +387,7 @@ Your fourth &comedi; program: commands
 <para>
 This example programs an analog output subdevice with &comedi;'s most
 powerful acquisition function, the asynchronous
-<link linkend="commandsstreaming">command</link>, to generate a waveform. 
+<link linkend="commandsstreaming">command</link>, to generate a waveform.
 </para>
 
 <para>
@@ -407,11 +408,11 @@ for output to the DAC.
 <para>
 Once you have
 issued the command, &comedi; expects you to keep the buffer full of
-data to output to the acquisition card.  This is done by 
-<function>write()</function>.  Since there may be a delay between the 
+data to output to the acquisition card.  This is done by
+<function>write()</function>.  Since there may be a delay between the
 <link linkend="func-ref-comedi-command">comedi_command()</link>
 and a subsequent <function>write()</function>, you
-should fill the buffer using <function>write()</function> before you call 
+should fill the buffer using <function>write()</function> before you call
 <link linkend="func-ref-comedi-command">comedi_command()</link>,
 as is done here.
 <programlisting>
@@ -480,7 +481,7 @@ int main(int argc, char *argv[])
   unsigned int maxdata;
   <link linkend="ref-type-comedi-range">comedi_range</link> *rng;
   int ret;
-  <link linkend="ref-type-lsampl-t">lsampl_t</link> insn_data = 0; 
+  <link linkend="ref-type-lsampl-t">lsampl_t</link> insn_data = 0;
 
   parse_options(argc,argv);
 
@@ -540,7 +541,7 @@ int main(int argc, char *argv[])
     exit(1);
   }
   printf("m=%d\n",m);
-  
+
   ret = <link linkend="comedi-internal-trigger">comedi_internal_trigger</link>(dev, subdevice, 0);
 <![CDATA[
   if(ret<0){

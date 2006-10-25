@@ -1,4 +1,4 @@
-<!-- <!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook V3.1//EN"> -->
+<!-- <!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook V4.2//EN"> -->
 
 <glossary id="comedilib-glossary">
   <title>
@@ -29,7 +29,7 @@ buffer
 &comedi; uses permanently allocated kernel memory for streaming input
 and output to store data that has been measured by a device, but has
 not been read by an application.  These buffers can be resized by the
-Comedilib function <function>comedi_buffer_XXX()</function> or the 
+Comedilib function <function>comedi_buffer_XXX()</function> or the
 <function>comedi_config</function>
 utility.
       </para>
@@ -45,7 +45,7 @@ buffer overflow
 This is an error message that indicates that the driver ran out of
 space in a &comedi; buffer to put samples.  It means that the application
 is not copying data out of the buffer quickly enough.  Often, this
-problem can be fixed by making the &comedi; buffer larger.  See 
+problem can be fixed by making the &comedi; buffer larger.  See
 <function>comedi_buffer_XXX</function> for more information.
       </para>
     </glossdef>

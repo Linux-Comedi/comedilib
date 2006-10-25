@@ -1,4 +1,4 @@
-<!-- <!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook V3.1//EN"> -->
+<!-- <!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook V4.2//EN"> -->
 
 <section id="introduction">
 
@@ -52,7 +52,7 @@ configuration and calibration utilities, and demonstration programs.
 the same interface as <emphasis>comedilib</emphasis> in kernel space,
 and suitable for <emphasis>real-time</emphasis> tasks. It is
 effectively a <quote>kernel library</quote> for using &comedi; from
-real-time tasks. 
+real-time tasks.
 </para>
 </listitem>
 
@@ -99,7 +99,7 @@ encoders, pulse generators, frequency and pulse timers, etc.).
 Schleef designed a structure which is a balance between
 <emphasis>modularity</emphasis> and <emphasis>complexity</emphasis>:
 it's fairly easy to integrate a new card because most of the
-infrastructure part of other, similar drivers can be reused, and 
+infrastructure part of other, similar drivers can be reused, and
 learning the generic and hence somewhat <quote>heavier</quote> &comedi;
 API doesn't scare away new contributors from integrating their drivers
 into the &comedi; framework.
@@ -286,8 +286,8 @@ available in the kernel of the real-time operating systems
 <ulink
  url="http://www.rtlinux-gpl.org/">RTLinux/GPL
 </ulink>
-or <ulink url="http://www.rtai.org">RTAI</ulink>. 
-The APIs of RTAI and RTLinux/Free differ in 
+or <ulink url="http://www.rtai.org">RTAI</ulink>.
+The APIs of RTAI and RTLinux/Free differ in
 different ways, so the &comedi; developers have spent a lot of efforts
 to make generic wrappers to the required RTOS primitives: timers,
 memory allocation, registration of interrupt handlers, etc.
@@ -333,7 +333,7 @@ memory.
 <listitem>
 <para>
 <emphasis role="strong">Pulse</emphasis>-based signals (counters,
-timers, encoders, etc.) are conceptually 
+timers, encoders, etc.) are conceptually
 only a bit more complex than digital inputs and outputs, in that
 they only add some <emphasis>timing specifications</emphasis> to the
 signal. &comedi; has still only a limited number of drivers for this
@@ -378,7 +378,7 @@ outputs.  Each sub-device has parameters for: the number of channel
 and the type of the channels.
 </para>
 </listitem>
-                                                                                
+
 <listitem>
 <para>
 <emphasis role="strong">Device</emphasis>: a set of sub-devices that are physically implemented on the
@@ -398,7 +398,7 @@ sub-device with two analog output channels, and a
 Some interface cards have extra components that don't fit in the
 above-mentioned classification, such as an EEPROM to store
 configuration and board parameters, or calibration inputs. These
-special components are also classified as <quote>sub-devices</quote> in 
+special components are also classified as <quote>sub-devices</quote> in
 &comedi;.
 </para>
 
@@ -566,7 +566,7 @@ Scans are not directly available as stand-alone function calls in the
 <emphasis role="strong">Command</emphasis>: a command is
 <emphasis>sequence</emphasis> of
 <emphasis>scans</emphasis>, for which conditions have been specified
-that determine when the acquisition will start and stop.  A 
+that determine when the acquisition will start and stop.  A
 <function>comedi_command()</function> function call generates
 <emphasis role="strong">aynchronous</emphasis> data acquisition:
 as soon as the command information has been filled in, the
@@ -592,7 +592,7 @@ prepared (but not started) the hardware for the acquisition.
 The command functionality is very configurable with respect to
 choosing which <emphasis role="strong">events</emphasis> will signal
 the starting or stopping of the programmed acquisition: external triggers,
-internal triggers, end of scan interrupts, timers, etc. 
+internal triggers, end of scan interrupts, timers, etc.
 The user of the driver can execute a &comedi;
 <emphasis>instruction</emphasis> that sends a
 trigger signal to the device driver. What the driver does exactly with
@@ -606,7 +606,7 @@ instruction or command that initiated the current acquisition.
 </para>
 <para>
 Typically, there is one synchronous triggering instruction for each
-<emphasis>subdevice</emphasis>. 
+<emphasis>subdevice</emphasis>.
 </para>
 </listitem>
 
@@ -678,7 +678,7 @@ acquisition that has been launched previously to take place
 asynchronously (i.e., the card fills up som shared memory buffer
 autonomously, and only warns the user program after it has finished).
 The mechanisms for synchronization and interrupt handling are a bit
-different when used in real-time 
+different when used in real-time
 (<application>RTAI</application> or
 <application>RTLinux/Free</application>) or non real-time, but both
 contexts are encapsulated wihting the same &comedi; calls.
@@ -699,7 +699,7 @@ device drivers, through file operations on entries in the
 device's functionality), or interactively from the command line
 through the <quote>files</quote> in the
 <filename class=directory>/proc</filename> directory (which allow to
-inspect the status of a &comedi; device).  
+inspect the status of a &comedi; device).
 </para>
 
 </section>

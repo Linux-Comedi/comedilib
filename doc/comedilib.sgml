@@ -1,4 +1,4 @@
-<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook V3.1//EN" [
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook V4.2//EN" [
 <!ENTITY intro SYSTEM "intro.sgml">
 <!ENTITY install SYSTEM "install.sgml">
 <!ENTITY tutorial SYSTEM "tutorial.sgml">
@@ -14,10 +14,9 @@
 ]>
 
 <article>
-
-<artheader>
+<articleinfo>
   <title>
-    Comedi 
+    Comedi
   </title>
   <subtitle>
 The <emphasis>Control and Measurement Device Interface</emphasis>
@@ -104,7 +103,7 @@ USA.
  </para>
  </legalnotice>
 
-</artheader>
+</articleinfo>
 
 &intro;
 
@@ -130,7 +129,7 @@ USA.
     &comedi; Reference
   </title>
   <para>
-    Reference for 
+    Reference for
   <link linkend="constantsmacros">constants and macros</link>,
   <link linkend="datatypesstructures">data types and structures</link>,
   and <link linkend="functionreference">functions</link>.
