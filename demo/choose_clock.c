@@ -1,8 +1,9 @@
 /*
- * Digital I/O example
+ * INSN_CONFIG_SET_CLOCK_SRC example
  * Part of Comedilib
  *
  * Copyright (c) 1999,2000 David A. Schleef <ds@schleef.org>
+ * Copyright (c) 2007 Frank Mori Hess <fmhess@users.sourceforge.net>
  *
  * This file may be freely modified, distributed, and combined with
  * other software, as long as proper attribution is given in the
@@ -31,6 +32,9 @@ comedi_t *device;
 
 int main(int argc, char *argv[])
 {
+	unsigned period_ns;
+	int retval;
+
 	freq = 0.;
 	parse_options(argc,argv);
 
@@ -39,7 +43,6 @@ int main(int argc, char *argv[])
 		comedi_perror(filename);
 		exit(0);
 	}
-	unsigned period_ns;
 	if(freq > 0.)
 		period_ns = 1e9 / freq;
 	else
@@ -63,7 +66,7 @@ int main(int argc, char *argv[])
 	data[1] = value;
 	data[2] = period_ns;
 
-	int retval = comedi_do_insn(device, &insn);
+	retval = comedi_do_insn(device, &insn);
 	if(retval < 0) comedi_perror("comedi_do_insn");
 	return retval;
 }
