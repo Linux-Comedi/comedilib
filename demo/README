@@ -23,7 +23,9 @@ DEMO PROGRAMS:
 ao_waveform:
 	You need a device (and driver) capable of streaming analog output,
 	which currently is some of the members of the NI AT-MIO and PCI-MIO
-	E series.  Creates a sine wave on an analog output channel.
+	E series.  Creates a sine wave on an analog output channel.  You
+	can specify the frequency of the generated sine wave on the
+	command line.
 
 board_info:
 	Displays some information that Comedi knows about a device.
