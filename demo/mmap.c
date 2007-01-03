@@ -30,8 +30,8 @@ unsigned int chanlist[256];
 
 void *map;
 
-int prepare_cmd_lib(comedi_t *dev,int subdevice,comedi_cmd *cmd);
-int prepare_cmd(comedi_t *dev,int subdevice,comedi_cmd *cmd);
+int prepare_cmd_lib(comedi_t *dev, int subdevice, int n_scan, int n_chan, unsigned period_nanosec, comedi_cmd *cmd);
+int prepare_cmd(comedi_t *dev, int subdevice, int n_scan, int n_chan, unsigned period_nanosec, comedi_cmd *cmd);
 
 
 int main(int argc, char *argv[])
@@ -42,45 +42,47 @@ int main(int argc, char *argv[])
 	int front, back;
 	int ret;
 	int i;
+	struct parsed_options options;
 
-	parse_options(argc,argv);
+	init_parsed_options(&options);
+	parse_options(&options, argc, argv);
 
-	dev = comedi_open(filename);
+	dev = comedi_open(options.filename);
 	if(!dev){
-		comedi_perror(filename);
+		comedi_perror(options.filename);
 		exit(1);
 	}
 
-	size = comedi_get_buffer_size(dev,subdevice);
-	fprintf(stderr,"buffer size is %d\n",size);
+	size = comedi_get_buffer_size(dev, options.subdevice);
+	fprintf(stderr,"buffer size is %d\n", size);
 
-	map=mmap(NULL,size,PROT_READ,MAP_SHARED,comedi_fileno(dev),0);
-	fprintf(stderr,"map=%p\n",map);
+	map = mmap(NULL,size,PROT_READ,MAP_SHARED, comedi_fileno(dev), 0);
+	fprintf(stderr, "map=%p\n", map);
 	if( map == MAP_FAILED ){
 		perror( "mmap" );
 		exit(1);
 	}
 
-	for(i=0;i<n_chan;i++){
-		chanlist[i]=CR_PACK(channel+i,range,aref);
+	for(i = 0; i < options.n_chan; i++){
+		chanlist[i] = CR_PACK(options.channel + i, options.range, options.aref);
 	}
 
-	//prepare_cmd_lib(dev,subdevice,cmd);
-	prepare_cmd(dev,subdevice,cmd);
-	
-	ret = comedi_command_test(dev,cmd);
+	//prepare_cmd_lib(dev, options.subdevice, options.n_scan, options.n_chan, 1e9 / options.freq, cmd);
+	prepare_cmd(dev, options.subdevice, options.n_scan, options.n_chan, 1e9 / options.freq, cmd);
 
-	ret = comedi_command_test(dev,cmd);
+	ret = comedi_command_test(dev, cmd);
 
-	if(ret!=0){
+	ret = comedi_command_test(dev, cmd);
+
+	if(ret != 0){
 		fprintf(stderr,"command_test failed\n");
 		exit(1);
 	}
 
-	dump_cmd(stderr,cmd);
+	dump_cmd(stderr, cmd);
 
-	ret = comedi_command(dev,cmd);
-	if(ret<0){
+	ret = comedi_command(dev, cmd);
+	if(ret < 0){
 		comedi_perror("comedi_command");
 		exit(1);
 	}
@@ -88,27 +90,27 @@ int main(int argc, char *argv[])
 	front = 0;
 	back = 0;
 	while(1){
-		front += comedi_get_buffer_contents(dev,subdevice);
-		if(verbose)fprintf(stderr,"front = %d, back = %d\n",front,back);
-		if(front<back)break;
-		if(front==back){
-			//comedi_poll(dev,subdevice);
+		front += comedi_get_buffer_contents(dev, options.subdevice);
+		if(options.verbose) fprintf(stderr, "front = %d, back = %d\n", front, back);
+		if(front < back) break;
+		if(front == back){
+			//comedi_poll(dev, options.subdevice);
 			usleep(10000);
 			continue;
 		}
 
-		for(i=back;i<front;i+=sizeof(sampl_t)){
+		for(i = back; i < front; i += sizeof(sampl_t)){
 			static int col = 0;
-			printf("%d ",*(sampl_t *)(map+(i%size)));
+			printf("%d ",*(sampl_t *)(map + (i % size)));
 			col++;
-			if(col==n_chan){
+			if(col == options.n_chan){
 				printf("\n");
-				col=0;
+				col = 0;
 			}
 		}
 
-		ret = comedi_mark_buffer_read(dev,subdevice,front-back);
-		if(ret<0){
+		ret = comedi_mark_buffer_read(dev, options.subdevice, front - back);
+		if(ret < 0){
 			comedi_perror("comedi_mark_buffer_read");
 			break;
 		}
@@ -118,11 +120,11 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-int prepare_cmd_lib(comedi_t *dev,int subdevice,comedi_cmd *cmd)
+int prepare_cmd_lib(comedi_t *dev, int subdevice, int n_scan, int n_chan, unsigned period_nanosec, comedi_cmd *cmd)
 {
 	int ret;
 
-	ret = comedi_get_cmd_generic_timed(dev,subdevice,cmd,1e9/freq);
+	ret = comedi_get_cmd_generic_timed(dev, subdevice, cmd, period_nanosec);
 	if(ret<0){
 		comedi_perror("comedi_get_cmd_generic_timed\n");
 		return ret;
@@ -132,12 +134,12 @@ int prepare_cmd_lib(comedi_t *dev,int subdevice,comedi_cmd *cmd)
 	cmd->chanlist_len = n_chan;
 	cmd->scan_end_arg = n_chan;
 
-	if(cmd->stop_src==TRIG_COUNT)cmd->stop_arg = n_scan;
+	if(cmd->stop_src == TRIG_COUNT) cmd->stop_arg = n_scan;
 
 	return 0;
 }
 
-int prepare_cmd(comedi_t *dev,int subdevice,comedi_cmd *cmd)
+int prepare_cmd(comedi_t *dev, int subdevice, int n_scan, int n_chan, unsigned period_nanosec, comedi_cmd *cmd)
 {
 	memset(cmd,0,sizeof(*cmd));
 
@@ -149,7 +151,7 @@ int prepare_cmd(comedi_t *dev,int subdevice,comedi_cmd *cmd)
 	cmd->start_arg = 0;
 
 	cmd->scan_begin_src = TRIG_TIMER;
-	cmd->scan_begin_arg = 1e9/freq;
+	cmd->scan_begin_arg = period_nanosec;
 
 	cmd->convert_src = TRIG_TIMER;
 	cmd->convert_arg = 1;

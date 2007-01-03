@@ -10,7 +10,7 @@
  */
 
 /*
- * Requirements:  
+ * Requirements:
  *    - A board with a digital output subdevice and a subdevice that
  *      can trigger on an external digital line.  A parallel port
  *      satisfies these requirements.
@@ -58,7 +58,7 @@ sampl_t buf[BUFSZ];
 unsigned int chanlist[16];
 
 
-void prepare_cmd(comedi_t *dev,comedi_cmd *cmd);
+void prepare_cmd(comedi_t *dev,comedi_cmd *cmd, int subdevice);
 void do_cmd(comedi_t *dev,comedi_cmd *cmd);
 void do_toggle(void);
 
@@ -125,19 +125,19 @@ void do_toggle(void)
 
 int main(int argc, char *argv[])
 {
-	char *fn = NULL;
 	int ret;
 	comedi_cmd cmd;
+	struct parsed_options options;
 
-	fn = "/dev/comedi1";
+	init_parsed_options(&options);
+	parse_options(&options, argc, argv);
 
-	device = comedi_open(fn);
+	device = comedi_open(options.filename);
 	if(!device){
-		perror(fn);
+		perror(options.filename);
 		exit(1);
 	}
 
-	subdevice = 3;
 	out_subd = 0;
 
 	config_output();
@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
 	}
 #endif
 
-	prepare_cmd(device,&cmd);
+	prepare_cmd(device, &cmd, options.subdevice);
 
 	do_cmd(device,&cmd);
 
@@ -224,7 +224,7 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 				go = 0;
 			}else{
 				//int i;
-	
+
 				total+=ret;
 				//printf("read %d %d\n",ret,total);
 				//printf("count = %d\n",count);
@@ -245,12 +245,12 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd)
  * of scans measured is 10.  This is analogous to the old mode2
  * acquisition.
  */
-void prepare_cmd(comedi_t *dev,comedi_cmd *cmd)
+void prepare_cmd(comedi_t *dev, comedi_cmd *cmd, int subdevice)
 {
 	memset(cmd,0,sizeof(*cmd));
 
 	/* the subdevice that the command is sent to */
-	cmd->subdev =		subdevice;
+	cmd->subdev = subdevice;
 
 	/* flags */
 	cmd->flags =		TRIG_WAKE_EOS;

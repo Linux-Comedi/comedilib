@@ -36,36 +36,40 @@ int main(int argc, char *argv[])
 	int maxdata;
 	lsampl_t data;
 	double voltage;
+	struct parsed_options options;
 
-	parse_options(argc,argv);
+	init_parsed_options(&options);
+	options.subdevice = -1;
+	parse_options(&options, argc, argv);
 
-	device=comedi_open(filename);
+	device = comedi_open(options.filename);
 	if(!device){
-		comedi_perror(filename);
-		exit(0);
+		comedi_perror(options.filename);
+		exit(-1);
 	}
 
-	subdevice=comedi_find_subdevice_by_type(device,COMEDI_SUBD_AI,0);
-	if(subdevice<0){
-		printf("no analog input subdevice found\n");
-		exit(0);
+	if(options.subdevice < 0)
+	{
+		options.subdevice = comedi_find_subdevice_by_type(device, COMEDI_SUBD_AI, 0);
+		if(options.subdevice<0){
+			printf("no analog input subdevice found\n");
+			exit(-1);
+		}
 	}
+	n_chans = comedi_get_n_channels(device, options.subdevice);
+	for(chan = 0; chan < n_chans; ++chan){
+		printf("%d: ", chan);
 
-	n_chans=comedi_get_n_channels(device,subdevice);
-	for(chan=0;chan<n_chans;chan++){
-		printf("%d: ",chan);
+		n_ranges = comedi_get_n_ranges(device, options.subdevice, chan);
 
-		n_ranges=comedi_get_n_ranges(device,subdevice,chan);
-
-		maxdata=comedi_get_maxdata(device,subdevice,chan);
-		for(range=0;range<n_ranges;range++){
-			comedi_data_read(device,subdevice,chan,range,aref,&data);
-			voltage=comedi_to_phys(data,comedi_get_range(device,subdevice,chan,range),maxdata);
-			printf("%g ",voltage);
+		maxdata = comedi_get_maxdata(device, options.subdevice, chan);
+		for(range = 0; range < n_ranges; range++){
+			comedi_data_read(device, options.subdevice, chan, options.range, options.aref, &data);
+			voltage = comedi_to_phys(data, comedi_get_range(device, options.subdevice, chan, options.range), maxdata);
+			printf("%g ", voltage);
 		}
 		printf("\n");
 	}
-	
-	exit(0);
+	return 0;
 }
 

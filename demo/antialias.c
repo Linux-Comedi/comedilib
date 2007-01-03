@@ -47,28 +47,30 @@ int main(int argc, char *argv[])
 {
 	lsampl_t data;
 	int ret;
+	struct parsed_options options;
 
-	parse_options(argc,argv);
+	init_parsed_options(&options);
+	parse_options(&options, argc, argv);
 
-	device=comedi_open(filename);
+	device = comedi_open(options.filename);
 	if(!device){
-		comedi_perror(filename);
+		comedi_perror(options.filename);
 		exit(0);
 	}
 
-	data = value; 
-	if(verbose){
+	data = options.value;
+	if(options.verbose){
 		printf("writing %d to device=%s subdevice=%d channel=%d range=%d analog reference=%d\n",
-			data,filename,subdevice,channel,range,aref);
+			data, options.filename, options.subdevice, options.channel, options.range, options.aref);
 	}
 
-	ret=comedi_data_write(device,subdevice,channel,range,aref,data);
+	ret = comedi_data_write(device, options.subdevice, options.channel, options.range, options.aref, data);
 	if(ret<0){
-		comedi_perror(filename);
+		comedi_perror(options.filename);
 		exit(0);
 	}
 
-	printf("%d\n",data);
+	printf("%d\n", data);
 
 	ao_antialias((1000<<16)+1000);
 

@@ -37,36 +37,33 @@ comedi_t *device;
 #define BUFSZ 1024
 sampl_t buf[BUFSZ];
 
-void prepare_cmd(comedi_t *dev,comedi_cmd *cmd);
+void prepare_cmd(comedi_t *dev, comedi_cmd *cmd, int subdevice);
 void do_cmd(comedi_t *dev,comedi_cmd *cmd);
 
 int main(int argc, char *argv[])
 {
-	char *fn = NULL;
 	comedi_t *dev;
 	comedi_cmd cmd;
 	int ret;
+	struct parsed_options options;
 
-	parse_options(argc,argv);
+	init_parsed_options(&options);
+	options.channel = -1;
+	parse_options(&options, argc, argv);
 
-	//fn = "/dev/comedi1";
-	fn = "/dev/comedi0";
-
-	dev = comedi_open(fn);
+	dev = comedi_open(options.filename);
 	if(!dev){
-		perror(fn);
+		perror(options.filename);
 		exit(1);
 	}
 	device = dev;
 
-	subdevice = 0;
-
-	if(channel)pin_data=channel;
+	if(options.channel >= 0) pin_data = options.channel;
 
 	ret = fcntl(comedi_fileno(dev),F_SETFL,O_NONBLOCK);
 	if(ret<0)perror("fcntl");
 
-	prepare_cmd(dev,&cmd);
+	prepare_cmd(dev, &cmd, options.subdevice);
 
 	do_cmd(dev,&cmd);
 
@@ -152,7 +149,7 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 				go = 0;
 			}else{
 				int i;
-	
+
 				total+=ret;
 				for(i=0;i<ret/sizeof(sampl_t);i++){
 					fprintf(stderr,"%d",buf[i]>0xa000);
@@ -198,7 +195,7 @@ unsigned int chanlist[16];
  * of scans measured is 10.  This is analogous to the old mode2
  * acquisition.
  */
-void prepare_cmd(comedi_t *dev,comedi_cmd *cmd)
+void prepare_cmd(comedi_t *dev,comedi_cmd *cmd, int subdevice)
 {
 	memset(cmd,0,sizeof(comedi_cmd));
 

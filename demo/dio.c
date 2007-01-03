@@ -31,30 +31,32 @@ int main(int argc, char *argv[])
 {
 	int ret;
 	int stype;
+	struct parsed_options options;
 
-	parse_options(argc,argv);
+	init_parsed_options(&options);
+	parse_options(&options, argc, argv);
 
-	device=comedi_open(filename);
+	device = comedi_open(options.filename);
 	if(!device){
-		comedi_perror(filename);
-		exit(0);
+		comedi_perror(options.filename);
+		exit(-1);
 	}
 
-	stype = comedi_get_subdevice_type(device,subdevice);
-	if(stype!=COMEDI_SUBD_DIO){
-		printf("%d is not a digital I/O subdevice\n",subdevice);
-		exit(0);
+	stype = comedi_get_subdevice_type(device, options.subdevice);
+	if(stype != COMEDI_SUBD_DIO){
+		printf("%d is not a digital I/O subdevice\n", options.subdevice);
+		exit(-1);
 	}
 
-	printf("configuring pin %d or subdevice %d ", channel, subdevice);
-	if(value)
+	printf("configuring pin %d or subdevice %d ", options.channel, options.subdevice);
+	if(options.value)
 	{
 		printf("for output.\n");
-		ret=comedi_dio_config(device,subdevice,channel, COMEDI_OUTPUT);
+		ret = comedi_dio_config(device, options.subdevice, options.channel, COMEDI_OUTPUT);
 	}else
 	{
 		printf("for input.\n");
-		ret=comedi_dio_config(device,subdevice,channel, COMEDI_INPUT);
+		ret = comedi_dio_config(device, options.subdevice, options.channel, COMEDI_INPUT);
 	}
 	return 0;
 }

@@ -1,6 +1,6 @@
 /*
  * Demo of the comedi_sv_*() functions
- * 
+ *
  * Part of Comedilib
  *
  * Copyright (c) 1999,2000 David A. Schleef <ds@schleef.org>
@@ -28,33 +28,35 @@ int main(int argc, char *argv[])
 	int ret;
 	comedi_sv_t sv;
 	double volts;
+	struct parsed_options options;
 
-	parse_options(argc,argv);
+	init_parsed_options(&options);
+	parse_options(&options, argc, argv);
 
-	device=comedi_open(filename);
+	device = comedi_open(options.filename);
 	if(!device){
-		comedi_perror(filename);
-		exit(0);
+		comedi_perror(options.filename);
+		exit(-1);
 	}
 
-	if(verbose){
+	if(options.verbose){
 		printf("measuring device=%s subdevice=%d channel=%d range=%d analog reference=%d\n",
-			filename,subdevice,channel,range,aref);
+			options.filename, options.subdevice, options.channel, options.range, options.aref);
 	}
 
-	comedi_sv_init(&sv,device,subdevice,channel);
+	comedi_sv_init(&sv, device, options.subdevice, options.channel);
 
-	sv.range=range;
-	sv.aref=aref;
-	sv.n=100;
+	sv.range = options.range;
+	sv.aref = options.aref;
+	sv.n = 100;
 
-	ret=comedi_sv_measure(&sv,&volts);
-	if(ret<0){
+	ret = comedi_sv_measure(&sv, &volts);
+	if(ret < 0){
 		comedi_perror("comedi_sv_measure()");
-		exit(0);
+		exit(-1);
 	}
 
-	printf("%g\n",volts);
+	printf("%g\n", volts);
 
 	return 0;
 }

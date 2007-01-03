@@ -69,38 +69,35 @@ int count;
 #define BUFSZ 1024
 sampl_t buf[BUFSZ];
 
-void do_cmd_1(comedi_t *dev);
+void do_cmd_1(comedi_t *dev, int subdevice);
 void do_cmd_2(comedi_t *dev);
 void do_cmd(comedi_t *dev,comedi_cmd *cmd);
 
 int main(int argc, char *argv[])
 {
-	char *fn = NULL;
-	comedi_t *dev;
 	struct sigaction sa;
 	int ret;
 	sigset_t sigset;
 	int flags;
+	struct parsed_options options;
 
-	//fn = "/dev/comedi1";
-	fn = "/dev/comedi0";
+	init_parsed_options(&options);
+	parse_options(&options, argc, argv);
 
-	dev = comedi_open(fn);
-	if(!dev){
-		perror(fn);
+	device = comedi_open(options.filename);
+	if(!device){
+		perror(options.filename);
 		exit(1);
 	}
-	device = dev;
 
-	subdevice = 0;
 	out_subd = 2;
 
 	config_output();
 
-	fcntl(comedi_fileno(dev),F_SETOWN,getpid());
-	flags = fcntl(comedi_fileno(dev),F_GETFL);
-	ret = fcntl(comedi_fileno(dev),F_SETFL,flags|O_ASYNC);
-	//ret = fcntl(comedi_fileno(dev),F_SETFL,O_NONBLOCK|O_ASYNC);
+	fcntl(comedi_fileno(device), F_SETOWN, getpid());
+	flags = fcntl(comedi_fileno(device),F_GETFL);
+	ret = fcntl(comedi_fileno(device),F_SETFL,flags|O_ASYNC);
+	//ret = fcntl(comedi_fileno(device),F_SETFL,O_NONBLOCK|O_ASYNC);
 	if(ret<0)perror("fcntl");
 
 	memset(&sa,0,sizeof(sa));
@@ -123,7 +120,7 @@ int main(int argc, char *argv[])
 	}
 #endif
 
-	do_cmd_1(dev);
+	do_cmd_1(device, options.subdevice);
 
 	return 0;
 }
@@ -196,14 +193,14 @@ unsigned int chanlist[0];
  * of scans measured is 10.  This is analogous to the old mode2
  * acquisition.
  */
-void do_cmd_1(comedi_t *dev)
+void do_cmd_1(comedi_t *dev, int subdevice)
 {
 	comedi_cmd cmd;
 
 	memset(&cmd,0,sizeof(cmd));
 
 	/* the subdevice that the command is sent to */
-	cmd.subdev =	subdevice;
+	cmd.subdev = subdevice;
 
 	/* flags */
 	cmd.flags =	TRIG_WAKE_EOS;

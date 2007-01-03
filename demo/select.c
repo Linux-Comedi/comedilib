@@ -33,45 +33,40 @@
 #define BUFSZ 1000
 sampl_t buf[BUFSZ];
 
-int n_chans = 1;
-int n_scans = 10;
+const int n_chans = 1;
+const int n_scans = 10;
 
 unsigned int chanlist[4];
 
 comedi_t *device;
 
-void prepare_cmd(comedi_t *dev,comedi_cmd *cmd);
+void prepare_cmd(comedi_t *dev,comedi_cmd *cmd, int subdevice);
 void do_cmd(comedi_t *dev,comedi_cmd *cmd);
-
-#define sec_to_nsec(x) ((x)*1000000000)
-#define sec_to_usec(x) ((x)*1000000)
-#define sec_to_msec(x) ((x)*1000)
-#define msec_to_nsec(x) ((x)*1000000)
-#define msec_to_usec(x) ((x)*1000)
-#define usec_to_nsec(x) ((x)*1000)
 
 int main(int argc, char *argv[])
 {
 	comedi_cmd cmd;
 	int i;
+	struct parsed_options options;
 
-	parse_options(argc,argv);
+	init_parsed_options(&options);
+	parse_options(&options, argc, argv);
 
-	device = comedi_open(filename);
+	device = comedi_open(options.filename);
 	if(!device){
-		perror(filename);
+		perror(options.filename);
 		exit(1);
 	}
 
-	fcntl(comedi_fileno(device),F_SETFL,O_NONBLOCK);
+	fcntl(comedi_fileno(device), F_SETFL, O_NONBLOCK);
 
-	for(i=0;i<n_chans;i++){
-		chanlist[i]=CR_PACK(channel+i,range,aref);
+	for(i = 0; i < n_chans; i++){
+		chanlist[i] = CR_PACK(options.channel + i, options.range, options.aref);
 	}
 
-	prepare_cmd(device,&cmd);
+	prepare_cmd(device, &cmd, options.subdevice);
 
-	do_cmd(device,&cmd);
+	do_cmd(device, &cmd);
 
 	return 0;
 }
@@ -161,7 +156,7 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd)
  * of scans measured is 10.  This is analogous to the old mode2
  * acquisition.
  */
-void prepare_cmd(comedi_t *dev,comedi_cmd *cmd)
+void prepare_cmd(comedi_t *dev, comedi_cmd *cmd, int subdevice)
 {
 	memset(cmd,0,sizeof(*cmd));
 
@@ -178,7 +173,7 @@ void prepare_cmd(comedi_t *dev,comedi_cmd *cmd)
 	   src=TRIG_EXT and arg=3. */
 
 	/* In this case, we specify using TRIG_NOW to start
-	 * acquisition immediately when the command is issued.  
+	 * acquisition immediately when the command is issued.
 	 * The argument of TRIG_NOW is "number of nsec after
 	 * NOW", but no driver supports it yet.  Also, no driver
 	 * currently supports using a start_src other than

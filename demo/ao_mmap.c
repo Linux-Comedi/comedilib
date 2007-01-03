@@ -56,7 +56,7 @@ static int comedi_internal_trigger(comedi_t *dev, unsigned int subd, unsigned in
 static void write_waveform(sampl_t *buffer, int size, double amplitude, double offset, int maxdata)
 {
 	int i;
-	
+
 	for(i = 0; i < size; ++i)
 	{
 		double temp = (amplitude / 2.) * sin((2. * M_PI * i) / size) + offset;
@@ -82,47 +82,49 @@ int main(int argc, char *argv[])
 	double amplitude;
 	/* offset, in DAC units */
 	double offset;
-	int subdevice;
+	struct parsed_options options;
 
-	
-	parse_options(argc,argv);
+	init_parsed_options(&options);
+	options.subdevice = -1;
+	parse_options(&options, argc, argv);
 
 	/* Force n_chan to be 1 */
-	n_chan = 1;
+	options.n_chan = 1;
 
-	dev = comedi_open(filename);
+	dev = comedi_open(options.filename);
 	if(dev == NULL){
-		fprintf(stderr, "error opening %s\n", filename);
+		fprintf(stderr, "error opening %s\n", options.filename);
 		return -1;
 	}
-	subdevice = comedi_find_subdevice_by_type(dev,COMEDI_SUBD_AO,0);
+	if(options.subdevice < 0)
+		options.subdevice = comedi_find_subdevice_by_type(dev,COMEDI_SUBD_AO, 0);
 
-	maxdata = comedi_get_maxdata(dev,subdevice,0);
-	rng = comedi_get_range(dev,subdevice,0,0);
+	maxdata = comedi_get_maxdata(dev, options.subdevice, 0);
+	rng = comedi_get_range(dev, options.subdevice, 0, 0);
 
 	offset = (double)comedi_from_phys(0.0, rng, maxdata);
 	amplitude = (double)comedi_from_phys(1.0, rng, maxdata) - offset;
 
 	memset(&cmd,0,sizeof(cmd));
-	cmd.subdev = subdevice;
+	cmd.subdev = options.subdevice;
 	cmd.flags = 0;
 	cmd.start_src = TRIG_INT;
 	cmd.start_arg = 0;
 	cmd.scan_begin_src = TRIG_TIMER;
-	cmd.scan_begin_arg = 1e9/freq;
+	cmd.scan_begin_arg = 1e9 / options.freq;
 	cmd.convert_src = TRIG_NOW;
 	cmd.convert_arg = 0;
 	cmd.scan_end_src = TRIG_COUNT;
-	cmd.scan_end_arg = n_chan;
+	cmd.scan_end_arg = options.n_chan;
 	cmd.stop_src = TRIG_NONE;
 	cmd.stop_arg = 0;
 
 	cmd.chanlist = chanlist;
-	cmd.chanlist_len = n_chan;
+	cmd.chanlist_len = options.n_chan;
 
-	chanlist[0] = CR_PACK(channel,range,aref);
+	chanlist[0] = CR_PACK(options.channel, options.range, options.aref);
 
-	dump_cmd(stdout,&cmd);
+	dump_cmd(stdout, &cmd);
 
 	err = comedi_command_test(dev, &cmd);
 	if (err < 0) {
@@ -140,8 +142,8 @@ int main(int argc, char *argv[])
 		comedi_perror("comedi_command");
 		exit(1);
 	}
-	
-	size = comedi_get_buffer_size(dev, subdevice);
+
+	size = comedi_get_buffer_size(dev, options.subdevice);
 	fprintf(stderr, "buffer size is %d\n", size);
 	map = mmap(NULL, size, PROT_WRITE, MAP_SHARED, comedi_fileno(dev), 0);
 	if(map == MAP_FAILED)
@@ -157,20 +159,20 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 	printf("marking %i samples as written\n", num_samples);
-	ret = comedi_mark_buffer_written(dev, subdevice, size);
+	ret = comedi_mark_buffer_written(dev, options.subdevice, size);
 	if(ret < 0)
 	{
 		comedi_perror("comedi_mark_buffer_written");
 		exit(1);
 	}
-	ret = comedi_internal_trigger(dev, subdevice, 0);
+	ret = comedi_internal_trigger(dev, options.subdevice, 0);
 	if(ret<0){
 		comedi_perror("comedi_internal_trigger");
 		exit(1);
 	}
 	while(1)
 	{
-		int bytes_marked = comedi_get_buffer_contents(dev,subdevice);
+		int bytes_marked = comedi_get_buffer_contents(dev, options.subdevice);
 		int bytes_unmarked = size - bytes_marked;
 		if(bytes_marked < 0)
 		{
@@ -180,7 +182,7 @@ int main(int argc, char *argv[])
 		if(bytes_unmarked > 0)
 		{
 			// this keeps comedi from reporting a buffer underrun
-			if(comedi_mark_buffer_written(dev, subdevice, bytes_unmarked) < 0)
+			if(comedi_mark_buffer_written(dev, options.subdevice, bytes_unmarked) < 0)
 			{
 				comedi_perror("comedi_mark_buffer_written");
 				exit(1);

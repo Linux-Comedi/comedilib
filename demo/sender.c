@@ -32,7 +32,7 @@ int wait2 = usec_to_nsec(0);
 
 comedi_t *device;
 
-void write_bits(int bits);
+void write_bits(int subdevice, int bits);
 
 
 int main(int argc, char *argv[])
@@ -40,31 +40,39 @@ int main(int argc, char *argv[])
 	int ret;
 	int stype;
 	int i;
+	struct parsed_options options;
 
-	parse_options(argc,argv);
+	init_parsed_options(&options);
+	options.subdevice = -1;
+	parse_options(&options, argc, argv);
 
-	device=comedi_open(filename);
+	device = comedi_open(options.filename);
 	if(!device){
-		comedi_perror(filename);
-		exit(0);
+		comedi_perror(options.filename);
+		exit(-1);
+	}
+	if(options.subdevice < 0)
+	{
+		options.subdevice = comedi_find_subdevice_by_type(device, COMEDI_SUBD_DIO, 0);
+		if(options.subdevice < 0){
+			fprintf(stderr,"No dio subdevice found.\n");
+			exit(-1);
+		}
+	}
+	stype = comedi_get_subdevice_type(device, options.subdevice);
+	if(stype != COMEDI_SUBD_DIO){
+		printf("%d is not a digital I/O subdevice\n", options.subdevice);
+		exit(-1);
 	}
 
-	subdevice = 2;
+	printf("configuring pin %d for output...\n", chan_dat);
+	ret = comedi_dio_config(device, options.subdevice, chan_dat, COMEDI_OUTPUT);
 
-	stype = comedi_get_subdevice_type(device,subdevice);
-	if(stype!=COMEDI_SUBD_DIO){
-		printf("%d is not a digital I/O subdevice\n",subdevice);
-		exit(0);
-	}
+	printf("configuring pin %d for output...\n", chan_clk);
+	ret = comedi_dio_config(device, options.subdevice, chan_clk, COMEDI_OUTPUT);
 
-	printf("configuring pin %d for output...\n",chan_dat);
-	ret=comedi_dio_config(device,subdevice,chan_dat,COMEDI_OUTPUT);
-	
-	printf("configuring pin %d for output...\n",chan_clk);
-	ret=comedi_dio_config(device,subdevice,chan_clk,COMEDI_OUTPUT);
-	
-	for(i=0;i<0x100;i++){
-		write_bits(i);
+	for(i = 0; i < 0x100; i++){
+		write_bits(options.subdevice, i);
 	}
 	//write_bits(0xa5);
 
@@ -72,7 +80,7 @@ int main(int argc, char *argv[])
 }
 
 
-void write_bits(int bits)
+void write_bits(int subdevice, int bits)
 {
 	comedi_insnlist il;
 	comedi_insn insn[5];

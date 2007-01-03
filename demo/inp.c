@@ -33,40 +33,42 @@ int main(int argc, char *argv[])
 	comedi_range * range_info;
 	lsampl_t maxdata;
 	double physical_value;
+	struct parsed_options options;
 
-	parse_options(argc,argv);
+	init_parsed_options(&options);
+	parse_options(&options, argc, argv);
 
-	device=comedi_open(filename);
+	device = comedi_open(options.filename);
 	if(!device){
-		comedi_perror(filename);
-		exit(0);
+		comedi_perror(options.filename);
+		exit(-1);
 	}
 
-	if(verbose){
+	if(options.verbose){
 		printf("measuring device=%s subdevice=%d channel=%d range=%d analog reference=%d\n",
-			filename,subdevice,channel,range,aref);
+			options.filename, options.subdevice, options.channel, options.range, options.aref);
 	}
 
-	ret=comedi_data_read(device,subdevice,channel,range,aref,&data);
-	if(ret<0){
-		comedi_perror(filename);
-		exit(0);
+	ret = comedi_data_read(device, options.subdevice, options.channel, options.range, options.aref, &data);
+	if(ret < 0){
+		comedi_perror(options.filename);
+		exit(-1);
 	}
 
-	if(physical) {
+	if(options.physical) {
 		comedi_set_global_oor_behavior(COMEDI_OOR_NAN);
-		range_info = comedi_get_range(device,subdevice,channel,range);
-		maxdata = comedi_get_maxdata(device,subdevice,channel);
-		if(verbose) {
+		range_info = comedi_get_range(device, options.subdevice, options.channel, options.range);
+		maxdata = comedi_get_maxdata(device, options.subdevice, options.channel);
+		if(options.verbose) {
 			printf("[0,%d] -> [%g,%g]\n", maxdata,
 				range_info->min, range_info->max);
 		}
-		physical_value = comedi_to_phys(data,range_info,maxdata);
+		physical_value = comedi_to_phys(data, range_info, maxdata);
 		if(isnan(physical_value)) {
 			printf("Out of range [%g,%g]",
 				range_info->min, range_info->max);
 		} else {
-			printf("%g",physical_value);
+			printf("%g", physical_value);
 			switch(range_info->unit) {
 				case UNIT_volt: printf(" V"); break;
 				case UNIT_mA: printf(" mA"); break;
@@ -74,7 +76,7 @@ int main(int argc, char *argv[])
 				default: printf(" (unknown unit %d)",
 					range_info->unit);
 			}
-			if(verbose) {
+			if(options.verbose) {
 				printf(" (%d raw units)", data);
 			}
 		}

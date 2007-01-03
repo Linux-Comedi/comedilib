@@ -8,24 +8,27 @@
  * Definitions of some of the common code.
  */
 
-extern char *filename;
-extern int verbose_flag;
 extern comedi_t *device;
 
-extern int value;
-extern int subdevice;
-extern int channel;
-extern int aref;
-extern int range;
-extern int physical;
-extern int verbose;
-extern int n_chan;
-extern int n_scan;
-extern double freq;
+struct parsed_options
+{
+	char *filename;
+	double value;
+	int subdevice;
+	int channel;
+	int aref;
+	int range;
+	int physical;
+	int verbose;
+	int n_chan;
+	int n_scan;
+	double freq;
+};
 
-int parse_options(int argc, char *argv[]);
-char *cmd_src(int src,char *buf);
-void dump_cmd(FILE *file,comedi_cmd *cmd);
+extern void init_parsed_options(struct parsed_options *options);
+extern int parse_options(struct parsed_options *options, int argc, char *argv[]);
+extern char *cmd_src(int src,char *buf);
+extern void dump_cmd(FILE *file,comedi_cmd *cmd);
 
 
 #define sec_to_nsec(x) ((x)*1000000000)

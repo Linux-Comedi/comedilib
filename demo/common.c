@@ -15,69 +15,67 @@
 #include <stdlib.h>
 #include "examples.h"
 
+static char * const default_filename = "/dev/comedi0";
 
-char *filename="/dev/comedi0";
-int verbose = 0;
+void init_parsed_options(struct parsed_options *options)
+{
+	memset(options, 0, sizeof(struct parsed_options));
+	options->filename = default_filename;
+	options->aref = AREF_GROUND;
+	options->n_chan = 4;
+	options->n_scan = 1000;
+	options->freq = 1000.0;
+	options->physical = 0;
+	options->value = 0.;
+}
 
-int value=0;
-int subdevice=0;
-int channel=0;
-int aref=AREF_GROUND;
-int range=0;
-int n_chan=4;
-int n_scan=1000;
-double freq=1000.0;
-int physical = 0;
-
-
-int parse_options(int argc, char *argv[])
+int parse_options(struct parsed_options *options, int argc, char *argv[])
 {
 	int c;
-
 
 	while (-1 != (c = getopt(argc, argv, "a:c:s:r:f:n:N:F:pvdgom"))) {
 		switch (c) {
 		case 'f':
-			filename = optarg;
+			options->filename = optarg;
 			break;
 		case 's':
-			subdevice = strtoul(optarg,NULL,0);
+			options->subdevice = strtoul(optarg, NULL, 0);
 			break;
 		case 'c':
-			channel = strtoul(optarg,NULL,0);
+			options->channel = strtoul(optarg, NULL, 0);
 			break;
 		case 'a':
-			aref = strtoul(optarg,NULL,0);
+			options->aref = strtoul(optarg, NULL, 0);
 			break;
 		case 'r':
-			range = strtoul(optarg,NULL,0);
+			options->range = strtoul(optarg, NULL, 0);
 			break;
 		case 'n':
-			n_chan = strtoul(optarg,NULL,0);
+			options->n_chan = strtoul(optarg, NULL, 0);
 			break;
 		case 'N':
-			n_scan = strtoul(optarg,NULL,0);
+			options->n_scan = strtoul(optarg, NULL, 0);
 			break;
 		case 'F':
-			freq = strtoul(optarg,NULL,0);
+			options->freq = strtod(optarg, NULL);
 			break;
 		case 'p':
-			physical = 1;
+			options->physical = 1;
 			break;
 		case 'v':
-			verbose = 1;
+			++options->verbose;
 			break;
 		case 'd':
-			aref = AREF_DIFF;
+			options->aref = AREF_DIFF;
 			break;
 		case 'g':
-			aref = AREF_GROUND;
+			options->aref = AREF_GROUND;
 			break;
 		case 'o':
-			aref = AREF_OTHER;
+			options->aref = AREF_OTHER;
 			break;
 		case 'm':
-			aref = AREF_COMMON;
+			options->aref = AREF_COMMON;
 			break;
 		default:
 			printf("bad option\n");
@@ -86,7 +84,7 @@ int parse_options(int argc, char *argv[])
 	}
 	if(optind < argc) {
 		/* data value */
-		sscanf(argv[optind++],"%d",&value);
+		options->value = strtod(argv[optind++], NULL);
 	}
 
 	return argc;

@@ -34,30 +34,34 @@ int main(int argc, char *argv[])
 {
 	unsigned period_ns;
 	int retval;
+	lsampl_t routing;
+	struct parsed_options options;
 
-	freq = 0.;
-	parse_options(argc,argv);
+	init_parsed_options(&options);
+	options.freq = 0.;
+	parse_options(&options, argc, argv);
 
-	device=comedi_open(filename);
+	device = comedi_open(options.filename);
 	if(!device){
-		comedi_perror(filename);
-		exit(0);
+		comedi_perror(options.filename);
+		exit(-1);
 	}
-	if(freq > 0.)
-		period_ns = 1e9 / freq;
+	if(options.freq > 0.)
+		period_ns = 1e9 / options.freq;
 	else
 		period_ns = 0;
-	printf("Selecting routing %d for channel %d on subdevice %d.\n", value, channel, subdevice);
+	routing = options.value;
+	printf("Selecting routing %d for channel %d on subdevice %d.\n", routing, options.channel, options.subdevice);
 	comedi_insn insn;
 	lsampl_t data[2];
 	memset(&insn, 0, sizeof(comedi_insn));
 	insn.insn = INSN_CONFIG;
-	insn.subdev = subdevice;
-	insn.chanspec = channel;
+	insn.subdev = options.subdevice;
+	insn.chanspec = options.channel;
 	insn.data = data;
 	insn.n = sizeof(data) / sizeof(data[0]);
 	data[0] = INSN_CONFIG_SET_ROUTING;
-	data[1] = value;
+	data[1] = routing;
 
 	retval = comedi_do_insn(device, &insn);
 	if(retval < 0) comedi_perror("comedi_do_insn");

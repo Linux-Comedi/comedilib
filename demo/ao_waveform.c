@@ -70,13 +70,12 @@ double offset			= 2048;
    inefficient */
 #define BUF_LEN 0x8000
 
-int subdevice;
 int external_trigger_number = 0;
 
 sampl_t data[BUF_LEN];
 
 void dds_output(sampl_t *buf,int n);
-void dds_init(void);
+void dds_init(double waveform_frequency, double update_frequency);
 
 /* This define determines which waveform to use. */
 #define dds_init_function dds_init_sine
@@ -113,50 +112,54 @@ int main(int argc, char *argv[])
 	unsigned int maxdata;
 	comedi_range *rng;
 	int ret;
+	struct parsed_options options;
 
-	parse_options(argc,argv);
+	init_parsed_options(&options);
+	options.subdevice = -1;
+	parse_options(&options, argc, argv);
 
 	/* Force n_chan to be 1 */
-	n_chan = 1;
+	options.n_chan = 1;
 
-	if(value){
-		waveform_frequency = value;
+	if(options.value){
+		waveform_frequency = options.value;
 	}
 
-	dev = comedi_open(filename);
+	dev = comedi_open(options.filename);
 	if(dev == NULL){
-		fprintf(stderr, "error opening %s\n", filename);
+		fprintf(stderr, "error opening %s\n", options.filename);
 		return -1;
 	}
-	subdevice = comedi_find_subdevice_by_type(dev,COMEDI_SUBD_AO,0);
+	if(options.subdevice < 0)
+		options.subdevice = comedi_find_subdevice_by_type(dev, COMEDI_SUBD_AO, 0);
 
-	maxdata = comedi_get_maxdata(dev,subdevice,0);
-	rng = comedi_get_range(dev,subdevice,0,0);
+	maxdata = comedi_get_maxdata(dev, options.subdevice, 0);
+	rng = comedi_get_range(dev, options.subdevice, 0, 0);
 
-	offset = (double)comedi_from_phys(0.0,rng,maxdata);
-	amplitude = (double)comedi_from_phys(1.0,rng,maxdata) - offset;
+	offset = (double)comedi_from_phys(0.0, rng, maxdata);
+	amplitude = (double)comedi_from_phys(1.0, rng, maxdata) - offset;
 
 	memset(&cmd,0,sizeof(cmd));
-	cmd.subdev = subdevice;
+	cmd.subdev = options.subdevice;
 	cmd.flags = 0;
 	cmd.start_src = TRIG_INT;
 	cmd.start_arg = 0;
 	cmd.scan_begin_src = TRIG_TIMER;
-	cmd.scan_begin_arg = 1e9/freq;
+	cmd.scan_begin_arg = 1e9 / options.freq;
 	cmd.convert_src = TRIG_NOW;
 	cmd.convert_arg = 0;
 	cmd.scan_end_src = TRIG_COUNT;
-	cmd.scan_end_arg = n_chan;
+	cmd.scan_end_arg = options.n_chan;
 	cmd.stop_src = TRIG_NONE;
 	cmd.stop_arg = 0;
 
 	cmd.chanlist = chanlist;
-	cmd.chanlist_len = n_chan;
+	cmd.chanlist_len = options.n_chan;
 
-	chanlist[0] = CR_PACK(channel,range,aref);
-	chanlist[1] = CR_PACK(channel+1,range,aref);
+	chanlist[0] = CR_PACK(options.channel, options.range, options.aref);
+	chanlist[1] = CR_PACK(options.channel + 1, options.range, options.aref);
 
-	dds_init();
+	dds_init(waveform_frequency, options.freq);
 
 	dump_cmd(stdout,&cmd);
 
@@ -191,8 +194,8 @@ int main(int argc, char *argv[])
 	}
 	printf("m=%d\n",m);
 
-	ret = comedi_internal_trigger(dev, subdevice, 0);
-	if(ret<0){
+	ret = comedi_internal_trigger(dev, options.subdevice, 0);
+	if(ret < 0){
 		perror("comedi_internal_trigger\n");
 		exit(1);
 	}
@@ -228,9 +231,9 @@ sampl_t waveform[WAVEFORM_LEN];
 unsigned int acc;
 unsigned int adder;
 
-void dds_init(void)
+void dds_init(double waveform_frequency, double update_frequency)
 {
-	adder=waveform_frequency/freq*(1<<16)*(1<<WAVEFORM_SHIFT);
+	adder = waveform_frequency / update_frequency * (1 << 16) * (1 << WAVEFORM_SHIFT);
 
 	dds_init_function();
 }

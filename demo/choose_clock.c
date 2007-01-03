@@ -34,20 +34,24 @@ int main(int argc, char *argv[])
 {
 	unsigned period_ns;
 	int retval;
+	lsampl_t clock_selection;
+	struct parsed_options options;
 
-	freq = 0.;
-	parse_options(argc,argv);
+	init_parsed_options(&options);
+	options.freq = 0.;
+	parse_options(&options, argc, argv);
 
-	device=comedi_open(filename);
+	device = comedi_open(options.filename);
 	if(!device){
-		comedi_perror(filename);
-		exit(0);
+		comedi_perror(options.filename);
+		exit(-1);
 	}
-	if(freq > 0.)
-		period_ns = 1e9 / freq;
+	if(options.freq > 0.)
+		period_ns = 1e9 / options.freq;
 	else
 		period_ns = 0;
-	printf("Selecting master clock %d on subdevice %d.\n", value, subdevice);
+	clock_selection = options.value;
+	printf("Selecting master clock %d on subdevice %d.\n", clock_selection, options.subdevice);
 	if(period_ns)
 	{
 		printf("Clock period = %d nanoseconds.\n", period_ns);
@@ -59,11 +63,11 @@ int main(int argc, char *argv[])
 	lsampl_t data[3];
 	memset(&insn, 0, sizeof(comedi_insn));
 	insn.insn = INSN_CONFIG;
-	insn.subdev = subdevice;
+	insn.subdev = options.subdevice;
 	insn.data = data;
 	insn.n = sizeof(data) / sizeof(data[0]);
 	data[0] = INSN_CONFIG_SET_CLOCK_SRC;
-	data[1] = value;
+	data[1] = clock_selection;
 	data[2] = period_ns;
 
 	retval = comedi_do_insn(device, &insn);

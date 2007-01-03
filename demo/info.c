@@ -49,24 +49,26 @@ int main(int argc,char *argv[])
 	int n_ranges;
 	int subdev_flags;
 	comedi_range *rng;
-	
-	parse_options(argc,argv);
+	struct parsed_options options;
 
-	it=comedi_open(filename);
+	init_parsed_options(&options);
+	parse_options(&options, argc, argv);
+
+	it = comedi_open(options.filename);
 	if(!it){
-		comedi_perror(filename);
+		comedi_perror(options.filename);
 		exit(1);
 	}
 
 	printf("overall info:\n");
-	printf("  version code: 0x%06x\n",comedi_get_version_code(it));
-	printf("  driver name: %s\n",comedi_get_driver_name(it));
-	printf("  board name: %s\n",comedi_get_board_name(it));
-	printf("  number of subdevices: %d\n",n_subdevices=comedi_get_n_subdevices(it));
-	
-	for(i=0;i<n_subdevices;i++){
+	printf("  version code: 0x%06x\n", comedi_get_version_code(it));
+	printf("  driver name: %s\n", comedi_get_driver_name(it));
+	printf("  board name: %s\n", comedi_get_board_name(it));
+	printf("  number of subdevices: %d\n", n_subdevices = comedi_get_n_subdevices(it));
+
+	for(i = 0; i < n_subdevices; i++){
 		printf("subdevice %d:\n",i);
-		type=comedi_get_subdevice_type(it,i);
+		type = comedi_get_subdevice_type(it, i);
 		printf("  type: %d (%s)\n",type,subdevice_types[type]);
 		if(type==COMEDI_SUBD_UNUSED)
 			continue;
@@ -106,7 +108,7 @@ int main(int argc,char *argv[])
 		printf("  command:\n");
 		get_command_stuff(it,i);
 	}
-	
+
 	return 0;
 }
 
@@ -114,11 +116,11 @@ char *tobinary(char *s,int bits,int n)
 {
 	int bit=1<<n;
 	char *t=s;
-	
+
 	for(;bit;bit>>=1)
 		*t++=(bits&bit)?'1':'0';
 	*t=0;
-	
+
 	return s;
 }
 
@@ -137,7 +139,7 @@ void get_command_stuff(comedi_t *it,int s)
 		printf("    convert: %s\n",cmd_src(cmd.convert_src,buf));
 		printf("    scan_end: %s\n",cmd_src(cmd.scan_end_src,buf));
 		printf("    stop: %s\n",cmd_src(cmd.stop_src,buf));
-	
+
 		probe_max_1chan(it,s);
 	}
 }
