@@ -77,12 +77,12 @@ int main(int argc,char *argv[])
 		n_chans=comedi_get_n_channels(it,i);
 		printf("  number of channels: %d\n",n_chans);
 		if(!comedi_maxdata_is_chan_specific(it,i)){
-			printf("  max data value: %d\n",comedi_get_maxdata(it,i,0));
+			printf("  max data value: %lu\n", (unsigned long)comedi_get_maxdata(it,i,0));
 		}else{
 			printf("  max data value: (channel specific)\n");
 			for(chan=0;chan<n_chans;chan++){
-				printf("    chan%d: %d\n",chan,
-					comedi_get_maxdata(it,i,chan));
+				printf("    chan%d: %lu\n",chan,
+					(unsigned long)comedi_get_maxdata(it,i,chan));
 			}
 		}
 		printf("  ranges:\n");
