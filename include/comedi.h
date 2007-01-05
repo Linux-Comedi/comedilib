@@ -179,8 +179,10 @@ typedef unsigned short sampl_t;
 #define SDF_MODE2	0x0200		/* can do mode 2 */
 #define SDF_MODE3	0x0400		/* can do mode 3 */
 #define SDF_MODE4	0x0800		/* can do mode 4 */
-#define SDF_CMD		0x1000		/* can do commands */
+#define SDF_CMD		0x1000		/* can do commands (deprecated) */
 #define SDF_SOFT_CALIBRATED	0x2000	/* subdevice uses software calibration */
+#define SDF_CMD_WRITE		0x4000		/* can do output commands */
+#define SDF_CMD_READ		0x8000		/* can do input commands */
 
 #define SDF_READABLE	0x00010000	/* subdevice can be read (e.g. analog input) */
 #define SDF_WRITABLE	0x00020000	/* subdevice can be written (e.g. analog output) */
@@ -220,9 +222,6 @@ enum configuration_ids
 	INSN_CONFIG_DIO_INPUT = 0,
 	INSN_CONFIG_DIO_OUTPUT = 1,
 	INSN_CONFIG_DIO_OPENDRAIN = 2,
-	COMEDI_INPUT = INSN_CONFIG_DIO_INPUT,
-	COMEDI_OUTPUT = INSN_CONFIG_DIO_OUTPUT,
-	COMEDI_OPENDRAIN = INSN_CONFIG_DIO_OPENDRAIN,
 	INSN_CONFIG_ANALOG_TRIG = 16,
 //	INSN_CONFIG_WAVEFORM = 17,
 //	INSN_CONFIG_TRIG = 18,
@@ -240,6 +239,10 @@ enum configuration_ids
 	INSN_CONFIG_DIO_QUERY = 28,
 	INSN_CONFIG_PWM_OUTPUT = 29,
 	INSN_CONFIG_GET_PWM_OUTPUT = 30,
+	INSN_CONFIG_ARM = 31,
+	INSN_CONFIG_DISARM = 32,
+	INSN_CONFIG_GET_COUNTER_STATUS = 33,
+	INSN_CONFIG_RESET = 34,
 	INSN_CONFIG_GPCT_SINGLE_PULSE_GENERATOR = 1001, // Use CTR as single pulsegenerator
 	INSN_CONFIG_GPCT_PULSE_TRAIN_GENERATOR = 1002, // Use CTR as pulsetraingenerator
 	INSN_CONFIG_GPCT_QUADRATURE_ENCODER = 1003, // Use the counter as encoder
@@ -247,12 +250,19 @@ enum configuration_ids
 	INSN_CONFIG_GET_GATE_SRC = 2002,	// Get gate source
 	INSN_CONFIG_SET_CLOCK_SRC = 2003,	// Set master clock source
 	INSN_CONFIG_GET_CLOCK_SRC = 2004,	// Get master clock source
-	INSN_CONFIG_8254_SET_MODE = 4097,
+	INSN_CONFIG_SET_COUNTER_MODE = 4097,
+	INSN_CONFIG_8254_SET_MODE = INSN_CONFIG_SET_COUNTER_MODE,	/* deprecated */
 	INSN_CONFIG_8254_READ_STATUS = 4098,
 	INSN_CONFIG_SET_ROUTING = 4099,
 	INSN_CONFIG_GET_ROUTING = 4109,
 };
 
+enum comedi_io_direction
+{
+	COMEDI_INPUT = 0,
+	COMEDI_OUTPUT = 1,
+	COMEDI_OPENDRAIN = 2
+};
 
 /* ioctls */
 
@@ -469,34 +479,11 @@ struct comedi_bufinfo_struct{
 #define GPCT_RESET_COUNTER_ON_INDEX 1
 
 /*
-  Counter clock and gate source configuration.
-
-  Four config commands to set/get the gate/clock source for a counter channel:
-
-  0 ID: INSN_CONFIG_SET_GATE_SRC
-  1 gate source
-
-  0 ID: INSN_CONFIG_GET_GATE_SRC
-  1 <-- Current gate source returned here.
-
-  0 ID: INSN_CONFIG_SET_CLOCK_SRC
-  1 clock source
-
-  0 ID: INSN_CONFIG_GET_CLOCK_SRC
-  1 <-- Current clock source returned here.
-
-  Notes:
-  1. Gate and clock sources are hardware-specific.
-  2. 'chanspec' indicates the channel to configure (if the hardware supports
-     per-channel configuration of the gate and clock sources).
-*/
-
-/*
   8254 specific configuration.
 
   It supports two config commands:
 
-  0 ID: INSN_CONFIG_8254_SET_MODE
+  0 ID: INSN_CONFIG_SET_COUNTER_MODE
   1 8254 Mode
     I8254_MODE0, I8254_MODE1, ..., I8254_MODE5
     OR'ed with:
@@ -522,7 +509,154 @@ enum i8254_mode
 	I8254_BINARY = 0
 };
 
-/* clock sources for ni mio boards and INSN_CONFIG_SET_CLOCK_SRC */
+/* mode bits for NI general-purpose counters, set with INSN_CONFIG_SET_COUNTER_MODE */
+#define NI_GPCT_COUNTING_MODE_SHIFT 16
+#define NI_GPCT_INDEX_PHASE_BITSHIFT 20
+#define NI_GPCT_COUNTING_DIRECTION_SHIFT 24
+enum ni_gpct_mode_bits
+{
+	NI_GPCT_GATE_ON_BOTH_EDGES_BIT = 0x4,
+	NI_GPCT_EDGE_GATE_MODE_MASK = 0x18,
+	NI_GPCT_EDGE_GATE_STARTS_STOPS_BITS = 0x0,
+	NI_GPCT_EDGE_GATE_STOPS_STARTS_BITS = 0x8,
+	NI_GPCT_EDGE_GATE_STARTS_BITS = 0x10,
+	NI_GPCT_EDGE_GATE_NO_STARTS_NO_STOPS_BITS = 0x18,
+	NI_GPCT_STOP_MODE_MASK = 0x60,
+	NI_GPCT_STOP_ON_GATE_BITS = 0x00,
+	NI_GPCT_STOP_ON_GATE_OR_TC_BITS = 0x20,
+	NI_GPCT_STOP_ON_GATE_OR_SECOND_TC_BITS = 0x40,
+	NI_GPCT_LOAD_B_SELECT_BIT = 0x80,
+	NI_GPCT_OUTPUT_MODE_MASK = 0x300,
+	NI_GPCT_OUTPUT_TC_PULSE_BITS = 0x100,
+	NI_GPCT_OUTPUT_TC_TOGGLE_BITS = 0x200,
+	NI_GPCT_OUTPUT_TC_OR_GATE_TOGGLE_BITS = 0x300,
+	NI_GPCT_HARDWARE_DISARM_MASK = 0xc00,
+	NI_GPCT_NO_HARDWARE_DISARM_BITS = 0x000,
+	NI_GPCT_DISARM_AT_TC_BITS = 0x400,
+	NI_GPCT_DISARM_AT_GATE_BITS = 0x800,
+	NI_GPCT_DISARM_AT_TC_OR_GATE_BITS = 0xc00,
+	NI_GPCT_LOADING_ON_TC_BIT = 0x1000,
+	NI_GPCT_LOADING_ON_GATE_BIT = 0x4000,
+	NI_GPCT_COUNTING_MODE_MASK = 0x7 << NI_GPCT_COUNTING_MODE_SHIFT,
+	NI_GPCT_COUNTING_MODE_NORMAL_BITS = 0x0 << NI_GPCT_COUNTING_MODE_SHIFT,
+	NI_GPCT_COUNTING_MODE_QUADRATURE_X1_BITS = 0x1 << NI_GPCT_COUNTING_MODE_SHIFT,
+	NI_GPCT_COUNTING_MODE_QUADRATURE_X2_BITS = 0x2 << NI_GPCT_COUNTING_MODE_SHIFT,
+	NI_GPCT_COUNTING_MODE_QUADRATURE_X4_BITS = 0x3 << NI_GPCT_COUNTING_MODE_SHIFT,
+	NI_GPCT_COUNTING_MODE_TWO_PULSE_BITS = 0x4 << NI_GPCT_COUNTING_MODE_SHIFT,
+	NI_GPCT_COUNTING_MODE_SYNC_SOURCE_BITS = 0x6 << NI_GPCT_COUNTING_MODE_SHIFT,
+	NI_GPCT_INDEX_PHASE_MASK = 0x3 << NI_GPCT_INDEX_PHASE_BITSHIFT,
+	NI_GPCT_INDEX_PHASE_LOW_A_LOW_B_BITS = 0x0 << NI_GPCT_INDEX_PHASE_BITSHIFT,
+	NI_GPCT_INDEX_PHASE_LOW_A_HIGH_B_BITS = 0x1 << NI_GPCT_INDEX_PHASE_BITSHIFT,
+	NI_GPCT_INDEX_PHASE_HIGH_A_LOW_B_BITS = 0x2 << NI_GPCT_INDEX_PHASE_BITSHIFT,
+	NI_GPCT_INDEX_PHASE_HIGH_A_HIGH_B_BITS = 0x3 << NI_GPCT_INDEX_PHASE_BITSHIFT,
+	NI_GPCT_INDEX_ENABLE_BIT = 0x400000,
+	NI_GPCT_COUNTING_DIRECTION_MASK = 0x3 << NI_GPCT_COUNTING_DIRECTION_SHIFT,
+	NI_GPCT_COUNTING_DIRECTION_DOWN_BITS = 0x00 << NI_GPCT_COUNTING_DIRECTION_SHIFT,
+	NI_GPCT_COUNTING_DIRECTION_UP_BITS = 0x1 << NI_GPCT_COUNTING_DIRECTION_SHIFT,
+	NI_GPCT_COUNTING_DIRECTION_HW_UP_DOWN_BITS = 0x2 << NI_GPCT_COUNTING_DIRECTION_SHIFT,
+	NI_GPCT_COUNTING_DIRECTION_HW_GATE_BITS = 0x3 << NI_GPCT_COUNTING_DIRECTION_SHIFT,
+	NI_GPCT_RELOAD_SOURCE_MASK = 0xc000000,
+	NI_GPCT_RELOAD_SOURCE_FIXED_BITS = 0x0,
+	NI_GPCT_RELOAD_SOURCE_SWITCHING_BITS = 0x4000000,
+	NI_GPCT_RELOAD_SOURCE_GATE_SELECT_BITS = 0x8000000,
+	NI_GPCT_OR_GATE_BIT = 0x10000000,
+	NI_GPCT_INVERT_OUTPUT_BIT = 0x20000000
+};
+
+/* Bits for setting a clock source with
+ * INSN_CONFIG_SET_CLOCK_SRC when using NI general-purpose counters. */
+enum ni_gpct_clock_source_bits
+{
+	NI_GPCT_CLOCK_SRC_SELECT_MASK = 0x1f,
+	NI_GPCT_TIMEBASE_1_CLOCK_SRC_BITS = 0x0,
+	NI_GPCT_TIMEBASE_2_CLOCK_SRC_BITS = 0x1,
+	NI_GPCT_TIMEBASE_3_CLOCK_SRC_BITS = 0x2,
+	NI_GPCT_LOGIC_LOW_CLOCK_SRC_BITS = 0x3,
+	NI_GPCT_NEXT_GATE_CLOCK_SRC_BITS = 0x4,
+	NI_GPCT_NEXT_TC_CLOCK_SRC_BITS = 0x5,
+	NI_GPCT_SOURCE_PIN_i_CLOCK_SRC_BITS = 0x6, /* NI 660x-specific */
+	NI_GPCT_PXI10_CLOCK_SRC_BITS = 0x7,
+	NI_GPCT_PXI_STAR_TRIGGER_CLOCK_SRC_BITS = 0x8,
+	NI_GPCT_ANALOG_TRIGGER_OUT_CLOCK_SRC_BITS = 0x9,
+	NI_GPCT_PRESCALE_MODE_CLOCK_SRC_MASK = 0x30000000,
+	NI_GPCT_NO_PRESCALE_CLOCK_SRC_BITS = 0x0,
+	NI_GPCT_PRESCALE_X2_CLOCK_SRC_BITS = 0x10000000,	/* divide source by 2 */
+	NI_GPCT_PRESCALE_X8_CLOCK_SRC_BITS = 0x20000000,	/* divide source by 8 */
+	NI_GPCT_INVERT_CLOCK_SRC_BIT = 0x80000000
+};
+static inline unsigned NI_GPCT_SOURCE_PIN_CLOCK_SRC_BITS(unsigned n) /* NI 660x-specific */
+{
+	return 0x10 + n;
+}
+static inline unsigned NI_GPCT_RTSI_CLOCK_SRC_BITS(unsigned n)
+{
+	return 0x18 + n;
+}
+static inline unsigned NI_GPCT_PFI_CLOCK_SRC_BITS(unsigned n) /* no pfi on NI 660x */
+{
+	return 0x20 + n;
+}
+
+/* Possibilities for setting a gate source with
+INSN_CONFIG_SET_GATE_SRC when using NI general-purpose counters.
+May be bitwise-or'd with CR_EDGE or CR_INVERT. */
+enum ni_gpct_gate_select
+{
+	/* m-series gates */
+	NI_GPCT_AI_START2_GATE_SELECT = 0x12,
+	NI_GPCT_PXI_STAR_TRIGGER_GATE_SELECT = 0x13,
+	NI_GPCT_NEXT_OUT_GATE_SELECT = 0x14,
+	NI_GPCT_AI_START1_GATE_SELECT = 0x1c,
+	NI_GPCT_NEXT_SOURCE_GATE_SELECT = 0x1d,
+	NI_GPCT_ANALOG_TRIGGER_OUT_GATE_SELECT = 0x1e,
+	NI_GPCT_LOGIC_LOW_GATE_SELECT = 0x1f,
+	/* more gates for 660x */
+	NI_GPCT_SOURCE_PIN_i_GATE_SELECT = 0x100,
+	NI_GPCT_GATE_PIN_i_GATE_SELECT = 0x101,
+	/* more gates for 660x "second gate" */
+	NI_GPCT_UP_DOWN_PIN_i_GATE_SELECT = 0x201,
+	NI_GPCT_SELECTED_GATE_GATE_SELECT = 0x21e,
+	/* m-series "second gate" sources are unknown,
+	we should add them here with an offset of 0x300 when known. */
+	NI_GPCT_DISABLED_GATE_SELECT = 0x8000,
+};
+static inline unsigned NI_GPCT_GATE_PIN_GATE_SELECT(unsigned n)
+{
+	return 0x102 + n;
+}
+static inline unsigned NI_GPCT_RTSI_GATE_SELECT(unsigned n)
+{
+	if(n < 7)
+		return 0xb + n;
+	else
+		return 0x1b;
+}
+static inline unsigned NI_GPCT_PFI_GATE_SELECT(unsigned n)
+{
+	if(n < 10)
+		return 0x1 + n;
+	else
+		return 0xb + n;
+}
+static inline unsigned NI_GPCT_UP_DOWN_PIN_GATE_SELECT(unsigned n)
+{
+	return 0x202 + n;
+}
+
+/* start sources for ni general-purpose counters for use with
+INSN_CONFIG_ARM */
+enum ni_gpct_arm_source
+{
+	NI_GPCT_ARM_IMMEDIATE = 0x0,
+	NI_GPCT_ARM_PAIRED_IMMEDIATE = 0x1, /* Start both the counter and the adjacent paired counter simultaneously */
+	/* NI doesn't document bits for selecting hardware arm triggers.  If
+	the NI_GPCT_ARM_UNKNOWN bit is set, we will pass the least significant
+	bits (3 bits for 660x or 5 bits for m-series) through to the hardware.
+	This will at least allow someone to figure out what the bits do later.*/
+	NI_GPCT_ARM_UNKNOWN = 0x1000,
+};
+
+/* master clock sources for ni mio boards and INSN_CONFIG_SET_CLOCK_SRC */
 enum ni_mio_clock_source
 {
 	NI_MIO_INTERNAL_CLOCK = 0,
@@ -608,6 +742,14 @@ static inline unsigned NI_EXT_RTSI(unsigned rtsi_channel)
 	if(rtsi_channel < 7) return 10 + rtsi_channel;
 	else return 19 + rtsi_channel;
 }
+
+/* status bits for INSN_CONFIG_GET_COUNTER_STATUS */
+enum comedi_counter_status_flags
+{
+	COMEDI_COUNTER_ARMED = 0x1,
+	COMEDI_COUNTER_COUNTING = 0x2,
+	COMEDI_COUNTER_TERMINAL_COUNT = 0x4,
+};
 
 #ifdef __cplusplus
 }
