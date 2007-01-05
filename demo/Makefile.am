@@ -1,7 +1,7 @@
 
 noinst_PROGRAMS = \
-	antialias ao_waveform ao_mmap apply_cal choose_clock \
-	choose_routing cmd dio eeprom_dump board_info \
+	antialias ao_waveform ao_mmap apply_cal board_info choose_clock \
+	choose_routing cmd dio eeprom_dump gpct_pulse_generator \
 	inp inpn insn ledclock mmap outp poll receiver select \
 	sender sigio sv tut1 tut2
 
@@ -23,6 +23,10 @@ apply_cal_SOURCES = apply_cal.c common.c
 apply_cal_CFLAGS = $(COMEDILIB_CFLAGS)
 apply_cal_LDADD = $(COMEDILIB_LIBS)
 
+board_info_SOURCES = info.c common.c
+board_info_CFLAGS = $(COMEDILIB_CFLAGS)
+board_info_LDADD = $(COMEDILIB_LIBS)
+
 choose_clock_SOURCES = choose_clock.c common.c
 choose_clock_CFLAGS = $(COMEDILIB_CFLAGS)
 choose_clock_LDADD = $(COMEDILIB_LIBS)
@@ -43,9 +47,9 @@ eeprom_dump_SOURCES = eeprom_dump.c common.c
 eeprom_dump_CFLAGS = $(COMEDILIB_CFLAGS)
 eeprom_dump_LDADD = $(COMEDILIB_LIBS)
 
-board_info_SOURCES = info.c common.c
-board_info_CFLAGS = $(COMEDILIB_CFLAGS)
-board_info_LDADD = $(COMEDILIB_LIBS)
+gpct_pulse_generator_SOURCES = gpct_pulse_generator.c common.c
+gpct_pulse_generator_CFLAGS = $(COMEDILIB_CFLAGS)
+gpct_pulse_generator_LDADD = $(COMEDILIB_LIBS)
 
 inp_SOURCES = inp.c common.c
 inp_CFLAGS = $(COMEDILIB_CFLAGS)

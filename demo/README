@@ -60,6 +60,16 @@ eeprom_dump:
 	Dumps the EEPROM of a card, if it has one.  Useful for debugging
 	devices/drivers.
 
+gpct_pulse_generator:
+	Causes an NI general-purpose counter subdevice to produce a
+	continuous train of pulses on its output.  The -F option specifies
+	the pulse period (as a frequency in Hertz), and the argument specifies
+	the pulse width (in nanoseconds).  By default, the pulse width will
+	be set to half the pulse period.  You may need to use the "dio"
+	and "choose_routing" demos to route the counter's output to
+	an output line that you can observe (for instance one of the PFI
+	lines).
+
 inp:
 	Simple input:  Reads one sample from one channel on one subdevice.
 
