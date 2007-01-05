@@ -36,6 +36,14 @@ choose_clock:
 	the clock source, and the optional -F option specifies the clock's
 	frequency.
 
+choose_routing:
+	Changes the signal routed to a specified channel.  The subdevice must support
+	INSN_CONFIG_SET_ROUTING.  The command-line argument specifies
+	the signal you want routed to the specified channel.  This demo
+	can be used, for example, to choose a what signal you want to
+	appear on a PFI line (which has been configured as an output)
+	of a National Instruments board.
+
 common:
 	This is not an example.  The file common.c just contains some code
 	that is common to many of the examples.
