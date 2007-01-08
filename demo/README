@@ -69,7 +69,7 @@ eeprom_dump:
 	devices/drivers.
 
 gpct_pulse_generator:
-	Causes an NI general-purpose counter subdevice to produce a
+	Configures a NI general-purpose counter subdevice to produce a
 	continuous train of pulses on its output.  The -F option specifies
 	the pulse period (as a frequency in Hertz), and the argument specifies
 	the pulse width (in nanoseconds).  By default, the pulse width will
@@ -77,6 +77,12 @@ gpct_pulse_generator:
 	and "choose_routing" demos to route the counter's output to
 	an output line that you can observe (for instance one of the PFI
 	lines).
+
+gpct_simple_counting:
+	Configures a NI general-purpose counter subdevice to act as a
+	simple event counter.  You can select the input to the counter
+	using the "choose_clock" demo.  The counter's value can be read
+	out using the "inp" demo.
 
 inp:
 	Simple input:  Reads one sample from one channel on one subdevice.

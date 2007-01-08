@@ -1,11 +1,8 @@
 /*
  * NI general-purpose counter example.  Configures the counter to
- * produce a continuous pulse train.  The argument specifies the
- * number of nanoseconds the output pulse should remain high.
- * The example assumes the board has already been configured to
- * route the output signal of the counter to an appropriate
- * location (you may need to route it to a PFI output line
- * for example).
+ * start simple event counting.  The counter's value can be read
+ * with the inp demo.  Different clock sources can be chosen
+ * with the choose_clock demo.
  * Part of Comedilib
  *
  * Copyright (c) 2007 Frank Mori Hess <fmhess@users.sourceforge.net>
@@ -33,13 +30,10 @@
 #include <ctype.h>
 #include "examples.h"
 
-
-int ni_gpct_start_pulse_generator(comedi_t *device, unsigned subdevice, unsigned period_ns, unsigned up_time_ns)
+int ni_gpct_start_simple_event_counting(comedi_t *device, unsigned subdevice, unsigned period_ns, unsigned up_time_ns)
 {
 	int retval;
 	lsampl_t counter_mode;
-	const unsigned clock_period_ns = 50;	/* 20MHz clock */
-	unsigned up_ticks, down_ticks;
 
 	retval = reset_counter(device, subdevice);
 	if(retval < 0) return retval;
@@ -54,39 +48,19 @@ int ni_gpct_start_pulse_generator(comedi_t *device, unsigned subdevice, unsigned
 	}
 
 	counter_mode = NI_GPCT_COUNTING_MODE_NORMAL_BITS;
-	// toggle output on terminal count
-	counter_mode |= NI_GPCT_OUTPUT_TC_TOGGLE_BITS;
-	// load on terminal count
-	counter_mode |= NI_GPCT_LOADING_ON_TC_BIT;
-	// alternate the reload source between the load a and load b registers
-	counter_mode |= NI_GPCT_RELOAD_SOURCE_SWITCHING_BITS;
-	// count down
-	counter_mode |= NI_GPCT_COUNTING_DIRECTION_DOWN_BITS;
-	// initialize load source as load b register
-	counter_mode |= NI_GPCT_LOAD_B_SELECT_BIT;
+	// output pulse on terminal count (doesn't really matter for this application)
+	counter_mode |= NI_GPCT_OUTPUT_TC_PULSE_BITS;
+	/* Don't alternate the reload source between the load a and load b registers.
+		Doesn't really matter here, since we aren't going to be reloading the counter.
+	*/
+	counter_mode |= NI_GPCT_RELOAD_SOURCE_FIXED_BITS;
+	// count up
+	counter_mode |= NI_GPCT_COUNTING_DIRECTION_UP_BITS;
 	// don't stop on terminal count
 	counter_mode |= NI_GPCT_STOP_ON_GATE_BITS;
 	// don't disarm on terminal count or gate signal
 	counter_mode |= NI_GPCT_NO_HARDWARE_DISARM_BITS;
 	retval = set_counter_mode(device, subdevice, counter_mode);
-	if(retval < 0) return retval;
-
-	/* 20MHz clock */
-	retval = set_clock_source(device, subdevice, NI_GPCT_TIMEBASE_1_CLOCK_SRC_BITS, clock_period_ns);
-	if(retval < 0) return retval;
-
-	up_ticks = (up_time_ns + clock_period_ns / 2) / clock_period_ns;
-	down_ticks = (period_ns + clock_period_ns / 2) / clock_period_ns - up_ticks;
-	/* set initial counter value by writing to channel 0 */
-	retval = comedi_data_write(device, subdevice, 0, 0, 0, down_ticks);
-	if(retval < 0) return retval;
-	/* set "load a" register to the number of clock ticks the counter output should remain low
-	by writing to channel 1. */
-	comedi_data_write(device, subdevice, 1, 0, 0, down_ticks);
-	if(retval < 0) return retval;
-	/* set "load b" register to the number of clock ticks the counter output should remain high
-	by writing to channel 2 */
-	comedi_data_write(device, subdevice, 2, 0, 0, up_ticks);
 	if(retval < 0) return retval;
 
 	retval = arm(device, subdevice, NI_GPCT_ARM_IMMEDIATE);
@@ -118,12 +92,9 @@ int main(int argc, char *argv[])
 		exit(-1);
 	}
 	/*FIXME: check that device is counter */
-	printf("Generating pulse train on subdevice %d.\n", options.subdevice);
-	printf("Period = %d ns.\n", period_ns);
-	printf("Up Time = %d ns.\n", up_time);
-	printf("Down Time = %d ns.\n", period_ns - up_time);
+	printf("Initiating simple event counting on subdevice %d.\n", options.subdevice);
 
-	retval = ni_gpct_start_pulse_generator(device, options.subdevice, period_ns, up_time);
+	retval = ni_gpct_start_simple_event_counting(device, options.subdevice, period_ns, up_time);
 	if(retval < 0) return retval;
 	return 0;
 }
