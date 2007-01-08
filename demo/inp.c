@@ -77,11 +77,11 @@ int main(int argc, char *argv[])
 					range_info->unit);
 			}
 			if(options.verbose) {
-				printf(" (%d raw units)", data);
+				printf(" (%lu raw units)", (unsigned long)data);
 			}
 		}
 	} else {
-		printf("%d",data);
+		printf("%lu", (unsigned long)data);
 	}
 	printf("\n");
 
