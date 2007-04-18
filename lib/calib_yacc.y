@@ -137,13 +137,13 @@ static comedi_calibration_setting_t* current_setting( calib_yyparse_private_t *p
 
 static int add_channel( calib_yyparse_private_t *priv, int channel )
 {
-	int *temp;
+	unsigned *temp;
 	comedi_calibration_setting_t *setting;
 
 	setting = current_setting( priv );
 	if( setting == NULL ) return -1;
 
-	temp = realloc( setting->channels, ( setting->num_channels + 1 ) * sizeof( int ) );
+	temp = realloc( setting->channels, ( setting->num_channels + 1 ) * sizeof(unsigned) );
 	if( temp == NULL )
 	{
 		fprintf(stderr, "%s: realloc failed to allocate memory.\n", __FUNCTION__);
@@ -156,13 +156,13 @@ static int add_channel( calib_yyparse_private_t *priv, int channel )
 
 static int add_range( calib_yyparse_private_t *priv, int range )
 {
-	int *temp;
+	unsigned *temp;
 	comedi_calibration_setting_t *setting;
 
 	setting = current_setting( priv );
 	if( setting == NULL ) return -1;
 
-	temp = realloc( setting->ranges, ( setting->num_ranges + 1 ) * sizeof( int ) );
+	temp = realloc( setting->ranges, ( setting->num_ranges + 1 ) * sizeof(unsigned) );
 	if( temp == NULL )
 	{
 		fprintf(stderr, "%s: realloc failed to allocate memory.\n", __FUNCTION__);
