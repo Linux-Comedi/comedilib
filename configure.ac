@@ -121,15 +121,56 @@ AM_CONDITIONAL(HAVE_DOCBOOK2HTML, [test "$DOCBOOK2HTML" != "no"])
 pcmciadir="\${sysconfdir}/pcmcia"
 AC_SUBST(pcmciadir)
 
+
+
+# new udev hotplug
+AC_ARG_ENABLE([udev-hotplug], [  --enable-udev-hotplug=[[/lib]]    enable udev hotplug],
+	[ENABLE_UDEVHOTPLUG=$enableval], [ENABLE_UDEVHOTPLUG="no"])
+AM_CONDITIONAL(INSTALL_UDEVHOTPLUG, [test "$ENABLE_UDEVHOTPLUG" != "no"])
+if test "$ENABLE_UDEVHOTPLUG" != "no"; then
+	udevrulesdir="\${sysconfdir}/udev/rules.d/"
+	if  test "$ENABLE_UDEVHOTPLUG" == "yes"; then
+		AC_MSG_ERROR([udev-hotplug needs a path as an argument (usually: --enable-udev-hotplug=/lib).])
+	fi
+	if test "$ENABLE_UDEVHOTPLUG" != "/lib"; then
+		AC_MSG_WARN([Installing the udev scripts in the non-standard location: $ENABLE_UDEVHOTPLUG (should be --enable-udev-hotplug=/lib)])
+	fi
+	if test "$sysconfdir" != "/etc"; then
+		AC_MSG_WARN([udev hotplug works only if sysconfdir is set to /etc.])
+	fi
+	udevfirmwaredir="$ENABLE_UDEVHOTPLUG/firmware"
+	udevscriptsdir="$ENABLE_UDEVHOTPLUG/udev"
+	AC_SUBST(udevrulesdir)
+	AC_SUBST(udevfirmwaredir)
+	AC_SUBST(udevscriptsdir)
+else
+	ENABLE_UDEVHOTPLUG="no"
+fi
+
+
+# old hotplug mechanism
+AC_ARG_ENABLE([etc-hotplug], [  --enable-etc-hotplug    enable old hotplug in /etc/hotplug],
+	[ENABLE_ETCHOTPLUG=$enableval], [ENABLE_ETCHOTPLUG="no"])
+AM_CONDITIONAL(INSTALL_ETCHOTPLUG, [test "$ENABLE_ETCHOTPLUG" != "no"])
+
+if test "$ENABLE_ETCHOTPLUG" != "no"; then
 #see: http://linux-hotplug.sourceforge.net/
 #the hotplug expects the device dependent scripts here:
-usbhotplugdir="\${sysconfdir}/hotplug/usb"
-AC_SUBST(usbhotplugdir)
+	usbhotplugdir="\${sysconfdir}/hotplug/usb"
+	AC_SUBST(usbhotplugdir)
 
 #firmware for the hotplug script
 #see: http://linux-hotplug.sourceforge.net/
-usbfirmwaredir="\${datadir}/usb"
-AC_SUBST(usbfirmwaredir)
+	usbfirmwaredir="\${datadir}/usb"
+	AC_SUBST(usbfirmwaredir)
+	if test "$sysconfdir" != "/etc"; then
+		AC_MSG_WARN([hotplug works only if sysconfdir is set to /etc.])
+	fi
+fi
+
+if test "$ENABLE_ETCHOTPLUG" = "no" && test "$ENABLE_UDEVHOTPLUG" = "no" ; then
+		AC_MSG_WARN([No hotplug mechanism will we installed. Consult ./configure --help if you want hotplug.])
+fi
 
 #documentaion goes here
 doccomedilibdir="\${datadir}/doc/libcomedi0"
@@ -144,6 +185,7 @@ etc/hotplug/Makefile
 etc/hotplug/usb/Makefile
 etc/hotplug/usb/usbdux/Makefile
 etc/hotplug/usb/usbduxfast/Makefile
+etc/udev/Makefile
 doc/Makefile
 demo/Makefile
 include/Makefile
