@@ -125,8 +125,8 @@ AC_SUBST(pcmciadir)
 
 
 # new udev hotplug
-AC_ARG_ENABLE([udev-hotplug], [  --enable-udev-hotplug=[[/lib]]    enable udev hotplug],
-	[ENABLE_UDEVHOTPLUG=$enableval], [ENABLE_UDEVHOTPLUG="no"])
+AC_ARG_WITH([udev-hotplug], [  --with-udev-hotplug=[[/lib]]    enable udev hotplug],
+	[ENABLE_UDEVHOTPLUG=$withval], [ENABLE_UDEVHOTPLUG="no"])
 AM_CONDITIONAL(INSTALL_UDEVHOTPLUG, [test "$ENABLE_UDEVHOTPLUG" != "no"])
 if test "$ENABLE_UDEVHOTPLUG" != "no"; then
 	udevrulesdir="\${sysconfdir}/udev/rules.d/"
