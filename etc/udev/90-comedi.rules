@@ -7,3 +7,5 @@ SYSFS{idVendor}=="13d8", SYSFS{idProduct}=="0001", RUN+="/lib/udev/usbdux"
 SYSFS{idVendor}=="13d8", SYSFS{idProduct}=="0002", RUN+="/lib/udev/usbdux"
 SYSFS{idVendor}=="13d8", SYSFS{idProduct}=="0010", RUN+="/lib/udev/usbduxfast"
 LABEL="usbdux_end"
+
+KERNEL=="comedi[0-9]*", MODE="0666"
