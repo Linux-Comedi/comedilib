@@ -1,7 +1,7 @@
 
 noinst_PROGRAMS = \
 	antialias ao_waveform ao_mmap apply_cal board_info choose_clock \
-	choose_routing cmd dio eeprom_dump gpct_pulse_generator \
+	choose_routing cmd dio eeprom_dump gpct_encoder gpct_pulse_generator \
 	gpct_simple_counting inp inpn insn ledclock \
 	mmap outp poll receiver select \
 	sender sigio sv tut1 tut2
@@ -47,6 +47,10 @@ dio_LDADD = $(COMEDILIB_LIBS)
 eeprom_dump_SOURCES = eeprom_dump.c common.c
 eeprom_dump_CFLAGS = $(COMEDILIB_CFLAGS)
 eeprom_dump_LDADD = $(COMEDILIB_LIBS)
+
+gpct_encoder_SOURCES = gpct_encoder.c common.c
+gpct_encoder_CFLAGS = $(COMEDILIB_CFLAGS)
+gpct_encoder_LDADD = $(COMEDILIB_LIBS)
 
 gpct_pulse_generator_SOURCES = gpct_pulse_generator.c common.c
 gpct_pulse_generator_CFLAGS = $(COMEDILIB_CFLAGS)
