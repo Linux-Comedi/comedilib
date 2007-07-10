@@ -30,7 +30,7 @@
 #include <ctype.h>
 #include "examples.h"
 
-int ni_gpct_start_simple_event_counting(comedi_t *device, unsigned subdevice, unsigned period_ns, unsigned up_time_ns)
+int ni_gpct_start_simple_event_counting(comedi_t *device, unsigned subdevice)
 {
 	int retval;
 	lsampl_t counter_mode;
@@ -72,19 +72,11 @@ int ni_gpct_start_simple_event_counting(comedi_t *device, unsigned subdevice, un
 int main(int argc, char *argv[])
 {
 	comedi_t *device;
-	unsigned up_time;
-	unsigned period_ns;
 	int retval;
 	struct parsed_options options;
 
 	init_parsed_options(&options);
-	options.value = -1.;
 	parse_options(&options, argc, argv);
-	period_ns = lrint(1e9 / options.freq);
-	if(options.value < 0.)
-		up_time = period_ns / 2;
-	else
-		up_time = lrint(options.value);
 	device = comedi_open(options.filename);
 	if(!device)
 	{
@@ -94,7 +86,7 @@ int main(int argc, char *argv[])
 	/*FIXME: check that device is counter */
 	printf("Initiating simple event counting on subdevice %d.\n", options.subdevice);
 
-	retval = ni_gpct_start_simple_event_counting(device, options.subdevice, period_ns, up_time);
+	retval = ni_gpct_start_simple_event_counting(device, options.subdevice);
 	if(retval < 0) return retval;
 	return 0;
 }
