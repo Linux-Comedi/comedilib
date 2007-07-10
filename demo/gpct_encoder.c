@@ -101,7 +101,6 @@ int main(int argc, char *argv[])
 	unsigned int initial_value = 0;
 	int retval;
 
-	struct parsed_options options;
 	{
 		int c;
 		while (-1 != (c = getopt(argc, argv, "f:s:A:B:Z:I:"))) {
@@ -133,7 +132,7 @@ int main(int argc, char *argv[])
 				break;
 			case 'I':
 				initial_value = strtoul(optarg, NULL, 0);
-					break;
+				break;
 			}
 		}
 	}
