@@ -5,7 +5,8 @@
  * The example assumes the board has already been configured to
  * route the output signal of the counter to an appropriate
  * location (you may need to route it to a PFI output line
- * for example).
+ * for example).  The choose_routing demo may be helpful to
+ * set the routing of the counter's output signal.
  * Part of Comedilib
  *
  * Copyright (c) 2007 Frank Mori Hess <fmhess@users.sourceforge.net>
