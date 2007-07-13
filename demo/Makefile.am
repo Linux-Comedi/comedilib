@@ -1,7 +1,8 @@
 
 noinst_PROGRAMS = \
-	antialias ao_waveform ao_mmap apply_cal board_info choose_clock \
-	choose_routing cmd dio eeprom_dump gpct_encoder gpct_pulse_generator \
+	antialias ao_waveform ao_mmap apply_cal board_info choose_clock choose_filter \
+	choose_routing cmd dio eeprom_dump gpct_buffered_counting \
+	gpct_encoder gpct_pulse_generator \
 	gpct_simple_counting inp inpn insn ledclock \
 	mmap outp poll receiver select \
 	sender sigio sv tut1 tut2
@@ -32,6 +33,10 @@ choose_clock_SOURCES = choose_clock.c common.c
 choose_clock_CFLAGS = $(COMEDILIB_CFLAGS)
 choose_clock_LDADD = $(COMEDILIB_LIBS)
 
+choose_filter_SOURCES = choose_filter.c common.c
+choose_filter_CFLAGS = $(COMEDILIB_CFLAGS)
+choose_filter_LDADD = $(COMEDILIB_LIBS)
+
 choose_routing_SOURCES = choose_routing.c common.c
 choose_routing_CFLAGS = $(COMEDILIB_CFLAGS)
 choose_routing_LDADD = $(COMEDILIB_LIBS)
@@ -47,6 +52,10 @@ dio_LDADD = $(COMEDILIB_LIBS)
 eeprom_dump_SOURCES = eeprom_dump.c common.c
 eeprom_dump_CFLAGS = $(COMEDILIB_CFLAGS)
 eeprom_dump_LDADD = $(COMEDILIB_LIBS)
+
+gpct_buffered_counting_SOURCES = gpct_buffered_counting.c common.c
+gpct_buffered_counting_CFLAGS = $(COMEDILIB_CFLAGS)
+gpct_buffered_counting_LDADD = $(COMEDILIB_LIBS)
 
 gpct_encoder_SOURCES = gpct_encoder.c common.c
 gpct_encoder_CFLAGS = $(COMEDILIB_CFLAGS)
