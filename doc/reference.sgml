@@ -232,8 +232,8 @@ struct comedi_devinfo_struct{
   unsigned int n_subdevs;       // number of subdevices on this device
   char         driver_name[COMEDI_NAMELEN];
   char         board_name[COMEDI_NAMELEN];
-  int          read_subdevice;  // number of read devices
-  int          write_subdevice; // number of write devices
+  int          read_subdevice;  // index of subdevice whose buffer is read by read(), etc. on file descriptor from comedi_fileno() (negative means none)
+  int          write_subdevice; // index of subdevice whose buffer is written by write(), etc. on file descriptor from comedi_fileno() (negatove means none).
   int          unused[30];
 };
 
