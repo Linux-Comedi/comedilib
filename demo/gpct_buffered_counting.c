@@ -35,6 +35,36 @@
 #include <ctype.h>
 #include "examples.h"
 
+int check_subdevice(comedi_t *device, int *subdevice, const char *device_filepath)
+{
+	int read_subdevice = comedi_get_read_subdevice(device);
+	if(read_subdevice < 0)
+	{
+		fprintf(stderr, "Device file \"%s\" cannot do streaming input.\n", device_filepath);
+		return -1;
+	}
+	if(*subdevice < 0) *subdevice = read_subdevice;
+	if(read_subdevice != *subdevice)
+	{
+		fprintf(stderr, "You specified subdevice %i, but the read subdevice of device file \"%s\" is %i.\n",
+			*subdevice, device_filepath, read_subdevice);
+		return -1;
+	}
+	int subdevice_type = comedi_get_subdevice_type(device, *subdevice);
+	if(subdevice_type < 0)
+	{
+		comedi_perror("comedi_get_subdevice_type()");
+		return -1;
+	}
+	if(subdevice_type != COMEDI_SUBD_COUNTER)
+	{
+		fprintf(stderr, "Subdevice is not a counter (type %i), but of type %i.\n",
+			COMEDI_SUBD_COUNTER, subdevice_type);
+		return -1;
+	}
+	return 0;
+}
+
 int ni_gpct_configure_buffered_event_counting(comedi_t *device, unsigned subdevice)
 {
 	int retval;
@@ -125,7 +155,7 @@ int ni_gpct_send_command(comedi_t *device, unsigned subdevice, unsigned n_counts
 	return 0;
 }
 
-int ni_gpct_read_and_dump_counts(comedi_t *device, const char *device_filename, unsigned subdevice)
+int ni_gpct_read_and_dump_counts(comedi_t *device, unsigned subdevice)
 {
 	char subdevice_filename[100];
 	int retval;
@@ -133,18 +163,6 @@ int ni_gpct_read_and_dump_counts(comedi_t *device, const char *device_filename, 
 	static const unsigned buffer_size = 1000;
 	lsampl_t buffer[buffer_size];
 
-	//TODO: allow subdevice file name to be specified as a command-line option (with sensible default)
-#if 0
-	retval = snprintf(subdevice_filename, sizeof(subdevice_filename), "%s_sub%i", device_filename, subdevice);
-	assert(retval < sizeof(subdevice_filename));
-	fd = open(subdevice_filename, O_RDONLY);
-	if(fd < 0)
-	{
-		fprintf(stderr, "error opening subdevice file \"%s\".\n", subdevice_filename);
-		perror("open");
-		return -errno;
-	}
-#endif
 	fd = comedi_fileno(device);
 	retval = read(fd, buffer, buffer_size * sizeof(lsampl_t));
 	while(retval > 0)
@@ -173,6 +191,7 @@ int main(int argc, char *argv[])
 	struct parsed_options options;
 
 	init_parsed_options(&options);
+	options.subdevice = -1;
 	parse_options(&options, argc, argv);
 	device = comedi_open(options.filename);
 	if(!device)
@@ -180,14 +199,15 @@ int main(int argc, char *argv[])
 		comedi_perror(options.filename);
 		exit(-1);
 	}
-	/*FIXME: check that device is counter */
+	retval = check_subdevice(device, &options.subdevice, options.filename);
+	if(retval < 0) return retval;
 	printf("Running buffered event counting on subdevice %d.\n", options.subdevice);
 
 	retval = ni_gpct_configure_buffered_event_counting(device, options.subdevice);
 	if(retval < 0) return retval;
 	retval = ni_gpct_send_command(device, options.subdevice, options.n_scan);
 	if(retval < 0) return retval;
-	retval = ni_gpct_read_and_dump_counts(device, options.filename, options.subdevice);
+	retval = ni_gpct_read_and_dump_counts(device, options.subdevice);
 	if(retval < 0) return retval;
 	return 0;
 }
