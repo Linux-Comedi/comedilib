@@ -117,7 +117,7 @@ subdevices for streaming input and output.
     <glossterm>
 command
     </glossterm>
-    <glosssee otherterm="comedicommand">
+    <glosssee otherterm="comedicommand"></glosssee>
   </glossentry>
 
   <glossentry id="configoption">
@@ -162,7 +162,7 @@ option
     <glossdef>
       <para>
       </para>
-  <glossseealso otherterm="optionlist">
+      <glossseealso otherterm="optionlist"></glossseealso>
     </glossdef>
   </glossentry>
 
@@ -176,8 +176,8 @@ option list
 Option lists are used with <function>comedi_config</function> to
 perform driver configuration.
       </para>
-  <glossseealso otherterm="configoption">
-  <glossseealso otherterm="option">
+      <glossseealso otherterm="configoption"></glossseealso>
+      <glossseealso otherterm="option"></glossseealso>
     </glossdef>
   </glossentry>
 
