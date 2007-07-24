@@ -56,6 +56,40 @@ References:
 
 
 
+Driver: adl_pci7296.o
+Description: Driver for the Adlink PCI-7296 96 ch. digital io board
+Devices: [ADLink] PCI-7296 (pci7296)
+Author: Jon Grierson <jd@renko.co.uk>
+Updated: 2.8.2006
+Status: testing
+
+Configuration Options:
+  none
+
+
+
+Driver: adl_pci7432.o
+Description: Driver for the Adlink PCI-7432 64 ch. isolated digital io board
+Devices: [ADLink] PCI-7432 (pci7432)
+Author: Michel Lachaine <mike@mikelachaine.ca>
+Status: experimental
+
+Configuration Options:
+  none
+
+
+
+Driver: adl_pci8164.o
+Description: Driver for the Adlink PCI-8164 4 Axes Motion Control board
+Devices: [ADLink] PCI-8164 (pci8164)
+Author: Michel Lachaine <mike@mikelachaine.ca>
+Status: experimental
+
+Configuration Options:
+  none
+
+
+
 Driver: adl_pci9111.o
 Description: Adlink PCI-9111HR
 Author: Emmanuel Pacaud <emmanuel.pacaud@univ-poitiers.fr>
@@ -69,24 +103,24 @@ Supports:
   - di_insn read
   - do_insn read/write
   - ai_do_cmd mode with the following sources:
-  
+
     - start_src 		TRIG_NOW
     - scan_begin_src 		TRIG_FOLLOW	TRIG_TIMER	TRIG_EXT
     - convert_src				TRIG_TIMER	TRIG_EXT
     - scan_end_src		TRIG_COUNT
     - stop_src			TRIG_COUNT	TRIG_NONE
-    
+
     The scanned channels must be consecutive and start from 0. They must
     all have the same range and aref.
-    
+
 Configuration options:
-  
+
     [0] - PCI bus number (optional)
     [1] - PCI slot number (optional)
-    
+
     If bus/slot is not specified, the first available PCI
     device will be used.
-  
+
 
 
 
@@ -177,7 +211,7 @@ Author: Michal Dobes <dobes@tesnet.cz>
 Devices: [Advantech] PCI-1730 (pci1730), PCI-1733 (pci1733),
   PCI-1734 (pci1734), PCI-1750 (pci1750), PCI-1751 (pci1751),
   PCI-1752 (pci1752), PCI-1753 (pci1753), PCI-1753+PCI-1753E (pci1753e),
-  PCI-1754 (pci1754), PCI-1756 (pci1756), PCI-1760(pci1760), 
+  PCI-1754 (pci1754), PCI-1756 (pci1756), PCI-1760(pci1760),
   PCI-1762 (pci1762)
 Status: untested
 Updated: 2003-04-06
@@ -189,6 +223,36 @@ Configuration options:
   [1] - PCI slot of device (optional)
           If bus/slot is not specified, the first available PCI
           device will be used.
+
+
+
+
+Driver: aio_aio12_8.o
+Description: Acces I/O Products PC-104 AIO12-8 Analog I/O Board
+Author: Pablo Mejia <pablo.mejia@cctechnol.com>
+Devices:
+ [Acces I/O] PC-104 AIO12-8
+Status: experimental
+
+Configuration Options:
+  [0] - I/O port base address
+
+Notes:
+
+  Only synchronous operations are supported.
+
+
+
+
+Driver: aio_iiro_16.o
+Description: Acces I/O Products PC-104 IIRO16 Relay And Isolated Input Board
+Author: Zachary Ware <zach.ware@cctechnol.com>
+Devices:
+ [Acces I/O] PC-104 AIO12-8
+Status: experimental
+
+Configuration Options:
+  [0] - I/O port base address
 
 
 
@@ -229,7 +293,7 @@ SUBDEVICES
 
                     PC214E      PC272E/PCI272
                  -------------  -------------
-  Subdevices           4              4 
+  Subdevices           4              4
    0                 PPI-X          PPI-X
    1                 PPI-Y          PPI-Y
    2                 CTR-Z1*        PPI-Z
@@ -281,7 +345,7 @@ instructions are supported:
     clock source in data[1].
 
   INSN_CONFIG_SET_GATE_SRC.  Sets the counter channel's gate source as
-    specified in data[1] (this is a hardware-specific value).  Not
+    specified in data[2] (this is a hardware-specific value).  Not
     supported on PC214E.  For the other boards, valid gate sources are 0
     to 7 as follows:
 
@@ -298,7 +362,7 @@ instructions are supported:
       7.  Reserved.
 
   INSN_CONFIG_GET_GATE_SRC.  Returns the counter channel's current gate
-    source in data[1].
+    source in data[2].
 
 Clock and gate interconnection notes:
 
@@ -309,7 +373,7 @@ Clock and gate interconnection notes:
   2.  Gate source /OUT n-2 is the inverted output of channel 0 on the
   same counter subdevice if n = 2, or the inverted output of channel n+1
   on the preceding counter subdevice (see note 3) if n < 2.
-  
+
   3.  The counter subdevices are connected in a ring, so the highest
   counter subdevice precedes the lowest.
 
@@ -511,10 +575,16 @@ Caveats:
 Driver: amplc_pci230.o
 Description: Amplicom PCI230, PCI260 Multifunction I/O boards
 Author: Allan Willcox <allanwillcox@ozemail.com.au>, Steve D Sharples <steve.sharples@nottingham.ac.uk>
-Updated: Fri,  30 April 2004
-Devices: [Amplicon] PCI230 (amplc_pci230), PCI260
+Updated: Wed, 27 Jun 2007 15:21:41 +0100
+Devices: [Amplicon] PCI230 (pci230 or amplc_pci230),
+  PCI260 (pci260 or amplc_pci230)
 Status: works
 
+Configuration options:
+  [0] - PCI bus of device (optional).
+  [1] - PCI slot of device (optional).
+          If bus/slot is not specified, the first available PCI device
+          will be used.
 
 
 
@@ -551,7 +621,7 @@ Devices: [Measurement Computing] PCI-DAS6402/16 (cb_pcidas64),
   PCI-DAS6402/12, PCI-DAS64/M1/16, PCI-DAS64/M2/16,
   PCI-DAS64/M3/16, PCI-DAS6402/16/JR, PCI-DAS64/M1/16/JR,
   PCI-DAS64/M2/16/JR, PCI-DAS64/M3/16/JR, PCI-DAS64/M1/14,
-  PCI-DAS64/M2/14, PCI-DAS64/M3/14, PCI-DAS6014, 
+  PCI-DAS64/M2/14, PCI-DAS64/M3/14, PCI-DAS6014,
   PCI-DAS6023, PCI-DAS6025, PCI-DAS6030,
   PCI-DAS6031, PCI-DAS6032, PCI-DAS6033, PCI-DAS6034,
   PCI-DAS6035, PCI-DAS6036, PCI-DAS6040, PCI-DAS6052,
@@ -592,7 +662,7 @@ Status:
 
   The boards may be autocalibrated using the comedi_calibrate
   utility.
-	
+
 Configuration options:
   [0] - PCI bus of device (optional)
   [1] - PCI slot of device (optional)
@@ -655,16 +725,16 @@ Updated: Thu, 20 Jun 2002 16:19:41 -0500
 Status: works
 
 All features of the PCIM-DDA06-16 board are supported.  This board
-has 6 16-bit AO channels, and the usual 8255 DIO setup.  (24 channels, 
+has 6 16-bit AO channels, and the usual 8255 DIO setup.  (24 channels,
 configurable in banks of 8 and 4, etc.).  This board does not support commands.
 
 The board has a peculiar way of specifying AO gain/range settings -- You have
 1 jumper bank on the card, which either makes all 6 AO channels either
-5 Volt unipolar, 5V bipolar, 10 Volt unipolar or 10V bipolar. 
-  
+5 Volt unipolar, 5V bipolar, 10 Volt unipolar or 10V bipolar.
+
 Since there is absolutely _no_ way to tell in software how this jumper is set
 (well, at least according  to the rather thin spec. from Measurement Computing
- that comes with the board), the driver assumes the jumper is at its factory 
+ that comes with the board), the driver assumes the jumper is at its factory
 default setting of +/-5V.
 
 Also of note is the fact that this board features another jumper, whose
@@ -675,13 +745,13 @@ output modes on the board:
     signal output by the DAC on the board (this is the factory default).
   - Simultaneous XFER Mode: Writing to an AO channel has no effect until
     you read from any one of the AO channels.  This is useful for loading
-    all 6 AO values, and then reading from any one of the AO channels on the 
+    all 6 AO values, and then reading from any one of the AO channels on the
     device to instantly update all 6 AO values in unison.  Useful for some
-    control apps, I would assume?  If your jumper is in this setting, then you 
+    control apps, I would assume?  If your jumper is in this setting, then you
     need to issue your comedi_data_write()s to load all the values you want,
     then issue one comedi_data_read() on any channel on the AO subdevice
     to initiate the simultaneous XFER.
- 
+
 
 Configuration Options:
   [0] PCI bus (optional) (unimplemented)
@@ -702,8 +772,8 @@ Status: works
 This driver allows you to 'bond' (merge) multiple comedi subdevices
 (coming from possibly difference boards and/or drivers) together.  For
 example, if you had a board with 2 different DIO subdevices, and
-another with 1 DIO subdevice, you could 'bond' them with this driver 
-so that they look like one big fat DIO subdevice.  This makes writing 
+another with 1 DIO subdevice, you could 'bond' them with this driver
+so that they look like one big fat DIO subdevice.  This makes writing
 applications slightly easier as you don't have to worry about managing
 different subdevices in the application -- you just worry about
 indexing one linear array of channel id's.
@@ -826,11 +896,14 @@ Driver: contec_pci_dio.o
 Description: Contec PIO1616L digital I/O board
 Devices: [Contec] PIO1616L (contec_pci_dio)
 Author: Stefano Rivoir <s.rivoir@gts.it>
-Updated: Mon, 18 Mar 2002 15:34:01 -0800
+Updated: Wed, 27 Jun 2007 13:00:06 +0100
 Status: works
 
 Configuration Options:
-  none
+  [0] - PCI bus of device (optional)
+  [1] - PCI slot of device (optional)
+  If bus/slot is not specified, the first supported
+  PCI device found will be used.
 
 
 
@@ -1295,9 +1368,9 @@ There are 4 x 12-bit Analogue Outputs.  Ranges : 5V, 10V, +/-5V, +/-10V
 4 x 16-bit counters
 
 Options:
- [0] - PCI bus number - if bus number and slot number are 0, 
+ [0] - PCI bus number - if bus number and slot number are 0,
                         then driver search for first unused card
- [1] - PCI slot number 
+ [1] - PCI slot number
 
 
 
@@ -1401,11 +1474,47 @@ Configuration options:
     device will be used.
 
 The 2600 requires a firmware upload, which can be accomplished
-using the -i or --init-data option of comedi_config. 
+using the -i or --init-data option of comedi_config.
 The firmware can be
 found in the comedi_nonfree_firmware tarball available
-from http://www.comedi.org 
+from http://www.comedi.org
 
+
+
+
+Driver: mpc624.o
+Description: Micro/sys MPC-624 PC/104 board
+Devices: [Micro/sys] MPC-624 (mpc624)
+Author: Stanislaw Raczynski <sraczynski@op.pl>
+Updated: Thu, 15 Sep 2005 12:01:18 +0200
+Status: working
+
+    The Micro/sys MPC-624 board is based on the LTC2440 24-bit sigma-delta
+    ADC chip.
+    
+    Subdevices supported by the driver:
+    - Analog In:   supported
+    - Digital I/O: not supported
+    - LEDs:        not supported
+    - EEPROM:      not supported
+
+Configuration Options:
+  [0] - I/O base address
+  [1] - convertion rate
+            Convertion rate  RMS noise  Effective Number Of Bits
+         0      3.52kHz        23uV                17
+         1      1.76kHz       3.5uV                20
+         2       880Hz         2uV                21.3
+         3       440Hz        1.4uV               21.8
+         4       220Hz         1uV                22.4
+         5       110Hz        750uV               22.9
+         6       55Hz         510nV               23.4
+         7      27.5Hz        375nV                24 
+         8      13.75Hz       250nV               24.4
+         9      6.875Hz       200nV               24.6
+   [2] - voltage range
+         0      -1.01V .. +1.01V
+         1      -10.1V .. +10.1V
 
 
 
@@ -1443,6 +1552,23 @@ Updated: Sat, 25 Jan 2003 13:24:40 -0800
 
 
 
+Driver: ni_65xx.o
+Description: National Instruments 65xx static dio boards
+Author: Jon Grierson <jd@renko.co.uk>, Frank Mori Hess <fmhess@users.sourceforge.net>
+Status: testing
+Devices: [National Instruments] PCI-6509 (ni_65xx), PXI-6509, PCI-6510, PCI-6511,
+  PXI-6511, PCI-6512, PXI-6512, PCI-6513, PXI-6513, PCI-6514, PXI-6514, PCI-6515,
+  PXI-6515, PCI-6516, PCI-6517, PCI-6518, PCI-6519, PCI-6520, PCI-6521, PXI-6521,
+  PCI-6528, PXI-6528
+Updated: Wed Oct 18 08:59:11 EDT 2006
+
+Based on the PCI-6527 driver by ds.
+The interrupt subdevice (subdevice 3) is probably broken for all boards
+except maybe the 6514.
+
+
+
+
 Driver: ni_660x.o
 Description: National Instruments 660x counter/timer boards
 Devices:
@@ -1468,8 +1594,6 @@ Things to do:
 - Add DMA support (see mite.c and ni_pcidio.c for examples)
 - Add commands (copy from ni_pcidio.c ?)
 - Add interrupts
-- Extend "Application possibilities" for the GPCT subdevice (eg. Time
-Measurement, ...)
 
 
 
@@ -1692,29 +1816,35 @@ comedi_nonfree_firmware tarball available from http://www.comedi.org
 
 
 Driver: ni_pcimio.o
-Description: National Instruments PCI-MIO-E series (all boards)
+Description: National Instruments PCI-MIO-E series and M series (all boards)
 Author: ds, John Hallen, Frank Mori Hess, Rolf Mueller, Herbert Peremans,
   Herman Bruyninckx, Terry Barnaby
 Status: works
 Devices: [National Instruments] PCI-MIO-16XE-50 (ni_pcimio),
   PCI-MIO-16XE-10, PXI-6030E, PCI-MIO-16E-1, PCI-MIO-16E-4, PCI-6014, PCI-6040E,
-  PXI-6040E, PCI-6031E, PCI-6032E, PCI-6033E, PCI-6071E, PCI-6023E,
+  PXI-6040E, PCI-6030E, PCI-6031E, PCI-6032E, PCI-6033E, PCI-6071E, PCI-6023E,
   PCI-6024E, PCI-6025E, PXI-6025E, PCI-6034E, PCI-6035E, PCI-6052E,
   PCI-6110, PCI-6111, PCI-6220, PCI-6221, PCI-6224, PCI-6225, PCI-6229,
-  PCI-6250, PCI-6251, PCI-6254, PCI-6259,
-  PCI-6280, PCI-6281, PCI-6284, PCI-6289,
+  PCI-6250, PCI-6251, PCIe-6251, PCI-6254, PCI-6259, PCIe-6259,
+  PCI-6280, PCI-6281, PXI-6281, PCI-6284, PCI-6289,
   PCI-6711, PXI-6711, PCI-6713, PXI-6713,
-  PXI-6071E, PXI-6070E,
-  PXI-6052E, PCI-6036E, PCI-6731, PCI-6733, PXI-6733
-  PCI-6143
-Updated: Tue Mar 21 17:40:10 EST 2006
+  PXI-6071E, PCI-6070E, PXI-6070E,
+  PXI-6052E, PCI-6036E, PCI-6731, PCI-6733, PXI-6733,
+  PCI-6143, PXI-6143
+Updated: Wed Nov 29 10:30:36 EST 2006
 
 These boards are almost identical to the AT-MIO E series, except that
 they use the PCI bus instead of ISA (i.e., AT).  See the notes for
 the ni_atmio.o driver for additional information about these boards.
 
 Autocalibration is supported on many of the devices, using the
-calibration utility in Comedilib.
+comedi_calibrate (or comedi_soft_calibrate for m-series) utility.
+M-Series boards do analog input and analog output calibration entirely
+in software. The software calibration corrects
+the analog input for offset, gain and
+nonlinearity.  The analog outputs are corrected for offset and gain.
+See the comedilib documentation on comedi_get_softcal_converter() for
+more information.
 
 By default, the driver uses DMA to transfer analog input data to
 memory.  When DMA is enabled, not all triggering features are
@@ -1727,19 +1857,43 @@ With this board all of the convertors perform one simultaineous sample during
 a scan interval. The period for a scan is used for the convert time in a
 Comedi cmd. The convert trigger source is normally set to TRIG_NOW by default.
 
-Basic support for the RTSI trigger bus is supported on these cards on
+The RTSI trigger bus is supported on these cards on
 subdevice 10. See the comedilib documentation for details.
 
 Information (number of channels, bits, etc.) for some devices may be
 incorrect.  Please check this and submit a bug if there are problems
 for your device.
 
-The support for the M-Series boards is still under development.
+SCXI is probably broken for m-series boards.
 
 Bugs:
- - When DMA is enabled, COMEDI_EV_SCAN_END and COMEDI_EV_CONVERT do
+ - When DMA is enabled, COMEDI_EV_CONVERT does
    not work correctly.
- - There are reported problems with the 67xx boards.
+
+
+
+
+Driver: ni_tio.o
+Description: National Instruments general purpose counters
+Devices:
+Author: J.P. Mellor <jpmellor@rose-hulman.edu>,
+	Herman.Bruyninckx@mech.kuleuven.ac.be,
+	Wim.Meeussen@mech.kuleuven.ac.be,
+	Klaas.Gadeyne@mech.kuleuven.ac.be,
+	Frank Mori Hess <fmhess@users.sourceforge.net>
+Updated: Thu Nov 16 09:50:32 EST 2006
+Status: experimental
+
+This module is not used directly by end-users.  Rather, it
+is used by other drivers (for example ni_660x and ni_pcimio)
+to provide support for NI's general purpose counters.  It was
+originally based on the counter code from ni_660x.c and
+ni_mio_common.c.
+
+References:
+DAQ 660x Register-Level Programmer Manual  (NI 370505A-01)
+DAQ 6601/6602 User Manual (NI 322137B-01)
+340934b.pdf  DAQ-STC reference manual
 
 
 
@@ -1791,27 +1945,27 @@ Interrupts are not supported.
 
     Options for PCL-726:
      [0] - IO Base
-     [2]...[7] - D/A output range for channel 1-6: 
-               0: 0-5V, 1: 0-10V, 2: +/-5V, 3: +/-10V, 
+     [2]...[7] - D/A output range for channel 1-6:
+               0: 0-5V, 1: 0-10V, 2: +/-5V, 3: +/-10V,
 	       4: 4-20mA, 5: unknown (external reference)
-	       
+
     Options for PCL-727:
      [0] - IO Base
-     [2]...[13] - D/A output range for channel 1-12: 
-               0: 0-5V, 1: 0-10V, 2: +/-5V, 
+     [2]...[13] - D/A output range for channel 1-12:
+               0: 0-5V, 1: 0-10V, 2: +/-5V,
 	       3: 4-20mA
-	       
+
     Options for PCL-728 and ACL-6128:
      [0] - IO Base
-     [2], [3] - D/A output range for channel 1 and 2: 
-               0: 0-5V, 1: 0-10V, 2: +/-5V, 3: +/-10V, 
+     [2], [3] - D/A output range for channel 1 and 2:
+               0: 0-5V, 1: 0-10V, 2: +/-5V, 3: +/-10V,
 	       4: 4-20mA, 5: 0-20mA
-	       
+
     Options for ACL-6126:
      [0] - IO Base
      [1] - IRQ (0=disable, 3, 5, 6, 7, 9, 10, 11, 12, 15) (currently ignored)
-     [2]...[7] - D/A output range for channel 1-6: 
-               0: 0-5V, 1: 0-10V, 2: +/-5V, 3: +/-10V, 
+     [2]...[7] - D/A output range for channel 1-6:
+               0: 0-5V, 1: 0-10V, 2: +/-5V, 3: +/-10V,
 	       4: 4-20mA
 
 
@@ -1918,7 +2072,7 @@ A word or two about DMA. Driver support DMA operations at two ways:
     [5] - 0,  5=D/A output 0-5V  (internal reference -5V)
           1, 10=D/A output 0-10V (internal reference -10V)
 	  2    =D/A output unknow (external reference)
-       
+
    Options for PCL-818, PCL-818H:
     [0] - IO Base
     [1] - IRQ	(0=disable, 2, 3, 4, 5, 6, 7)
@@ -1932,7 +2086,7 @@ A word or two about DMA. Driver support DMA operations at two ways:
    Options for PCL-818HD, PCL-818HG:
     [0] - IO Base
     [1] - IRQ	(0=disable, 2, 3, 4, 5, 6, 7)
-    [2] - DMA/FIFO  (-1=use FIFO, 0=disable both FIFO and DMA, 
+    [2] - DMA/FIFO  (-1=use FIFO, 0=disable both FIFO and DMA,
                       1=use DMA ch 1, 3=use DMA ch 3)
     [3] - 0, 10=10MHz clock for 8254
               1= 1MHz clock for 8254
@@ -1950,7 +2104,7 @@ A word or two about DMA. Driver support DMA operations at two ways:
 	      1=             +/-5V
 	      2=             +/-2.5V
 	      3=             +/-1V
-	      4=             +/-0.5V 
+	      4=             +/-0.5V
 	      5=  	     user defined bipolar
 	      6=	     0-10V
 	      7=	     0-5V
@@ -2014,7 +2168,7 @@ Configuration options:
 
 Driver: pcmda12.o
 Description: A driver for the Winsystems PCM-D/A-12
-Devices: (Winsystems) PCM-D/A-12 [pcmda12]
+Devices: [Winsystems] PCM-D/A-12 (pcmda12)
 Author: Calin Culianu <calin@ajvar.org>
 Updated: Fri, 13 Jan 2006 12:01:01 -0500
 Status: works
@@ -2029,7 +2183,7 @@ base address.  Each address corresponds to the LSB then MSB of a
 particular channel from 0-7.
 
 Note that the board is not ISA-PNP capable and thus
-needs the I/O port comedi_config parameter.  
+needs the I/O port comedi_config parameter.
 
 Note that passing a nonzero value as the second config option will
 enable "simultaneous xfer" mode for this board, in which AO writes
@@ -2044,9 +2198,64 @@ Configuration Options:
 
 
 
+Driver: pcmmio.o
+Description: A driver for the PCM-MIO multifunction board
+Devices: [Winsystems] PCM-MIO (pcmmio)
+Author: Calin Culianu <calin@ajvar.org>
+Updated: Wed, May 16 2007 16:21:10 -0500
+Status: works
+
+A driver for the relatively new PCM-MIO multifunction board from
+Winsystems.  This board is a PC-104 based I/O board.  It contains
+four subdevices: 
+  subdevice 0 - 16 channels of 16-bit AI
+  subdevice 1 - 8 channels of 16-bit AO
+  subdevice 2 - first 24 channels of the 48 channel of DIO (with edge-triggered interrupt support)
+  subdevice 3 - last 24 channels of the 48 channel DIO (no interrupt support for this bank of channels)
+
+  Some notes:
+
+  Synchronous reads and writes are the only things implemented for AI and AO, 
+  even though the hardware itself can do streaming acquisition, etc.  Anyone
+  want to add asynchronous I/O for AI/AO as a feature?  Be my guest...
+
+  Asynchronous I/O for the DIO subdevices *is* implemented, however!  They are 
+  basically edge-triggered interrupts for any configuration of the first 
+  24 DIO-lines.
+
+  Also note that this interrupt support is untested.
+
+  A few words about edge-detection IRQ support (commands on DIO):
+
+  * To use edge-detection IRQ support for the DIO subdevice, pass the IRQ
+    of the board to the comedi_config command.  The board IRQ is not jumpered 
+    but rather configured through software, so any IRQ from 1-15 is OK.
+  
+  * Due to the genericity of the comedi API, you need to create a special 
+    comedi_command in order to use edge-triggered interrupts for DIO.
+  
+  * Use comedi_commands with TRIG_NOW.  Your callback will be called each 
+    time an edge is detected on the specified DIO line(s), and the data
+    values will be two sample_t's, which should be concatenated to form
+    one 32-bit unsigned int.  This value is the mask of channels that had
+    edges detected from your channel list.  Note that the bits positions
+    in the mask correspond to positions in your chanlist when you
+    specified the command and *not* channel id's!
+  
+ *  To set the polarity of the edge-detection interrupts pass a nonzero value 
+    for either CR_RANGE or CR_AREF for edge-up polarity, or a zero 
+    value for both CR_RANGE and CR_AREF if you want edge-down polarity.
+  
+
+Configuration Options:
+  [0] - I/O port base address
+  [1] - IRQ (optional -- for edge-detect interrupt support only, leave out if you don't need this feature)
+
+
+
 Driver: pcmuio.o
 Description: A driver for the PCM-UIO48A and PCM-UIO96A boards from Winsystems.
-Devices: (Winsystems) PCM-UIO48A [pcmuio48], (Winsystems) PCM-UIO96A [pcmuio96]
+Devices: [Winsystems] PCM-UIO48A (pcmuio48), PCM-UIO96A (pcmuio96)
 Author: Calin Culianu <calin@ajvar.org>
 Updated: Fri, 13 Jan 2006 12:01:01 -0500
 Status: works
@@ -2065,14 +2274,14 @@ the board.  You need to pass that information to this driver as the
 first and second comedi_config option, respectively.  Note that the
 48-channel version uses 16 bytes of IO memory and the 96-channel
 version uses 32-bytes (in case you are worried about conflicts).  The
-48-channel board is split into two 24-channel comedi subdevices. 
-The 96-channel board is split into 4 24-channel DIO subdevices.  
+48-channel board is split into two 24-channel comedi subdevices.
+The 96-channel board is split into 4 24-channel DIO subdevices.
 
 Note that IRQ support has been added, but it is untested.
 
-To use edge-detection IRQ support, pass the IRQs of both ASICS 
-(for the 96 channel version) or just 1 ASIC (for 48-channel version).  
-Then, use use comedi_commands with TRIG_NOW.  
+To use edge-detection IRQ support, pass the IRQs of both ASICS
+(for the 96 channel version) or just 1 ASIC (for 48-channel version).
+Then, use use comedi_commands with TRIG_NOW.
 Your callback will be called each time an edge is triggered, and the data
 values will be two sample_t's, which should be concatenated to form one
 32-bit unsigned int.  This value is the mask of channels that had
@@ -2080,7 +2289,7 @@ edges detected from your channel list.  Note that the bits positions
 in the mask correspond to positions in your chanlist when you specified
 the command and *not* channel id's!
 
-To set the polarity of the edge-detection interrupts pass a nonzero value for 
+To set the polarity of the edge-detection interrupts pass a nonzero value for
 either CR_RANGE or CR_AREF for edge-up polarity, or a zero value for both
 CR_RANGE and CR_AREF if you want edge-down polarity.
 
@@ -2190,6 +2399,27 @@ Configuration Options:
 
 
 
+Driver: s526.ko
+Description: Sensoray 526 driver
+Devices: Sensoray s526
+Author: Richie
+	Everett Wang <everett.wang@everteq.com>
+Updated: Thu, 14 Sep. 2006
+Status: experimental
+
+Encoder works
+Analog input works
+Analog output works
+PWM output works
+Commands are not supported yet.
+
+Configuration Options:
+
+comedi_config /dev/comedi0 s526 0x2C0,0x3
+
+
+
+
 Driver: serial2002.o
 Description: Driver for serial connected hardware
 Devices:
@@ -2223,6 +2453,24 @@ Status: unknown
 
 
 
+Driver: unioxx5.o
+Description: Driver for Fastwel UNIOxx-5 (analog and digital i/o) boards.
+Author: Kruchinin Daniil (asgard) <asgard@etersoft.ru>
+Status: unknown
+Updated: 2006-10-09
+Devices: [Fastwel] UNIOxx-5 (unioxx5),
+
+ This card supports digital and analog I/O. It written for g01          
+ subdevices only.                                                       
+ channels range: 0 .. 23 dio channels                                   
+ and 0 .. 11 analog modules range                                       
+ During attaching unioxx5 module displays modules identifiers           
+ (see dmesg after comedi_config) in format:                             
+ | [module_number] module_id |                                          
+
+
+
+
 Driver: usbdux.c
 Description: University of Stirling USB DAQ & INCITE Technology Limited
 Devices: [ITL] USB-DUX (usbdux.o)
@@ -2248,7 +2496,7 @@ Driver: usbduxfast.c
 Description: ITL USB-DUXfast
 Devices: [ITL] USB-DUX (usbduxfast.o)
 Author: Bernd Porr <BerndPorr@f2s.com>
-Updated: 12 Jun 2005
+Updated: 04 Dec 2006
 Status: testing
 
 
