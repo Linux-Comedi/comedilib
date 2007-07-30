@@ -16,7 +16,11 @@ Comedi supports a variety of data acquisition hardware; an
 incomplete list can be found in the Comedi source.
 
 This distribution contains only the user-space library.  You will
-almost certainly also want to download the Comedi kernel modules.
+almost certainly also want to download the Comedi kernel modules
+found in the "comedi" tarball.  Also, the calibration programs
+comedi_calibrate and comedi_soft_calibrate can be found in the
+"comedi_calibrate" tarball.  A few boards also need firmware
+found in the "comedi-nonfree-firmware" tarball.
 
 * Installation:
 
