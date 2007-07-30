@@ -262,7 +262,7 @@ Description: Amplicon PC272E, PCI272
 Author: Ian Abbott <abbotti@mev.co.uk>
 Devices: [Amplicon] PC212E (pc212e), PC214E (pc214e), PC215E (pc215e),
   PCI215 (pci215), PC218E (pc218e), PC272E (pc272e), PCI272 (pci272)
-Updated: Fri, 07 Oct 2005 16:59:59 +0100
+Updated: Fri, 27 Jul 2007 14:28:41 +0100
 Status: works
 
 Configuration options - PC212E, PC214E, PC215E, PC218E, PC272E:
@@ -342,7 +342,8 @@ instructions are supported:
         channels on the chip.
 
   INSN_CONFIG_GET_CLOCK_SRC.  Returns the counter channel's current
-    clock source in data[1].
+    clock source in data[1].  For internal clock sources, data[2] is set
+    to the period in ns.
 
   INSN_CONFIG_SET_GATE_SRC.  Sets the counter channel's gate source as
     specified in data[2] (this is a hardware-specific value).  Not
@@ -1412,6 +1413,26 @@ options for PCI-20341M:
 
 
 
+Driver: jr3_pci.o
+Description: JR3/PCI force sensor board
+Author: Anders Blomdell <anders.blomdell@control.lth.se>
+Status: works
+Devices: [JR3] PCI force sensor board (jr3_pci)
+
+  The DSP on the board requires initialization code, which can 
+  be loaded by placing it in /lib/firmware/comedi.  
+  The initialization code should be somewhere on the media you got 
+  with your card. One version is available from http://www.comedi.org
+  in the comedi_nonfree_firmware tarball.
+
+  Configuration options:
+  [0] - PCI bus number - if bus number and slot number are 0,
+                         then driver search for first unused card
+  [1] - PCI slot number
+
+
+
+
 Driver: ke_counter.o
 Description: Driver for Kolter Electronic Counter Card
 Devices: [Kolter Electronic] PCI Counter Card (ke_counter)
@@ -1591,9 +1612,7 @@ DAQ 660x Register-Level Programmer Manual  (NI 370505A-01)
 DAQ 6601/6602 User Manual (NI 322137B-01)
 
 Things to do:
-- Add DMA support (see mite.c and ni_pcidio.c for examples)
-- Add commands (copy from ni_pcidio.c ?)
-- Add interrupts
+- Add commands (see ni_tio.c and ni_mio_common.c)
 
 
 
@@ -2207,7 +2226,7 @@ Status: works
 
 A driver for the relatively new PCM-MIO multifunction board from
 Winsystems.  This board is a PC-104 based I/O board.  It contains
-four subdevices: 
+four subdevices:
   subdevice 0 - 16 channels of 16-bit AI
   subdevice 1 - 8 channels of 16-bit AO
   subdevice 2 - first 24 channels of the 48 channel of DIO (with edge-triggered interrupt support)
@@ -2215,12 +2234,12 @@ four subdevices:
 
   Some notes:
 
-  Synchronous reads and writes are the only things implemented for AI and AO, 
+  Synchronous reads and writes are the only things implemented for AI and AO,
   even though the hardware itself can do streaming acquisition, etc.  Anyone
   want to add asynchronous I/O for AI/AO as a feature?  Be my guest...
 
-  Asynchronous I/O for the DIO subdevices *is* implemented, however!  They are 
-  basically edge-triggered interrupts for any configuration of the first 
+  Asynchronous I/O for the DIO subdevices *is* implemented, however!  They are
+  basically edge-triggered interrupts for any configuration of the first
   24 DIO-lines.
 
   Also note that this interrupt support is untested.
@@ -2228,24 +2247,24 @@ four subdevices:
   A few words about edge-detection IRQ support (commands on DIO):
 
   * To use edge-detection IRQ support for the DIO subdevice, pass the IRQ
-    of the board to the comedi_config command.  The board IRQ is not jumpered 
+    of the board to the comedi_config command.  The board IRQ is not jumpered
     but rather configured through software, so any IRQ from 1-15 is OK.
-  
-  * Due to the genericity of the comedi API, you need to create a special 
+
+  * Due to the genericity of the comedi API, you need to create a special
     comedi_command in order to use edge-triggered interrupts for DIO.
-  
-  * Use comedi_commands with TRIG_NOW.  Your callback will be called each 
+
+  * Use comedi_commands with TRIG_NOW.  Your callback will be called each
     time an edge is detected on the specified DIO line(s), and the data
     values will be two sample_t's, which should be concatenated to form
     one 32-bit unsigned int.  This value is the mask of channels that had
     edges detected from your channel list.  Note that the bits positions
     in the mask correspond to positions in your chanlist when you
     specified the command and *not* channel id's!
-  
- *  To set the polarity of the edge-detection interrupts pass a nonzero value 
-    for either CR_RANGE or CR_AREF for edge-up polarity, or a zero 
+
+ *  To set the polarity of the edge-detection interrupts pass a nonzero value
+    for either CR_RANGE or CR_AREF for edge-up polarity, or a zero
     value for both CR_RANGE and CR_AREF if you want edge-down polarity.
-  
+
 
 Configuration Options:
   [0] - I/O port base address
@@ -2382,6 +2401,37 @@ Configuration options:
 
 
 
+Driver: rti800.o
+Description: Analog Devices RTI-800/815
+Author: ds
+Status: unknown
+Devices: [Analog Devices] RTI-800 (rti800), RTI-815 (rti815)
+
+Configuration options:
+  [0] - I/O port base address
+  [1] - IRQ
+  [2] - A/D reference
+          0 = differential
+          1 = pseudodifferential (common)
+          2 = single-ended
+  [3] - A/D range
+          0 = [-10,10]
+          1 = [-5,5]
+          2 = [0,10]
+  [4] - A/D encoding
+          0 = two's complement
+          1 = straight binary
+  [5] - DAC 0 range
+          0 = [-10,10]
+          1 = [0,10]
+  [5] - DAC 0 encoding
+          0 = two's complement
+          1 = straight binary
+  [6] - DAC 1 range (same as DAC 0)
+  [7] - DAC 1 encoding (same as DAC 0)
+
+
+
 Driver: rti802.o
 Description: Analog Devices RTI-802
 Author: Anders Blomdell <anders.blomdell@control.lth.se>
@@ -2417,6 +2467,44 @@ Configuration Options:
 
 comedi_config /dev/comedi0 s526 0x2C0,0x3
 
+
+
+
+Driver: s626.o (s626.ko)
+Description: Sensoray 626 driver
+Devices: Sensoray s626
+Authors: Gianluca Palli <gpalli@deis.unibo.it>,
+Updated: Thu, 12 Jul 2005
+Status: experimental
+
+  Configuration Options:
+  analog input:
+   none
+
+  analog output:
+   none
+
+  digital channel:
+   s626 has 3 dio subdevices (2,3 and 4) each with 16 i/o channels
+   supported configuration options:
+   INSN_CONFIG_DIO_QUERY
+   COMEDI_INPUT
+   COMEDI_OUTPUT
+
+  encoder:
+   Every channel must be configured before reading.
+
+   Example code
+
+   insn.insn=INSN_CONFIG;   //configuration instruction
+   insn.n=1;                //number of operation (must be 1)
+   insn.data=&initialvalue; //initial value loaded into encoder
+                            //during configuration
+   insn.subdev=5;           //encoder subdevice
+   insn.chanspec=CR_PACK(encoder_channel,0,AREF_OTHER); //encoder_channel
+                                                        //to configure
+
+   comedi_do_insn(cf,&insn); //executing configuration
 
 
 
