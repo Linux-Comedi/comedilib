@@ -2,8 +2,8 @@
 Building Comedilib from CVS is slightly different from the releases.
 There is an additional step of creating the configure script and
 makefiles from the templates using automake, autoconf, etc.  This
-is all done automatically by running the program autoreconf
-witch should be part of your distribution's autoconf package.
+is all done automatically by running the autogen.sh script
+in this directory.
 
 Requirements:
 
