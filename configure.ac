@@ -1,12 +1,28 @@
 
-AC_INIT([comedilib], [0.7.23])
+AC_INIT([comedilib], [0.8.0])
 AC_CANONICAL_TARGET([])
 
 AC_CONFIG_AUX_DIR([.])
 #COMEDILIB_DEBUG="-Wall -Werror"
 COMEDILIB_DEBUG="-Wall"
 AM_INIT_AUTOMAKE([-Wall -Werror])
-AS_LIBTOOL(COMEDILIB, 7, 23, 7)
+
+# libtool version: current:revision:age
+#
+# If the library source code has changed at all since the last update, then
+# increment revision (`c:r:a' becomes `c:r+1:a').
+#
+# If any interfaces have been added, removed, or changed since the last update,
+# increment current, and set revision to 0.
+#
+# If any interfaces have been added since the last public release, then
+# increment age.
+#
+# If any interfaces have been removed since the last public release, then set
+# age to 0.
+#
+# AS_LIBTOOL arguments are (prefix, current, revision, age)
+AS_LIBTOOL(COMEDILIB, 8, 0, 8)
 
 AM_CONFIG_HEADER(config.h)
 

@@ -246,7 +246,7 @@ int _comedi_apply_calibration( comedi_t *dev, unsigned int subdev, unsigned int 
 	return retval;
 }
 
-EXPORT_ALIAS_DEFAULT(_comedi_get_hardcal_converter, comedi_get_hardcal_converter, 0.7.23);
+EXPORT_ALIAS_DEFAULT(_comedi_get_hardcal_converter, comedi_get_hardcal_converter, 0.8.0);
 int _comedi_get_hardcal_converter(
 	comedi_t *dev, unsigned subdevice, unsigned channel, unsigned range,
 	enum comedi_conversion_direction direction,
@@ -279,7 +279,7 @@ int _comedi_get_hardcal_converter(
 	return 0;
 }
 
-EXPORT_ALIAS_DEFAULT(_comedi_get_softcal_converter, comedi_get_softcal_converter, 0.7.23);
+EXPORT_ALIAS_DEFAULT(_comedi_get_softcal_converter, comedi_get_softcal_converter, 0.8.0);
 int _comedi_get_softcal_converter(
 	unsigned subdevice, unsigned channel, unsigned range,
 	enum comedi_conversion_direction direction,
@@ -328,14 +328,14 @@ static double apply_polynomial(const comedi_polynomial_t *polynomial, double inp
 	return value;
 }
 
-EXPORT_ALIAS_DEFAULT(_comedi_to_physical, comedi_to_physical, 0.7.23);
+EXPORT_ALIAS_DEFAULT(_comedi_to_physical, comedi_to_physical, 0.8.0);
 double _comedi_to_physical(lsampl_t data,
 	const comedi_polynomial_t *conversion_polynomial)
 {
 	return apply_polynomial(conversion_polynomial, data);
 }
 
-EXPORT_ALIAS_DEFAULT(_comedi_from_physical, comedi_from_physical, 0.7.23);
+EXPORT_ALIAS_DEFAULT(_comedi_from_physical, comedi_from_physical, 0.8.0);
 lsampl_t _comedi_from_physical(double data,
 	const comedi_polynomial_t *conversion_polynomial)
 {

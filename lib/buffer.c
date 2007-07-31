@@ -93,7 +93,7 @@ int _comedi_mark_buffer_read(comedi_t *it, unsigned int subdev, unsigned int byt
 	return bi.buf_write_count - bi.buf_read_count;
 }
 
-EXPORT_ALIAS_DEFAULT(_comedi_mark_buffer_written,comedi_mark_buffer_written,0.7.23);
+EXPORT_ALIAS_DEFAULT(_comedi_mark_buffer_written,comedi_mark_buffer_written,0.8.0);
 int _comedi_mark_buffer_written(comedi_t *it, unsigned int subdev, unsigned int bytes)
 {
 	int ret;

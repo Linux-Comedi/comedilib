@@ -79,7 +79,7 @@ int _comedi_dio_config(comedi_t *it,unsigned int subdev,unsigned int chan,unsign
 	}
 }
 
-EXPORT_ALIAS_DEFAULT(_comedi_dio_get_config, comedi_dio_get_config, 0.7.23);
+EXPORT_ALIAS_DEFAULT(_comedi_dio_get_config, comedi_dio_get_config, 0.8.0);
 int _comedi_dio_get_config(comedi_t *it,unsigned int subdev, unsigned int chan, unsigned int *io)
 {
 	subdevice *s;
@@ -208,7 +208,7 @@ int _comedi_dio_write(comedi_t *it,unsigned int subdev,unsigned int chan,
 	}
 }
 
-EXPORT_ALIAS_DEFAULT(_comedi_dio_bitfield2,comedi_dio_bitfield2,0.7.23);
+EXPORT_ALIAS_DEFAULT(_comedi_dio_bitfield2,comedi_dio_bitfield2,0.8.0);
 int _comedi_dio_bitfield2(comedi_t *it, unsigned int subdev, unsigned int mask, unsigned int *bits, unsigned base_channel)
 {
 	int ret;

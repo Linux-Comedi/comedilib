@@ -79,7 +79,7 @@ int _comedi_get_subdevice_flags_old(comedi_t *it,unsigned int subd)
 	return it->subdevices[subd].subd_flags;
 }
 
-EXPORT_ALIAS_DEFAULT(_comedi_get_subdevice_flags,comedi_get_subdevice_flags,0.7.23);
+EXPORT_ALIAS_DEFAULT(_comedi_get_subdevice_flags,comedi_get_subdevice_flags,0.8.0);
 int _comedi_get_subdevice_flags(comedi_t *it,unsigned int subd)
 {
 	comedi_subdinfo *s;
