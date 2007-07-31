@@ -27,7 +27,7 @@ AC_DEFUN([AS_LIBTOOL],
   AC_SUBST([$1]_AGE)
   AC_SUBST([$1]_LIBVERSION)
 
-dnl  [$1]_LT_LDFLAGS="$[$1]_LT_LDFLAGS -version-info $[$1]_LIBVERSION"
+  [$1]_LT_LDFLAGS="$[$1]_LT_LDFLAGS -version-info $[$1]_LIBVERSION"
   if test ! -z "[$5]"
   then
     [$1]_LT_LDFLAGS="$[$1]_LT_LDFLAGS -release $[$1]_VERSION"

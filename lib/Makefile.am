@@ -19,7 +19,7 @@ libcomedi_la_CFLAGS = $(COMEDILIB_CFLAGS) -D_REENTRANT -DLOCALSTATEDIR=\"\$(loca
 
 
 libcomedi_la_LDFLAGS = -soname libcomedi \
-        -release $(VERSION) \
+        $(COMEDILIB_LT_LDFLAGS) \
         -Wl,--version-script=$(srcdir)/version_script
 
 
