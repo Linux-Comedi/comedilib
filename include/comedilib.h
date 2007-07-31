@@ -149,6 +149,10 @@ int comedi_dio_write(comedi_t *it,unsigned int subd,unsigned int chan,
 	unsigned int bit);
 int comedi_dio_bitfield2(comedi_t *it,unsigned int subd,
 	unsigned int write_mask, unsigned int *bits, unsigned int base_channel);
+/* Should be moved to _COMEDILIB_DEPRECATED once bindings for other languages are updated
+ * to use comedi_dio_bitfield2() instead.*/
+int comedi_dio_bitfield(comedi_t *it,unsigned int subd,
+	unsigned int write_mask, unsigned int *bits);
 
 /* slowly varying stuff */
 int comedi_sv_init(comedi_sv_t *it,comedi_t *dev,unsigned int subd,unsigned int chan);
@@ -188,8 +192,6 @@ int comedi_timed_1chan(comedi_t *it,unsigned int subdev,unsigned int chan,
 	unsigned int n_samples,double *data);
 int comedi_get_rangetype(comedi_t *it,unsigned int subdevice,
 	unsigned int chan);
-int comedi_dio_bitfield(comedi_t *it,unsigned int subd,
-	unsigned int write_mask, unsigned int *bits);
 #endif
 
 
