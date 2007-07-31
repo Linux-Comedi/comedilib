@@ -9,9 +9,9 @@ EXTRA_DIST = $(SGML) funcref mkref drivers.txt mkdr FAQ \
 BUILT_SOURCES = funcref.sgml drivers.sgml
 
 if HAVE_DOCBOOK2PDF
-doccomedilib_DATA = comedilib.pdf
+pdf_DATA = comedilib.pdf
 else
-doccomedilib_DATA =
+pdf_DATA =
 endif
 
 if HAVE_DOCBOOK2HTML
@@ -46,19 +46,21 @@ doc_html: $(SGML)
 	{ $(DOCBOOK2HTML) -o doc_html $(srcdir)/comedilib.sgml && touch doc_html; } || { $(RM) -r doc_html; exit 1; }
 
 install_html:
-	$(INSTALL) -d $(doccomedilibdir)/html
+	$(mkdir_p) $(htmldir)/html
+	chmod u+w $(htmldir)/html
 	for each in $(srcdir)/doc_html/*.html $(srcdir)/*.gif ; do \
-		$(INSTALL_DATA) $$each $(doccomedilibdir)/html ; done
+		$(INSTALL_DATA) $$each $(htmldir)/html ; done
 
 uninstall_html:
 	for each in $(srcdir)/doc_html/*.html $(srcdir)/*.gif ; do \
-		$(RM) $(doccomedilibdir)/html/`basename $$each` ; done
+		$(RM) $(htmldir)/html/`basename $$each` ; done
 
 man: $(SGML)
 	{ $(DOCBOOK2MAN) -o man $(srcdir)/comedilib.sgml && touch man; } || { $(RM) -r man; exit 1; }
 
 install_man:
-	$(INSTALL) -d $(mandir)/man3
+	$(mkdir_p) -m 755 $(mandir)/man3
+	chmod u+w $(mandir)/man3
 	for each in $(srcdir)/man/*.3 ; do $(INSTALL_DATA) $$each $(mandir)/man3 ; done
 
 uninstall_man:
