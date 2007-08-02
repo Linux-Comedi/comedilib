@@ -56,6 +56,18 @@ References:
 
 
 
+Driver: adl_pci7296.o
+Description: Driver for the Adlink PCI-7296 96 ch. digital io board
+Devices: [ADLink] PCI-7296 (pci7296)
+Author: Jon Grierson <jd@renko.co.uk>
+Updated: 2.8.2006
+Status: testing
+
+Configuration Options:
+  none
+
+
+
 Driver: adl_pci7432.o
 Description: Driver for the Adlink PCI-7432 64 ch. isolated digital io board
 Devices: [ADLink] PCI-7432 (pci7432)
@@ -601,35 +613,6 @@ Status: experimental
 
 
 
-Driver: cb_pcidas.o
-Description: MeasurementComputing PCI-DAS series with the AMCC S5933 PCI controller
-Author: Ivan Martinez <imr@oersted.dtu.dk>,
-  Frank Mori Hess <fmhess@users.sourceforge.net>
-Updated: 2003-3-11
-Devices: [Measurement Computing] PCI-DAS1602/16 (cb_pcidas),
-  PCI-DAS1602/16jr, PCI-DAS1602/12, PCI-DAS1200, PCI-DAS1200jr,
-  PCI-DAS1000, PCI-DAS1001, PCI_DAS1002
-
-Status:
-  There are many reports of the driver being used with most of the
-  supported cards. Despite no detailed log is maintained, it can
-  be said that the driver is quite tested and stable.
-
-  The boards may be autocalibrated using the comedi_calibrate
-  utility.
-
-Configuration options:
-  [0] - PCI bus of device (optional)
-  [1] - PCI slot of device (optional)
-  If bus/slot is not specified, the first supported
-  PCI device found will be used.
-
-For commands, the scanned channels must be consecutive
-(i.e. 4-5-6-7, 2-3-4,...), and must all have the same
-range and aref.
-
-
-
 Driver: cb_pcidas64.o
 Description: MeasurementComputing PCI-DAS64xx, 60XX, and 4020 series with the PLX 9080 PCI controller
 Author: Frank Mori Hess <fmhess@users.sourceforge.net>
@@ -664,6 +647,35 @@ https://bugs.comedi.org.
 
 
 
+Driver: cb_pcidas.o
+Description: MeasurementComputing PCI-DAS series with the AMCC S5933 PCI controller
+Author: Ivan Martinez <imr@oersted.dtu.dk>,
+  Frank Mori Hess <fmhess@users.sourceforge.net>
+Updated: 2003-3-11
+Devices: [Measurement Computing] PCI-DAS1602/16 (cb_pcidas),
+  PCI-DAS1602/16jr, PCI-DAS1602/12, PCI-DAS1200, PCI-DAS1200jr,
+  PCI-DAS1000, PCI-DAS1001, PCI_DAS1002
+
+Status:
+  There are many reports of the driver being used with most of the
+  supported cards. Despite no detailed log is maintained, it can
+  be said that the driver is quite tested and stable.
+
+  The boards may be autocalibrated using the comedi_calibrate
+  utility.
+
+Configuration options:
+  [0] - PCI bus of device (optional)
+  [1] - PCI slot of device (optional)
+  If bus/slot is not specified, the first supported
+  PCI device found will be used.
+
+For commands, the scanned channels must be consecutive
+(i.e. 4-5-6-7, 2-3-4,...), and must all have the same
+range and aref.
+
+
+
 Driver: cb_pcidda.o
 Description: MeasurementComputing PCI-DDA series
 Author: Ivan Martinez <ivanmr@altavista.com>, Frank Mori Hess <fmhess@users.sourceforge.net>
@@ -686,9 +698,28 @@ Please report sucess/failure with other different cards to
 
 
 
+Driver: cb_pcidio.o
+Description: ComputerBoards' DIO boards with PCI interface
+Devices: [Measurement Computing] PCI-DIO24H (cb_pcidio), PCI-DIO48H
+Author: Yoshiya Matsuzaka
+Updated: Wed, 01 Aug 2007 11:52:49 +0100
+Status: experimental
+
+This driver has been modified from skel.c of comedi-0.7.70.
+
+Configuration Options:
+  [0] - PCI bus of device (optional)
+  [1] - PCI slot of device (optional)
+  If bus/slot is not specified, the first available PCI device will
+  be used.
+
+Passing a zero for an option is the same as leaving it unspecified.
+
+
+
 Driver: cb_pcimdas.o
 Description: Measurement Computing PCI Migration series boards
-Devices: [Computer Boards] PCIM-DAS1602/16 (cb_pcimdas)
+Devices: [ComputerBoards] PCIM-DAS1602/16 (cb_pcimdas)
 Author: Richard Bytheway
 Updated: Wed, 13 Nov 2002 12:34:56 +0000
 Status: experimental
@@ -699,7 +730,7 @@ Configuration Options:
     [0] - PCI bus number
     [1] - PCI slot number
 
-Developed from cb_pcidas and skel by Richard Bytheway (mocelet@sucs.org). 
+Developed from cb_pcidas and skel by Richard Bytheway (mocelet@sucs.org).
 Only supports DIO, AO and simple AI in it's present form.
 No interrupts, multi channel or FIFO AI, although the card looks like it could support this.
 See http://www.measurementcomputing.com/PDFManuals/pcim-das1602_16.pdf for more details.
@@ -1005,7 +1036,7 @@ Passing a zero for an option is the same as leaving it unspecified.
 Driver: das16m1.o
 Description: CIO-DAS16/M1
 Author: Frank Mori Hess <fmhess@users.sourceforge.net>
-Devices: [MeasurementComputing] CIO-DAS16/M1 (cio-das16/m1)
+Devices: [Measurement Computing] CIO-DAS16/M1 (cio-das16/m1)
 Status: works
 
 This driver supports a single board - the CIO-DAS16/M1.
@@ -1314,37 +1345,6 @@ Configuration options:
 
 
 
-Driver: me4000.o
-Description: Meilhaus ME-4000 series boards
-Devices: [Meilhaus] ME-4650 (me4000), ME-4670i, ME-4680, ME-4680i, ME-4680is
-Author: gg (Guenter Gebhardt <g.gebhardt@meilhaus.com>)
-Updated: Mon, 18 Mar 2002 15:34:01 -0800
-Status: broken (no support for loading firmware)
-
-Supports:
-
-    - Analog Input
-    - Analog Output
-    - Digital I/O
-    - Counter
-
-Configuration Options:
-
-    [0] - PCI bus number (optional)
-    [1] - PCI slot number (optional)
-
-    If bus/slot is not specified, the first available PCI
-    device will be used.
-
-The firmware required by these boards is available in the
-comedi_nonfree_firmware tarball available from
-http://www.comedi.org.  However, the driver's support for
-loading the firmware through comedi_config is currently
-broken.
-
-
-
-
 Driver: gsc_hpdi.o
 Description: General Standards Corporation High
     Speed Parallel Digital Interface rs485 boards
@@ -1432,6 +1432,26 @@ options for PCI-20341M:
 
 
 
+Driver: jr3_pci.o
+Description: JR3/PCI force sensor board
+Author: Anders Blomdell <anders.blomdell@control.lth.se>
+Status: works
+Devices: [JR3] PCI force sensor board (jr3_pci)
+
+  The DSP on the board requires initialization code, which can 
+  be loaded by placing it in /lib/firmware/comedi.  
+  The initialization code should be somewhere on the media you got 
+  with your card. One version is available from http://www.comedi.org
+  in the comedi_nonfree_firmware tarball.
+
+  Configuration options:
+  [0] - PCI bus number - if bus number and slot number are 0,
+                         then driver search for first unused card
+  [1] - PCI slot number
+
+
+
+
 Driver: ke_counter.o
 Description: Driver for Kolter Electronic Counter Card
 Devices: [Kolter Electronic] PCI Counter Card (ke_counter)
@@ -1441,6 +1461,37 @@ Status: tested
 
 This driver is a simple driver to read the counter values from
 Kolter Electronic PCI Counter Card.
+
+
+
+Driver: me4000.o
+Description: Meilhaus ME-4000 series boards
+Devices: [Meilhaus] ME-4650 (me4000), ME-4670i, ME-4680, ME-4680i, ME-4680is
+Author: gg (Guenter Gebhardt <g.gebhardt@meilhaus.com>)
+Updated: Mon, 18 Mar 2002 15:34:01 -0800
+Status: broken (no support for loading firmware)
+
+Supports:
+
+    - Analog Input
+    - Analog Output
+    - Digital I/O
+    - Counter
+
+Configuration Options:
+
+    [0] - PCI bus number (optional)
+    [1] - PCI slot number (optional)
+
+    If bus/slot is not specified, the first available PCI
+    device will be used.
+
+The firmware required by these boards is available in the
+comedi_nonfree_firmware tarball available from
+http://www.comedi.org.  However, the driver's support for
+loading the firmware through comedi_config is currently
+broken.
+
 
 
 
@@ -1541,15 +1592,19 @@ Updated: Sat, 25 Jan 2003 13:24:40 -0800
 
 
 
-Driver: pcl711.o
-Description: Advantech PCL-711 and 711b, ADLink ACL-8112
-Author: ds, Janne Jalkanen <jalkanen@cs.hut.fi>, Eric Bunn <ebu@cs.hut.fi>
-Status: mostly complete
-Devices: [Advantech] PCL-711 (pcl711), PCL-711B (pcl711b),
-  [AdLink] ACL-8112HG (acl8112hg), ACL-8112DG (acl8112dg)
+Driver: ni_65xx.o
+Description: National Instruments 65xx static dio boards
+Author: Jon Grierson <jd@renko.co.uk>, Frank Mori Hess <fmhess@users.sourceforge.net>
+Status: testing
+Devices: [National Instruments] PCI-6509 (ni_65xx), PXI-6509, PCI-6510, PCI-6511,
+  PXI-6511, PCI-6512, PXI-6512, PCI-6513, PXI-6513, PCI-6514, PXI-6514, PCI-6515,
+  PXI-6515, PCI-6516, PCI-6517, PCI-6518, PCI-6519, PCI-6520, PCI-6521, PXI-6521,
+  PCI-6528, PXI-6528
+Updated: Wed Oct 18 08:59:11 EDT 2006
 
-Since these boards do not have DMA or FIFOs, only immediate mode is
-supported.
+Based on the PCI-6527 driver by ds.
+The interrupt subdevice (subdevice 3) is probably broken for all boards
+except maybe the 6514.
 
 
 
@@ -1623,6 +1678,14 @@ Configuration options:
 
 
 
+Driver: ni_atmio16d.o
+Description: National Instruments AT-MIO-16D
+Author: Chris R. Baugher <baugher@enteract.com>
+Status: unknown
+Devices: [National Instruments] AT-MIO-16 (atmio16), AT-MIO-16D (atmio16d)
+
+
+
 Driver: ni_atmio.o
 Description: National Instruments AT-MIO-E series
 Author: ds
@@ -1662,14 +1725,6 @@ External triggering is supported for some events.  The channel index
 
 Some of the more esoteric triggering possibilities of these boards
 are not supported.
-
-
-
-Driver: ni_atmio16d.o
-Description: National Instruments AT-MIO-16D
-Author: Chris R. Baugher <baugher@enteract.com>
-Status: unknown
-Devices: [National Instruments] AT-MIO-16 (atmio16), AT-MIO-16D (atmio16d)
 
 
 
@@ -1798,27 +1853,6 @@ comedi_nonfree_firmware tarball available from http://www.comedi.org
 
 
 
-Driver: s526.ko
-Description: Sensoray 526 driver
-Devices: Sensoray s526
-Author: Richie
-	Everett Wang <everett.wang@everteq.com>
-Updated: Thu, 14 Sep. 2006
-Status: experimental
-
-Encoder works
-Analog input works
-Analog output works
-PWM output works
-Commands are not supported yet.
-
-Configuration Options:
-
-comedi_config /dev/comedi0 s526 0x2C0,0x3
-
-
-
-
 Driver: ni_pcimio.o
 Description: National Instruments PCI-MIO-E series and M series (all boards)
 Author: ds, John Hallen, Frank Mori Hess, Rolf Mueller, Herbert Peremans,
@@ -1877,6 +1911,44 @@ Bugs:
 
 
 
+Driver: ni_tio.o
+Description: National Instruments general purpose counters
+Devices:
+Author: J.P. Mellor <jpmellor@rose-hulman.edu>,
+	Herman.Bruyninckx@mech.kuleuven.ac.be,
+	Wim.Meeussen@mech.kuleuven.ac.be,
+	Klaas.Gadeyne@mech.kuleuven.ac.be,
+	Frank Mori Hess <fmhess@users.sourceforge.net>
+Updated: Thu Nov 16 09:50:32 EST 2006
+Status: experimental
+
+This module is not used directly by end-users.  Rather, it
+is used by other drivers (for example ni_660x and ni_pcimio)
+to provide support for NI's general purpose counters.  It was
+originally based on the counter code from ni_660x.c and
+ni_mio_common.c.
+
+References:
+DAQ 660x Register-Level Programmer Manual  (NI 370505A-01)
+DAQ 6601/6602 User Manual (NI 322137B-01)
+340934b.pdf  DAQ-STC reference manual
+
+
+
+
+Driver: pcl711.o
+Description: Advantech PCL-711 and 711b, ADLink ACL-8112
+Author: ds, Janne Jalkanen <jalkanen@cs.hut.fi>, Eric Bunn <ebu@cs.hut.fi>
+Status: mostly complete
+Devices: [Advantech] PCL-711 (pcl711), PCL-711B (pcl711b),
+  [AdLink] ACL-8112HG (acl8112hg), ACL-8112DG (acl8112dg)
+
+Since these boards do not have DMA or FIFOs, only immediate mode is
+supported.
+
+
+
+
 Driver: pcl724.o
 Description: Advantech PCL-724, PCL-722, PCL-731 ADLink ACL-7122, ACL-7124,
   PET-48DIO
@@ -1889,6 +1961,14 @@ This is driver for digital I/O boards PCL-722/724/731 with 144/24/48 DIO
 and for digital I/O boards ACL-7122/7124/PET-48DIO with 144/24/48 DIO.
 It need 8255.o for operations and only immediate mode is supported.
 See the source for configuration details.
+
+
+
+Driver: pcl725.o
+Description: Advantech PCL-725 (& compatibles)
+Author: ds
+Status: unknown
+Devices: [Advantech] PCL-725 (pcl725)
 
 
 
@@ -1925,14 +2005,6 @@ Interrupts are not supported.
      [2]...[7] - D/A output range for channel 1-6:
                0: 0-5V, 1: 0-10V, 2: +/-5V, 3: +/-10V,
 	       4: 4-20mA
-
-
-
-Driver: pcl725.o
-Description: Advantech PCL-725 (& compatibles)
-Author: ds
-Status: unknown
-Devices: [Advantech] PCL-725 (pcl725)
 
 
 
@@ -2164,6 +2236,61 @@ Configuration Options:
 
 
 
+Driver: pcmmio.o
+Description: A driver for the PCM-MIO multifunction board
+Devices: [Winsystems] PCM-MIO (pcmmio)
+Author: Calin Culianu <calin@ajvar.org>
+Updated: Wed, May 16 2007 16:21:10 -0500
+Status: works
+
+A driver for the relatively new PCM-MIO multifunction board from
+Winsystems.  This board is a PC-104 based I/O board.  It contains
+four subdevices:
+  subdevice 0 - 16 channels of 16-bit AI
+  subdevice 1 - 8 channels of 16-bit AO
+  subdevice 2 - first 24 channels of the 48 channel of DIO (with edge-triggered interrupt support)
+  subdevice 3 - last 24 channels of the 48 channel DIO (no interrupt support for this bank of channels)
+
+  Some notes:
+
+  Synchronous reads and writes are the only things implemented for AI and AO,
+  even though the hardware itself can do streaming acquisition, etc.  Anyone
+  want to add asynchronous I/O for AI/AO as a feature?  Be my guest...
+
+  Asynchronous I/O for the DIO subdevices *is* implemented, however!  They are
+  basically edge-triggered interrupts for any configuration of the first
+  24 DIO-lines.
+
+  Also note that this interrupt support is untested.
+
+  A few words about edge-detection IRQ support (commands on DIO):
+
+  * To use edge-detection IRQ support for the DIO subdevice, pass the IRQ
+    of the board to the comedi_config command.  The board IRQ is not jumpered
+    but rather configured through software, so any IRQ from 1-15 is OK.
+
+  * Due to the genericity of the comedi API, you need to create a special
+    comedi_command in order to use edge-triggered interrupts for DIO.
+
+  * Use comedi_commands with TRIG_NOW.  Your callback will be called each
+    time an edge is detected on the specified DIO line(s), and the data
+    values will be two sample_t's, which should be concatenated to form
+    one 32-bit unsigned int.  This value is the mask of channels that had
+    edges detected from your channel list.  Note that the bits positions
+    in the mask correspond to positions in your chanlist when you
+    specified the command and *not* channel id's!
+
+ *  To set the polarity of the edge-detection interrupts pass a nonzero value
+    for either CR_RANGE or CR_AREF for edge-up polarity, or a zero
+    value for both CR_RANGE and CR_AREF if you want edge-down polarity.
+
+
+Configuration Options:
+  [0] - I/O port base address
+  [1] - IRQ (optional -- for edge-detect interrupt support only, leave out if you don't need this feature)
+
+
+
 Driver: pcmuio.o
 Description: A driver for the PCM-UIO48A and PCM-UIO96A boards from Winsystems.
 Devices: [Winsystems] PCM-UIO48A (pcmuio48), PCM-UIO96A (pcmuio96)
@@ -2310,9 +2437,30 @@ Configuration Options:
 
 
 
-Driver: s626.o (s626.ko)
+Driver: s526.ko
+Description: Sensoray 526 driver
+Devices: [Sensoray] 526 (s526)
+Author: Richie
+	Everett Wang <everett.wang@everteq.com>
+Updated: Thu, 14 Sep. 2006
+Status: experimental
+
+Encoder works
+Analog input works
+Analog output works
+PWM output works
+Commands are not supported yet.
+
+Configuration Options:
+
+comedi_config /dev/comedi0 s526 0x2C0,0x3
+
+
+
+
+Driver: s626.ko
 Description: Sensoray 626 driver
-Devices: Sensoray s626
+Devices: [Sensoray] 626 (s626)
 Authors: Gianluca Palli <gpalli@deis.unibo.it>,
 Updated: Thu, 12 Jul 2005
 Status: experimental
@@ -2381,6 +2529,24 @@ Status: unknown
 
 
 
+Driver: unioxx5.o
+Description: Driver for Fastwel UNIOxx-5 (analog and digital i/o) boards.
+Author: Kruchinin Daniil (asgard) <asgard@etersoft.ru>
+Status: unknown
+Updated: 2006-10-09
+Devices: [Fastwel] UNIOxx-5 (unioxx5),
+
+ This card supports digital and analog I/O. It written for g01          
+ subdevices only.                                                       
+ channels range: 0 .. 23 dio channels                                   
+ and 0 .. 11 analog modules range                                       
+ During attaching unioxx5 module displays modules identifiers           
+ (see dmesg after comedi_config) in format:                             
+ | [module_number] module_id |                                          
+
+
+
+
 Driver: usbdux.c
 Description: University of Stirling USB DAQ & INCITE Technology Limited
 Devices: [ITL] USB-DUX (usbdux.o)
@@ -2408,168 +2574,6 @@ Devices: [ITL] USB-DUX (usbduxfast.o)
 Author: Bernd Porr <BerndPorr@f2s.com>
 Updated: 04 Dec 2006
 Status: testing
-
-
-
-Driver: unioxx5.o
-Description: Driver for Fastwel UNIOxx-5 (analog and digital i/o) boards.
-Author: Kruchinin Daniil (asgard) <asgard@etersoft.ru>
-Status: unknown
-Updated: 2006-10-09
-Devices: [Fastwel] UNIOxx-5 (unioxx5),
-
- This card supports digital and analog I/O. It written for g01          
- subdevices only.                                                       
- channels range: 0 .. 23 dio channels                                   
- and 0 .. 11 analog modules range                                       
- During attaching unioxx5 module displays modules identifiers           
- (see dmesg after comedi_config) in format:                             
- | [module_number] module_id |                                          
-
-
-
-
-Driver: adl_pci7296.o
-Description: Driver for the Adlink PCI-7296 96 ch. digital io board
-Devices: [ADLink] PCI-7296 (pci7296)
-Author: Jon Grierson <jd@renko.co.uk>
-Updated: 2.8.2006
-Status: testing
-
-Configuration Options:
-  none
-
-
-
-Driver: pcmmio.o
-Description: A driver for the PCM-MIO multifunction board
-Devices: [Winsystems] PCM-MIO (pcmmio)
-Author: Calin Culianu <calin@ajvar.org>
-Updated: Wed, May 16 2007 16:21:10 -0500
-Status: works
-
-A driver for the relatively new PCM-MIO multifunction board from
-Winsystems.  This board is a PC-104 based I/O board.  It contains
-four subdevices:
-  subdevice 0 - 16 channels of 16-bit AI
-  subdevice 1 - 8 channels of 16-bit AO
-  subdevice 2 - first 24 channels of the 48 channel of DIO (with edge-triggered interrupt support)
-  subdevice 3 - last 24 channels of the 48 channel DIO (no interrupt support for this bank of channels)
-
-  Some notes:
-
-  Synchronous reads and writes are the only things implemented for AI and AO,
-  even though the hardware itself can do streaming acquisition, etc.  Anyone
-  want to add asynchronous I/O for AI/AO as a feature?  Be my guest...
-
-  Asynchronous I/O for the DIO subdevices *is* implemented, however!  They are
-  basically edge-triggered interrupts for any configuration of the first
-  24 DIO-lines.
-
-  Also note that this interrupt support is untested.
-
-  A few words about edge-detection IRQ support (commands on DIO):
-
-  * To use edge-detection IRQ support for the DIO subdevice, pass the IRQ
-    of the board to the comedi_config command.  The board IRQ is not jumpered
-    but rather configured through software, so any IRQ from 1-15 is OK.
-
-  * Due to the genericity of the comedi API, you need to create a special
-    comedi_command in order to use edge-triggered interrupts for DIO.
-
-  * Use comedi_commands with TRIG_NOW.  Your callback will be called each
-    time an edge is detected on the specified DIO line(s), and the data
-    values will be two sample_t's, which should be concatenated to form
-    one 32-bit unsigned int.  This value is the mask of channels that had
-    edges detected from your channel list.  Note that the bits positions
-    in the mask correspond to positions in your chanlist when you
-    specified the command and *not* channel id's!
-
- *  To set the polarity of the edge-detection interrupts pass a nonzero value
-    for either CR_RANGE or CR_AREF for edge-up polarity, or a zero
-    value for both CR_RANGE and CR_AREF if you want edge-down polarity.
-
-
-Configuration Options:
-  [0] - I/O port base address
-  [1] - IRQ (optional -- for edge-detect interrupt support only, leave out if you don't need this feature)
-
-
-
-Driver: ni_65xx.o
-Description: National Instruments 65xx static dio boards
-Author: Jon Grierson <jd@renko.co.uk>, Frank Mori Hess <fmhess@users.sourceforge.net>
-Status: testing
-Devices: [National Instruments] PCI-6509 (ni_65xx), PXI-6509, PCI-6510, PCI-6511,
-  PXI-6511, PCI-6512, PXI-6512, PCI-6513, PXI-6513, PCI-6514, PXI-6514, PCI-6515,
-  PXI-6515, PCI-6516, PCI-6517, PCI-6518, PCI-6519, PCI-6520, PCI-6521, PXI-6521,
-  PCI-6528, PXI-6528
-Updated: Wed Oct 18 08:59:11 EDT 2006
-
-Based on the PCI-6527 driver by ds.
-The interrupt subdevice (subdevice 3) is probably broken for all boards
-except maybe the 6514.
-
-
-
-
-Driver: ni_tio.o
-Description: National Instruments general purpose counters
-Devices:
-Author: J.P. Mellor <jpmellor@rose-hulman.edu>,
-	Herman.Bruyninckx@mech.kuleuven.ac.be,
-	Wim.Meeussen@mech.kuleuven.ac.be,
-	Klaas.Gadeyne@mech.kuleuven.ac.be,
-	Frank Mori Hess <fmhess@users.sourceforge.net>
-Updated: Thu Nov 16 09:50:32 EST 2006
-Status: experimental
-
-This module is not used directly by end-users.  Rather, it
-is used by other drivers (for example ni_660x and ni_pcimio)
-to provide support for NI's general purpose counters.  It was
-originally based on the counter code from ni_660x.c and
-ni_mio_common.c.
-
-References:
-DAQ 660x Register-Level Programmer Manual  (NI 370505A-01)
-DAQ 6601/6602 User Manual (NI 322137B-01)
-340934b.pdf  DAQ-STC reference manual
-
-
-
-
-Driver: jr3_pci.o
-Description: JR3/PCI force sensor board
-Author: Anders Blomdell <anders.blomdell@control.lth.se>
-Status: works
-Devices: [JR3] PCI force sensor board (jr3_pci)
-
-  The DSP on the board requires initialization code, which can 
-  be loaded by placing it in /lib/firmware/comedi.  
-  The initialization code should be somewhere on the media you got 
-  with your card. One version is available from http://www.comedi.org
-  in the comedi_nonfree_firmware tarball.
-
-  Configuration options:
-  [0] - PCI bus number - if bus number and slot number are 0,
-                         then driver search for first unused card
-  [1] - PCI slot number
-
-
-
-
-Driver: cb_pcidio.o
-Description: ComputerBoards' DIO boards with PCI interface
-Devices: [Measurement Computing]
-	PCI-DIO24H, PCI-DIO48H
-Author: Yoshiya Matsuzaka
-Updated: Wed, 25 Jul 2007 15:15:41 +0900
-Status: experimental
-
-This driver has been modified from skel.c of comedi-0.7.70.
-
-Configuration Options:
-  none
 
 
 
