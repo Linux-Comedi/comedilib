@@ -35,7 +35,6 @@ static lsampl_t maxdata[N_CHANS];
 
 
 int prepare_cmd_lib(comedi_t *dev, int subdevice, int n_scan, int n_chan, unsigned period_nanosec, comedi_cmd *cmd);
-int prepare_cmd_lib(comedi_t *dev, int subdevice, int n_scan, int n_chan, unsigned period_nanosec, comedi_cmd *cmd);
 
 void do_cmd(comedi_t *dev,comedi_cmd *cmd);
 
