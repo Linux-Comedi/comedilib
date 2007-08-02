@@ -150,7 +150,7 @@ void probe_max_1chan(comedi_t *it,int s)
 	char buf[100];
 
 	printf("  command fast 1chan:\n");
-	if(comedi_get_cmd_generic_timed(it,s,&cmd,1)<0){
+	if(comedi_get_cmd_generic_timed(it, s, &cmd, 1, 1)<0){
 		printf("    not supported\n");
 	}else{
 		printf("    start: %s %d\n",

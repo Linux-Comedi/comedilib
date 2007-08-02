@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
  * This prepares a command in a pretty generic way.  We ask the
  * library to create a stock command that supports periodic
  * sampling of data, then modify the parts we want. */
-int prepare_cmd_lib(comedi_t *dev, int subdevice, int n_scan, int n_chan, unsigned period_nanosec, comedi_cmd *cmd)
+int prepare_cmd_lib(comedi_t *dev, int subdevice, int n_scan, int n_chan, unsigned scan_period_nanosec, comedi_cmd *cmd)
 {
 	int ret;
 
@@ -211,7 +211,7 @@ int prepare_cmd_lib(comedi_t *dev, int subdevice, int n_scan, int n_chan, unsign
 	/* This comedilib function will get us a generic timed
 	 * command for a particular board.  If it returns -1,
 	 * that's bad. */
-	ret = comedi_get_cmd_generic_timed(dev, subdevice,cmd, period_nanosec);
+	ret = comedi_get_cmd_generic_timed(dev, subdevice, cmd, n_chan, scan_period_nanosec);
 	if(ret<0){
 		printf("comedi_get_cmd_generic_timed failed\n");
 		return ret;
@@ -220,8 +220,6 @@ int prepare_cmd_lib(comedi_t *dev, int subdevice, int n_scan, int n_chan, unsign
 	/* Modify parts of the command */
 	cmd->chanlist = chanlist;
 	cmd->chanlist_len = n_chan;
-
-	cmd->scan_end_arg = n_chan;
 	if(cmd->stop_src == TRIG_COUNT) cmd->stop_arg = n_scan;
 
 	return 0;

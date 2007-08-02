@@ -82,7 +82,7 @@ int test_cmd_probe_fast_1chan(void)
 	}
 
 	printf("command fast 1chan:\n");
-	if(comedi_get_cmd_generic_timed(device,subdevice,&cmd,1)<0){
+	if(comedi_get_cmd_generic_timed(device,subdevice, &cmd, 1, 1)<0){
 		printf("  not supported\n");
 		return 0;
 	}
@@ -117,7 +117,7 @@ int test_cmd_read_fast_1chan(void)
 		return 0;
 	}
 
-	if(comedi_get_cmd_generic_timed(device,subdevice,&cmd,1)<0){
+	if(comedi_get_cmd_generic_timed(device, subdevice, &cmd, 1, 1)<0){
 		printf("  not supported\n");
 		return 0;
 	}
@@ -164,7 +164,7 @@ int test_cmd_write_fast_1chan(void)
 	static const int num_samples = 100000;
 	int num_bytes;
 	int wc;
-	
+
 	if((flags & SDF_LSAMPL))
 	{
 		num_bytes = num_samples * sizeof(lsampl_t);
@@ -177,7 +177,7 @@ int test_cmd_write_fast_1chan(void)
 		return 0;
 	}
 
-	if(comedi_get_cmd_generic_timed(device,subdevice,&cmd,1)<0){
+	if(comedi_get_cmd_generic_timed(device, subdevice, &cmd, 1, 1)<0){
 		printf("  not supported\n");
 		return 0;
 	}
@@ -214,7 +214,7 @@ int test_cmd_write_fast_1chan(void)
 		total += ret;
 		if(verbose)printf("write %d %d\n",ret,total);
 	}
-	
+
 	ret = comedi_internal_trigger(device, subdevice, 0);
 	if(ret<0){
 		perror("E: comedi_inttrig");
@@ -323,11 +323,11 @@ char *tobinary(char *s,int bits,int n)
 {
 	int bit=1<<n;
 	char *t=s;
-	
+
 	for(;bit;bit>>=1)
 		*t++=(bits&bit)?'1':'0';
 	*t=0;
-	
+
 	return s;
 }
 

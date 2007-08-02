@@ -92,3 +92,8 @@ v0.8.0 {
 		comedi_mark_buffer_written;
 		comedi_to_physical;
 } v0.7.20;
+
+v0.9.0 {
+	global:
+		comedi_get_cmd_generic_timed;
+} v0.8.0;

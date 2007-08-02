@@ -43,7 +43,7 @@ static int get_chunks_per_length(int length)
 	int ret;
 	int chunks=0;
 
-	if(comedi_get_cmd_generic_timed(device,subdevice,&cmd,1)<0){
+	if(comedi_get_cmd_generic_timed(device, subdevice, &cmd, 1, 1)<0){
 		printf("  not supported\n");
 		return 0;
 	}

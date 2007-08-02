@@ -164,7 +164,7 @@ int comedi_sv_measure(comedi_sv_t *it,double *data);
 int comedi_get_cmd_src_mask(comedi_t *dev,unsigned int subdevice,
 	comedi_cmd *cmd);
 int comedi_get_cmd_generic_timed(comedi_t *dev,unsigned int subdevice,
-	comedi_cmd *cmd,unsigned int ns);
+	comedi_cmd *cmd, unsigned chanlist_len, unsigned scan_period_ns);
 int comedi_cancel(comedi_t *it,unsigned int subdevice);
 int comedi_command(comedi_t *it,comedi_cmd *cmd);
 int comedi_command_test(comedi_t *it,comedi_cmd *cmd);

@@ -35,7 +35,7 @@ int test_read_select(void)
 		return 0;
 	}
 
-	if(comedi_get_cmd_generic_timed(device,subdevice,&cmd,1)<0){
+	if(comedi_get_cmd_generic_timed(device, subdevice, &cmd, 1, 1)<0){
 		printf("E: comedi_get_cmd_generic_timed failed\n");
 		return 0;
 	}

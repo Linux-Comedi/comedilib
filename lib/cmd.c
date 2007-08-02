@@ -78,11 +78,13 @@ int _comedi_get_cmd_src_mask(comedi_t *it,unsigned int subd,comedi_cmd *cmd)
 	return 0;
 }
 
-static int __generic_timed(comedi_t *it,unsigned int s,
-	comedi_cmd *cmd, unsigned int ns)
+static int __generic_timed(comedi_t *it, unsigned s,
+	comedi_cmd *cmd, unsigned chanlist_len, unsigned scan_period_ns)
 {
 	int ret;
+	unsigned convert_period_ns;
 
+	if(chanlist_len < 1) return -EINVAL;
 	ret = comedi_get_cmd_src_mask(it,s,cmd);
 	if(ret<0)return ret;
 
@@ -99,35 +101,35 @@ static int __generic_timed(comedi_t *it,unsigned int s,
 		return -1;
 	}
 
-	/* Potential bug: there is a possibility that the source mask may
-	 * have * TRIG_TIMER set for both convert_src and scan_begin_src,
-	 * but they may not be supported together. */
-	if(cmd->convert_src&TRIG_TIMER){
-		if(cmd->scan_begin_src&TRIG_FOLLOW){
-			cmd->convert_src = TRIG_TIMER;
-			cmd->convert_arg = ns;
-			cmd->scan_begin_src = TRIG_FOLLOW;
-			cmd->scan_begin_arg = 0;
-		}else{
-			cmd->convert_src = TRIG_TIMER;
-			cmd->convert_arg = ns;
-			cmd->scan_begin_src = TRIG_TIMER;
-			cmd->scan_begin_arg = ns;
-		}
-	}else if(cmd->convert_src & TRIG_NOW &&
-		cmd->scan_begin_src & TRIG_TIMER)
+	convert_period_ns = (scan_period_ns + chanlist_len / 2) / chanlist_len;
+	if((cmd->convert_src & TRIG_TIMER) &&
+		(cmd->scan_begin_src & TRIG_FOLLOW))
+	{
+		cmd->convert_src = TRIG_TIMER;
+		cmd->convert_arg = convert_period_ns;
+		cmd->scan_begin_src = TRIG_FOLLOW;
+		cmd->scan_begin_arg = 0;
+	}else if((cmd->convert_src & TRIG_NOW) &&
+		(cmd->scan_begin_src & TRIG_TIMER))
 	{
 		cmd->convert_src = TRIG_NOW;
 		cmd->convert_arg = 0;
 		cmd->scan_begin_src = TRIG_TIMER;
-		cmd->scan_begin_arg = ns;
+		cmd->scan_begin_arg = scan_period_ns;
+	}else if((cmd->convert_src & TRIG_TIMER) &&
+		(cmd->scan_begin_src & TRIG_TIMER))
+	{
+		cmd->convert_src = TRIG_TIMER;
+		cmd->convert_arg = convert_period_ns;
+		cmd->scan_begin_src = TRIG_TIMER;
+		cmd->scan_begin_arg = scan_period_ns;
 	}else{
 		COMEDILIB_DEBUG(3,"comedi_get_cmd_generic_timed: can't do timed?\n");
 		return -1;
 	}
 
 	cmd->scan_end_src = TRIG_COUNT;
-	cmd->scan_end_arg = 1;
+	cmd->scan_end_arg = chanlist_len;
 
 	if(cmd->stop_src&TRIG_COUNT){
 		cmd->stop_src=TRIG_COUNT;
@@ -140,7 +142,7 @@ static int __generic_timed(comedi_t *it,unsigned int s,
 		return -1;
 	}
 
-	cmd->chanlist_len = 1;
+	cmd->chanlist_len = chanlist_len;
 
 	ret=comedi_command_test(it,cmd);
 	COMEDILIB_DEBUG(3,"comedi_get_cmd_generic_timed: test 1 returned %d\n",ret);
@@ -156,8 +158,8 @@ static int __generic_timed(comedi_t *it,unsigned int s,
 	return -1;
 }
 
-EXPORT_ALIAS_DEFAULT(_comedi_get_cmd_generic_timed,comedi_get_cmd_generic_timed,0.7.18);
-int _comedi_get_cmd_generic_timed(comedi_t *it,unsigned int subd,comedi_cmd *cmd,
+EXPORT_ALIAS_VER(_comedi_get_cmd_generic_timed_obsolete,comedi_get_cmd_generic_timed,0.7.18);
+int _comedi_get_cmd_generic_timed_obsolete(comedi_t *it,unsigned int subd,comedi_cmd *cmd,
 	unsigned int ns)
 {
 	subdevice *s;
@@ -175,7 +177,35 @@ int _comedi_get_cmd_generic_timed(comedi_t *it,unsigned int subd,comedi_cmd *cmd
 	if(!s->cmd_timed)
 		s->cmd_timed = malloc(sizeof(comedi_cmd));
 
-	ret = __generic_timed(it,subd,s->cmd_timed,ns);
+	ret = __generic_timed(it, subd, s->cmd_timed, 1, ns);
+	if(ret<0){
+		s->cmd_mask_errno = errno;
+		return -1;
+	}
+	*cmd=*s->cmd_timed;
+	return 0;
+}
+
+EXPORT_ALIAS_DEFAULT(_comedi_get_cmd_generic_timed,comedi_get_cmd_generic_timed,0.9.0);
+int _comedi_get_cmd_generic_timed(comedi_t *it, unsigned subd, comedi_cmd *cmd,
+	unsigned chanlist_len, unsigned scan_period_ns)
+{
+	subdevice *s;
+	int ret;
+
+	if(!valid_subd(it,subd)) return -1;
+
+	s = it->subdevices + subd;
+
+	if(s->cmd_timed_errno){
+		errno = s->cmd_mask_errno;
+		return -1;
+	}
+
+	if(!s->cmd_timed)
+		s->cmd_timed = malloc(sizeof(comedi_cmd));
+
+	ret = __generic_timed(it, subd, s->cmd_timed, chanlist_len, scan_period_ns);
 	if(ret<0){
 		s->cmd_mask_errno = errno;
 		return -1;

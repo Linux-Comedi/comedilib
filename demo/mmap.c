@@ -120,11 +120,11 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-int prepare_cmd_lib(comedi_t *dev, int subdevice, int n_scan, int n_chan, unsigned period_nanosec, comedi_cmd *cmd)
+int prepare_cmd_lib(comedi_t *dev, int subdevice, int n_scan, int n_chan, unsigned scan_period_nanosec, comedi_cmd *cmd)
 {
 	int ret;
 
-	ret = comedi_get_cmd_generic_timed(dev, subdevice, cmd, period_nanosec);
+	ret = comedi_get_cmd_generic_timed(dev, subdevice, cmd, n_chan, scan_period_nanosec);
 	if(ret<0){
 		comedi_perror("comedi_get_cmd_generic_timed\n");
 		return ret;
@@ -132,8 +132,6 @@ int prepare_cmd_lib(comedi_t *dev, int subdevice, int n_scan, int n_chan, unsign
 
 	cmd->chanlist = chanlist;
 	cmd->chanlist_len = n_chan;
-	cmd->scan_end_arg = n_chan;
-
 	if(cmd->stop_src == TRIG_COUNT) cmd->stop_arg = n_scan;
 
 	return 0;

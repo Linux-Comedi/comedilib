@@ -506,6 +506,8 @@ int comedi_dio_write(comedi_t *it,unsigned int subd,unsigned int chan,
 	unsigned int bit);
 int comedi_dio_bitfield(comedi_t *it,unsigned int subd,
 	unsigned int write_mask, unsigned int *INOUT);
+int comedi_dio_bitfield2(comedi_t *it, unsigned int subd,
+	unsigned int write_mask, unsigned int *INOUT, unsigned base_channel);
 
 /* slowly varying stuff */
 int comedi_sv_init(comedi_sv_t *it,comedi_t *dev,unsigned int subd,unsigned int chan);
@@ -517,7 +519,7 @@ int comedi_sv_measure(comedi_sv_t *it,double *data);
 int comedi_get_cmd_src_mask(comedi_t *dev,unsigned int subdevice,
 	comedi_cmd *INOUT);
 int comedi_get_cmd_generic_timed(comedi_t *dev,unsigned int subdevice,
-	comedi_cmd *INOUT,unsigned int ns);
+	comedi_cmd *INOUT, unsigned chanlist_len, unsigned int scan_period_ns);
 int comedi_cancel(comedi_t *it,unsigned int subdevice);
 int comedi_command(comedi_t *it,comedi_cmd *cmd);
 int comedi_command_test(comedi_t *it,comedi_cmd *INOUT);

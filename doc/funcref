@@ -891,15 +891,18 @@ Retval: int
 Param: comedi_t * device
 Param: unsigned int subdevice
 Param: comedi_cmd * command
-Param: unsigned int period_ns
+Param: unsigned int chanlist_len
+Param: unsigned int scan_period_ns
 Description:
  The command capabilities of the subdevice indicated by the parameters
  device and subdevice are probed, and the results placed in the
  command structure pointed to by the parameter command.  The command
  structure pointed to by the parameter command is modified to be a
- valid command that can be used as a parameter to comedi_command().
- The command measures samples at a rate that corresponds to the
- period period_ns.  The rate is adjusted to a rate that the device
+ valid command that can be used as a parameter to comedi_command()
+ (after the command has been assigned a valid chanlist array).
+ The command measures scans consisting of chanlist_len channels
+ at a scan rate that corresponds to the
+ period scan_period_ns.  The rate is adjusted to a rate that the device
  can handle.  If sucessful, 0 is returned, otherwise -1.
 
 Function: comedi_cancel -- stop streaming input/output in progress
