@@ -120,7 +120,6 @@ int ni_gpct_send_command(comedi_t *device, unsigned subdevice, unsigned n_counts
 	memset(&cmd, 0, sizeof(cmd));
 	cmd.subdev = subdevice;
 	cmd.flags = 0;
-	cmd.flags |= TRIG_WAKE_EOS;
 	/* Wake up at the end of every scan, reduces latency for slow data streams.
 	Turn off for more efficient throughput. */
 	cmd.flags |= TRIG_WAKE_EOS;
@@ -134,8 +133,8 @@ int ni_gpct_send_command(comedi_t *device, unsigned subdevice, unsigned n_counts
 	cmd.convert_arg = 0;
 	cmd.scan_end_src =	TRIG_COUNT;
 	cmd.scan_end_arg = num_chan;
-	cmd.stop_src = TRIG_COUNT;
-	cmd.stop_arg = n_counts;
+	cmd.stop_src = TRIG_NONE;
+	cmd.stop_arg = 0;
 	cmd.chanlist = chanlist;
 	cmd.chanlist_len = num_chan;
 	chanlist[0] = 0;
