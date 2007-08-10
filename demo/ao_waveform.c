@@ -32,15 +32,6 @@
  * [ Actually, the accumulator is only 26 bits, for some
  * reason.  I'll fix this sometime. ]
  *
- * On the Comedi side of things, the setup for mode 2
- * is similar to analog input, except for the TRIG_WRITE
- * flag.  Once you have issued the command, comedi then
- * expects you to keep the buffer full of data to output
- * to the DAC.  This is done by write().  Since there
- * may be a delay between the comedi_command() and a subsequent
- * write(), you should fill the buffer using write() before
- * you call comedi_command(), as is done here.
- *
  */
 
 #include <stdio.h>
