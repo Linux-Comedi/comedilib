@@ -267,3 +267,19 @@ int set_gate_source(comedi_t *device, unsigned subdevice, lsampl_t gate_index, l
 	}
 	return 0;
 }
+
+int comedi_internal_trigger(comedi_t *dev, unsigned int subd, unsigned int trignum)
+{
+	comedi_insn insn;
+	lsampl_t data[1];
+
+	memset(&insn, 0, sizeof(comedi_insn));
+	insn.insn = INSN_INTTRIG;
+	insn.subdev = subd;
+	insn.data = data;
+	insn.n = 1;
+
+	data[0] = trignum;
+
+	return comedi_do_insn(dev, &insn);
+}

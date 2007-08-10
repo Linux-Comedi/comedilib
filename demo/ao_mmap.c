@@ -37,22 +37,6 @@
 #include "examples.h"
 
 
-static int comedi_internal_trigger(comedi_t *dev, unsigned int subd, unsigned int trignum)
-{
-	comedi_insn insn;
-	lsampl_t data[1];
-
-	memset(&insn, 0, sizeof(comedi_insn));
-	insn.insn = INSN_INTTRIG;
-	insn.subdev = subd;
-	insn.data = data;
-	insn.n = 1;
-
-	data[0] = trignum;
-
-	return comedi_do_insn(dev, &insn);
-}
-
 static void write_waveform(sampl_t *buffer, int size, double amplitude, double offset, int maxdata)
 {
 	int i;

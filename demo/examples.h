@@ -35,6 +35,7 @@ extern int reset_counter(comedi_t *device, unsigned subdevice);
 extern int set_counter_mode(comedi_t *device, unsigned subdevice, lsampl_t mode_bits);
 extern int set_clock_source(comedi_t *device, unsigned subdevice, lsampl_t clock, lsampl_t period_ns);
 extern int set_gate_source(comedi_t *device, unsigned subdevice, lsampl_t gate_index, lsampl_t gate_source);
+extern int comedi_internal_trigger(comedi_t *dev, unsigned int subd, unsigned int trignum);
 
 #define sec_to_nsec(x) ((x)*1000000000)
 #define sec_to_usec(x) ((x)*1000000)
