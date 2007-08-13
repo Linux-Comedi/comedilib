@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
 
 	memset(&cmd,0,sizeof(cmd));
 	cmd.subdev = options.subdevice;
-	cmd.flags = 0;
+	cmd.flags = CMDF_WRITE;
 	cmd.start_src = TRIG_INT;
 	cmd.start_arg = 0;
 	cmd.scan_begin_src = TRIG_TIMER;
