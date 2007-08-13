@@ -1,7 +1,7 @@
 
 noinst_PROGRAMS = \
 	antialias ao_waveform ao_mmap apply_cal board_info choose_clock choose_filter \
-	choose_routing cmd dio eeprom_dump gpct_buffered_counting \
+	choose_routing cmd do_waveform dio eeprom_dump gpct_buffered_counting \
 	gpct_encoder gpct_pulse_generator \
 	gpct_simple_counting inp inpn insn ledclock \
 	mmap outp poll receiver select \
@@ -48,6 +48,10 @@ cmd_LDADD = $(COMEDILIB_LIBS)
 dio_SOURCES = dio.c common.c
 dio_CFLAGS = $(COMEDILIB_CFLAGS)
 dio_LDADD = $(COMEDILIB_LIBS)
+
+do_waveform_SOURCES = do_waveform.c common.c
+do_waveform_CFLAGS = $(COMEDILIB_CFLAGS)
+do_waveform_LDADD = $(COMEDILIB_LIBS)
 
 eeprom_dump_SOURCES = eeprom_dump.c common.c
 eeprom_dump_CFLAGS = $(COMEDILIB_CFLAGS)
