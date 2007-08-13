@@ -119,6 +119,9 @@ void dump_cmd(FILE *out,comedi_cmd *cmd)
 {
 	char buf[100];
 
+	fprintf(out,"subdevice:      %d\n",
+		cmd->subdev);
+
 	fprintf(out,"start:      %-8s %d\n",
 		cmd_src(cmd->start_src,buf),
 		cmd->start_arg);
