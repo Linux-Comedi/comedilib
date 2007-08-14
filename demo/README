@@ -64,6 +64,28 @@ dio:
 	an input.  Once the channel's direction has been configured,
 	you can read/write to it with the inp/outp demo programs.
 
+do_waveform:
+	Requirements: NI M-Series board.
+	This demo uses the digital io subdevice with an
+	asynchronous command to generate waveforms.  The
+	waveforms in this example are square waves with
+	varying periods depending on the digital output
+	channel.  Channel N outputs a square wave with
+	period 2*(N+1) clocks. The command line argument chooses the
+	clock signal for updating the outputs.  As a suggestion,
+	you might use the output of one of the general
+	purpose counters for a clock (the default clock
+	source is the output of general purpose counter 0),
+	and run the gpct_pulse_generator demo to start the counter
+	generating pulses on its output.
+
+	Note, you must configure at least one of the digital channels as
+	an output (for example by running the dio demo program)
+	before running this program. You must also pass the dio
+	subdevice file using the -f option, since the default write
+	subdevice for the m-series boards is the analog output.  For
+	example, "dio_waveform -f /dev/comedi0_sub2".
+
 eeprom_dump:
 	Dumps the EEPROM of a card, if it has one.  Useful for debugging
 	devices/drivers.
