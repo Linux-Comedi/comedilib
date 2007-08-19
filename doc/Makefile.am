@@ -46,25 +46,25 @@ doc_html: $(SGML)
 	{ $(DOCBOOK2HTML) -o doc_html $(srcdir)/comedilib.sgml && touch doc_html; } || { $(RM) -r doc_html; exit 1; }
 
 install_html:
-	$(mkdir_p) $(htmldir)/html
-	chmod u+w $(htmldir)/html
+	$(mkdir_p) $(DESTDIR)$(htmldir)/html
+	chmod u+w $(DESTDIR)$(htmldir)/html
 	for each in $(srcdir)/doc_html/*.html $(srcdir)/*.gif ; do \
-		$(INSTALL_DATA) $$each $(htmldir)/html ; done
+		$(INSTALL_DATA) $$each $(DESTDIR)$(htmldir)/html ; done
 
 uninstall_html:
 	for each in $(srcdir)/doc_html/*.html $(srcdir)/*.gif ; do \
-		$(RM) $(htmldir)/html/`basename $$each` ; done
+		$(RM) $(DESTDIR)$(htmldir)/html/`basename $$each` ; done
 
 man: $(SGML)
 	{ $(DOCBOOK2MAN) -o man $(srcdir)/comedilib.sgml && touch man; } || { $(RM) -r man; exit 1; }
 
 install_man:
-	$(mkdir_p) -m 755 $(mandir)/man3
-	chmod u+w $(mandir)/man3
-	for each in $(srcdir)/man/*.3 ; do $(INSTALL_DATA) $$each $(mandir)/man3 ; done
+	$(mkdir_p) -m 755 $(DESTDIR)$(mandir)/man3
+	chmod u+w $(DESTDIR)$(mandir)/man3
+	for each in $(srcdir)/man/*.3 ; do $(INSTALL_DATA) $$each $(DESTDIR)$(mandir)/man3 ; done
 
 uninstall_man:
-	for each in $(srcdir)/man/*.3 ; do $(RM) $(mandir)/man3/`basename $$each` ; done
+	for each in $(srcdir)/man/*.3 ; do $(RM) $(DESTDIR)$(mandir)/man3/`basename $$each` ; done
 
 comedilib.pdf: $(SGML)
 	$(DOCBOOK2PDF) $(srcdir)/comedilib.sgml
