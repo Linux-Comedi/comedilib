@@ -9,5 +9,4 @@ endif
 
 libscxi_la_SOURCES = scxi.c
 libscxi_la_CFLAGS = $(COMEDILIB_CFLAGS) -D_REENTRANT
-libscxi_la_LDFLAGS = -release $(VERSION) -Wl
-libscxi_la_LIBADD = -lcomedi
+libscxi_la_LDFLAGS = -version-info @SCXI_SO_VERSION@

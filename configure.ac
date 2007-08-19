@@ -23,6 +23,9 @@ AM_INIT_AUTOMAKE([-Wall -Werror])
 #
 # AS_LIBTOOL arguments are (prefix, current, revision, age)
 AS_LIBTOOL(COMEDILIB, 8, 0, 8)
+#libscxi c:r:a
+SCXI_SO_VERSION=8:0:8
+AC_SUBST(SCXI_SO_VERSION)
 
 AM_CONFIG_HEADER(config.h)
 

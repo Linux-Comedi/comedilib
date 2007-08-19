@@ -22,7 +22,6 @@ libcomedi_la_LDFLAGS = -soname libcomedi \
         $(COMEDILIB_LT_LDFLAGS) \
         -Wl,--version-script=$(srcdir)/version_script
 
-
 $(srcdir)/calib_yacc.c $(srcdir)/calib_yacc.h: $(srcdir)/calib_yacc.y
 	$(YACC) -d -p calib_yy -o $(srcdir)/calib_yacc.c $<
 
