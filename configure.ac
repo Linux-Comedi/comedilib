@@ -194,6 +194,8 @@ fi
 AC_CONFIG_FILES(
 Makefile
 comedi_config/Makefile
+c++/Makefile
+c++/include/Makefile
 etc/Makefile
 etc/pcmcia/Makefile
 etc/hotplug/Makefile
