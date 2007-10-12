@@ -167,6 +167,8 @@ namespace comedi
 	class subdevice
 	{
 	public:
+		subdevice(): _index(-1)
+		{}
 		subdevice(const device &dev, unsigned subdevice_index):
 			_device(dev), _index(subdevice_index)
 		{
@@ -190,6 +192,18 @@ namespace comedi
 				throw std::runtime_error(message.str());
 			}
 			return retval;
+		}
+		void cancel()
+		{
+			int retval = comedi_cancel(comedi_handle(), index());
+			if(retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_cancel() failed, return value=" << retval << " .";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_cancel");
+				throw std::runtime_error(message.str());
+			}
 		}
 		lsampl_t data_read(unsigned channel, unsigned range, unsigned aref) const
 		{
