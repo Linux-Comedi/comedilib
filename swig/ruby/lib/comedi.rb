@@ -41,11 +41,11 @@ require 'comedi.so'
 
 include Comedi
 
-# SWIG::TYPE_p_comedi_t is returned by Comedi::open
+# SWIG::TYPE_p_comedi_t_struct is returned by Comedi::open
 
-class SWIG::TYPE_p_comedi_t
+class SWIG::TYPE_p_comedi_t_struct
 
-    # create an IO object to access the comedi_t fileno
+    # create an IO object to access the comedi_t_struct fileno
 
     def ios
 	def self.ios
@@ -168,14 +168,16 @@ private
 	    to_phys
 	    from_phys
 	    set_global_oor_behavior
+	    comedi_to_physical
+	    comedi_from_physical
 	}),
     ]
     
     instance_methods = [   
 
-	# SWIG::TYPE_p_comedi_t methods that return -1 on error.
+	# SWIG::TYPE_p_comedi_t_struct methods that return -1 on error.
 
-	Method_group.new(SWIG::TYPE_p_comedi_t, -1, nil, %w{
+	Method_group.new(SWIG::TYPE_p_comedi_t_struct, -1, nil, %w{
 	    close
 	    fileno
 	    get_subdevice_type
@@ -198,6 +200,7 @@ private
 	    unlock
 	    data_read_hint
 	    data_write
+	    dio_get_config
 	    dio_config
 	    dio_write
 	    cancel
@@ -207,53 +210,55 @@ private
 	    get_buffer_contents
 	    mark_buffer_read
 	    get_buffer_offset
+	    get_softcal_converter
+	    get_hardcal_converter
 	}),
 
-	# SWIG::TYPE_p_comedi_t methods that return status and a
+	# SWIG::TYPE_p_comedi_t_struct methods that return status and a
 	# value. Status is -1 on error. Status is discarded.
 
-	Method_group.new(SWIG::TYPE_p_comedi_t, -1, :simple, %w{
+	Method_group.new(SWIG::TYPE_p_comedi_t_struct, -1, :simple, %w{
 	    data_read
 	    data_read_delayed
 	    dio_read
-	    dio_bitfield
+	    dio_bitfield2
 	    get_cmd_src_mask
 	    get_cmd_generic_timed
 	}),
 
-	# SWIG::TYPE_p_comedi_t methods that return status and a
+	# SWIG::TYPE_p_comedi_t_struct methods that return status and a
 	# value. Status is -1 on error. Status and value are both
 	# returned.
 
-	Method_group.new(SWIG::TYPE_p_comedi_t, -1, :compound, %w{
+	Method_group.new(SWIG::TYPE_p_comedi_t_struct, -1, :compound, %w{
 	    command_test
 	}),
 
-	# SWIG::TYPE_p_comedi_t methods that return 0 on error.
+	# SWIG::TYPE_p_comedi_t_struct methods that return 0 on error.
 
-	Method_group.new(SWIG::TYPE_p_comedi_t, 0, nil, %w{
+	Method_group.new(SWIG::TYPE_p_comedi_t_struct, 0, nil, %w{
 	    get_maxdata
 	}),
 
-	# SWIG::TYPE_p_comedi_t methods that return <0 on error.
+	# SWIG::TYPE_p_comedi_t_struct methods that return <0 on error.
 
-	Method_group.new(SWIG::TYPE_p_comedi_t, :neg, nil, %w{
+	Method_group.new(SWIG::TYPE_p_comedi_t_struct, :neg, nil, %w{
 	    apply_calibration
 	    apply_parsed_calibration
 	}),
 
-	# SWIG::TYPE_p_comedi_t methods that return nil on error.
+	# SWIG::TYPE_p_comedi_t_struct methods that return nil on error.
 
-	Method_group.new(SWIG::TYPE_p_comedi_t, nil, nil, %w{
+	Method_group.new(SWIG::TYPE_p_comedi_t_struct, nil, nil, %w{
 	    get_driver_name
 	    get_board_name
 	    get_range
 	    get_default_calibration_path
 	}),
 
-	# SWIG::TYPE_p_comedi_t methods that do not indicate errors.
+	# SWIG::TYPE_p_comedi_t_struct methods that do not indicate errors.
 
-	Method_group.new(SWIG::TYPE_p_comedi_t, :none, nil, %w{
+	Method_group.new(SWIG::TYPE_p_comedi_t_struct, :none, nil, %w{
 	    get_n_subdevices
 	    get_version_code
 	}),

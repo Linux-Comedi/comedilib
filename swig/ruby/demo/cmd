@@ -10,7 +10,7 @@ cmdtest_messages = [ "success", "invalid source", "source conflict",
 		    "invalid argument", "argument conflict",
 		    "invalid chanlist" ]
 
-class SWIG::TYPE_p_comedi_t
+class SWIG::TYPE_p_comedi_t_struct
 
     def prepare_cmd_lib(subdevice, freq, cmd)
 	begin

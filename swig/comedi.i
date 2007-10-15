@@ -7,7 +7,7 @@
     Copyright (C) 2003 Steven Jenkins <steven.jenkins@ieee.org>
 
     This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
+    it under the terms of the GNU Lesser General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
     (at your option) any later version.
 
@@ -64,8 +64,42 @@ static unsigned int cr_aref(unsigned int a){
 
 /* comedi.h */
 
+/* comedi's major device number */
+#define COMEDI_MAJOR 98
+
+/*
+   maximum number of minor devices.  This can be increased, although
+   kernel structures are currently statically allocated, thus you
+   don't want this to be much more than you actually use.
+ */
+#define COMEDI_NDEVICES 16
+
+/* number of config options in the config structure */
+#define COMEDI_NDEVCONFOPTS 32
+/*length of nth chunk of firmware data*/
+#define COMEDI_DEVCONF_AUX_DATA3_LENGTH		25
+#define COMEDI_DEVCONF_AUX_DATA2_LENGTH		26
+#define COMEDI_DEVCONF_AUX_DATA1_LENGTH		27
+#define COMEDI_DEVCONF_AUX_DATA0_LENGTH		28
+#define COMEDI_DEVCONF_AUX_DATA_HI		29	/*most significant 32 bits of pointer address (if needed)*/
+#define COMEDI_DEVCONF_AUX_DATA_LO		30	/*least significant 32 bits of pointer address*/
+#define COMEDI_DEVCONF_AUX_DATA_LENGTH	31	/* total data length */
+
+/* max length of device and driver names */
+#define COMEDI_NAMELEN 20
+
+
 typedef unsigned int lsampl_t;
 typedef unsigned short sampl_t;
+
+/* packs and unpacks a channel/range number */
+
+#define CR_PACK(chan,rng,aref)		( (((aref)&0x3)<<24) | (((rng)&0xff)<<16) | (chan) )
+#define CR_PACK_FLAGS(chan, range, aref, flags)	(CR_PACK(chan, range, aref) | ((flags) & CR_FLAGS_MASK))
+
+#define CR_CHAN(a)	((a)&0xffff)
+#define CR_RANGE(a)	(((a)>>16)&0xff)
+#define CR_AREF(a)	(((a)>>24)&0x03)
 
 #define CR_FLAGS_MASK	0xfc000000
 #define CR_ALT_FILTER	(1<<26)
@@ -102,7 +136,6 @@ typedef unsigned short sampl_t;
 #define GPCT_CONT_PULSE_OUT	0x0200
 #define GPCT_SINGLE_PULSE_OUT	0x0400
 
-
 /* instructions */
 
 #define INSN_MASK_WRITE		0x8000000
@@ -125,7 +158,7 @@ typedef unsigned short sampl_t;
 #define TRIG_DEGLITCH	0x0004		/* enable deglitching */
 //#define TRIG_RT	0x0008		/* perform op in real time */
 #define TRIG_CONFIG	0x0010		/* perform configuration, not triggering */
-//#define TRIG_WAKE_EOS	0x0020		/* wake up on end-of-scan events */
+#define TRIG_WAKE_EOS	0x0020		/* wake up on end-of-scan events */
 //#define TRIG_WRITE	0x0040		/* write to bidirectional devices */
 
 /* command flags */
@@ -134,7 +167,6 @@ typedef unsigned short sampl_t;
 #define CMDF_PRIORITY		0x00000008 /* try to use a real-time interrupt while performing command */
 
 #define TRIG_RT		CMDF_PRIORITY /* compatibility definition */
-#define TRIG_WAKE_EOS		0x00000020 /* legacy definition for COMEDI_EV_SCAN_END */
 
 #define CMDF_WRITE		0x00000040
 #define TRIG_WRITE	CMDF_WRITE /* compatibility definition */
@@ -182,7 +214,10 @@ typedef unsigned short sampl_t;
 #define SDF_MODE2	0x0200		/* can do mode 2 */
 #define SDF_MODE3	0x0400		/* can do mode 3 */
 #define SDF_MODE4	0x0800		/* can do mode 4 */
-#define SDF_CMD		0x1000		/* can do commands */
+#define SDF_CMD		0x1000		/* can do commands (deprecated) */
+#define SDF_SOFT_CALIBRATED	0x2000	/* subdevice uses software calibration */
+#define SDF_CMD_WRITE		0x4000		/* can do output commands */
+#define SDF_CMD_READ		0x8000		/* can do input commands */
 
 #define SDF_READABLE	0x00010000	/* subdevice can be read (e.g. analog input) */
 #define SDF_WRITABLE	0x00020000	/* subdevice can be written (e.g. analog output) */
@@ -202,34 +237,93 @@ typedef unsigned short sampl_t;
 
 /* subdevice types */
 
-#define COMEDI_SUBD_UNUSED              0	/* unused */
-#define COMEDI_SUBD_AI                  1	/* analog input */
-#define COMEDI_SUBD_AO                  2	/* analog output */
-#define COMEDI_SUBD_DI                  3	/* digital input */
-#define COMEDI_SUBD_DO                  4	/* digital output */
-#define COMEDI_SUBD_DIO                 5	/* digital input/output */
-#define COMEDI_SUBD_COUNTER             6	/* counter */
-#define COMEDI_SUBD_TIMER               7	/* timer */
-#define COMEDI_SUBD_MEMORY              8	/* memory, EEPROM, DPRAM */
-#define COMEDI_SUBD_CALIB               9	/* calibration DACs */
-#define COMEDI_SUBD_PROC                10	/* processor, DSP */
+enum comedi_subdevice_type
+{
+	COMEDI_SUBD_UNUSED,	/* unused by driver */
+	COMEDI_SUBD_AI,	/* analog input */
+	COMEDI_SUBD_AO,	/* analog output */
+	COMEDI_SUBD_DI,	/* digital input */
+	COMEDI_SUBD_DO,	/* digital output */
+	COMEDI_SUBD_DIO,	/* digital input/output */
+	COMEDI_SUBD_COUNTER,	/* counter */
+	COMEDI_SUBD_TIMER,	/* timer */
+	COMEDI_SUBD_MEMORY,	/* memory, EEPROM, DPRAM */
+	COMEDI_SUBD_CALIB,	/* calibration DACs */
+	COMEDI_SUBD_PROC,	/* processor, DSP */
+	COMEDI_SUBD_SERIAL	/* serial IO */
+};
 
 /* configuration instructions */
 
-#define COMEDI_INPUT			0
-#define COMEDI_OUTPUT			1
-#define COMEDI_OPENDRAIN		2
+enum configuration_ids
+{
+	INSN_CONFIG_DIO_INPUT = 0,
+	INSN_CONFIG_DIO_OUTPUT = 1,
+	INSN_CONFIG_DIO_OPENDRAIN = 2,
+	INSN_CONFIG_ANALOG_TRIG = 16,
+//	INSN_CONFIG_WAVEFORM = 17,
+//	INSN_CONFIG_TRIG = 18,
+//	INSN_CONFIG_COUNTER = 19,
+	INSN_CONFIG_ALT_SOURCE = 20,
+	INSN_CONFIG_DIGITAL_TRIG = 21,
+	INSN_CONFIG_BLOCK_SIZE = 22,
+	INSN_CONFIG_TIMER_1 = 23,
+	INSN_CONFIG_FILTER = 24,
+	INSN_CONFIG_CHANGE_NOTIFY = 25,
 
-#define INSN_CONFIG_ANALOG_TRIG		0x10
-//#define INSN_CONFIG_WAVEFORM		0x11
-//#define INSN_CONFIG_TRIG		0x12
-//#define INSN_CONFIG_COUNTER		0x13
-#define INSN_CONFIG_ALT_SOURCE		0x14
-#define INSN_CONFIG_DIGITAL_TRIG	0x15
-#define INSN_CONFIG_BLOCK_SIZE		0x16
-#define INSN_CONFIG_TIMER_1		0x17
-#define INSN_CONFIG_FILTER		0x18
-#define INSN_CONFIG_CHANGE_NOTIFY	0x19
+	/*ALPHA*/
+	INSN_CONFIG_SERIAL_CLOCK = 26,
+	INSN_CONFIG_BIDIRECTIONAL_DATA = 27,
+	INSN_CONFIG_DIO_QUERY = 28,
+	INSN_CONFIG_PWM_OUTPUT = 29,
+	INSN_CONFIG_GET_PWM_OUTPUT = 30,
+	INSN_CONFIG_ARM = 31,
+	INSN_CONFIG_DISARM = 32,
+	INSN_CONFIG_GET_COUNTER_STATUS = 33,
+	INSN_CONFIG_RESET = 34,
+	INSN_CONFIG_GPCT_SINGLE_PULSE_GENERATOR = 1001, // Use CTR as single pulsegenerator
+	INSN_CONFIG_GPCT_PULSE_TRAIN_GENERATOR = 1002, // Use CTR as pulsetraingenerator
+	INSN_CONFIG_GPCT_QUADRATURE_ENCODER = 1003, // Use the counter as encoder
+	INSN_CONFIG_SET_GATE_SRC = 2001,	// Set gate source
+	INSN_CONFIG_GET_GATE_SRC = 2002,	// Get gate source
+	INSN_CONFIG_SET_CLOCK_SRC = 2003,	// Set master clock source
+	INSN_CONFIG_GET_CLOCK_SRC = 2004,	// Get master clock source
+	INSN_CONFIG_SET_OTHER_SRC = 2005,       // Set other source
+//	INSN_CONFIG_GET_OTHER_SRC = 2006,	// Get other source
+	INSN_CONFIG_SET_COUNTER_MODE = 4097,
+	INSN_CONFIG_8254_SET_MODE = INSN_CONFIG_SET_COUNTER_MODE,	/* deprecated */
+	INSN_CONFIG_8254_READ_STATUS = 4098,
+	INSN_CONFIG_SET_ROUTING = 4099,
+	INSN_CONFIG_GET_ROUTING = 4109,
+};
+
+enum comedi_io_direction
+{
+	COMEDI_INPUT = 0,
+	COMEDI_OUTPUT = 1,
+	COMEDI_OPENDRAIN = 2
+};
+
+/* ioctls */
+
+#define CIO 'd'
+#define COMEDI_DEVCONFIG _IOW(CIO,0,comedi_devconfig)
+#define COMEDI_DEVINFO _IOR(CIO,1,comedi_devinfo)
+#define COMEDI_SUBDINFO _IOR(CIO,2,comedi_subdinfo)
+#define COMEDI_CHANINFO _IOR(CIO,3,comedi_chaninfo)
+#define COMEDI_TRIG _IOWR(CIO,4,comedi_trig)
+#define COMEDI_LOCK _IO(CIO,5)
+#define COMEDI_UNLOCK _IO(CIO,6)
+#define COMEDI_CANCEL _IO(CIO,7)
+#define COMEDI_RANGEINFO _IOR(CIO,8,comedi_rangeinfo)
+#define COMEDI_CMD _IOR(CIO,9,comedi_cmd)
+#define COMEDI_CMDTEST _IOR(CIO,10,comedi_cmd)
+#define COMEDI_INSNLIST _IOR(CIO,11,comedi_insnlist)
+#define COMEDI_INSN _IOR(CIO,12,comedi_insn)
+#define COMEDI_BUFCONFIG _IOR(CIO,13,comedi_bufconfig)
+#define COMEDI_BUFINFO _IOWR(CIO,14,comedi_bufinfo)
+#define COMEDI_POLL _IO(CIO,15)
+
 
 /* structures */
 
@@ -398,8 +492,267 @@ struct comedi_bufinfo_struct{
 #define COMEDI_CB_ERROR		16	/* card error during acquisition */
 #define COMEDI_CB_OVERFLOW	32	/* buffer overflow/underflow */
 
+/**********************************************************/
+/* everything after this line is ALPHA */
+/**********************************************************/
+
+/*
+  8254 specific configuration.
+
+  It supports two config commands:
+
+  0 ID: INSN_CONFIG_SET_COUNTER_MODE
+  1 8254 Mode
+    I8254_MODE0, I8254_MODE1, ..., I8254_MODE5
+    OR'ed with:
+    I8254_BCD, I8254_BINARY
+
+  0 ID: INSN_CONFIG_8254_READ_STATUS
+  1 <-- Status byte returned here.
+    B7=Output
+    B6=NULL Count
+    B5-B0 Current mode.
+
+*/
+
+enum i8254_mode
+{
+	I8254_MODE0 = (0<<1),  /* Interrupt on terminal count */
+	I8254_MODE1 = (1<<1),  /* Hardware retriggerable one-shot */
+	I8254_MODE2 = (2<<1),  /* Rate generator */
+	I8254_MODE3 = (3<<1),  /* Square wave mode */
+	I8254_MODE4 = (4<<1),  /* Software triggered strobe */
+	I8254_MODE5 = (5<<1),  /* Hardware triggered strobe (retriggerable) */
+	I8254_BCD = 1, /* use binary-coded decimal instead of binary (pretty useless) */
+	I8254_BINARY = 0
+};
+
+/* mode bits for NI general-purpose counters, set with INSN_CONFIG_SET_COUNTER_MODE */
+#define NI_GPCT_COUNTING_MODE_SHIFT 16
+#define NI_GPCT_INDEX_PHASE_BITSHIFT 20
+#define NI_GPCT_COUNTING_DIRECTION_SHIFT 24
+enum ni_gpct_mode_bits
+{
+	NI_GPCT_GATE_ON_BOTH_EDGES_BIT = 0x4,
+	NI_GPCT_EDGE_GATE_MODE_MASK = 0x18,
+	NI_GPCT_EDGE_GATE_STARTS_STOPS_BITS = 0x0,
+	NI_GPCT_EDGE_GATE_STOPS_STARTS_BITS = 0x8,
+	NI_GPCT_EDGE_GATE_STARTS_BITS = 0x10,
+	NI_GPCT_EDGE_GATE_NO_STARTS_NO_STOPS_BITS = 0x18,
+	NI_GPCT_STOP_MODE_MASK = 0x60,
+	NI_GPCT_STOP_ON_GATE_BITS = 0x00,
+	NI_GPCT_STOP_ON_GATE_OR_TC_BITS = 0x20,
+	NI_GPCT_STOP_ON_GATE_OR_SECOND_TC_BITS = 0x40,
+	NI_GPCT_LOAD_B_SELECT_BIT = 0x80,
+	NI_GPCT_OUTPUT_MODE_MASK = 0x300,
+	NI_GPCT_OUTPUT_TC_PULSE_BITS = 0x100,
+	NI_GPCT_OUTPUT_TC_TOGGLE_BITS = 0x200,
+	NI_GPCT_OUTPUT_TC_OR_GATE_TOGGLE_BITS = 0x300,
+	NI_GPCT_HARDWARE_DISARM_MASK = 0xc00,
+	NI_GPCT_NO_HARDWARE_DISARM_BITS = 0x000,
+	NI_GPCT_DISARM_AT_TC_BITS = 0x400,
+	NI_GPCT_DISARM_AT_GATE_BITS = 0x800,
+	NI_GPCT_DISARM_AT_TC_OR_GATE_BITS = 0xc00,
+	NI_GPCT_LOADING_ON_TC_BIT = 0x1000,
+	NI_GPCT_LOADING_ON_GATE_BIT = 0x4000,
+	NI_GPCT_COUNTING_MODE_MASK = 0x7 << NI_GPCT_COUNTING_MODE_SHIFT,
+	NI_GPCT_COUNTING_MODE_NORMAL_BITS = 0x0 << NI_GPCT_COUNTING_MODE_SHIFT,
+	NI_GPCT_COUNTING_MODE_QUADRATURE_X1_BITS = 0x1 << NI_GPCT_COUNTING_MODE_SHIFT,
+	NI_GPCT_COUNTING_MODE_QUADRATURE_X2_BITS = 0x2 << NI_GPCT_COUNTING_MODE_SHIFT,
+	NI_GPCT_COUNTING_MODE_QUADRATURE_X4_BITS = 0x3 << NI_GPCT_COUNTING_MODE_SHIFT,
+	NI_GPCT_COUNTING_MODE_TWO_PULSE_BITS = 0x4 << NI_GPCT_COUNTING_MODE_SHIFT,
+	NI_GPCT_COUNTING_MODE_SYNC_SOURCE_BITS = 0x6 << NI_GPCT_COUNTING_MODE_SHIFT,
+	NI_GPCT_INDEX_PHASE_MASK = 0x3 << NI_GPCT_INDEX_PHASE_BITSHIFT,
+	NI_GPCT_INDEX_PHASE_LOW_A_LOW_B_BITS = 0x0 << NI_GPCT_INDEX_PHASE_BITSHIFT,
+	NI_GPCT_INDEX_PHASE_LOW_A_HIGH_B_BITS = 0x1 << NI_GPCT_INDEX_PHASE_BITSHIFT,
+	NI_GPCT_INDEX_PHASE_HIGH_A_LOW_B_BITS = 0x2 << NI_GPCT_INDEX_PHASE_BITSHIFT,
+	NI_GPCT_INDEX_PHASE_HIGH_A_HIGH_B_BITS = 0x3 << NI_GPCT_INDEX_PHASE_BITSHIFT,
+	NI_GPCT_INDEX_ENABLE_BIT = 0x400000,
+	NI_GPCT_COUNTING_DIRECTION_MASK = 0x3 << NI_GPCT_COUNTING_DIRECTION_SHIFT,
+	NI_GPCT_COUNTING_DIRECTION_DOWN_BITS = 0x00 << NI_GPCT_COUNTING_DIRECTION_SHIFT,
+	NI_GPCT_COUNTING_DIRECTION_UP_BITS = 0x1 << NI_GPCT_COUNTING_DIRECTION_SHIFT,
+	NI_GPCT_COUNTING_DIRECTION_HW_UP_DOWN_BITS = 0x2 << NI_GPCT_COUNTING_DIRECTION_SHIFT,
+	NI_GPCT_COUNTING_DIRECTION_HW_GATE_BITS = 0x3 << NI_GPCT_COUNTING_DIRECTION_SHIFT,
+	NI_GPCT_RELOAD_SOURCE_MASK = 0xc000000,
+	NI_GPCT_RELOAD_SOURCE_FIXED_BITS = 0x0,
+	NI_GPCT_RELOAD_SOURCE_SWITCHING_BITS = 0x4000000,
+	NI_GPCT_RELOAD_SOURCE_GATE_SELECT_BITS = 0x8000000,
+	NI_GPCT_OR_GATE_BIT = 0x10000000,
+	NI_GPCT_INVERT_OUTPUT_BIT = 0x20000000
+};
+
+/* Bits for setting a clock source with
+ * INSN_CONFIG_SET_CLOCK_SRC when using NI general-purpose counters. */
+enum ni_gpct_clock_source_bits
+{
+	NI_GPCT_CLOCK_SRC_SELECT_MASK = 0x3f,
+	NI_GPCT_TIMEBASE_1_CLOCK_SRC_BITS = 0x0,
+	NI_GPCT_TIMEBASE_2_CLOCK_SRC_BITS = 0x1,
+	NI_GPCT_TIMEBASE_3_CLOCK_SRC_BITS = 0x2,
+	NI_GPCT_LOGIC_LOW_CLOCK_SRC_BITS = 0x3,
+	NI_GPCT_NEXT_GATE_CLOCK_SRC_BITS = 0x4,
+	NI_GPCT_NEXT_TC_CLOCK_SRC_BITS = 0x5,
+	NI_GPCT_SOURCE_PIN_i_CLOCK_SRC_BITS = 0x6, /* NI 660x-specific */
+	NI_GPCT_PXI10_CLOCK_SRC_BITS = 0x7,
+	NI_GPCT_PXI_STAR_TRIGGER_CLOCK_SRC_BITS = 0x8,
+	NI_GPCT_ANALOG_TRIGGER_OUT_CLOCK_SRC_BITS = 0x9,
+	NI_GPCT_PRESCALE_MODE_CLOCK_SRC_MASK = 0x30000000,
+	NI_GPCT_NO_PRESCALE_CLOCK_SRC_BITS = 0x0,
+	NI_GPCT_PRESCALE_X2_CLOCK_SRC_BITS = 0x10000000,	/* divide source by 2 */
+	NI_GPCT_PRESCALE_X8_CLOCK_SRC_BITS = 0x20000000,	/* divide source by 8 */
+	NI_GPCT_INVERT_CLOCK_SRC_BIT = 0x80000000
+};
+
+/* Possibilities for setting a gate source with
+INSN_CONFIG_SET_GATE_SRC when using NI general-purpose counters.
+May be bitwise-or'd with CR_EDGE or CR_INVERT. */
+enum ni_gpct_gate_select
+{
+	/* m-series gates */
+	NI_GPCT_TIMESTAMP_MUX_GATE_SELECT = 0x0,
+	NI_GPCT_AI_START2_GATE_SELECT = 0x12,
+	NI_GPCT_PXI_STAR_TRIGGER_GATE_SELECT = 0x13,
+	NI_GPCT_NEXT_OUT_GATE_SELECT = 0x14,
+	NI_GPCT_AI_START1_GATE_SELECT = 0x1c,
+	NI_GPCT_NEXT_SOURCE_GATE_SELECT = 0x1d,
+	NI_GPCT_ANALOG_TRIGGER_OUT_GATE_SELECT = 0x1e,
+	NI_GPCT_LOGIC_LOW_GATE_SELECT = 0x1f,
+	/* more gates for 660x */
+	NI_GPCT_SOURCE_PIN_i_GATE_SELECT = 0x100,
+	NI_GPCT_GATE_PIN_i_GATE_SELECT = 0x101,
+	/* more gates for 660x "second gate" */
+	NI_GPCT_UP_DOWN_PIN_i_GATE_SELECT = 0x201,
+	NI_GPCT_SELECTED_GATE_GATE_SELECT = 0x21e,
+	/* m-series "second gate" sources are unknown,
+	we should add them here with an offset of 0x300 when known. */
+	NI_GPCT_DISABLED_GATE_SELECT = 0x8000,
+};
+
+/* Possibilities for setting a source with
+INSN_CONFIG_SET_OTHER_SRC when using NI general-purpose counters. */
+enum ni_gpct_other_index {
+  NI_GPCT_SOURCE_ENCODER_A,
+  NI_GPCT_SOURCE_ENCODER_B,
+  NI_GPCT_SOURCE_ENCODER_Z
+};
+enum ni_gpct_other_select
+{
+  	/* m-series gates */
+        // Still unknown, probably only need NI_GPCT_PFI_OTHER_SELECT
+	NI_GPCT_DISABLED_OTHER_SELECT = 0x8000,
+};
+
+
+/* start sources for ni general-purpose counters for use with
+INSN_CONFIG_ARM */
+enum ni_gpct_arm_source
+{
+	NI_GPCT_ARM_IMMEDIATE = 0x0,
+	NI_GPCT_ARM_PAIRED_IMMEDIATE = 0x1, /* Start both the counter and the adjacent paired counter simultaneously */
+	/* NI doesn't document bits for selecting hardware arm triggers.  If
+	the NI_GPCT_ARM_UNKNOWN bit is set, we will pass the least significant
+	bits (3 bits for 660x or 5 bits for m-series) through to the hardware.
+	This will at least allow someone to figure out what the bits do later.*/
+	NI_GPCT_ARM_UNKNOWN = 0x1000,
+};
+
+/* digital filtering options for ni 660x for use with INSN_CONFIG_FILTER. */
+enum ni_gpct_filter_select
+{
+	NI_GPCT_FILTER_OFF = 0x0,
+	NI_GPCT_FILTER_TIMEBASE_3_SYNC = 0x1,
+	NI_GPCT_FILTER_100x_TIMEBASE_1= 0x2,
+	NI_GPCT_FILTER_20x_TIMEBASE_1 = 0x3,
+	NI_GPCT_FILTER_10x_TIMEBASE_1 = 0x4,
+	NI_GPCT_FILTER_2x_TIMEBASE_1 = 0x5,
+	NI_GPCT_FILTER_2x_TIMEBASE_3 = 0x6
+};
+
+/* PFI digital filtering options for ni m-series for use with INSN_CONFIG_FILTER. */
+enum ni_pfi_filter_select
+{
+	NI_PFI_FILTER_OFF = 0x0,
+	NI_PFI_FILTER_125ns = 0x1,
+	NI_PFI_FILTER_6425ns = 0x2,
+	NI_PFI_FILTER_2550us = 0x3
+};
+
+/* master clock sources for ni mio boards and INSN_CONFIG_SET_CLOCK_SRC */
+enum ni_mio_clock_source
+{
+	NI_MIO_INTERNAL_CLOCK = 0,
+	NI_MIO_RTSI_CLOCK = 1,	/* doesn't work for m-series, use NI_MIO_PLL_RTSI_CLOCK() */
+	/* the NI_MIO_PLL_* sources are m-series only */
+	NI_MIO_PLL_PXI_STAR_TRIGGER_CLOCK = 2,
+	NI_MIO_PLL_PXI10_CLOCK = 3,
+	NI_MIO_PLL_RTSI0_CLOCK = 4
+};
+
+/* Signals which can be routed to an NI RTSI pin with INSN_CONFIG_SET_ROUTING.
+ The numbers assigned are not arbitrary, they correspond to the bits required
+ to program the board. */
+enum ni_rtsi_routing
+{
+	NI_RTSI_OUTPUT_ADR_START1 = 0,
+	NI_RTSI_OUTPUT_ADR_START2 = 1,
+	NI_RTSI_OUTPUT_SCLKG = 2,
+	NI_RTSI_OUTPUT_DACUPDN = 3,
+	NI_RTSI_OUTPUT_DA_START1 = 4,
+	NI_RTSI_OUTPUT_G_SRC0 = 5,
+	NI_RTSI_OUTPUT_G_GATE0 = 6,
+	NI_RTSI_OUTPUT_RGOUT0 = 7,
+	NI_RTSI_OUTPUT_RTSI_BRD_0 = 8,
+	NI_RTSI_OUTPUT_RTSI_OSC = 12 /* pre-m-series always have RTSI clock on line 7 */
+};
+
+/* Signals which can be routed to an NI PFI pin on an m-series board
+ with INSN_CONFIG_SET_ROUTING.  These numbers are also returned
+ by INSN_CONFIG_GET_ROUTING on pre-m-series boards, even though
+ their routing cannot be changed.  The numbers assigned are
+ not arbitrary, they correspond to the bits required
+ to program the board. */
+enum ni_pfi_routing
+{
+	NI_PFI_OUTPUT_PFI_DEFAULT = 0,
+	NI_PFI_OUTPUT_AI_START1 = 1,
+	NI_PFI_OUTPUT_AI_START2 = 2,
+	NI_PFI_OUTPUT_AI_CONVERT = 3,
+	NI_PFI_OUTPUT_G_SRC1 = 4,
+	NI_PFI_OUTPUT_G_GATE1 = 5,
+	NI_PFI_OUTPUT_AO_UPDATE_N = 6,
+	NI_PFI_OUTPUT_AO_START1 = 7,
+	NI_PFI_OUTPUT_AI_START_PULSE = 8,
+	NI_PFI_OUTPUT_G_SRC0 = 9,
+	NI_PFI_OUTPUT_G_GATE0 = 10,
+	NI_PFI_OUTPUT_EXT_STROBE = 11,
+	NI_PFI_OUTPUT_AI_EXT_MUX_CLK = 12,
+	NI_PFI_OUTPUT_GOUT0 = 13,
+	NI_PFI_OUTPUT_GOUT1 = 14,
+	NI_PFI_OUTPUT_FREQ_OUT = 15,
+	NI_PFI_OUTPUT_PFI_DO = 16,
+	NI_PFI_OUTPUT_I_ATRIG = 17,
+	NI_PFI_OUTPUT_RTSI0 = 18,
+	NI_PFI_OUTPUT_PXI_STAR_TRIGGER_IN = 26,
+	NI_PFI_OUTPUT_SCXI_TRIG1 = 27,
+	NI_PFI_OUTPUT_DIO_CHANGE_DETECT_RTSI = 28,
+	NI_PFI_OUTPUT_CDI_SAMPLE = 29,
+	NI_PFI_OUTPUT_CDO_UPDATE = 30
+};
+
+/* NI External Trigger lines.  These values are not arbitrary, but are related to
+	the bits required to program the board (offset by 1 for historical reasons). */
+
+/* status bits for INSN_CONFIG_GET_COUNTER_STATUS */
+enum comedi_counter_status_flags
+{
+	COMEDI_COUNTER_ARMED = 0x1,
+	COMEDI_COUNTER_COUNTING = 0x2,
+	COMEDI_COUNTER_TERMINAL_COUNT = 0x4,
+};
+
 /* comedilib.h */
-typedef void comedi_t;
+
+typedef struct comedi_t_struct comedi_t;
 
 typedef struct{
 	double min;
@@ -427,6 +780,9 @@ enum comedi_oor_behavior {
 	COMEDI_OOR_NAN
 };
 
+
+
+
 comedi_t *comedi_open(const char *fn);
 int comedi_close(comedi_t *it);
 
@@ -444,8 +800,8 @@ enum comedi_oor_behavior comedi_set_global_oor_behavior(enum comedi_oor_behavior
 int comedi_get_n_subdevices(comedi_t *it);
 #define COMEDI_VERSION_CODE(a,b,c) (((a)<<16) | ((b)<<8) | (c))
 int comedi_get_version_code(comedi_t *it);
-char *comedi_get_driver_name(comedi_t *it);
-char *comedi_get_board_name(comedi_t *it);
+const char *comedi_get_driver_name(comedi_t *it);
+const char *comedi_get_board_name(comedi_t *it);
 int comedi_get_read_subdevice(comedi_t *dev);
 int comedi_get_write_subdevice(comedi_t *dev);
 
@@ -474,6 +830,9 @@ int comedi_set_buffer_size(comedi_t *it,unsigned int subdevice,
 	unsigned int len);
 
 /* low-level stuff */
+#ifdef _COMEDILIB_DEPRECATED
+int comedi_trigger(comedi_t *it,comedi_trig *trig); /* deprecated */
+#endif
 int comedi_do_insnlist(comedi_t *it,comedi_insnlist *il);
 int comedi_do_insn(comedi_t *it,comedi_insn *insn);
 int comedi_lock(comedi_t *it,unsigned int subdevice);
@@ -500,6 +859,8 @@ int comedi_data_write(comedi_t *it,unsigned int subd,unsigned int chan,
 	unsigned int range,unsigned int aref,lsampl_t data);
 int comedi_dio_config(comedi_t *it,unsigned int subd,unsigned int chan,
 	unsigned int dir);
+int comedi_dio_get_config(comedi_t *it,unsigned int subd,unsigned int chan,
+	unsigned int *OUTPUT);
 int comedi_dio_read(comedi_t *it,unsigned int subd,unsigned int chan,
 	unsigned int *OUTPUT);
 int comedi_dio_write(comedi_t *it,unsigned int subd,unsigned int chan,
@@ -532,9 +893,33 @@ int comedi_set_max_buffer_size(comedi_t *it, unsigned int subdev,
 int comedi_get_buffer_contents(comedi_t *it, unsigned int subdev);
 int comedi_mark_buffer_read(comedi_t *it, unsigned int subdev,
 	unsigned int bytes);
+int comedi_mark_buffer_written(comedi_t *it, unsigned int subdev,
+	unsigned int bytes);
 int comedi_get_buffer_offset(comedi_t *it, unsigned int subdev);
 
+#ifdef _COMEDILIB_DEPRECATED
+/*
+ * The following functions are deprecated and should not be used.
+ */
+int comedi_get_timer(comedi_t *it,unsigned int subdev,double freq,
+	unsigned int *trigvar,double *actual_freq);
+int comedi_timed_1chan(comedi_t *it,unsigned int subdev,unsigned int chan,
+	unsigned int range, unsigned int aref,double freq,
+	unsigned int n_samples,double *data);
+int comedi_get_rangetype(comedi_t *it,unsigned int subdevice,
+	unsigned int chan);
+int comedi_dio_bitfield(comedi_t *it,unsigned int subd,
+	unsigned int write_mask, unsigned int *bits);
+#endif
 
+
+#ifndef _COMEDILIB_STRICT_ABI
+/*
+   The following prototypes are _NOT_ part of the Comedilib ABI, and
+   may change in future versions without regard to source or binary
+   compatibility.  In practice, this is a holding place for the next
+   library ABI version change.
+ */
 /* structs and functions used for parsing calibration files */
 typedef struct
 {
@@ -542,6 +927,18 @@ typedef struct
 	unsigned int channel;
 	unsigned int value;
 } comedi_caldac_t;
+#define COMEDI_MAX_NUM_POLYNOMIAL_COEFFICIENTS 4
+typedef struct
+{
+	double coefficients[COMEDI_MAX_NUM_POLYNOMIAL_COEFFICIENTS];
+	double expansion_origin;
+	unsigned order;
+} comedi_polynomial_t;
+typedef struct
+{
+	comedi_polynomial_t *to_phys;
+	comedi_polynomial_t *from_phys;
+} comedi_softcal_t;
 #define CS_MAX_AREFS_LENGTH 4
 typedef struct
 {
@@ -554,6 +951,7 @@ typedef struct
 	unsigned int num_arefs;
 	comedi_caldac_t *caldacs;
 	unsigned int num_caldacs;
+	comedi_softcal_t soft_calibration;
 } comedi_calibration_setting_t;
 
 typedef struct
@@ -572,3 +970,23 @@ void comedi_cleanup_calibration( comedi_calibration_t *calibration );
 int comedi_apply_calibration( comedi_t *dev, unsigned int subdev, unsigned int channel,
 	unsigned int range, unsigned int aref, const char *cal_file_path);
 
+/* New stuff to provide conversion between integers and physical values that
+* can support software calibrations. */
+enum comedi_conversion_direction
+{
+	COMEDI_TO_PHYSICAL,
+	COMEDI_FROM_PHYSICAL
+};
+int comedi_get_softcal_converter(
+	unsigned subdevice, unsigned channel, unsigned range,
+	enum comedi_conversion_direction direction,
+	const comedi_calibration_t *calibration, comedi_polynomial_t* OUTPUT);
+int comedi_get_hardcal_converter(
+	comedi_t *dev, unsigned subdevice, unsigned channel, unsigned range,
+	enum comedi_conversion_direction direction, comedi_polynomial_t* OUTPUT);
+double comedi_to_physical(lsampl_t data,
+	const comedi_polynomial_t *conversion_polynomial);
+lsampl_t comedi_from_physical(double data,
+	const comedi_polynomial_t *conversion_polynomial);
+
+#endif
