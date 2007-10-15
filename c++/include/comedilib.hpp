@@ -258,6 +258,31 @@ namespace comedi
 			}
 		}
 		device dev() const {return _device;}
+		void dio_bitfield2(unsigned write_mask, unsigned *bits, unsigned base_channel)
+		{
+			int retval = comedi_dio_bitfield2(comedi_handle(), index(),
+				write_mask, bits, base_channel);
+			if(retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_dio_bitfield2() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_dio_bitfield2");
+				throw std::runtime_error(message.str());
+			}
+		}
+		void dio_config(unsigned channel, enum comedi_io_direction direction)
+		{
+			int retval = comedi_dio_config(comedi_handle(), index(), channel, direction);
+			if(retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_dio_config() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_dio_config");
+				throw std::runtime_error(message.str());
+			}
+		}
 		unsigned flags() const
 		{
 			int retval = comedi_get_subdevice_flags(comedi_handle(), index());
