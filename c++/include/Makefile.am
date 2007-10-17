@@ -1,3 +1,3 @@
 
-include_HEADERS = comedilib.hpp
+include_HEADERS = comedilib.hpp comedi_iostream.hpp
 
