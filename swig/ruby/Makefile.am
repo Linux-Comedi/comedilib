@@ -13,7 +13,7 @@ install-data-local:
 endif
 
 ext/Makefile config.save: $(srcdir)/ext/comedi_ruby_wrap.c
-	$(RUBY) $(srcdir)/setup.rb config $(RUBY_CONFIG_OPTIONS) -- --with-comedilib-dir=../../..
+	$(RUBY) $(srcdir)/setup.rb config $(RUBY_CONFIG_OPTIONS) -- --with-comedilib-dir=$(abs_srcdir)/../..
 
 ext/comedi.so ext/comedi_ruby_wrap.o: ext/Makefile config.save
 	$(RUBY) $(srcdir)/setup.rb setup
