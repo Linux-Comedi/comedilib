@@ -17,7 +17,7 @@ int test_insn_read_time(void)
 {
 	comedi_insn insn[3];
 	comedi_insnlist il;
-	struct timeval t1,t2;
+	lsampl_t t1[2],t2[2];
 	lsampl_t data;
 	int save_errno;
 	int ret;
@@ -37,7 +37,7 @@ int test_insn_read_time(void)
 
 	insn[0].insn = INSN_GTOD;
 	insn[0].n=2;
-	insn[0].data = (void *)&t1;
+	insn[0].data = t1;
 
 	insn[1].subdev = subdevice;
 	insn[1].insn = INSN_READ;
@@ -47,7 +47,7 @@ int test_insn_read_time(void)
 
 	insn[2].insn = INSN_GTOD;
 	insn[2].n=2;
-	insn[2].data = (void *)&t2;
+	insn[2].data = t2;
 
 	ret = comedi_do_insnlist(device,&il);
 	save_errno = errno;
@@ -61,7 +61,7 @@ int test_insn_read_time(void)
 	}
 
 	printf("read time: %ld us\n",
-		(t2.tv_sec-t1.tv_sec)*1000000+(t2.tv_usec-t1.tv_usec));
+		(long)(t2[0]-t1[0])*1000000+(t2[1]-t1[1]));
 
 
 	return 0;

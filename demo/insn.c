@@ -34,6 +34,11 @@
  * This example does 3 instructions in one system call.  It does
  * a gettimeofday() call, then reads N_SAMPLES samples from an
  * analog input, and the another gettimeofday() call.
+ *
+ * (Note: The gettimeofday() value is obtained using an INSN_GTOD
+ * instruction, which places the seconds value in data[0] and the
+ * microseconds in data[1], so the seconds value is limited to
+ * 32-bits even on 64-bit systems.)
  */
 
 #define MAX_SAMPLES 128
@@ -45,7 +50,7 @@ int main(int argc, char *argv[])
 	int ret,i;
 	comedi_insn insn[3];
 	comedi_insnlist il;
-	struct timeval t1,t2;
+	lsampl_t t1[2], t2[2];
 	lsampl_t data[MAX_SAMPLES];
 	struct parsed_options options;
 
@@ -77,7 +82,7 @@ int main(int argc, char *argv[])
 	/* Instruction 0: perform a gettimeofday() */
 	insn[0].insn=INSN_GTOD;
 	insn[0].n=2;
-	insn[0].data=(void *)&t1;
+	insn[0].data=t1;
 
 	/* Instruction 1: do 10 analog input reads */
 	insn[1].insn=INSN_READ;
@@ -89,7 +94,7 @@ int main(int argc, char *argv[])
 	/* Instruction 2: perform a gettimeofday() */
 	insn[2].insn=INSN_GTOD;
 	insn[2].n=2;
-	insn[2].data=(void *)&t2;
+	insn[2].data=t2;
 
 	ret=comedi_do_insnlist(device,&il);
 	if(ret<0){
@@ -97,14 +102,14 @@ int main(int argc, char *argv[])
 		exit(-1);
 	}
 
-	printf("initial time: %ld.%06ld\n", t1.tv_sec, t1.tv_usec);
+	printf("initial time: %d.%06d\n", t1[0], t1[1]);
 	for(i = 0; i < options.n_scan; i++){
 		printf("%d\n", data[i]);
 	}
-	printf("final time: %ld.%06ld\n", t2.tv_sec, t2.tv_usec);
+	printf("final time: %d.%06d\n", t2[0], t2[1]);
 
-	printf("difference (us): %ld\n",(t2.tv_sec-t1.tv_sec) * 1000000 +
-			(t2.tv_usec - t1.tv_usec));
+	printf("difference (us): %ld\n",(long)(t2[0]-t1[0]) * 1000000 +
+			(t2[1] - t1[1]));
 
 	return 0;
 }

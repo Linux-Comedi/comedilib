@@ -306,6 +306,11 @@ function, the so-called <link linkend="instructions">instruction</link>.
  * This example does 3 instructions in one system call.  It does
  * a gettimeofday() call, then reads N_SAMPLES samples from an
  * analog input, and the another gettimeofday() call.
+ *
+ * (Note: The gettimeofday() value is obtained using an INSN_GTOD
+ * instruction, which places the seconds value in data[0] and the
+ * microseconds in data[1], so the seconds value is limited to
+ * 32-bits even on 64-bit systems.)
  */
 
 #define MAX_SAMPLES 128
@@ -317,7 +322,7 @@ int main(int argc, char *argv[])
   int ret,i;
   <link linkend="ref-type-comedi-insn">comedi_insn</link> insn[3];
   <link linkend="ref-type-comedi-insnlist">comedi_insnlist</link> il;
-  struct timeval t1,t2;
+  <link linkend="ref-type-lsampl-t">lsampl_t</link> t1[2], t2[2];
   <link linkend="ref-type-lsampl-t">lsampl_t</link> data[MAX_SAMPLES];
 
   parse_options(argc,argv);
@@ -343,7 +348,7 @@ int main(int argc, char *argv[])
   /* Instruction 0: perform a gettimeofday() */
   insn[0].insn=<link linkend="insn-gtod">INSN_GTOD</link>;
   insn[0].n=2;
-  insn[0].data=(void *)&amp;t1;
+  insn[0].data=t1;
 
   /* Instruction 1: do 10 analog input reads */
   insn[1].insn=<link linkend="insn-read">INSN_READ</link>;
@@ -355,7 +360,7 @@ int main(int argc, char *argv[])
   /* Instruction 2: perform a gettimeofday() */
   insn[2].insn=<link linkend="insn-gtod">INSN_GTOD</link>;
   insn[2].n=2;
-  insn[2].data=(void *)&amp;t2;
+  insn[2].data=t2;
 
   ret=<link linkend="func-ref-comedi-do-insnlist">comedi_do_insnlist</link>(device,&amp;il);
   if(ret<![CDATA[<]]>0){
@@ -363,14 +368,13 @@ int main(int argc, char *argv[])
     exit(0);
   }
 
-  printf("initial time: %ld.%06ld\n",t1.tv_sec,t1.tv_usec);
+  printf("initial time: %d.%06d\n",t1[0],t1[1]);
   for(i=0;i<![CDATA[<]]>n_scan;i++){
     printf("%d\n",data[i]);
   }
-  printf("final time: %ld.%06ld\n",t2.tv_sec,t2.tv_usec);
+  printf("final time: %d.%06d\n",t2[0],t2[1]);
 
-  printf("difference (us): %ld\n",(t2.tv_sec-t1.tv_sec)*1000000+
-      (t2.tv_usec-t1.tv_usec));
+  printf("difference (us): %ld\n",(long)(t2[0]-t1[0])*1000000+(t2[1]-t1[1]));
 
   return 0;
 }

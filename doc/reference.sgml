@@ -518,7 +518,8 @@ INSN_GTOD
     </term>
     <listitem>
       <para>
-read a timestamp, identical to gettimeofday()
+read a timestamp, identical to gettimeofday() except the seconds
+and microseconds values are of type <link linkend="ref-type-lsampl-t">lsampl_t</link>.
       </para>
     </listitem>
   </varlistentry>
