@@ -1177,7 +1177,7 @@ Description:
 Returns:
  Zero on success, a negative number on failure.
 
-Function: comedi_cleanup_calibration_file -- free calibration resources
+Function: comedi_cleanup_calibration -- free calibration resources
 Retval: void
 Param: comedi_calibration_t *calibration
 Status: alpha
