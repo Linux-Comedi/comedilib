@@ -107,8 +107,8 @@ int main(int argc, char *argv[])
 	if(options.subdevice < 0)
 		options.subdevice = comedi_find_subdevice_by_type(dev, COMEDI_SUBD_AO, 0);
 
-	maxdata = comedi_get_maxdata(dev, options.subdevice, 0);
-	rng = comedi_get_range(dev, options.subdevice, 0, 0);
+	maxdata = comedi_get_maxdata(dev, options.subdevice, options.channel);
+	rng = comedi_get_range(dev, options.subdevice, options.channel, options.range);
 
 	offset = (double)comedi_from_phys(0.0, rng, maxdata);
 	amplitude = (double)comedi_from_phys(1.0, rng, maxdata) - offset;
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
 	cmd.chanlist_len = options.n_chan;
 
 	chanlist[0] = CR_PACK(options.channel, options.range, options.aref);
-	chanlist[1] = CR_PACK(options.channel + 1, options.range, options.aref);
+	//chanlist[1] = CR_PACK(options.channel + 1, options.range, options.aref);
 
 	dds_init(waveform_frequency, options.freq);
 
