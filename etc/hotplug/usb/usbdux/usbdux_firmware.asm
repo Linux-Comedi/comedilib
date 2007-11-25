@@ -34,6 +34,7 @@
 	
 	.equ	CMD_FLAG,90h	; flag if next IN transf is DIO
 	.equ	SGLCHANNEL,91h	; channel for INSN
+	.equ	PWMFLAG,92h	; PWM
 	
 	.equ	DIOSTAT0,98h	; last status of the digital port
 	.equ	DIOSTAT1,99h	; same for the second counter
@@ -128,7 +129,6 @@ spare_isr:
 ep0in_isr:	
 ep0out_isr:	
 ep1in_isr:	
-ep1out_isr:	
 ibn_isr:	
 ep0ping_isr:	
 ep1ping_isr:	
@@ -143,7 +143,7 @@ ep6isoerr_isr:
 ep8isoerr_isr:
 ep6_isr:
 ep2_isr:
-
+ep4_isr:	
 
 	push	dps
 	push	dpl
@@ -195,14 +195,195 @@ main:
 	lcall	init_timer
 	
 mloop2:	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
+
+;;; pwm
+	mov	r0,#PWMFLAG	; pwm on?
+	mov	a,@r0		; get info
+	jz	mloop2		; it's off
+
+	mov	a,GPIFTRIG	; GPIF status
+	anl	a,#80h		; done bit
+	jz	mloop2		; GPIF still busy
+
+        mov     a,#01h		; WR,EP4, 01 = EP4
+        mov     GPIFTRIG,a	; restart it
 
 	sjmp	mloop2		; loop for ever
+
+
+;;; GPIF waveform for PWM
+waveform:
+	;;      0     1     2     3     4     5     6     7(not used)
+	;; len (gives 50.007Hz)
+	.db	195,  195,  195,  195,  195,  195,  1,    1
+
+	;; opcode
+	.db	002H, 006H, 002H, 002H, 002H, 002H, 002H, 002H
+	
+	;; out
+	.db	0ffH, 0ffH, 0ffH, 0ffH, 0ffH, 0ffH, 0ffH, 0ffH
+
+	;; log
+	.db	000H, 000H, 000H, 000H, 000H, 000H, 000H, 000H
+
+
+stopPWM:
+	mov	r0,#PWMFLAG	; flag for PWM
+	mov	a,#0		; PWM (for the main loop)
+	mov	@r0,a		; set it
+
+	mov	dptr,#IFCONFIG	; switch off GPIF
+	mov	a,#10000000b	; gpif, 30MHz, internal IFCLK
+	lcall	syncdelaywr
+	ret
+	
+
+;;; init PWM
+startPWM:
+	mov	dptr,#IFCONFIG	; switch on IFCLK signal
+	mov	a,#10000010b	; gpif, 30MHz, internal IFCLK
+	lcall	syncdelaywr
+
+	mov	OEB,0FFH	; output to port B
+
+	mov	DPTR,#EP4CFG
+	mov	a,#10100000b	; valid, out, bulk
+	movx	@DPTR,a
+
+	;; reset the endpoint
+	mov	dptr,#FIFORESET
+	mov	a,#80h		; NAK
+	lcall	syncdelaywr
+	mov	a,#84h		; reset EP4 + NAK
+	lcall	syncdelaywr
+	mov	a,#0		; normal op
+	lcall	syncdelaywr
+
+	mov	dptr,#EP4BCL
+	mov	a,#0H		; discard packets
+	lcall	syncdelaywr	; empty FIFO buffer
+	lcall	syncdelaywr	; empty FIFO buffer
+
+	;; aborts all transfers by the GPIF
+	mov	dptr,#GPIFABORT
+	mov	a,#0ffh		; abort all transfers
+	lcall	syncdelaywr
+
+	;; wait for GPIF to finish
+wait_f_abort:
+	mov	a,GPIFTRIG	; GPIF status
+	anl	a,#80h		; done bit
+	jz	wait_f_abort	; GPIF busy
+
+        mov     dptr,#GPIFCTLCFG
+        mov     a,#10000000b    ; tri state for CTRL
+        lcall   syncdelaywr
+
+        mov     dptr,#GPIFIDLECTL
+        mov     a,#11110000b    ; all CTL outputs low
+        lcall   syncdelaywr
+
+	;; abort if FIFO is empty
+        mov     a,#00000001b    ; abort if empty
+        mov     dptr,#EP4GPIFFLGSEL
+        lcall   syncdelaywr
+
+	;; 
+        mov     a,#00000001b    ; stop if GPIF flg
+        mov     dptr,#EP4GPIFPFSTOP
+        lcall   syncdelaywr
+
+	;; transaction counter
+	mov	a,#0ffH
+	mov	dptr,#GPIFTCB3
+	lcall	syncdelaywr
+
+	;; transaction counter
+	mov	a,#0ffH
+	mov	dptr,#GPIFTCB2
+	lcall	syncdelaywr
+
+	;; transaction counter
+	mov	a,#0ffH		; 512 bytes
+	mov	dptr,#GPIFTCB1
+	lcall	syncdelaywr
+
+	;; transaction counter
+	mov	a,#0ffH
+	mov	dptr,#GPIFTCB0
+	lcall	syncdelaywr
+
+	;; RDY pins. Not used here.
+        mov     a,#0
+        mov     dptr,#GPIFREADYCFG
+        lcall   syncdelaywr
+
+	;; drives the output in the IDLE state
+        mov     a,#1
+        mov     dptr,#GPIFIDLECS
+        lcall   syncdelaywr
+
+	;; direct data transfer from the EP to the GPIF
+	mov	dptr,#EP4FIFOCFG
+	mov	a,#00010000b	; autoout=1, byte-wide
+	lcall	syncdelaywr
+
+	;; waveform 0 is used for FIFO out
+	mov	dptr,#GPIFWFSELECT
+	mov	a,#00000000b
+	movx	@dptr,a
+	lcall	syncdelay
+
+	;; transfer the delay byte from the EP to the waveform
+	mov	dptr,#0e781h	; EP1 buffer
+	movx	a,@dptr		; get the delay
+	mov	dptr,#waveform	; points to the waveform
+	mov	r2,#6		; fill 6 bytes
+timloop:
+	movx	@dptr,a		; save timing in a xxx
+	inc	dptr
+	djnz	r2,timloop	; fill the 6 delay bytes
+
+	;; load waveform
+        mov     AUTOPTRH2,#0E4H ; XDATA0H
+        lcall   syncdelay
+        mov     AUTOPTRL2,#00H  ; XDATA0L
+        lcall   syncdelay
+
+	mov	dptr,#waveform	; points to the waveform
+	
+        mov     AUTOPTRSETUP,#7 ; autoinc and enable
+        lcall   syncdelay
+
+        mov     r2,#20H         ; 32 bytes to transfer
+
+wavetr:
+        movx    a,@dptr
+	inc	dptr
+	push	dpl
+	push	dph
+	push	dpl1
+	push	dph1
+        mov     dptr,#XAUTODAT2
+        movx    @dptr,a
+        lcall   syncdelay
+	pop	dph1 
+	pop	dpl1
+	pop	dph 
+	pop	dpl
+        djnz    r2,wavetr
+
+	mov	dptr,#OUTPKTEND
+	mov	a,#084H
+	lcall	syncdelaywr
+	lcall	syncdelaywr
+
+	mov	r0,#PWMFLAG	; flag for PWM
+	mov	a,#1		; PWM (for the main loop)
+	mov	@r0,a		; set it
+
+	ret
+
 
 
 ;;; initialise the ports for the AD-converter
@@ -352,15 +533,11 @@ initeps:
 	movx	@DPTR,a		; can receive data
 	lcall	syncdelay	; wait to sync
 	
-	mov	DPTR,#EP4CFG
+	mov	DPTR,#EP1OUTCFG
 	mov	a,#10100000b	; valid
 	movx	@dptr,a
 
-	mov	dptr,#EP4FIFOCFG
-	mov	a,#00000000b	; manual
-	movx	@dptr,a
-
-	mov	dptr,#EP4BCL	; "arm" it
+	mov	dptr,#EP1OUTBC	; "arm" it
 	mov	a,#00h
 	movx	@DPTR,a		; can receive data
 	lcall	syncdelay	; wait until we can write again
@@ -376,7 +553,7 @@ initeps:
 	movx	@DPTR,a		;
 
 	mov	dptr,#EPIE	; interrupt enable
-	mov	a,#10100000b	; enable irq for ep4,8
+	mov	a,#10001000b	; enable irq for ep1out,8
 	movx	@dptr,a		; do it
 
 	mov	dptr,#EPIRQ	; clear IRQs
@@ -591,10 +768,9 @@ reset_ep6:
 	lcall	syncdelaywr
 	ret
 
-	
-;;; interrupt-routine for ep4
+;;; interrupt-routine for ep1out
 ;;; receives the channel list and other commands
-ep4_isr:
+ep1out_isr:
 	push	dps
 	push	dpl
 	push	dph
@@ -611,17 +787,17 @@ ep4_isr:
 	push	06h		; R6
 	push	07h		; R7
 		
-	mov	dptr,#0f400h	; FIFO buffer of EP4
+	mov	dptr,#0E780h	; FIFO buffer of EP1OUT
 	movx	a,@dptr		; get the first byte
 	mov	r0,#CMD_FLAG	; pointer to the command byte
 	mov 	@r0,a		; store the command byte for ep8
 
-	mov	dptr,#ep4_jmp	; jump table for the different functions
+	mov	dptr,#ep1out_jmp; jump table for the different functions
 	rl	a		; multiply by 2: sizeof sjmp
 	jmp	@a+dptr		; jump to the jump table
 	;; jump table, corresponds to the command bytes defined
 	;; in usbdux.c
-ep4_jmp:
+ep1out_jmp:
 	sjmp	storechannellist; a=0
 	sjmp	single_da	; a=1
 	sjmp	config_digital_b; a=2
@@ -629,6 +805,16 @@ ep4_jmp:
 	sjmp	storesglchannel	; a=4
 	sjmp	readcounter	; a=5
 	sjmp	writecounter	; a=6
+	sjmp	pwm_on		; a=7
+	sjmp	pwm_off		; a=8
+
+pwm_on:
+	lcall	startPWM
+	sjmp	over_da
+
+pwm_off:
+	lcall	stopPWM
+	sjmp	over_da
 
 	;; read the counter
 readcounter:
@@ -638,7 +824,7 @@ readcounter:
 
 	;; write zeroes to the counters
 writecounter:
-	mov	dptr,#0f401h	; buffer
+	mov	dptr,#0e781h	; buffer
 	mov	r0,#CTR0	; r0 points to counter 0
 	movx	a,@dptr		; channel number
 	jz	wrctr0		; first channel
@@ -659,7 +845,7 @@ wrctr0:
 
 storesglchannel:
 	mov	r0,#SGLCHANNEL	; the conversion bytes are now stored in 80h
-	mov	dptr,#0f401h	; FIFO buffer of EP4
+	mov	dptr,#0e781h	; FIFO buffer of EP1OUT
 	movx	a,@dptr		; 
 	mov	@r0,a
 
@@ -681,7 +867,7 @@ storesglchannel:
 storechannellist:
 	mov	r0,#CHANNELLIST	; the conversion bytes are now stored in 80h
 	mov	r2,#9		; counter
-	mov	dptr,#0f401h	; FIFO buffer of EP4
+	mov	dptr,#0e781h	; FIFO buffer of EP1OUT
 chanlloop:	
 	movx	a,@dptr		; 
 	mov	@r0,a
@@ -701,13 +887,13 @@ chanlloop:
 
 ;;; Single DA conversion. The 2 bytes are in the FIFO buffer
 single_da:
-	mov	dptr,#0f401h	; FIFO buffer of EP4
+	mov	dptr,#0e781h	; FIFO buffer of EP1OUT
 	lcall	dalo		; conversion
 	sjmp	over_da
 
 ;;; configure the port B as input or output (bitwise)
 config_digital_b:
-	mov	dptr,#0f401h	; FIFO buffer of EP4
+	mov	dptr,#0e781h	; FIFO buffer of EP1OUT
 	movx	a,@dptr		; get the second byte
 	mov	OEB,a		; set the output enable bits
 	sjmp	over_da
@@ -715,7 +901,7 @@ config_digital_b:
 ;;; Write one byte to the external digital port B
 ;;; and prepare for digital read
 write_digital_b:
-	mov	dptr,#0f401h	; FIFO buffer of EP4
+	mov	dptr,#0e781h	; FIFO buffer of EP1OUT
 	movx	a,@dptr		; get the second byte
 	mov	OEB,a		; output enable
 	inc	dptr		; next byte
@@ -735,7 +921,7 @@ write_digital_b:
 	;; 
 	;; for all commands the same
 over_da:	
-	mov	dptr,#EP4BCL
+	mov	dptr,#EP1OUTBC
 	mov	a,#00h
 	lcall	syncdelaywr	; arm
 	lcall	syncdelaywr	; arm
@@ -747,7 +933,7 @@ over_da:
 	mov	EXIF,a		; Note: EXIF reg is not 8051 bit-addressable
 
 	mov	DPTR,#EPIRQ	; 
-	mov	a,#00100000b	; clear the ep4irq
+	mov	a,#00001000b	; clear the ep1outirq
 	movx	@DPTR,a
 
 	pop	07h
