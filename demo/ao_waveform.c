@@ -76,6 +76,7 @@ void dds_init_ramp_up(void);
 void dds_init_ramp_down(void);
 void dds_init_triangle(void);
 void dds_init_square(void);
+void dds_init_blancmange(void);
 
 static void (* const dds_init_function[])(void) = {
 	dds_init_sine,
@@ -84,6 +85,7 @@ static void (* const dds_init_function[])(void) = {
 	dds_init_triangle,
 	dds_init_square,
 	dds_init_cycloid,
+	dds_init_blancmange,
 };
 
 #define NUMFUNCS	(sizeof(dds_init_function)/sizeof(dds_init_function[0]))
@@ -245,6 +247,11 @@ void dds_output(sampl_t *buf,int n)
 	}
 }
 
+/* Defined for x in [0,1] */
+static inline double triangle(double x)
+{
+	return (x > 0.5) ? 1.0 - x : x;
+}
 
 void dds_init_sine(void)
 {
@@ -319,11 +326,8 @@ void dds_init_triangle(void)
 {
 	int i;
 
-	for (i = 0; i <= WAVEFORM_LEN / 2; i++) {
-		waveform[i] = rint(offset + amplitude * (i * 2) / WAVEFORM_LEN);
-	}
-	for ( ; i < WAVEFORM_LEN; i++) {
-		waveform[i] = rint(offset + amplitude * ((WAVEFORM_LEN - i) * 2) / WAVEFORM_LEN);
+	for (i = 0; i < WAVEFORM_LEN; i++) {
+		waveform[i] = rint(offset + amplitude * 2 * triangle((double)i / WAVEFORM_LEN));
 	}
 }
 
@@ -339,3 +343,19 @@ void dds_init_square(void)
 	}
 }
 
+void dds_init_blancmange(void)
+{
+	int i, n;
+	double b, x;
+
+	for (i = 0; i < WAVEFORM_LEN; i++) {
+		b = 0;
+		for (n = 0; n < 16; n++) {
+			x = (double)i / WAVEFORM_LEN;
+			x *= (1 << n);
+			x -= floor(x);
+			b += triangle(x) / (1 << n);
+		}
+		waveform[i] = rint(offset + amplitude * 1.5 * b);
+	}
+}
