@@ -15,9 +15,10 @@
  *
  * This demo uses an analog output subdevice with an
  * asynchronous command to generate a waveform.  The
- * waveform in this example is a sine wave (surprise!),
- * but this can be easily changed to make a generic
- * function generator.
+ * demo hijacks for -n option to select a waveform from
+ * a predefined list.  The default waveform is a sine
+ * wave (surprise!).  Other waveforms include sawtooth,
+ * square, triangle and cycloid.
  *
  * The function generation algorithm is the same as
  * what is typically used in digital function generators.
@@ -66,14 +67,26 @@ int external_trigger_number = 0;
 sampl_t data[BUF_LEN];
 
 void dds_output(sampl_t *buf,int n);
-void dds_init(double waveform_frequency, double update_frequency);
-
-/* This define determines which waveform to use. */
-#define dds_init_function dds_init_sine
+void dds_init(double waveform_frequency, double update_frequency, int fn);
 
 void dds_init_sine(void);
 void dds_init_pseudocycloid(void);
-void dds_init_sawtooth(void);
+void dds_init_cycloid(void);
+void dds_init_ramp_up(void);
+void dds_init_ramp_down(void);
+void dds_init_triangle(void);
+void dds_init_square(void);
+
+static void (* const dds_init_function[])(void) = {
+	dds_init_sine,
+	dds_init_ramp_up,
+	dds_init_ramp_down,
+	dds_init_triangle,
+	dds_init_square,
+	dds_init_cycloid,
+};
+
+#define NUMFUNCS	(sizeof(dds_init_function)/sizeof(dds_init_function[0]))
 
 int main(int argc, char *argv[])
 {
@@ -87,10 +100,18 @@ int main(int argc, char *argv[])
 	comedi_range *rng;
 	int ret;
 	struct parsed_options options;
+	int fn;
 
 	init_parsed_options(&options);
 	options.subdevice = -1;
+	options.n_chan = 0;	/* default waveform */
 	parse_options(&options, argc, argv);
+
+	/* Use n_chan to select waveform (cheat!) */
+	fn = options.n_chan;
+	if(fn < 0 || fn >= NUMFUNCS){
+		fn = 0;
+	}
 
 	/* Force n_chan to be 1 */
 	options.n_chan = 1;
@@ -133,7 +154,7 @@ int main(int argc, char *argv[])
 	chanlist[0] = CR_PACK(options.channel, options.range, options.aref);
 	//chanlist[1] = CR_PACK(options.channel + 1, options.range, options.aref);
 
-	dds_init(waveform_frequency, options.freq);
+	dds_init(waveform_frequency, options.freq, fn);
 
 	dump_cmd(stdout,&cmd);
 
@@ -205,11 +226,11 @@ sampl_t waveform[WAVEFORM_LEN];
 unsigned int acc;
 unsigned int adder;
 
-void dds_init(double waveform_frequency, double update_frequency)
+void dds_init(double waveform_frequency, double update_frequency, int fn)
 {
 	adder = waveform_frequency / update_frequency * (1 << 16) * (1 << WAVEFORM_SHIFT);
 
-	dds_init_function();
+	(*dds_init_function[fn])();
 }
 
 void dds_output(sampl_t *buf,int n)
@@ -228,9 +249,15 @@ void dds_output(sampl_t *buf,int n)
 void dds_init_sine(void)
 {
 	int i;
+	double ofs = offset;
+	double amp = 0.5 * amplitude;
 
+	if(ofs < amp){
+		/* Probably a unipolar range.  Bump up the offset. */
+		ofs = amp;
+	}
 	for(i=0;i<WAVEFORM_LEN;i++){
-		waveform[i]=rint(offset+0.5*amplitude*cos(i*2*M_PI/WAVEFORM_LEN));
+		waveform[i]=rint(ofs+amp*cos(i*2*M_PI/WAVEFORM_LEN));
 	}
 }
 
@@ -251,12 +278,64 @@ void dds_init_pseudocycloid(void)
 	}
 }
 
-void dds_init_sawtooth(void)
+void dds_init_cycloid(void)
+{
+	enum { SUBSCALE = 2 };	/* Needs to be >= 2. */
+	int h, i, ni;
+	double t, x, y;
+
+	i = -1;
+	for (h = 0; h < WAVEFORM_LEN * SUBSCALE; h++){
+		t = (h * (2 * M_PI)) / (WAVEFORM_LEN * SUBSCALE);
+		x = t - sin(t);
+		ni = (int)floor((x * WAVEFORM_LEN) / (2 * M_PI));
+		if (ni > i) {
+			i = ni;
+			y = 1 - cos(t);
+			waveform[i] = rint(offset + (amplitude * y / 2));
+		}
+	}
+}
+
+void dds_init_ramp_up(void)
 {
 	int i;
 
 	for(i=0;i<WAVEFORM_LEN;i++){
 		waveform[i]=rint(offset+amplitude*((double)i)/WAVEFORM_LEN);
+	}
+}
+
+void dds_init_ramp_down(void)
+{
+	int i;
+
+	for(i=0;i<WAVEFORM_LEN;i++){
+		waveform[i]=rint(offset+amplitude*((double)(WAVEFORM_LEN-1-i))/WAVEFORM_LEN);
+	}
+}
+
+void dds_init_triangle(void)
+{
+	int i;
+
+	for (i = 0; i <= WAVEFORM_LEN / 2; i++) {
+		waveform[i] = rint(offset + amplitude * (i * 2) / WAVEFORM_LEN);
+	}
+	for ( ; i < WAVEFORM_LEN; i++) {
+		waveform[i] = rint(offset + amplitude * ((WAVEFORM_LEN - i) * 2) / WAVEFORM_LEN);
+	}
+}
+
+void dds_init_square(void)
+{
+	int i;
+
+	for (i = 0; i < WAVEFORM_LEN / 2; i++) {
+		waveform[i] = rint(offset);
+	}
+	for ( ; i < WAVEFORM_LEN; i++) {
+		waveform[i] = rint(offset + amplitude);
 	}
 }
 
