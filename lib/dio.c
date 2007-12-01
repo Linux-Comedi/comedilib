@@ -43,12 +43,14 @@ int _comedi_dio_config(comedi_t *it,unsigned int subdev,unsigned int chan,unsign
 		return -1;
 
 	s=it->subdevices+subdev;
-	if(s->type!=COMEDI_SUBD_DIO)
+	if(s->type!=COMEDI_SUBD_DIO){
+		internal_error(EINVAL_SUBD);
 		return -1;
-
-	if(io!=COMEDI_INPUT && io!=COMEDI_OUTPUT)
+	}
+	if(io!=COMEDI_INPUT && io!=COMEDI_OUTPUT){
+		internal_error(EINVAL);
 		return -1;
-
+	}
 	if(it->has_insnlist_ioctl){
 		comedi_insn insn;
 		lsampl_t data;
