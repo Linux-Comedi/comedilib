@@ -98,7 +98,7 @@ void internal_error(int err)
 int valid_dev(comedi_t *it)
 {
 	if(!it || it->magic!=COMEDILIB_MAGIC){
-		internal_error(COMEDILIB_BADDEV);
+		internal_error(EBAD_CT);
 		return 0;
 	}
 	
@@ -109,7 +109,7 @@ int valid_subd(comedi_t *it,unsigned int subd)
 {
 	if(!valid_dev(it))return 0;
 	if(subd>=it->n_subdevices){
-		internal_error(COMEDILIB_BADSUBD);
+		internal_error(EINVAL_SUBD);
 		return 0;
 	}
 	
@@ -120,7 +120,7 @@ int valid_chan(comedi_t *it,unsigned int subd,unsigned int chan)
 {
 	if(!valid_subd(it,subd))return 0;
 	if(chan>=it->subdevices[subd].n_chan){
-		internal_error(COMEDILIB_BADCHAN);
+		internal_error(EINVAL_CHAN);
 		return 0;
 	}
 	

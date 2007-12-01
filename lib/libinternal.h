@@ -141,14 +141,6 @@ int valid_dev(comedi_t *it);
 int valid_subd(comedi_t *it,unsigned int subdevice);
 int valid_chan(comedi_t *it,unsigned int subdevice,unsigned int chan);
 
-enum{
-	COMEDILIB_NOERROR = 0x1000,
-	COMEDILIB_UNKNOWN,
-	COMEDILIB_BADDEV,
-	COMEDILIB_BADSUBD,
-	COMEDILIB_BADCHAN,
-};
-
 /* used by range.c, was in comedilib.h but apparently deprecated so I put it here - fmhess */
 int comedi_get_rangetype(comedi_t *it,unsigned int subdevice,unsigned int chan);
 
