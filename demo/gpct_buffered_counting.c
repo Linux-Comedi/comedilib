@@ -37,6 +37,7 @@
 
 int check_subdevice(comedi_t *device, int *subdevice, const char *device_filepath)
 {
+	int subdevice_type;
 	int read_subdevice = comedi_get_read_subdevice(device);
 	if(read_subdevice < 0)
 	{
@@ -50,7 +51,7 @@ int check_subdevice(comedi_t *device, int *subdevice, const char *device_filepat
 			*subdevice, device_filepath, read_subdevice);
 		return -1;
 	}
-	int subdevice_type = comedi_get_subdevice_type(device, *subdevice);
+	subdevice_type = comedi_get_subdevice_type(device, *subdevice);
 	if(subdevice_type < 0)
 	{
 		comedi_perror("comedi_get_subdevice_type()");

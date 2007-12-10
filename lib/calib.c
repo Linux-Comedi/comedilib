@@ -253,11 +253,13 @@ int _comedi_get_hardcal_converter(
 	comedi_polynomial_t* polynomial)
 {
 	comedi_range *range_ptr = comedi_get_range(dev, subdevice, channel, range);
+	lsampl_t maxdata;
+
 	if(range_ptr == NULL)
 	{
 		return -1;
 	}
-	lsampl_t maxdata = comedi_get_maxdata(dev, subdevice, channel);
+	maxdata = comedi_get_maxdata(dev, subdevice, channel);
 	if(maxdata == 0)
 	{
 		return -1;

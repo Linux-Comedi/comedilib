@@ -279,8 +279,9 @@ extern void _comedi_cleanup_calibration( comedi_calibration_t *file_contents )
 
 static comedi_polynomial_t* alloc_inverse_linear_polynomial(const comedi_polynomial_t *polynomial)
 {
+	comedi_polynomial_t *inverse;
 	if(polynomial->order != 1) return NULL;
-	comedi_polynomial_t *inverse = malloc(sizeof(comedi_polynomial_t));
+	inverse = malloc(sizeof(comedi_polynomial_t));
 	memset(inverse, 0, sizeof(comedi_polynomial_t));
 	inverse->order = 1;
 	inverse->expansion_origin = polynomial->coefficients[0];

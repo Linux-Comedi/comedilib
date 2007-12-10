@@ -36,6 +36,8 @@ int main(int argc, char *argv[])
 	int retval;
 	lsampl_t routing;
 	struct parsed_options options;
+	comedi_insn insn;
+	lsampl_t data[2];
 
 	init_parsed_options(&options);
 	options.freq = 0.;
@@ -52,8 +54,6 @@ int main(int argc, char *argv[])
 		period_ns = 0;
 	routing = options.value;
 	printf("Selecting routing %d for channel %d on subdevice %d.\n", routing, options.channel, options.subdevice);
-	comedi_insn insn;
-	lsampl_t data[2];
 	memset(&insn, 0, sizeof(comedi_insn));
 	insn.insn = INSN_CONFIG;
 	insn.subdev = options.subdevice;

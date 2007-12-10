@@ -36,6 +36,8 @@ int main(int argc, char *argv[])
 	int retval;
 	lsampl_t filter_selection;
 	struct parsed_options options;
+	comedi_insn insn;
+	lsampl_t data[2];
 
 	init_parsed_options(&options);
 	parse_options(&options, argc, argv);
@@ -47,8 +49,6 @@ int main(int argc, char *argv[])
 	}
 	filter_selection = options.value;
 	printf("Selecting filter %d on subdevice %d channel %d.\n", filter_selection, options.subdevice, options.channel);
-	comedi_insn insn;
-	lsampl_t data[2];
 	memset(&insn, 0, sizeof(comedi_insn));
 	insn.insn = INSN_CONFIG;
 	insn.subdev = options.subdevice;
