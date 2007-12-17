@@ -1023,7 +1023,10 @@ Description:
  transferred via read() calls.  This function is
  used to indicate that the next num_bytes bytes in the buffer
  are no longer needed and may be discarded.
- If there is an error, -1 is returned.
+Returns:
+ A return value ret greater than 0 indicates that the read offset in
+ the streaming buffer, as returned by comedi_get_buffer_offset, has been
+ incremented by ret bytes.  If there is an error, -1 is returned.
 
 Function: comedi_mark_buffer_written -- streaming buffer control
 Retval: int
