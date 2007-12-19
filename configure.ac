@@ -48,6 +48,27 @@ COMEDILIB_LIBS="$COMEDILIB_LIBS \$(top_builddir)/lib/libcomedi.la -lm"
 AC_SUBST(COMEDILIB_CFLAGS)
 AC_SUBST(COMEDILIB_LIBS)
 
+# autoconf backwards compatibility
+if test "$datarootdir" = ""; then
+	datarootdir='${datadir}'
+	AC_SUBST(datarootdir)
+fi
+
+if test "$docdir" = ""; then
+	docdir='${datarootdir}/doc/${PACKAGE}'
+	AC_SUBST(docdir)
+fi
+
+if test "$htmldir" = ""; then
+	htmldir='${docdir}'
+	AC_SUBST(htmldir)
+fi
+
+if test "$pdfdir" = ""; then
+	pdfdir='${docdir}'
+	AC_SUBST(pdfdir)
+fi
+
 #swig
 AC_PATH_PROG(SWIG, swig, "no")
 if test "$SWIG" == "no" ; then
