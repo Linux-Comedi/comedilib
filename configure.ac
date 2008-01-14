@@ -209,7 +209,7 @@ if test "$ENABLE_ETCHOTPLUG" != "no"; then
 fi
 
 if test "$ENABLE_ETCHOTPLUG" = "no" && test "$ENABLE_UDEVHOTPLUG" = "no" ; then
-		AC_MSG_WARN([No hotplug mechanism will we installed. Consult ./configure --help if you want hotplug.])
+		AC_MSG_WARN([No hotplug mechanism will be installed. Consult ./configure --help if you want hotplug.])
 fi
 
 AC_CONFIG_FILES(
