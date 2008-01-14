@@ -7,6 +7,11 @@
 <!ENTITY drivers SYSTEM "drivers.sgml">
 <!ENTITY reference SYSTEM "reference.sgml">
 <!ENTITY funcref SYSTEM "funcref.sgml">
+<!ENTITY calibration-funcref SYSTEM "calibration_funcref.sgml">
+<!ENTITY command-funcref SYSTEM "command_funcref.sgml">
+<!ENTITY dio-funcref SYSTEM "dio_funcref.sgml">
+<!ENTITY deprecated-funcref SYSTEM "deprecated_funcref.sgml">
+<!ENTITY error-funcref SYSTEM "error_funcref.sgml">
 <!ENTITY glossary SYSTEM "glossary.sgml">
 <!ENTITY comedi "<acronym>Comedi</acronym>">
 <!ENTITY uuml "ue">
@@ -26,27 +31,21 @@ handbook
     <firstname>David</firstname>
     <surname>Schleef</surname>
     <affiliation>
-      <address>
-        ds@schleef.org
-      </address>
+      <address>ds@schleef.org</address>
     </affiliation>
   </author>
   <author>
     <firstname>Frank</firstname>
     <surname>Hess</surname>
     <affiliation>
-      <address>
-        fmhess@users.sourceforge.net
-      </address>
+      <address>fmhess@users.sourceforge.net</address>
     </affiliation>
   </author>
   <author>
     <firstname>Herman</firstname>
     <surname>Bruyninckx</surname>
     <affiliation>
-      <address>
-        Herman.Bruyninckx@mech.kuleuven.ac.be
-      </address>
+      <address>Herman.Bruyninckx@mech.kuleuven.ac.be</address>
     </affiliation>
   </author>
  <copyright>
@@ -54,7 +53,7 @@ handbook
   <holder>David Schleef</holder>
  </copyright>
  <copyright>
-  <year>2001-2003, 2005</year>
+  <year>2001-2003, 2005, 2008</year>
   <holder>Frank Mori Hess</holder>
  </copyright>
  <copyright>
@@ -139,12 +138,36 @@ USA.
 
 <!-- </section> -->
 
-  &funcref;
-
+	<section id="functionreference">
+		<title>Functions</title>
+		<section>
+			<title>Core Functions</title>
+			&funcref;
+		</section>
+		<section>
+			<title>Asyncronous Commands</title>
+			&command-funcref;
+		</section>
+		<section>
+			<title>Calibration</title>
+			&calibration-funcref;
+		</section>
+		<section>
+			<title>Digital I/O</title>
+			&dio-funcref;
+		</section>
+		<section>
+			<title>Error Reporting</title>
+			&error-funcref;
+		</section>
+		<section>
+			<title>Deprecated</title>
+			&deprecated-funcref;
+		</section>
+	</section>
 </section>
 
   &glossary;
-
 
 </article>
 

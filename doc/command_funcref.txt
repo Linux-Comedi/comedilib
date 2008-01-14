@@ -1,0 +1,232 @@
+Function: comedi_cancel -- stop streaming input/output in progress
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Description:
+ The function comedi_cancel() can be used to stop a Comedi command
+ previously started by comedi_command() that is still in progress
+ on the subdevice indicated by the parameters device and subdevice.
+ This may not return the subdevice to a ready state, since there may
+ be samples in the buffer that need to be read.
+
+ If sucessful, 0 is returned, otherwise -1.
+
+Function: comedi_command -- start streaming input/output
+Retval: int
+Param: comedi_t * device
+Param: comedi_cmd * command
+Description:
+ The function comedi_command() starts streaming input or output.  The
+ command structure pointed to by the parameter command specifies the
+ acquisition.  The command must be able to pass comedi_command_test()
+ with a return value of 0, or comedi_command() will fail.
+ For input subdevices, sample values are read using the
+ function read().  For output subdevices, sample values are written
+ using the function write().
+
+ If sucessful, 0 is returned, otherwise -1.
+
+Function: comedi_command_test -- test streaming input/output configuration
+Retval: int
+Param: comedi_t * device
+Param: comedi_cmd * command
+Description:
+ The function comedi_command_test() tests the command structure pointed
+ to by the parameter command and returns an integer describing the
+ testing stages that were sucessfully passed.  In addition, if elements
+ of the command structure are invalid, they may be modified.  Source
+ elements are modified to remove invalid source triggers.  Argument
+ elements are adjusted or rounded to the nearest valid value.
+
+ The meanings of the return value are as follows.
+
+ 0 indicates a valid command.
+
+ 1 indicates that one of the *_src
+ members of the command contained an
+ unsupported trigger.  The bits corresponding to the unsupported
+ triggers are zeroed.
+
+ 2 indicates that the particular combination
+ of *_src settings is not supported by the driver, or that
+ one of the *_src members has the bit corresponding to
+ multiple trigger sources set at the same time.
+
+ 3 indicates that one of the *_arg members
+ of the command is set outside the range of allowable values.
+ For instance, an argument for a TRIG_TIMER source which
+ exceeds the board's maximum speed.  The invalid *_arg
+ members will be adjusted to valid values.
+
+ 4 indicates that one of the *_arg members
+ required adjustment.  For instance, the argument of a
+ TRIG_TIMER source may have been rounded to the nearest
+ timing period supported by the board.
+
+ 5 indicates that some aspect of the
+ command's chanlist is unsupported by the board.  For example,
+ some board's require that all channels in the chanlist
+ use the same range.
+
+Function: comedi_get_buffer_contents -- streaming buffer status
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Description:
+ The function comedi_get_buffer_contents() is used on a subdevice
+ that has a Comedi command in progress.  The number of bytes that
+ are available in the streaming buffer is returned.  If there is
+ an error, -1 is returned.
+
+Function: comedi_get_buffer_offset -- streaming buffer status
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Description:
+ The function comedi_get_buffer_offset() is used on a subdevice
+ that has a Comedi command in progress.  This function returns
+ the offset in bytes of the read pointer in the streaming buffer.
+ This offset is only useful for memory mapped buffers.
+ If there is an error, -1 is returned.
+
+Function: comedi_get_buffer_size -- streaming buffer size of subdevice
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Description:
+ The function comedi_get_buffer_size() returns the size (in bytes)
+ of the streaming buffer for the subdevice specified by device and
+ subdevice.  On error, -1 is returned.
+
+Function: comedi_get_cmd_generic_timed -- streaming input/output capabilities
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: comedi_cmd * command
+Param: unsigned int chanlist_len
+Param: unsigned int scan_period_ns
+Description:
+ The command capabilities of the subdevice indicated by the parameters
+ device and subdevice are probed, and the results placed in the
+ command structure pointed to by the parameter command.  The command
+ structure pointed to by the parameter command is modified to be a
+ valid command that can be used as a parameter to comedi_command()
+ (after the command has been assigned a valid chanlist array).
+ The command measures scans consisting of chanlist_len channels
+ at a scan rate that corresponds to the
+ period scan_period_ns.  The rate is adjusted to a rate that the device
+ can handle.  If sucessful, 0 is returned, otherwise -1.
+
+Function: comedi_get_cmd_src_mask -- streaming input/output capabilities
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: comedi_cmd * command
+Description:
+ The command capabilities of the subdevice indicated by the parameters
+ device and subdevice are probed, and the results placed in the
+ command structure pointed to by the parameter command.  The trigger
+ source elements of the command structure are set to the logical OR
+ value of possible trigger sources.  Other elements in the structure
+ are undefined.  If sucessful, 0 is returned, otherwise -1.
+
+Function: comedi_get_max_buffer_size -- maximum streaming buffer size
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Description:
+ The function comedi_get_max_buffer_size() returns the maximum
+ allowable size (in bytes) of the streaming buffer for the subdevice
+ specified by device and subdevice.  Changing the maximum buffer
+ size requires appropriate privileges.  On error, -1 is returned.
+
+Function: comedi_get_read_subdevice -- find streaming input subdevice
+Retval: int
+Param: comedi_t * device
+Description:
+ The function comedi_get_read_subdevice() returns the subdevice
+ that allows streaming input for device dev.  If no subdevice
+ supports streaming input, -1 is returned and the Comedilib error
+ number is set to XXX "subdevice not found".
+
+Function: comedi_get_write_subdevice -- find streaming output subdevice
+Retval: int
+Param: comedi_t * device
+Description:
+ The function comedi_get_write_subdevice() returns the subdevice
+ that allows streaming output for device dev.  If no subdevice
+ supports streaming output, -1 is returned and the Comedilib error
+ number is set to XXX "subdevice not found".
+
+Function: comedi_mark_buffer_read -- streaming buffer control
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int num_bytes
+Description:
+ The function comedi_mark_buffer_read() is used on a subdevice
+ that has a Comedi input command in progress.  It should only be used
+ if you are using a mmap() (as opposed
+ to calling read() on the device file) to read data from Comedi's buffer,
+ since Comedi will automatically keep track of how many bytes have been
+ transferred via read() calls.  This function is
+ used to indicate that the next num_bytes bytes in the buffer
+ are no longer needed and may be discarded.
+Returns:
+ A return value ret greater than 0 indicates that the read offset in
+ the streaming buffer, as returned by comedi_get_buffer_offset, has been
+ incremented by ret bytes.  If there is an error, -1 is returned.
+
+Function: comedi_mark_buffer_written -- streaming buffer control
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int num_bytes
+Description:
+ The function comedi_mark_buffer_written() is used on a subdevice
+ that has a Comedi output command in progress.  It should only be used
+ if you are using a mmap() (as opposed to calling write() on the device
+ file) to write data to Comedi's buffer, since Comedi
+ will automatically keep track of how many bytes have been
+ transferred via write() calls.  This function is
+ used to indicate that the next num_bytes bytes in the buffer
+ are valid and may be sent to the device.
+ If there is an error, -1 is returned.
+
+Function: comedi_poll -- force updating of streaming buffer
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Description:
+ The function comedi_poll() is used on a subdevice that has a
+ Comedi command in progress in order to update the streaming buffer.
+ If supported by the driver, all available samples are copied to
+ the streaming buffer.  These samples may be pending in DMA buffers
+ or device FIFOs.  If sucessful, the number of additional bytes
+ available is returned.  If there is an error, -1 is returned.
+
+Function: comedi_set_buffer_size -- streaming buffer size of subdevice
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int size
+Description:
+ The function comedi_set_buffer_size() changes the size of the
+ streaming buffer for the subdevice specified by device and subdevice.
+ The parameter size must be a multiple of the virtual memory page
+ size.
+
+ The virtual memory page size can be determined using
+ sysconf(_SC_PAGE_SIZE).
+
+Function: comedi_set_max_buffer_size -- streaming buffer size of subdevice
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int max_size
+Description:
+ The function comedi_set_max_buffer_size() changes the maximum
+ allowable size (in bytes) of the streaming buffer for the subdevice
+ specified by device and subdevice.  Changing the maximum buffer
+ size requires appropriate privileges.  If sucessful, the old buffer
+ size is returned.  On error, -1 is returned.
