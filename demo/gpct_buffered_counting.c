@@ -73,12 +73,18 @@ int ni_gpct_configure_buffered_event_counting(comedi_t *device, unsigned subdevi
 	static const unsigned gate_pfi_channel = 1;
 	static const unsigned initial_count = 0;
 
-	retval = reset_counter(device, subdevice);
+	retval = comedi_reset(device, subdevice);
 	if(retval < 0) return retval;
 
-	retval = set_gate_source(device, subdevice, 0, NI_GPCT_PFI_GATE_SELECT(gate_pfi_channel) /*| CR_EDGE*/);
+#if 1
+	// PFI gate select works for e and m series
+	retval = comedi_set_gate_source(device, subdevice, 0, NI_GPCT_PFI_GATE_SELECT(gate_pfi_channel) /*| CR_EDGE*/);
+#else
+	// gate pin gate select works for 660x
+	retval = comedi_set_gate_source(device, subdevice, 0, NI_GPCT_GATE_PIN_i_GATE_SELECT /*| CR_EDGE*/);
+#endif
 	if(retval < 0) return retval;
-	retval = set_gate_source(device, subdevice, 1, NI_GPCT_DISABLED_GATE_SELECT | CR_EDGE);
+	retval = comedi_set_gate_source(device, subdevice, 1, NI_GPCT_DISABLED_GATE_SELECT | CR_EDGE);
 	if(retval < 0)
 	{
 		fprintf(stderr, "Failed to set second gate source.  This is expected for older boards (e-series, etc.)\n"
@@ -100,7 +106,7 @@ int ni_gpct_configure_buffered_event_counting(comedi_t *device, unsigned subdevi
 	counter_mode |= NI_GPCT_STOP_ON_GATE_BITS;
 	// don't disarm on terminal count or gate signal
 	counter_mode |= NI_GPCT_NO_HARDWARE_DISARM_BITS;
-	retval = set_counter_mode(device, subdevice, counter_mode);
+	retval = comedi_set_counter_mode(device, subdevice, counter_mode);
 	if(retval < 0) return retval;
 
 	/* Set initial counter value by writing to channel 0.*/
@@ -157,7 +163,6 @@ int ni_gpct_send_command(comedi_t *device, unsigned subdevice, unsigned n_counts
 
 int ni_gpct_read_and_dump_counts(comedi_t *device, unsigned subdevice)
 {
-	char subdevice_filename[100];
 	int retval;
 	int fd;
 	static const unsigned buffer_size = 1000;
@@ -177,7 +182,7 @@ int ni_gpct_read_and_dump_counts(comedi_t *device, unsigned subdevice)
 	}
 	if(retval < 0)
 	{
-		fprintf(stderr, "error reading from subdevice file \"%s\".\n", subdevice_filename);
+		fprintf(stderr, "error reading from subdevice file.\n");
 		perror("read");
 		return -errno;
 	}

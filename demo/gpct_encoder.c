@@ -27,33 +27,6 @@
 #include <ctype.h>
 #include "examples.h"
 
-int set_other_source(comedi_t *device, unsigned subdevice,
-	lsampl_t index, lsampl_t source)
-{
-	comedi_insn insn;
-	lsampl_t data[3];
-	int retval;
-
-	memset(&insn, 0, sizeof(comedi_insn));
-	insn.insn = INSN_CONFIG;
-	insn.subdev = subdevice;
-	insn.chanspec = 0;
-	insn.data = data;
-	insn.n = sizeof(data) / sizeof(data[0]);
-	data[0] = INSN_CONFIG_SET_OTHER_SRC;
-	data[1] = index;
-	data[2] = source;
-
-	retval = comedi_do_insn(device, &insn);
-	if(retval < 0)
-	{
-		fprintf(stderr, "%s: error:\n", __FUNCTION__);
-		comedi_perror("comedi_do_insn");
-		return retval;
-	}
-	return 0;
-}
-
 int ni_gpct_start_encoder(comedi_t *device, unsigned subdevice,
 	unsigned int initial_value,
 	int a, int b, int z)
@@ -62,7 +35,7 @@ int ni_gpct_start_encoder(comedi_t *device, unsigned subdevice,
 	lsampl_t counter_mode;
 
 
-	retval = reset_counter(device, subdevice);
+	retval = comedi_reset(device, subdevice);
 	/* set initial counter value by writing to channel 0 */
 	retval = comedi_data_write(device, subdevice, 0, 0, 0, initial_value);
 	/* set "load a" register to initial_value by writing to channel 1 */
@@ -70,11 +43,11 @@ int ni_gpct_start_encoder(comedi_t *device, unsigned subdevice,
 	/* set "load b" register to initial_value by writing to channel 2 */
 	retval = comedi_data_write(device, subdevice, 2, 0, 0, initial_value);
 
-	set_gate_source(device, subdevice, 0, NI_GPCT_DISABLED_GATE_SELECT);
-	set_gate_source(device, subdevice, 1, NI_GPCT_DISABLED_GATE_SELECT);
-	set_other_source(device, subdevice, NI_GPCT_SOURCE_ENCODER_A, a);
-	set_other_source(device, subdevice, NI_GPCT_SOURCE_ENCODER_B, b);
-	set_other_source(device, subdevice, NI_GPCT_SOURCE_ENCODER_Z, z);
+	comedi_set_gate_source(device, subdevice, 0, NI_GPCT_DISABLED_GATE_SELECT);
+	comedi_set_gate_source(device, subdevice, 1, NI_GPCT_DISABLED_GATE_SELECT);
+	comedi_set_other_source(device, subdevice, NI_GPCT_SOURCE_ENCODER_A, a);
+	comedi_set_other_source(device, subdevice, NI_GPCT_SOURCE_ENCODER_B, b);
+	comedi_set_other_source(device, subdevice, NI_GPCT_SOURCE_ENCODER_Z, z);
 
 	counter_mode = (NI_GPCT_COUNTING_MODE_QUADRATURE_X4_BITS |
 		NI_GPCT_COUNTING_DIRECTION_HW_UP_DOWN_BITS);
@@ -82,10 +55,10 @@ int ni_gpct_start_encoder(comedi_t *device, unsigned subdevice,
 		counter_mode |= (NI_GPCT_INDEX_ENABLE_BIT |
 			NI_GPCT_INDEX_PHASE_HIGH_A_HIGH_B_BITS);
 	}
-	retval = set_counter_mode(device, subdevice, counter_mode);
+	retval = comedi_set_counter_mode(device, subdevice, counter_mode);
 	if(retval < 0) return retval;
 
-	retval = arm(device, subdevice, NI_GPCT_ARM_IMMEDIATE);
+	retval = comedi_arm(device, subdevice, NI_GPCT_ARM_IMMEDIATE);
 	if(retval < 0) return retval;
 
 	return 0;

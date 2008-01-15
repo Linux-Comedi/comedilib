@@ -36,12 +36,12 @@ int ni_gpct_start_simple_event_counting(comedi_t *device, unsigned subdevice)
 	lsampl_t counter_mode;
 	static const unsigned initial_count = 0;
 
-	retval = reset_counter(device, subdevice);
+	retval = comedi_reset(device, subdevice);
 	if(retval < 0) return retval;
 
-	retval = set_gate_source(device, subdevice, 0, NI_GPCT_DISABLED_GATE_SELECT | CR_EDGE);
+	retval = comedi_set_gate_source(device, subdevice, 0, NI_GPCT_GATE_PIN_GATE_SELECT(0) /* NI_GPCT_GATE_PIN_i_GATE_SELECT *//*| CR_EDGE*/);
 	if(retval < 0) return retval;
-	retval = set_gate_source(device, subdevice, 1, NI_GPCT_DISABLED_GATE_SELECT | CR_EDGE);
+	retval = comedi_set_gate_source(device, subdevice, 1, NI_GPCT_DISABLED_GATE_SELECT | CR_EDGE);
 	if(retval < 0)
 	{
 		fprintf(stderr, "Failed to set second gate source.  This is expected for older boards (e-series, etc.)\n"
@@ -61,14 +61,14 @@ int ni_gpct_start_simple_event_counting(comedi_t *device, unsigned subdevice)
 	counter_mode |= NI_GPCT_STOP_ON_GATE_BITS;
 	// don't disarm on terminal count or gate signal
 	counter_mode |= NI_GPCT_NO_HARDWARE_DISARM_BITS;
-	retval = set_counter_mode(device, subdevice, counter_mode);
+	retval = comedi_set_counter_mode(device, subdevice, counter_mode);
 	if(retval < 0) return retval;
 
 	/* set initial counter value by writing to channel 0.  The "load a" and "load b" registers can be
 	set by writing to channels 1 and 2 respectively. */
 	retval = comedi_data_write(device, subdevice, 0, 0, 0, initial_count);
 
-	retval = arm(device, subdevice, NI_GPCT_ARM_IMMEDIATE);
+	retval = comedi_arm(device, subdevice, NI_GPCT_ARM_IMMEDIATE);
 	if(retval < 0) return retval;
 
 	return 0;
