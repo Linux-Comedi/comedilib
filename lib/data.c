@@ -45,7 +45,7 @@ int _comedi_data_write(comedi_t *it,unsigned int subdev,unsigned int chan,unsign
 		return -1;
 
 	s=it->subdevices+subdev;
-	
+
 	if(it->has_insnlist_ioctl){
 		comedi_insn insn;
 
@@ -69,7 +69,7 @@ int _comedi_data_write(comedi_t *it,unsigned int subdev,unsigned int chan,unsign
 			trigvar1:	0,
 		};
 		sampl_t sdata[2];
-		
+
 		sdata[0]=data & 0xffff;
 		sdata[1]=(data >> 16) & 0xffff;
 		chan=CR_PACK(chan,range,aref);
@@ -94,6 +94,7 @@ static int comedi_internal_data_read_n(comedi_t *it,
 
 	if(!valid_subd(it,subdev))
 		return -1;
+	if(n == 0) return 0;
 
 	s = it->subdevices + subdev;
 
@@ -107,7 +108,7 @@ static int comedi_internal_data_read_n(comedi_t *it,
 		insn.data = data;
 		insn.subdev = subdev;
 		insn.chanspec = chanspec;
-
+		memset(insn.data, 0, n * sizeof(data[0]));	// for valgrind
 		return comedi_do_insn(it,&insn);
 	}else{
 		comedi_trig cmd={
@@ -196,7 +197,7 @@ int _comedi_data_read_delayed( comedi_t *it, unsigned int subdev,
 	comedi_insnlist ilist;
 	comedi_insn insn[3];
 	lsampl_t delay = nano_sec;
-	
+
 	if( !valid_chan( it, subdev, chan ) )
 		return -1;
 
@@ -204,6 +205,7 @@ int _comedi_data_read_delayed( comedi_t *it, unsigned int subdev,
 
 	memset( insn, 0, sizeof(insn) );
 	memset( &ilist, 0, sizeof(ilist) );
+	memset(data, 0, sizeof(*data));	// for valgrind
 
 	// setup, no conversions
 	insn[0].insn = INSN_READ;

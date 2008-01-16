@@ -87,10 +87,10 @@ int _comedi_get_subdevice_flags(comedi_t *it,unsigned int subd)
 	int ret;
 	if(!valid_dev(it))
 		return -1;
-	s = malloc(sizeof(comedi_subdinfo) * it->n_subdevices);
+	s = calloc(it->n_subdevices, sizeof(comedi_subdinfo));
 	if(s == NULL)
 	{
-		__comedi_errno = errno;
+		libc_error();
 		return -1;
 	}
 	ret = comedi_ioctl(it->fd, COMEDI_SUBDINFO, (unsigned long)s);

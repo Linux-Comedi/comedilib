@@ -21,6 +21,7 @@
     USA.
 */
 
+#include <assert.h>
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
@@ -51,16 +52,31 @@ int get_subdevices(comedi_t *it)
 	comedi_chaninfo ci;
 	subdevice *r;
 
-	s=malloc(sizeof(comedi_subdinfo)*it->n_subdevices);
-	debug_ptr(s);
+	s = calloc(it->n_subdevices, sizeof(comedi_subdinfo));
+	if(s == NULL)
+	{
+		debug_ptr(s);
+		libc_error();
+		return -1;
+	}
 
 	ret = comedi_ioctl(it->fd, COMEDI_SUBDINFO, (unsigned long)s);
-	debug_int(ret);
+	if(ret < 0)
+	{
+		debug_int(ret);
+		free(s);
+		return -1;
+	}
 
-	r=it->subdevices=realloc(it->subdevices,
-		sizeof(subdevice)*it->n_subdevices);
-	debug_ptr(r);
-	memset(r,0,sizeof(subdevice)*it->n_subdevices);
+	assert(it->subdevices == NULL);
+	r = it->subdevices = calloc(it->n_subdevices, sizeof(subdevice));
+	if(r == NULL)
+	{
+		debug_ptr(r);
+		libc_error();
+		free(s);
+		return -1;
+	}
 
 	it->has_insnlist_ioctl = do_test_for_insnlist(it);
 	it->has_insn_ioctl = do_test_for_insn(it);
@@ -76,15 +92,15 @@ int get_subdevices(comedi_t *it)
 		r[i].range_type = s[i].range_type;
 
 		if(r[i].subd_flags&SDF_FLAGS){
-			r[i].flags_list=malloc(sizeof(*r[i].flags_list)*r[i].n_chan);
+			r[i].flags_list = calloc(r[i].n_chan, sizeof(*r[i].flags_list));
 			debug_ptr(r[i].flags_list);
 		}
 		if(r[i].subd_flags&SDF_MAXDATA){
-			r[i].maxdata_list=malloc(sizeof(*r[i].maxdata_list)*r[i].n_chan);
+			r[i].maxdata_list = calloc(r[i].n_chan, sizeof(*r[i].maxdata_list));
 			debug_ptr(r[i].maxdata_list);
 		}
 		if(r[i].subd_flags&SDF_RANGETYPE){
-			r[i].range_type_list=malloc(sizeof(*r[i].range_type_list)*r[i].n_chan);
+			r[i].range_type_list = calloc(r[i].n_chan, sizeof(*r[i].range_type_list));
 			debug_ptr(r[i].range_type_list);
 		}
 		ci.subdev = i;
@@ -125,9 +141,21 @@ comedi_range *get_rangeinfo(int fd,unsigned int range_type)
 	int ret;
 	int i;
 
-	kr=malloc(sizeof(comedi_krange)*RANGE_LENGTH(range_type));
-	r=malloc(sizeof(comedi_range)*RANGE_LENGTH(range_type));
+	kr = calloc(RANGE_LENGTH(range_type), sizeof(comedi_krange));
+	if(kr == NULL)
+	{
+		libc_error();
+		return NULL;
+	}
+	r = malloc(sizeof(comedi_range)*RANGE_LENGTH(range_type));
+	if(r == NULL)
+	{
+		libc_error();
+		free(kr);
+		return NULL;
+	}
 
+	memset(&ri, 0, sizeof(ri));
 	ri.range_type = range_type;
 	ri.range_ptr = kr;
 	ret = comedi_ioctl(fd, COMEDI_RANGEINFO, (unsigned long)&ri);
@@ -188,14 +216,14 @@ static int do_test_for_insnlist(comedi_t *dev)
 	lsampl_t data[2];
 	int ret;
 
-	memset(&insn,0,sizeof(insn));
-
 	il.n_insns = 1;
 	il.insns = &insn;
 
+	memset(&insn,0,sizeof(insn));
 	insn.insn = INSN_GTOD;
 	insn.n = 2;
 	insn.data = data;
+	memset(insn.data, 0, insn.n * sizeof(insn.data[0]));
 
 	ret = comedi_ioctl(dev->fd, COMEDI_INSNLIST, (unsigned long)&il);
 
@@ -216,14 +244,14 @@ static int do_test_for_insn(comedi_t *dev)
 	lsampl_t data[2];
 	int ret;
 
-	memset(&insn,0,sizeof(insn));
-
 	il.n_insns = 1;
 	il.insns = &insn;
 
+	memset(&insn,0,sizeof(insn));
 	insn.insn = INSN_GTOD;
 	insn.n = 2;
 	insn.data = data;
+	memset(insn.data, 0, insn.n * sizeof(insn.data[0]));
 
 	ret = comedi_ioctl(dev->fd, COMEDI_INSN, (unsigned long)&insn);
 
@@ -255,9 +283,7 @@ static int do_test_for_insn_bits(comedi_t *dev,unsigned int subdevice)
 	insn.n = 2;
 	insn.data = data;
 	insn.subdev = subdevice;
-
-	data[0]=0;
-	data[1]=0;
+	memset(data, 0, insn.n * sizeof(data[0]));
 
 	ret = comedi_do_insnlist(dev,&il);
 

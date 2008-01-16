@@ -105,6 +105,7 @@ int _comedi_dio_get_config(comedi_t *it,unsigned int subdev, unsigned int chan, 
 	insn.data = data;
 	insn.subdev = subdev;
 	insn.chanspec = CR_PACK(chan,0,0);
+	memset(data, 0, insn.n * sizeof(*data));
 	data[0] = INSN_CONFIG_DIO_QUERY;
 
 	retval = comedi_do_insn(it,&insn);
@@ -131,7 +132,7 @@ int _comedi_dio_read(comedi_t *it,unsigned int subdev,unsigned int chan,
 
 	if(it->has_insnlist_ioctl){
 		comedi_insn insn;
-		lsampl_t data;
+		lsampl_t data = 0;
 
 		memset(&insn,0,sizeof(insn));
 		insn.insn = INSN_READ;

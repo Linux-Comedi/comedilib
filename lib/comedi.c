@@ -39,7 +39,7 @@ INTERNAL int __comedi_init=0;
 INTERNAL void initialize(void)
 {
 	char *s;
-	
+
 	__comedi_init=1;
 
 	if( (s=getenv("COMEDILIB_LOGLEVEL")) ){
@@ -47,7 +47,7 @@ INTERNAL void initialize(void)
 		COMEDILIB_DEBUG(3,"setting loglevel to %d\n",__comedi_loglevel);
 	}
 }
-  
+
 EXPORT_ALIAS_DEFAULT(_comedi_open,comedi_open,0.7.18);
 comedi_t* _comedi_open(const char *fn)
 {
@@ -70,7 +70,8 @@ comedi_t* _comedi_open(const char *fn)
 
 	it->n_subdevices=it->devinfo.n_subdevs;
 
-	get_subdevices(it);
+	if(get_subdevices(it) < 0)
+		goto cleanup;
 
 	it->magic=COMEDILIB_MAGIC;
 
