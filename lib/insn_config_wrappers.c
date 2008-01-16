@@ -40,7 +40,8 @@ int _comedi_reset(comedi_t *device, unsigned subdevice)
 	insn.n = sizeof(data) / sizeof(data[0]);
 	data[0] = INSN_CONFIG_RESET;
 
-	return comedi_do_insn(device, &insn);
+	if(comedi_do_insn(device, &insn) >= 0) return 0;
+	else return -1;
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_arm,comedi_arm,0.9.0);
@@ -58,7 +59,8 @@ int _comedi_arm(comedi_t *device, unsigned subdevice, unsigned target)
 	data[0] = INSN_CONFIG_ARM;
 	data[1] = target;
 
-	return comedi_do_insn(device, &insn);
+	if(comedi_do_insn(device, &insn) >= 0) return 0;
+	else return -1;
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_set_counter_mode,comedi_set_counter_mode,0.9.0);
@@ -76,7 +78,8 @@ int _comedi_set_counter_mode(comedi_t *device, unsigned subdevice, unsigned mode
 	data[0] = INSN_CONFIG_SET_COUNTER_MODE;
 	data[1] = mode_bits;
 
-	return comedi_do_insn(device, &insn);
+	if(comedi_do_insn(device, &insn) >= 0) return 0;
+	else return -1;
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_set_clock_source,comedi_set_clock_source,0.9.0);
@@ -95,7 +98,8 @@ int _comedi_set_clock_source(comedi_t *device, unsigned subdevice, unsigned cloc
 	data[1] = clock;
 	data[2] = period_ns;
 
-	return comedi_do_insn(device, &insn);
+	if(comedi_do_insn(device, &insn) >= 0) return 0;
+	else return -1;
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_set_gate_source,comedi_set_gate_source,0.9.0);
@@ -114,7 +118,8 @@ int _comedi_set_gate_source(comedi_t *device, unsigned subdevice, unsigned gate_
 	data[1] = gate_index;
 	data[2] = gate_source;
 
-	return comedi_do_insn(device, &insn);
+	if(comedi_do_insn(device, &insn) >= 0) return 0;
+	else return -1;
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_internal_trigger,comedi_internal_trigger,0.9.0);
@@ -131,7 +136,8 @@ int comedi_internal_trigger(comedi_t *dev, unsigned subd, unsigned trignum)
 
 	data[0] = trignum;
 
-	return comedi_do_insn(dev, &insn);
+	if(comedi_do_insn(dev, &insn) >= 0) return 0;
+	else return -1;
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_set_other_source,comedi_set_other_source,0.9.0);
@@ -159,5 +165,6 @@ int _comedi_set_other_source(comedi_t *device, unsigned subdevice,
 		comedi_perror("comedi_do_insn");
 		return retval;
 	}
-	return 0;
+	if(comedi_do_insn(device, &insn) >= 0) return 0;
+	else return -1;
 }
