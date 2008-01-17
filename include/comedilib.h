@@ -273,7 +273,7 @@ lsampl_t comedi_from_physical(double data,
 
 /* INSN_CONFIG wrappers */
 int comedi_reset(comedi_t *device, unsigned subdevice);
-int comedi_arm(comedi_t *device, unsigned subdevice, unsigned target);
+int comedi_arm(comedi_t *device, unsigned subdevice, unsigned source);
 int comedi_set_counter_mode(comedi_t *device, unsigned subdevice, unsigned mode_bits);
 int comedi_set_clock_source(comedi_t *device, unsigned subdevice, unsigned clock, unsigned period_ns);
 int comedi_set_gate_source(comedi_t *device, unsigned subdevice, unsigned gate_index, unsigned gate_source);

@@ -12,6 +12,7 @@
 <!ENTITY dio-funcref SYSTEM "dio_funcref.sgml">
 <!ENTITY deprecated-funcref SYSTEM "deprecated_funcref.sgml">
 <!ENTITY error-funcref SYSTEM "error_funcref.sgml">
+<!ENTITY extensions-funcref SYSTEM "extensions_funcref.sgml">
 <!ENTITY glossary SYSTEM "glossary.sgml">
 <!ENTITY comedi "<acronym>Comedi</acronym>">
 <!ENTITY uuml "ue">
@@ -159,6 +160,10 @@ USA.
 		<section>
 			<title>Error Reporting</title>
 			&error-funcref;
+		</section>
+		<section>
+			<title>Extensions</title>
+			&extensions-funcref;
 		</section>
 		<section>
 			<title>Deprecated</title>

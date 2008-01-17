@@ -459,6 +459,22 @@ Description:
  to know of the existence of a particular feature, an existence
  test function should be written and put in the Comedilib source.
 
+Function: comedi_internal_trigger -- generate soft trigger
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int trig_num
+Description:
+ This function sends an INSN_INTTRIG instruction to a subdevice, which causes an internal triggering event.
+ This event can, for example, trigger a subdevice to start an asynchronous command.
+
+ The <parameter>trig_num</parameter> parameter is reserved for future use, and should be set to 0.
+ It is likely it will be used in the future to support multiple independent internal triggers.
+ For example, an asynchronous command might be specified for a subdevice
+ with a start_src of TRIG_INT, and
+ a start_arg of 5.  Then the start event would only be triggered if comedi_internal_trigger() were
+ called on the subdevice with a <parameter>trig_num</parameter> equal to the same value of 5.
+
 Function: comedi_lock -- subdevice reservation
 Retval: int
 Param: comedi_t * device

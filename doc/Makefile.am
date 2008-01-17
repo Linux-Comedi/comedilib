@@ -1,21 +1,23 @@
 
 SGML = calibration_funcref.sgml command_funcref.sgml dio_funcref.sgml \
-	deprecated_funcref.sgml error_funcref.sgml \
+	deprecated_funcref.sgml error_funcref.sgml extensions_funcref.sgml \
 	drivers.sgml funcref.sgml glossary.sgml \
 	install.sgml intro.sgml other.sgml reference.sgml tutorial.sgml \
 	driverwriting.sgml comedilib.sgml
 
 EXTRA_DIST = $(SGML) calibration_funcref.txt command_funcref.txt dio_funcref.txt \
-	deprecated_funcref.txt error_funcref.txt funcref mkref drivers.txt mkdr FAQ \
-	comedilib.pdf acq-seq.gif doc_html man
+	deprecated_funcref.txt error_funcref.txt extensions_funcref.txt \
+	funcref mkref drivers.txt mkdr FAQ \
+	acq-seq.gif doc_html man
 
 BUILT_SOURCES = calibration_funcref.sgml command_funcref.sgml dio_funcref.sgml \
-	deprecated_funcref.sgml error_funcref.sgml funcref.sgml drivers.sgml
+	deprecated_funcref.sgml error_funcref.sgml extensions_funcref.sgml \
+	funcref.sgml drivers.sgml
 
 if HAVE_DOCBOOK2PDF
-pdf_DATA = $(srcdir)/comedilib.pdf
+dist_pdf_DATA = comedilib.pdf
 else
-pdf_DATA =
+dist_pdf_DATA =
 endif
 
 if HAVE_DOCBOOK2HTML
@@ -70,7 +72,7 @@ install_man:
 uninstall_man:
 	for each in `find $(srcdir)/man/ -name '*.3'`; do $(RM) $(DESTDIR)$(mandir)/man3/`basename $$each` ; done
 
-$(srcdir)/comedilib.pdf: $(SGML)
+comedilib.pdf: $(SGML)
 	$(DOCBOOK2PDF) -o $(srcdir) $(srcdir)/comedilib.sgml
 
 funcref.sgml: funcref mkref
@@ -90,6 +92,9 @@ deprecated_funcref.sgml: deprecated_funcref.txt mkref
 
 error_funcref.sgml: error_funcref.txt mkref
 	$(srcdir)/mkref $(srcdir)/error_funcref.txt >$(srcdir)/error_funcref.sgml
+
+extensions_funcref.sgml: extensions_funcref.txt mkref
+	$(srcdir)/mkref $(srcdir)/extensions_funcref.txt >$(srcdir)/extensions_funcref.sgml
 
 drivers.sgml: drivers.txt mkdr
 	$(srcdir)/mkdr $(srcdir)/drivers.txt >$(srcdir)/drivers.sgml
