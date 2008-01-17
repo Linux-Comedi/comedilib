@@ -87,7 +87,7 @@ EXPORT_ALIAS_DEFAULT(_comedi_close,comedi_close,0.7.18);
 int _comedi_close(comedi_t *it)
 {
 	subdevice *s;
-	int i;
+	int i,j;
 
 	it->magic=0;
 
@@ -104,6 +104,8 @@ int _comedi_close(comedi_t *it)
 		}
 		if(s->subd_flags&SDF_RANGETYPE){
 			free(s->range_type_list);
+			for(j=0;j<s->n_chan;j++)
+				free(s->rangeinfo_list[j]);
 			free(s->rangeinfo_list);
 		}else{
 			free(s->rangeinfo);
