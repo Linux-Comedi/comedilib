@@ -50,22 +50,21 @@ int get_subdevices(comedi_t *it)
 	int ret;
 	comedi_subdinfo *s;
 	comedi_chaninfo ci;
-	subdevice *r;
+	subdevice *r = NULL;
 
 	s = calloc(it->n_subdevices, sizeof(comedi_subdinfo));
 	if(s == NULL)
 	{
 		debug_ptr(s);
 		libc_error();
-		return -1;
+		goto cleanup;
 	}
 
 	ret = comedi_ioctl(it->fd, COMEDI_SUBDINFO, (unsigned long)s);
 	if(ret < 0)
 	{
 		debug_int(ret);
-		free(s);
-		return -1;
+		goto cleanup;
 	}
 
 	assert(it->subdevices == NULL);
@@ -74,8 +73,7 @@ int get_subdevices(comedi_t *it)
 	{
 		debug_ptr(r);
 		libc_error();
-		free(s);
-		return -1;
+		goto cleanup;
 	}
 
 	it->has_insnlist_ioctl = do_test_for_insnlist(it);
@@ -93,31 +91,55 @@ int get_subdevices(comedi_t *it)
 
 		if(r[i].subd_flags&SDF_FLAGS){
 			r[i].flags_list = calloc(r[i].n_chan, sizeof(*r[i].flags_list));
-			debug_ptr(r[i].flags_list);
+			if(r[i].flags_list == NULL){
+				debug_ptr(r[i].flags_list);
+				libc_error();
+				goto cleanup;
+			}
+
 		}
 		if(r[i].subd_flags&SDF_MAXDATA){
 			r[i].maxdata_list = calloc(r[i].n_chan, sizeof(*r[i].maxdata_list));
-			debug_ptr(r[i].maxdata_list);
+			if(r[i].maxdata_list == NULL){
+				debug_ptr(r[i].maxdata_list);
+				libc_error();
+				goto cleanup;
+			}
 		}
 		if(r[i].subd_flags&SDF_RANGETYPE){
 			r[i].range_type_list = calloc(r[i].n_chan, sizeof(*r[i].range_type_list));
-			debug_ptr(r[i].range_type_list);
+			if(r[i].range_type_list == NULL){
+				debug_ptr(r[i].range_type_list);
+				libc_error();
+				goto cleanup;
+			}
 		}
 		ci.subdev = i;
 		ci.flaglist = r[i].flags_list;
 		ci.rangelist = r[i].range_type_list;
 		ci.maxdata_list = r[i].maxdata_list;
 		ret = comedi_ioctl(it->fd, COMEDI_CHANINFO, (unsigned long)&ci);
-		debug_int(ret);
+		if(ret < 0){
+			debug_int(ret);
+			goto cleanup;
+		}
 
 		if(r[i].subd_flags&SDF_RANGETYPE){
-			r[i].rangeinfo_list=malloc(sizeof(*r[i].rangeinfo_list)*r[i].n_chan);
-			debug_ptr(r[i].rangeinfo_list);
+			r[i].rangeinfo_list=calloc(r[i].n_chan, sizeof(*r[i].rangeinfo_list));
+			if(r[i].rangeinfo_list == NULL){
+				debug_ptr(r[i].rangeinfo_list);
+				libc_error();
+				goto cleanup;
+			}
 			for(j=0;j<r[i].n_chan;j++){
 				r[i].rangeinfo_list[j]=get_rangeinfo(it->fd,r[i].range_type_list[j]);
+				if(r[i].rangeinfo_list[j] == NULL)
+					goto cleanup;
 			}
 		}else{
 			r[i].rangeinfo=get_rangeinfo(it->fd,r[i].range_type);
+			if(r[i].rangeinfo == NULL)
+				goto cleanup;
 		}
 
 		r[i].has_cmd = do_test_for_cmd(it,i);
@@ -131,6 +153,35 @@ int get_subdevices(comedi_t *it)
 	free(s);
 
 	return 0;
+
+cleanup:
+	
+	if(s)
+		free(s);
+
+	if(r){
+		for(i=0;i<it->n_subdevices;i++){
+			if(r[i].flags_list)
+				free(r[i].flags_list);
+			if(r[i].maxdata_list)
+				free(r[i].maxdata_list);
+			if(r[i].range_type_list)
+				free(r[i].range_type_list);
+			if(r[i].rangeinfo_list){
+				for(j=0;j<r[i].n_chan;j++){
+					if(r[i].rangeinfo_list[j])
+						free(r[i].rangeinfo_list[j]);
+				}
+			}else{
+				if(r[i].rangeinfo)
+					free(r[i].rangeinfo);
+			}
+		}
+		free(r);
+		it->subdevices = NULL;
+	}
+
+	return -1;
 }
 
 comedi_range *get_rangeinfo(int fd,unsigned int range_type)
@@ -144,12 +195,14 @@ comedi_range *get_rangeinfo(int fd,unsigned int range_type)
 	kr = calloc(RANGE_LENGTH(range_type), sizeof(comedi_krange));
 	if(kr == NULL)
 	{
+		debug_ptr(kr);
 		libc_error();
 		return NULL;
 	}
-	r = malloc(sizeof(comedi_range)*RANGE_LENGTH(range_type));
+	r = calloc(RANGE_LENGTH(range_type), sizeof(comedi_range));
 	if(r == NULL)
 	{
+		debug_ptr(r);
 		libc_error();
 		free(kr);
 		return NULL;
@@ -161,6 +214,9 @@ comedi_range *get_rangeinfo(int fd,unsigned int range_type)
 	ret = comedi_ioctl(fd, COMEDI_RANGEINFO, (unsigned long)&ri);
 	if(ret<0){
 		fprintf(stderr,"ioctl(%d,COMEDI_RANGEINFO,0x%08x,%p)\n",fd,range_type,kr);
+		free(r);
+		free(kr);
+		return NULL;
 	}
 
 	for(i=0;i<RANGE_LENGTH(range_type);i++){
