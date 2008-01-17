@@ -36,8 +36,6 @@ int main(int argc, char *argv[])
 	int retval;
 	lsampl_t clock_selection;
 	struct parsed_options options;
-	comedi_insn insn;
-	lsampl_t data[3];
 
 	init_parsed_options(&options);
 	options.freq = 0.;
@@ -61,17 +59,11 @@ int main(int argc, char *argv[])
 	{
 		printf("Clock period unspecified.\n");
 	}
-	memset(&insn, 0, sizeof(comedi_insn));
-	insn.insn = INSN_CONFIG;
-	insn.subdev = options.subdevice;
-	insn.data = data;
-	insn.n = sizeof(data) / sizeof(data[0]);
-	data[0] = INSN_CONFIG_SET_CLOCK_SRC;
-	data[1] = clock_selection;
-	data[2] = period_ns;
 
-	retval = comedi_do_insn(device, &insn);
-	if(retval < 0) comedi_perror("comedi_do_insn");
+	retval = comedi_set_clock_source(device, options.subdevice, clock_selection, period_ns);
+	if(retval < 0) comedi_perror("comedi_set_clock_source");
+
+	comedi_close(device);
 	return retval;
 }
 
