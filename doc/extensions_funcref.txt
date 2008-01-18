@@ -65,6 +65,29 @@ Description:
 Returns:
  0 on success, -1 on error.
 
+Function: comedi_set_filter -- select a filter for a subdevice
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int channel
+Param: unsigned int filter
+Status: alpha
+Description:
+ This function selects a filter for a subdevice.  For instance, a digital
+ input subdevice may provide deglitching filters with varying cutoff frequencies.
+ The filters are used to prevent high-frequency
+ noise from causing unwanted transitions on the digital inputs.  This function can
+ tell the hardware which deglitching filter to use, or to use none at all.
+
+ The <parameter>filter</parameter>
+ parameter selects which of the subdevice's filters to use, and is driver-dependant.
+
+ This function is only useable
+ on subdevices that provide support for the INSN_CONFIG_FILTER
+ configuration instruction.
+Returns:
+ 0 on success, -1 on error.
+
 Function: comedi_set_gate_source -- select gate source for a subdevice
 Retval: int
 Param: comedi_t * device
@@ -110,6 +133,26 @@ Description:
 
  This function is only useable
  on subdevices that provide support for the INSN_CONFIG_SET_OTHER_SOURCE
+ configuration instruction.
+Returns:
+ 0 on success, -1 on error.
+
+Function: comedi_set_routing -- select a signal for an output
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int channel
+Param: unsigned int routing
+Status: alpha
+Description:
+ This function configures a mutiplexed output channel which can
+ output a variety of different signals (such as NI's RTSI and PFI lines).
+ The <parameter>routing</parameter>
+ parameter selects which signal should be routed to appear on the
+ selected output channel, and is driver-dependant.
+
+ This function is only useable
+ on subdevices that provide support for the INSN_CONFIG_SET_ROUTING
  configuration instruction.
 Returns:
  0 on success, -1 on error.

@@ -102,6 +102,25 @@ int _comedi_set_clock_source(comedi_t *device, unsigned subdevice, unsigned cloc
 	else return -1;
 }
 
+EXPORT_ALIAS_DEFAULT(_comedi_set_filter,comedi_set_filter,0.9.0);
+int _comedi_set_filter(comedi_t *device, unsigned subdevice, unsigned channel, unsigned filter)
+{
+	comedi_insn insn;
+	lsampl_t data[2];
+
+	memset(&insn, 0, sizeof(comedi_insn));
+	insn.insn = INSN_CONFIG;
+	insn.subdev = subdevice;
+	insn.chanspec = channel;
+	insn.data = data;
+	insn.n = sizeof(data) / sizeof(data[0]);
+	data[0] = INSN_CONFIG_FILTER;
+	data[1] = filter;
+
+	if(comedi_do_insn(device, &insn) >= 0) return 0;
+	else return -1;
+}
+
 EXPORT_ALIAS_DEFAULT(_comedi_set_gate_source,comedi_set_gate_source,0.9.0);
 int _comedi_set_gate_source(comedi_t *device, unsigned subdevice, unsigned gate_index, unsigned gate_source)
 {
@@ -165,6 +184,25 @@ int _comedi_set_other_source(comedi_t *device, unsigned subdevice,
 		comedi_perror("comedi_do_insn");
 		return retval;
 	}
+	if(comedi_do_insn(device, &insn) >= 0) return 0;
+	else return -1;
+}
+
+EXPORT_ALIAS_DEFAULT(_comedi_set_routing,comedi_set_routing,0.9.0);
+int _comedi_set_routing(comedi_t *device, unsigned subdevice, unsigned channel, unsigned routing)
+{
+	comedi_insn insn;
+	lsampl_t data[2];
+
+	memset(&insn, 0, sizeof(comedi_insn));
+	insn.insn = INSN_CONFIG;
+	insn.subdev = subdevice;
+	insn.chanspec = channel;
+	insn.data = data;
+	insn.n = sizeof(data) / sizeof(data[0]);
+	data[0] = INSN_CONFIG_SET_ROUTING;
+	data[1] = routing;
+
 	if(comedi_do_insn(device, &insn) >= 0) return 0;
 	else return -1;
 }

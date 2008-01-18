@@ -100,7 +100,9 @@ v0.9.0 {
 		comedi_arm;
 		comedi_set_counter_mode;
 		comedi_set_clock_source;
+		comedi_set_filter;
 		comedi_set_gate_source;
 		comedi_internal_trigger;
 		comedi_set_other_source;
+		comedi_set_routing;
 } v0.8.0;
