@@ -45,9 +45,9 @@ int ni_gpct_start_pulse_generator(comedi_t *device, unsigned subdevice, unsigned
 	retval = comedi_reset(device, subdevice);
 	if(retval < 0) return retval;
 
-	retval = comedi_set_gate_source(device, subdevice, 0, NI_GPCT_DISABLED_GATE_SELECT | CR_EDGE);
+	retval = comedi_set_gate_source(device, subdevice, 0, 0, NI_GPCT_DISABLED_GATE_SELECT | CR_EDGE);
 	if(retval < 0) return retval;
-	retval = comedi_set_gate_source(device, subdevice, 1, NI_GPCT_DISABLED_GATE_SELECT | CR_EDGE);
+	retval = comedi_set_gate_source(device, subdevice, 0, 1, NI_GPCT_DISABLED_GATE_SELECT | CR_EDGE);
 	if(retval < 0)
 	{
 		fprintf(stderr, "Failed to set second gate source.  This is expected for older boards (e-series, etc.)\n"
@@ -69,7 +69,7 @@ int ni_gpct_start_pulse_generator(comedi_t *device, unsigned subdevice, unsigned
 	counter_mode |= NI_GPCT_STOP_ON_GATE_BITS;
 	// don't disarm on terminal count or gate signal
 	counter_mode |= NI_GPCT_NO_HARDWARE_DISARM_BITS;
-	retval = comedi_set_counter_mode(device, subdevice, counter_mode);
+	retval = comedi_set_counter_mode(device, subdevice, 0, counter_mode);
 	if(retval < 0) return retval;
 
 	/* 20MHz clock */

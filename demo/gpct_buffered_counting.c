@@ -78,13 +78,13 @@ int ni_gpct_configure_buffered_event_counting(comedi_t *device, unsigned subdevi
 
 #if 1
 	// PFI gate select works for e and m series
-	retval = comedi_set_gate_source(device, subdevice, 0, NI_GPCT_PFI_GATE_SELECT(gate_pfi_channel) /*| CR_EDGE*/);
+	retval = comedi_set_gate_source(device, subdevice, 0, 0, NI_GPCT_PFI_GATE_SELECT(gate_pfi_channel) /*| CR_EDGE*/);
 #else
 	// gate pin gate select works for 660x
-	retval = comedi_set_gate_source(device, subdevice, 0, NI_GPCT_GATE_PIN_i_GATE_SELECT /*| CR_EDGE*/);
+	retval = comedi_set_gate_source(device, subdevice, 0, 0, NI_GPCT_GATE_PIN_i_GATE_SELECT /*| CR_EDGE*/);
 #endif
 	if(retval < 0) return retval;
-	retval = comedi_set_gate_source(device, subdevice, 1, NI_GPCT_DISABLED_GATE_SELECT | CR_EDGE);
+	retval = comedi_set_gate_source(device, subdevice, 0, 1, NI_GPCT_DISABLED_GATE_SELECT | CR_EDGE);
 	if(retval < 0)
 	{
 		fprintf(stderr, "Failed to set second gate source.  This is expected for older boards (e-series, etc.)\n"
@@ -106,7 +106,7 @@ int ni_gpct_configure_buffered_event_counting(comedi_t *device, unsigned subdevi
 	counter_mode |= NI_GPCT_STOP_ON_GATE_BITS;
 	// don't disarm on terminal count or gate signal
 	counter_mode |= NI_GPCT_NO_HARDWARE_DISARM_BITS;
-	retval = comedi_set_counter_mode(device, subdevice, counter_mode);
+	retval = comedi_set_counter_mode(device, subdevice, 0, counter_mode);
 	if(retval < 0) return retval;
 
 	/* Set initial counter value by writing to channel 0.*/

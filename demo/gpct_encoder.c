@@ -43,11 +43,11 @@ int ni_gpct_start_encoder(comedi_t *device, unsigned subdevice,
 	/* set "load b" register to initial_value by writing to channel 2 */
 	retval = comedi_data_write(device, subdevice, 2, 0, 0, initial_value);
 
-	comedi_set_gate_source(device, subdevice, 0, NI_GPCT_DISABLED_GATE_SELECT);
-	comedi_set_gate_source(device, subdevice, 1, NI_GPCT_DISABLED_GATE_SELECT);
-	comedi_set_other_source(device, subdevice, NI_GPCT_SOURCE_ENCODER_A, a);
-	comedi_set_other_source(device, subdevice, NI_GPCT_SOURCE_ENCODER_B, b);
-	comedi_set_other_source(device, subdevice, NI_GPCT_SOURCE_ENCODER_Z, z);
+	comedi_set_gate_source(device, subdevice, 0, 0, NI_GPCT_DISABLED_GATE_SELECT);
+	comedi_set_gate_source(device, subdevice, 0, 1, NI_GPCT_DISABLED_GATE_SELECT);
+	comedi_set_other_source(device, subdevice, 0, NI_GPCT_SOURCE_ENCODER_A, a);
+	comedi_set_other_source(device, subdevice, 0, NI_GPCT_SOURCE_ENCODER_B, b);
+	comedi_set_other_source(device, subdevice, 0, NI_GPCT_SOURCE_ENCODER_Z, z);
 
 	counter_mode = (NI_GPCT_COUNTING_MODE_QUADRATURE_X4_BITS |
 		NI_GPCT_COUNTING_DIRECTION_HW_UP_DOWN_BITS);
@@ -55,7 +55,7 @@ int ni_gpct_start_encoder(comedi_t *device, unsigned subdevice,
 		counter_mode |= (NI_GPCT_INDEX_ENABLE_BIT |
 			NI_GPCT_INDEX_PHASE_HIGH_A_HIGH_B_BITS);
 	}
-	retval = comedi_set_counter_mode(device, subdevice, counter_mode);
+	retval = comedi_set_counter_mode(device, subdevice, 0, counter_mode);
 	if(retval < 0) return retval;
 
 	retval = comedi_arm(device, subdevice, NI_GPCT_ARM_IMMEDIATE);

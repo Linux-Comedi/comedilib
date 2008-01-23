@@ -63,8 +63,77 @@ int _comedi_arm(comedi_t *device, unsigned subdevice, unsigned target)
 	else return -1;
 }
 
+EXPORT_ALIAS_DEFAULT(_comedi_get_clock_source,comedi_get_clock_source,0.9.0);
+int _comedi_get_clock_source(comedi_t *device, unsigned subdevice, unsigned *clock, unsigned *period_ns)
+{
+	comedi_insn insn;
+	lsampl_t data[3];
+	int retval;
+
+	memset(&insn, 0, sizeof(comedi_insn));
+	insn.insn = INSN_CONFIG;
+	insn.subdev = subdevice;
+	insn.chanspec = 0;
+	insn.data = data;
+	insn.n = sizeof(data) / sizeof(data[0]);
+	memset(data, 0, insn.n * sizeof(data[0]));
+	data[0] = INSN_CONFIG_GET_CLOCK_SRC;
+
+	retval = comedi_do_insn(device, &insn);
+	if(retval < 0) return -1;
+	if(clock) *clock = insn.data[1];
+	if(period_ns) *period_ns = insn.data[2];
+	return 0;
+}
+
+EXPORT_ALIAS_DEFAULT(_comedi_get_gate_source,comedi_get_gate_source,0.9.0);
+int _comedi_get_gate_source(comedi_t *device, unsigned subdevice, unsigned channel,
+	unsigned gate, unsigned *source)
+{
+	comedi_insn insn;
+	lsampl_t data[3];
+	int retval;
+
+	memset(&insn, 0, sizeof(comedi_insn));
+	insn.insn = INSN_CONFIG;
+	insn.subdev = subdevice;
+	insn.chanspec = channel;
+	insn.data = data;
+	insn.n = sizeof(data) / sizeof(data[0]);
+	memset(insn.data, 0, insn.n * sizeof(insn.data[0]));
+	data[0] = INSN_CONFIG_GET_GATE_SRC;
+	data[1] = gate;
+
+	retval = comedi_do_insn(device, &insn);
+	if(retval < 0) return -1;
+	if(source) *source = insn.data[2];
+	return 0;
+}
+
+EXPORT_ALIAS_DEFAULT(_comedi_get_routing,comedi_get_routing,0.9.0);
+int _comedi_get_routing(comedi_t *device, unsigned subdevice, unsigned channel, unsigned *routing)
+{
+	comedi_insn insn;
+	lsampl_t data[2];
+	int retval;
+
+	memset(&insn, 0, sizeof(comedi_insn));
+	insn.insn = INSN_CONFIG;
+	insn.subdev = subdevice;
+	insn.chanspec = channel;
+	insn.data = data;
+	insn.n = sizeof(data) / sizeof(data[0]);
+	memset(insn.data, 0, insn.n * sizeof(insn.data[0]));
+	data[0] = INSN_CONFIG_GET_ROUTING;
+
+	retval = comedi_do_insn(device, &insn);
+	if(retval < 0) return -1;
+	if(routing) *routing = insn.data[1];
+	return 0;
+}
+
 EXPORT_ALIAS_DEFAULT(_comedi_set_counter_mode,comedi_set_counter_mode,0.9.0);
-int _comedi_set_counter_mode(comedi_t *device, unsigned subdevice, unsigned mode_bits)
+int _comedi_set_counter_mode(comedi_t *device, unsigned subdevice, unsigned channel, unsigned mode_bits)
 {
 	comedi_insn insn;
 	lsampl_t data[2];
@@ -72,7 +141,7 @@ int _comedi_set_counter_mode(comedi_t *device, unsigned subdevice, unsigned mode
 	memset(&insn, 0, sizeof(comedi_insn));
 	insn.insn = INSN_CONFIG;
 	insn.subdev = subdevice;
-	insn.chanspec = 0;
+	insn.chanspec = channel;
 	insn.data = data;
 	insn.n = sizeof(data) / sizeof(data[0]);
 	data[0] = INSN_CONFIG_SET_COUNTER_MODE;
@@ -122,7 +191,8 @@ int _comedi_set_filter(comedi_t *device, unsigned subdevice, unsigned channel, u
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_set_gate_source,comedi_set_gate_source,0.9.0);
-int _comedi_set_gate_source(comedi_t *device, unsigned subdevice, unsigned gate_index, unsigned gate_source)
+int _comedi_set_gate_source(comedi_t *device, unsigned subdevice, unsigned channel,
+	unsigned gate_index, unsigned gate_source)
 {
 	comedi_insn insn;
 	lsampl_t data[3];
@@ -130,7 +200,7 @@ int _comedi_set_gate_source(comedi_t *device, unsigned subdevice, unsigned gate_
 	memset(&insn, 0, sizeof(comedi_insn));
 	insn.insn = INSN_CONFIG;
 	insn.subdev = subdevice;
-	insn.chanspec = 0;
+	insn.chanspec = channel;
 	insn.data = data;
 	insn.n = sizeof(data) / sizeof(data[0]);
 	data[0] = INSN_CONFIG_SET_GATE_SRC;
@@ -161,7 +231,7 @@ int comedi_internal_trigger(comedi_t *dev, unsigned subd, unsigned trignum)
 
 EXPORT_ALIAS_DEFAULT(_comedi_set_other_source,comedi_set_other_source,0.9.0);
 int _comedi_set_other_source(comedi_t *device, unsigned subdevice,
-	unsigned other, unsigned source)
+	unsigned channel, unsigned other, unsigned source)
 {
 	comedi_insn insn;
 	lsampl_t data[3];
@@ -170,7 +240,7 @@ int _comedi_set_other_source(comedi_t *device, unsigned subdevice,
 	memset(&insn, 0, sizeof(comedi_insn));
 	insn.insn = INSN_CONFIG;
 	insn.subdev = subdevice;
-	insn.chanspec = 0;
+	insn.chanspec = channel;
 	insn.data = data;
 	insn.n = sizeof(data) / sizeof(data[0]);
 	data[0] = INSN_CONFIG_SET_OTHER_SRC;
