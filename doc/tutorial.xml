@@ -1,4 +1,9 @@
-<!-- <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook V4.2//EN" "docbook/dtd/4.2/docbook.dtd">  -->
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+	"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
+<!ENTITY % comedilib_entities SYSTEM "comedilib.ent">
+%comedilib_entities;
+]>
 
 <section id="writingprograms">
 <title>
@@ -8,13 +13,13 @@ Writing &comedi; programs
 This Section describes how a well-installed and configured &comedi;
 package can be used in an application, to communicate data with a set
 of &comedi; devices.
-<xref linkend="acquisitionfunctions"> gives more details about
+<xref linkend="acquisitionfunctions"/> gives more details about
 the various acquisition functions with which the application
 programmer can perform data acquisition in &comedi;.
 </para>
 <para>
 Also don't forget to take a good look at the
-<filename class=directory>demo</filename>
+<filename class="directory">demo</filename>
 directory of the Comedilib source code. It contains lots of examples
 for the basic functionalities of &comedi;.
 </para>
@@ -43,7 +48,7 @@ int main(int argc,char *argv[])
 
   it=<link linkend="func-ref-comedi-open">comedi_open</link>("/dev/comedi0");
 
-  <link linkend="func-ref-comedi-data-read">comedi_data_read</link>(it,subdev,chan,range,aref, & data);
+  <link linkend="func-ref-comedi-data-read">comedi_data_read</link>(it,subdev,chan,range,aref, &amp;data);
 
   printf("%d\n",data);
 
@@ -55,7 +60,7 @@ The
  <link linkend="func-ref-comedi-open">comedi_open()</link>
 </function> can only be successful if the
 <filename>comedi0</filename> device file is configured to point to a
-valid &comedi; driver. <xref linkend="cardconfiguration"> explains
+valid &comedi; driver. <xref linkend="cardconfiguration"/> explains
 how this driver is linked to the <quote>device file</quote>.
 </para>
 <para>
@@ -72,11 +77,11 @@ cc tut1.c -lcomedi -o tut1
 </para>
 
 <para>
-The <parameter class=function>range</parameter> variable tells
+The <parameter class="function">range</parameter> variable tells
 &comedi; which gain to use when measuring an analog voltage.  Since we
 don't know (yet) which numbers are valid, or what each means, we'll
 use <literal>0</literal>, because it won't cause errors.  Likewise
-with <parameter class=function>aref</parameter>, which determines the
+with <parameter class="function">aref</parameter>, which determines the
 analog reference used.
 </para>
 </section>
@@ -147,19 +152,19 @@ typedef struct{
         unsigned int unit;
 }comedi_range;
 </programlisting>
-The structure element <parameter class=function>min</parameter>
+The structure element <parameter class="function">min</parameter>
 represents the voltage corresponding to
 <link linkend="func-ref-comedi-data-read">comedi_data_read()</link>
 returning <literal>0</literal>,
-and <parameter class=function>max</parameter> represents
+and <parameter class="function">max</parameter> represents
 <link linkend="func-ref-comedi-data-read">comedi_data_read()</link>
-returning <parameter class=function>maxdata</parameter>,
+returning <parameter class="function">maxdata</parameter>,
 (i.e., <literal>4095</literal> for <literal>12</literal> bit A/C
 converters, <literal>65535</literal> for <literal>16</literal> bit,
 or, <literal>1</literal> for digital input; more on this in a bit.)
-The <parameter class=function>unit</parameter> entry tells you if
-<parameter class=function>min</parameter> and
-<parameter class=function>max</parameter> refer to voltage, current,
+The <parameter class="function">unit</parameter> entry tells you if
+<parameter class="function">min</parameter> and
+<parameter class="function">max</parameter> refer to voltage, current,
 or are dimensionless (e.g., for digital I/O).
 </para>
 
@@ -206,7 +211,7 @@ file=<link linkend="func-ref-comedi-open">comedi_open</link>("/dev/comedi0");
 </programlisting>
 
 <para>
-where <parameter class=function>file</parameter> is of type
+where <parameter class="function">file</parameter> is of type
 <parameter>(<link linkend="ref-type-comedi-t">comedi_t</link> *)</parameter>.
 This function calls <function>open()</function>, as done explicitly in
 a previous section, but also fills the
@@ -216,7 +221,7 @@ structure with lots of goodies; this information will be useful soon.
 
 <para>
 Specifically, you need to know
-<parameter class=function>maxdata</parameter> for a specific
+<parameter class="function">maxdata</parameter> for a specific
 subdevice/channel. How about:
 
 <programlisting>
@@ -451,13 +456,13 @@ void <link linkend="dds-output">dds_output</link>(sampl_t *buf,int n);
 void <link linkend="dds-init">dds_init</link>(void);
 
 /* This define determines which waveform to use. */
-#define <anchor id="dds-init-function">dds_init_function <link linkend="dds-init-sine">dds_init_sine</link>
+#define <anchor id="dds-init-function"/>dds_init_function <link linkend="dds-init-sine">dds_init_sine</link>
 
 void <link linkend="dds-init-sine">dds_init_sine</link>(void);
 void <link linkend="dds-init-pseudocycloid">dds_init_pseudocycloid</link>(void);
 void <link linkend="dds-init-sawtooth">dds_init_sawtooth</link>(void);
 
-int <anchor id="comedi-internal-trigger">comedi_internal_trigger(<link linkend="ref-type-comedi-t">comedi_t</link> *dev, unsigned int subd, unsigned int trignum)
+int <anchor id="comedi-internal-trigger"/>comedi_internal_trigger(<link linkend="ref-type-comedi-t">comedi_t</link> *dev, unsigned int subd, unsigned int trignum)
 {
   <link linkend="ref-type-comedi-insn">comedi_insn</link> insn;
   <link linkend="ref-type-lsampl-t">lsampl_t</link> data[1];
@@ -532,24 +537,22 @@ int main(int argc, char *argv[])
   <link linkend="dds-output">dds_output</link>(data,BUF_LEN);
   <link linkend="dds-output">dds_output</link>(data,BUF_LEN);
 
-  dump_cmd(stdout,<![CDATA[&cmd]]>);
+  dump_cmd(stdout,&amp;cmd);
 
-  if ((err = <link linkend="func-ref-comedi-command">comedi_command</link>(dev, <![CDATA[&cmd]]>)) < 0) {
+  if ((err = <link linkend="func-ref-comedi-command">comedi_command</link>(dev, &amp;cmd)) &lt; 0) {
     <link linkend="func-ref-comedi-perror">comedi_perror</link>("comedi_command");
     exit(1);
   }
 
   m=write(comedi_fileno(dev),data,BUF_LEN*sizeof(sampl_t));
-  if(<![CDATA[m<0]]>){
+  if(m &lt; 0){
     perror("write");
     exit(1);
   }
   printf("m=%d\n",m);
 
   ret = <link linkend="comedi-internal-trigger">comedi_internal_trigger</link>(dev, subdevice, 0);
-<![CDATA[
-  if(ret<0){
-]]>
+  if(ret &lt; 0){
     perror("comedi_internal_trigger\n");
     exit(1);
   }
@@ -559,9 +562,7 @@ int main(int argc, char *argv[])
     n=BUF_LEN*sizeof(sampl_t);
     while(n>0){
       m=write(comedi_fileno(dev),(void *)data+(BUF_LEN*sizeof(sampl_t)-n),n);
-<![CDATA[
-      if(m<0){
-]]>
+      if(m &lt; 0){
         perror("write");
         exit(0);
       }
@@ -575,17 +576,15 @@ int main(int argc, char *argv[])
 }
 
 #define WAVEFORM_SHIFT 16
-<![CDATA[
-#define WAVEFORM_LEN (1<<WAVEFORM_SHIFT)
-]]>
-#define WAVEFORM_MASK (WAVEFORM_LEN-1)
+#define WAVEFORM_LEN (1 &lt;&lt; WAVEFORM_SHIFT)
+#define WAVEFORM_MASK (WAVEFORM_LEN - 1)
 
 sampl_t waveform[WAVEFORM_LEN];
 
 unsigned int acc;
 unsigned int adder;
 
-void <anchor id="dds-init">dds_init(void)
+void <anchor id="dds-init"/>dds_init(void)
 {
 <![CDATA[
   adder=waveform_frequency/freq*(1<<16)*(1<<WAVEFORM_SHIFT);
@@ -594,7 +593,7 @@ void <anchor id="dds-init">dds_init(void)
   <link linkend="dds-init-function">dds_init_function</link>();
 }
 
-void <anchor id="dds-output">dds_output(sampl_t *buf,int n)
+void <anchor id="dds-output"/>dds_output(sampl_t *buf,int n)
 {
   int i;
   sampl_t *p=buf;
@@ -609,7 +608,7 @@ void <anchor id="dds-output">dds_output(sampl_t *buf,int n)
 }
 
 
-void <anchor id="dds-init-sine">dds_init_sine(void)
+void <anchor id="dds-init-sine"/>dds_init_sine(void)
 {
   int i;
 
@@ -621,7 +620,7 @@ void <anchor id="dds-init-sine">dds_init_sine(void)
 }
 
 /* Yes, I know this is not the proper equation for a cycloid.  Fix it. */
-void <anchor id="dds-init-pseudocycloid">dds_init_pseudocycloid(void)
+void <anchor id="dds-init-pseudocycloid"/>dds_init_pseudocycloid(void)
 {
   int i;
   double t;
@@ -638,7 +637,7 @@ void <anchor id="dds-init-pseudocycloid">dds_init_pseudocycloid(void)
   ]]>
 }
 
-void <anchor id="dds-init-sawtooth">dds_init_sawtooth(void)
+void <anchor id="dds-init-sawtooth"/>dds_init_sawtooth(void)
 {
   int i;
 

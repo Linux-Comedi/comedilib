@@ -298,7 +298,7 @@ Description:
 
  <table COLSEP="1" ROWSEP="1" ORIENT="port" PGWIDE="1">
  <title>subdevice flags</title>
- <tgroup COLS="3" ALIGN="left" >
+ <tgroup cols="3" align="left" >
  <thead>
  <row>
  <entry>Subdevice Flag</entry>

@@ -1,40 +1,38 @@
 
-SGML = calibration_funcref.sgml command_funcref.sgml dio_funcref.sgml \
-	deprecated_funcref.sgml error_funcref.sgml extensions_funcref.sgml \
-	drivers.sgml funcref.sgml glossary.sgml \
-	install.sgml intro.sgml other.sgml reference.sgml tutorial.sgml \
-	driverwriting.sgml comedilib.sgml
+XML = calibration_funcref.xml command_funcref.xml dio_funcref.xml \
+	deprecated_funcref.xml error_funcref.xml extensions_funcref.xml \
+	drivers.xml funcref.xml glossary.xml \
+	install.xml intro.xml other.xml reference.xml tutorial.xml \
+	driverwriting.xml comedilib.xml
 
-EXTRA_DIST = $(SGML) calibration_funcref.txt command_funcref.txt dio_funcref.txt \
+EXTRA_DIST = $(XML) calibration_funcref.txt command_funcref.txt dio_funcref.txt \
 	deprecated_funcref.txt error_funcref.txt extensions_funcref.txt \
 	funcref mkref drivers.txt mkdr FAQ \
 	acq-seq.gif doc_html man
 
-BUILT_SOURCES = calibration_funcref.sgml command_funcref.sgml dio_funcref.sgml \
-	deprecated_funcref.sgml error_funcref.sgml extensions_funcref.sgml \
-	funcref.sgml drivers.sgml
+BUILT_SOURCES = calibration_funcref.xml command_funcref.xml dio_funcref.xml \
+	deprecated_funcref.xml error_funcref.xml extensions_funcref.xml \
+	funcref.xml drivers.xml
 
-if HAVE_DOCBOOK2PDF
-dist_pdf_DATA = comedilib.pdf
-else
-dist_pdf_DATA =
-endif
-
-if HAVE_DOCBOOK2HTML
+if HAVE_XMLTO
 all_html = $(srcdir)/doc_html
 install_html = install_html
 uninstall_html = uninstall_html
-else
-all_html =
-install_html =
-uninstall_html =
-endif
 
-if HAVE_DOCBOOK2MAN
+#pdf output for xmlto is broken in debian etch
+#dist_pdf_DATA = comedilib.pdf
+dist_pdf_DATA =
+
 all_man = $(srcdir)/man
 install_man = install_man
 uninstall_man = uninstall_man
 else
+all_html =
+install_html =
+uninstall_html =
+
+dist_pdf_DATA =
+
 all_man =
 install_man =
 uninstall_man =
@@ -48,8 +46,8 @@ uninstall-local: $(uninstall_html) $(uninstall_man)
 
 #named this doc_html to avoid phony html target that is automatically generated
 #(at least by automake1.8)
-$(srcdir)/doc_html: $(SGML)
-	{ $(DOCBOOK2HTML) -o $(srcdir)/doc_html $(srcdir)/comedilib.sgml && touch $(srcdir)/doc_html; } || { $(RM) -r $(srcdir)/doc_html; exit 1; }
+$(srcdir)/doc_html: $(XML)
+	{ $(XMLTO) -o $(srcdir)/doc_html -m $(srcdir)/comedilib_html_config.xsl --skip-validation html $(srcdir)/comedilib.xml && touch $(srcdir)/doc_html; } || { $(RM) -r $(srcdir)/doc_html; exit 1; }
 
 install_html:
 	$(mkdir_p) $(DESTDIR)$(htmldir)/html
@@ -61,8 +59,8 @@ uninstall_html:
 	for each in $(srcdir)/doc_html/*.html $(srcdir)/*.gif ; do \
 		$(RM) $(DESTDIR)$(htmldir)/html/`basename $$each` ; done
 
-$(srcdir)/man: $(SGML)
-	{ $(DOCBOOK2MAN) -o $(srcdir)/man $(srcdir)/comedilib.sgml && touch $(srcdir)/man; } || { $(RM) -r $(srcdir)/man; exit 1; }
+$(srcdir)/man: $(XML)
+	{ $(XMLTO) -o $(srcdir)/man --skip-validation man $(srcdir)/comedilib.xml && touch $(srcdir)/man; } || { $(RM) -r $(srcdir)/man; exit 1; }
 
 install_man:
 	$(mkdir_p) -m 755 $(DESTDIR)$(mandir)/man3
@@ -72,32 +70,32 @@ install_man:
 uninstall_man:
 	for each in `find $(srcdir)/man/ -name '*.3'`; do $(RM) $(DESTDIR)$(mandir)/man3/`basename $$each` ; done
 
-comedilib.pdf: $(SGML)
-	$(DOCBOOK2PDF) -o $(srcdir) $(srcdir)/comedilib.sgml
+comedilib.pdf: $(XML)
+	$(XMLTO) -o $(srcdir)/pdf --skip-validation pdf $(srcdir)/comedilib.xml
 
-funcref.sgml: funcref mkref
-	$(srcdir)/mkref $(srcdir)/funcref >$(srcdir)/funcref.sgml
+funcref.xml: funcref mkref
+	$(srcdir)/mkref $(srcdir)/funcref >$(srcdir)/funcref.xml
 
-calibration_funcref.sgml: calibration_funcref.txt mkref
-	$(srcdir)/mkref $(srcdir)/calibration_funcref.txt >$(srcdir)/calibration_funcref.sgml
+calibration_funcref.xml: calibration_funcref.txt mkref
+	$(srcdir)/mkref $(srcdir)/calibration_funcref.txt >$(srcdir)/calibration_funcref.xml
 
-command_funcref.sgml: command_funcref.txt mkref
-	$(srcdir)/mkref $(srcdir)/command_funcref.txt >$(srcdir)/command_funcref.sgml
+command_funcref.xml: command_funcref.txt mkref
+	$(srcdir)/mkref $(srcdir)/command_funcref.txt >$(srcdir)/command_funcref.xml
 
-dio_funcref.sgml: dio_funcref.txt mkref
-	$(srcdir)/mkref $(srcdir)/dio_funcref.txt >$(srcdir)/dio_funcref.sgml
+dio_funcref.xml: dio_funcref.txt mkref
+	$(srcdir)/mkref $(srcdir)/dio_funcref.txt >$(srcdir)/dio_funcref.xml
 
-deprecated_funcref.sgml: deprecated_funcref.txt mkref
-	$(srcdir)/mkref $(srcdir)/deprecated_funcref.txt >$(srcdir)/deprecated_funcref.sgml
+deprecated_funcref.xml: deprecated_funcref.txt mkref
+	$(srcdir)/mkref $(srcdir)/deprecated_funcref.txt >$(srcdir)/deprecated_funcref.xml
 
-error_funcref.sgml: error_funcref.txt mkref
-	$(srcdir)/mkref $(srcdir)/error_funcref.txt >$(srcdir)/error_funcref.sgml
+error_funcref.xml: error_funcref.txt mkref
+	$(srcdir)/mkref $(srcdir)/error_funcref.txt >$(srcdir)/error_funcref.xml
 
-extensions_funcref.sgml: extensions_funcref.txt mkref
-	$(srcdir)/mkref $(srcdir)/extensions_funcref.txt >$(srcdir)/extensions_funcref.sgml
+extensions_funcref.xml: extensions_funcref.txt mkref
+	$(srcdir)/mkref $(srcdir)/extensions_funcref.txt >$(srcdir)/extensions_funcref.xml
 
-drivers.sgml: drivers.txt mkdr
-	$(srcdir)/mkdr $(srcdir)/drivers.txt >$(srcdir)/drivers.sgml
+drivers.xml: drivers.txt mkdr
+	$(srcdir)/mkdr $(srcdir)/drivers.txt >$(srcdir)/drivers.xml
 
 maintainer-clean-local:
 	$(RM) -r $(srcdir)/doc_html $(srcdir)/man

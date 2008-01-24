@@ -1,4 +1,14 @@
-<!-- <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook V4.2//EN" -->
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+	"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
+<!ENTITY % comedilib_entities SYSTEM "comedilib.ent">
+%comedilib_entities;
+]>
+
+<section id="comedireference" xmlns:xi="http://www.w3.org/2001/XInclude">
+	<title>
+		&comedi; Reference
+	</title>
 
 <section id="comedi-comedilib-h">
 <title>
@@ -59,7 +69,7 @@ The <parameter>aref</parameter> argument indicates what reference you
 want the device to use.  It can be any of the following:
 <variablelist>
   <varlistentry>
-    <term>AREF_GROUND <anchor id="aref-ground"> </term>
+    <term>AREF_GROUND <anchor id="aref-ground"/> </term>
     <listitem>
       <para>
         is for inputs/outputs referenced to ground.
@@ -67,7 +77,7 @@ want the device to use.  It can be any of the following:
     </listitem>
   </varlistentry>
   <varlistentry>
-    <term>AREF_COMMON <anchor id="aref-common"> </term>
+    <term>AREF_COMMON <anchor id="aref-common"/> </term>
     <listitem>
       <para>
 	 is for a <quote>common</quote> reference (the low inputs of all the
@@ -76,7 +86,7 @@ channels are tied together, but are isolated from ground).
     </listitem>
   </varlistentry>
   <varlistentry>
-    <term>AREF_DIFF <anchor id="aref-diff"> </term>
+    <term>AREF_DIFF <anchor id="aref-diff"/> </term>
     <listitem>
       <para>
     is for differential inputs/outputs.
@@ -84,7 +94,7 @@ channels are tied together, but are isolated from ground).
     </listitem>
   </varlistentry>
   <varlistentry>
-    <term>AREF_OTHER <anchor id="aref-other"> </term>
+    <term>AREF_OTHER <anchor id="aref-other"/> </term>
     <listitem>
       <para>
     is for any reference that does not fit into the above categories.
@@ -180,7 +190,7 @@ information about a subdevice. This structure is usually filled in
 automatically when the driver is loaded (<quote>attached</quote>), so
 programmers need not access this data structure directly.
 <programlisting>
-typedef struct subdevice_struct <anchor id="ref-type-subdevice">subdevice;
+typedef struct subdevice_struct <anchor id="ref-type-subdevice"/>subdevice;
 
 struct subdevice_struct{
   unsigned int type;
@@ -469,7 +479,7 @@ to the driver. Valid instruction types are:
 <variablelist>
   <varlistentry>
     <term>
-<anchor id="insn-read">
+<anchor id="insn-read"/>
 INSN_READ
     </term>
     <listitem>
@@ -480,7 +490,7 @@ read values from an input channel
   </varlistentry>
   <varlistentry>
     <term>
-<anchor id="insn-write">
+<anchor id="insn-write"/>
 INSN_WRITE
     </term>
     <listitem>
@@ -491,7 +501,7 @@ write values to an output channel
   </varlistentry>
   <varlistentry>
     <term>
-<anchor id="insn-bits">
+<anchor id="insn-bits"/>
 INSN_BITS
     </term>
     <listitem>
@@ -502,7 +512,7 @@ read/write values on multiple digital I/O channels
   </varlistentry>
   <varlistentry>
     <term>
-<anchor id="insn-config">
+<anchor id="insn-config"/>
 INSN_CONFIG
     </term>
     <listitem>
@@ -513,7 +523,7 @@ configure a subdevice
   </varlistentry>
   <varlistentry>
     <term>
-<anchor id="insn-gtod">
+<anchor id="insn-gtod"/>
 INSN_GTOD
     </term>
     <listitem>
@@ -525,7 +535,7 @@ and microseconds values are of type <link linkend="ref-type-lsampl-t">lsampl_t</
   </varlistentry>
   <varlistentry>
     <term>
-<anchor id="insn-wait">
+<anchor id="insn-wait"/>
 INSN_WAIT
     </term>
     <listitem>
@@ -629,4 +639,37 @@ a list of instructions.
 
 </section>
 
+</section>
+
+	<section id="functionreference">
+		<title>Functions</title>
+		<section>
+			<title>Core</title>
+			<xi:include href="funcref.xml"/>
+		</section>
+		<section>
+			<title>Asyncronous Commands</title>
+			<xi:include href="command_funcref.xml"/>
+		</section>
+		<section>
+			<title>Calibration</title>
+			<xi:include href="calibration_funcref.xml"/>
+		</section>
+		<section>
+			<title>Digital I/O</title>
+			<xi:include href="dio_funcref.xml"/>
+		</section>
+		<section>
+			<title>Error Reporting</title>
+			<xi:include href="error_funcref.xml"/>
+		</section>
+		<section>
+			<title>Extensions</title>
+			<xi:include href="extensions_funcref.xml"/>
+		</section>
+		<section>
+			<title>Deprecated</title>
+			<xi:include href="deprecated_funcref.xml"/>
+		</section>
+	</section>
 </section>

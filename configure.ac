@@ -127,36 +127,14 @@ AM_CONDITIONAL(BUILD_SCXI, [test "$ENABLE_SCXI" == "yes"])
 AC_ARG_ENABLE([docbook],[  --disable-docbook-binding        Disable docbook],[ENABLE_DOCBOOK=$enableval],[ENABLE_DOCBOOK="yes"])
 
 if test "$ENABLE_DOCBOOK" == "yes"; then
-	AC_PATH_PROG(DOCBOOK2MAN, docbook2man, no)
-	if test "$DOCBOOK2MAN" = "no" ; then
-  		AC_MSG_WARN([docbook2man not found, will not be able to rebuild man pages])
+	AC_PATH_PROG(XMLTO, xmlto, no)
+	if test "$XMLTO" = "no" ; then
+  		AC_MSG_WARN([xmlto not found, will not be able to rebuild documentation])
 	fi
 else
-	DOCBOOK2MAN="no"
+	XMLTO="no"
 fi
-AM_CONDITIONAL(HAVE_DOCBOOK2MAN, [test "$DOCBOOK2MAN" != "no"])
-
-if test "$ENABLE_DOCBOOK" == "yes"; then
-	AC_PATH_PROG(DOCBOOK2PDF, docbook2pdf, no)
-	if test "$DOCBOOK2PDF" = "no" ; then
-		AC_MSG_WARN([docbook2pdf not found, will not be able to rebuild pdf documentation])
-	fi
-else
-	DOCBOOK2PDF="no"
-fi
-AM_CONDITIONAL(HAVE_DOCBOOK2PDF, [test "$DOCBOOK2PDF" != "no"])
-
-
-if test "$ENABLE_DOCBOOK" == "yes"; then
-	AC_PATH_PROG(DOCBOOK2HTML, docbook2html, no)
-	if test "$DOCBOOK2HTML" = "no" ; then
-		AC_MSG_WARN([docbook2html not found, will not be able to rebuild html documentation])
-	fi
-else
-	DOCBOOK2HTML="no"
-fi
-AM_CONDITIONAL(HAVE_DOCBOOK2HTML, [test "$DOCBOOK2HTML" != "no"])
-
+AM_CONDITIONAL(HAVE_XMLTO, [test "$XMLTO" != "no"])
 
 pcmciadir="\${sysconfdir}/pcmcia"
 AC_SUBST(pcmciadir)

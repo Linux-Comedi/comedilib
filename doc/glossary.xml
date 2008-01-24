@@ -1,4 +1,9 @@
-<!-- <!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook V4.2//EN"> -->
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+	"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
+<!ENTITY % comedilib_entities SYSTEM "comedilib.ent">
+%comedilib_entities;
+]>
 
 <glossary id="comedilib-glossary">
   <title>

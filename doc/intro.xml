@@ -1,4 +1,9 @@
-<!-- <!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook V4.2//EN"> -->
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+	"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
+<!ENTITY % comedilib_entities SYSTEM "comedilib.ent">
+%comedilib_entities;
+]>
 
 <section id="introduction">
 
@@ -235,8 +240,8 @@ this device driver, however, runs in kernel space, and the user
 application in user space. So, the operating system provides an
 interface between both. In Linux or Unix, these interfaces are in the
 form of <quote>files</quote>
-  in the <filename class=directory>/dev</filename> directory (2.2.x kernels or
-earlier) or <filename class=directory>/devfs</filename> directory
+  in the <filename class="directory">/dev</filename> directory (2.2.x kernels or
+earlier) or <filename class="directory">/devfs</filename> directory
   (2.4.x kernels and later). Each device supported in the kernel has a
 representative as such a user space device file, and its functionality can
   be accessed by classical Unix file I/O:
@@ -248,10 +253,10 @@ representative as such a user space device file, and its functionality can
 
 <listitem>
 <para>
-  <emphasis role="strong"><filename class=directory>/proc</filename> interface.</emphasis>
+  <emphasis role="strong"><filename class="directory">/proc</filename> interface.</emphasis>
   Linux (and some other UNIX operating systems) offer a file-like
 interface to attached devices (and other OS-related information) via
-the <filename class=directory>/proc</filename> directories. These
+the <filename class="directory">/proc</filename> directories. These
 <quote>files</quote> do not really exist, but it gives a familiar
 interface to users, with which they can inspect the current status of
 each device.
@@ -411,7 +416,7 @@ Acquisition terminology
 
 <para>
 This Section introduces the terminology that this document uses when
-talking about <quote>acquisitions.</quote> <xref linkend="fig-acq-seq">
+talking about <quote>acquisitions.</quote> <xref linkend="fig-acq-seq"/>
 depicts a typical acquisition <emphasis role="strong">sequence</emphasis>:
 <itemizedlist>
 
@@ -426,7 +431,7 @@ and the hardware need some finite
 
 <listitem>
 <para>
-<anchor id="scan">
+<anchor id="scan"/>
 The sequence consists of a number of identically repeated
 <emphasis role="strong">scans</emphasis>. This is where the actual
 data acquisitions are taking place: data is read from the card, or
@@ -448,14 +453,14 @@ on the minimum time needed to complete a full scan.
 <listitem>
 <para>
 Each scan contains one or more
-<anchor id="conversion">
+<anchor id="conversion"/>
 <emphasis role="strong">conversions</emphasis> on particular channels,
 i.e., the AD/DA converter is activated on each of the programmed
 channels, and produces a sample, again in a finite
 <emphasis role="strong">conversion time</emphasis>, starting from the
 moment in time called the
 <emphasis role="strong">sample time</emphasis>
-in <xref linkend="fig-acq-seq">
+in <xref linkend="fig-acq-seq"/>
 (sometimes also called the <quote>timestamp</quote>),
 and caused by a
 triggering event, called <emphasis role="strong">convert</emphasis>.
@@ -493,7 +498,7 @@ scan.
 </title>
 <mediaobject>
 <imageobject>
-<imagedata fileref="acq-seq.gif" format="GIF">
+<imagedata fileref="acq-seq.gif" format="GIF"/>
 </imageobject>
 <!--
 <imageobject>
@@ -695,10 +700,10 @@ structures.
 Finally, &comedi; offers the previously mentioned
 <quote>high-level</quote> interaction, i.e., at the level of user space
 device drivers, through file operations on entries in the
-<filename class=directory>/dev</filename> directory (for access to the
+<filename class="directory">/dev</filename> directory (for access to the
 device's functionality), or interactively from the command line
 through the <quote>files</quote> in the
-<filename class=directory>/proc</filename> directory (which allow to
+<filename class="directory">/proc</filename> directory (which allow to
 inspect the status of a &comedi; device).
 </para>
 

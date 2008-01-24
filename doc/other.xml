@@ -1,5 +1,9 @@
-<!-- <!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook V4.3//EN"> -->
-
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+	"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
+<!ENTITY % comedilib_entities SYSTEM "comedilib.ent">
+%comedilib_entities;
+]>
 
 <section id="acquisitionfunctions">
 <title>
@@ -11,7 +15,7 @@ This Section gives an overview of all &comedi; functions with which
 application programmers can implement their data acquisition. (With
 <quote>acquisition</quote> we mean all possible kinds of interfacing
 with the cards: input, output, configuration, streaming, etc.)
-<xref linkend="comedireference"> explains the function calls in full
+<xref linkend="comedireference"/> explains the function calls in full
 detail.
 </para>
 
@@ -57,13 +61,13 @@ the functions
   int <link linkend="func-ref-comedi-dio-read">comedi_dio_read</link>(device,subdevice,channel,unsigned int *bit);
   int <link linkend="func-ref-comedi-dio-write">comedi_dio_write</link>(device,subdevice,channel,unsigned int bit);
 </programlisting>
-The <parameter class=function>device</parameter> parameter is a
+The <parameter class="function">device</parameter> parameter is a
 <link linkend="ref-type-comedi-t">pointer</link>
 to a successfully opened &comedi; device.
-The <parameter class=function>subdevice</parameter> and
-<parameter class=function>channel</parameter> parameters are positive
+The <parameter class="function">subdevice</parameter> and
+<parameter class="function">channel</parameter> parameters are positive
 integers that indicate which subdevice and channel is used in the
-acquisition. The integer <parameter class=function>bit</parameter>
+acquisition. The integer <parameter class="function">bit</parameter>
 contains the value of the acquired bit.
 </para>
 <para>
@@ -72,7 +76,7 @@ the function
 <programlisting>
   <link linkend="func-ref-comedi-dio-config">comedi_dio_config</link>(device,subdevice,channel,unsigned int dir);
 </programlisting>
-The parameter <parameter class=function>dir</parameter> should be
+The parameter <parameter class="function">dir</parameter> should be
 either <literal>COMEDI_INPUT</literal> or
 <literal>COMEDI_OUTPUT</literal>.
 Many digital I/O subdevices group channels into blocks for
@@ -87,15 +91,15 @@ function
   <link linkend="func-ref-comedi-dio-bitfield">comedi_dio_bitfield</link>(device,subdevice,unsigned int write_mask,unsigned int *bits);
 </programlisting>
 Each channel is assigned to a bit in the
-<parameter class=function>write_mask</parameter> and
-<parameter class=function>bits</parameter>
+<parameter class="function">write_mask</parameter> and
+<parameter class="function">bits</parameter>
 bitfield.  If a bit in
-<parameter class=function>write_mask</parameter> is set, the
-corresponding bit in <parameter class=function>*bits</parameter> will
+<parameter class="function">write_mask</parameter> is set, the
+corresponding bit in <parameter class="function">*bits</parameter> will
 be written to the corresponding digital output line.
 Each digital line is then read and placed into
-<parameter class=function>*bits</parameter>.  The value
-of bits in <parameter class=function>*bits</parameter> corresponding
+<parameter class="function">*bits</parameter>.  The value
+of bits in <parameter class="function">*bits</parameter> corresponding
 to digital output lines is undefined and device-specific.  Channel
 <literal>0</literal> is the least significant bit in the bitfield;
 channel <literal>31</literal> is the most significant bit.  Channels
@@ -187,7 +191,7 @@ that can read more than one sample:
   int <link linkend="func-ref-comedi-dio-read">comedi_data_read_n</link>(<link linkend="ref-type-comedi-t">comedi_t</link> *it, unsigned int subdev, unsigned int chan, unsigned int range,
       unsigned int aref, <link linkend="ref-type-lsampl-t">lsampl_t</link> *data, unsigned int n)
 </programlisting>
-The number of samples, <parameter class=function>n</parameter>, is
+The number of samples, <parameter class="function">n</parameter>, is
 limited by the &comedi; implementation (to a maximum of 100 samples),
 because the call is blocking.
 </para>
@@ -219,7 +223,7 @@ execute a multiple of identical acquisitions on the same channel, but
 also to perform a
 <link linkend="instructionsconfiguration">configuration</link> of a
 channel.
-<anchor id="anchor.instruction.list">
+<anchor id="anchor.instruction.list"/>
 An <emphasis>instruction list</emphasis> is a list of instructions,
 possibly on different channels. Both instructions and instructions
 lists are executed <emphasis>synchronously</emphasis>, i.e., while
@@ -241,13 +245,13 @@ All the information needed to execute an instruction is stored in the
 <link linkend="ref-type-comedi-insn">comedi_insn</link>
 data structure:
 <programlisting>
-struct <anchor id="insn-data-structure">comedi_insn_struct{
-  <anchor id="insn-data-structure-insn">unsigned int insn;      // integer encoding the type of acquisition
+struct <anchor id="insn-data-structure"/>comedi_insn_struct{
+  <anchor id="insn-data-structure-insn"/>unsigned int insn;      // integer encoding the type of acquisition
                           // (or configuration)
   unsigned int n;         // number of elements in data array
-  <link linkend="ref-type-lsampl-t">lsampl_t</link> <anchor id="insn-data-structure-data">*data;         // pointer to data buffer
+  <link linkend="ref-type-lsampl-t">lsampl_t</link> <anchor id="insn-data-structure-data"/>*data;         // pointer to data buffer
   unsigned int subdev;    // subdevice
-  unsigned int <anchor id="insn-data-structure-chanspec"><link linkend="ref-macro-CR-PACK">chanspec</link>; // encoded channel specification
+  unsigned int <anchor id="insn-data-structure-chanspec"/><link linkend="ref-macro-CR-PACK">chanspec</link>; // encoded channel specification
   unsigned int unused[3];
 } comedi_insn;
 </programlisting>
@@ -342,7 +346,7 @@ whole instruction (list) has finished.
 Instructions for configuration
 </title>
 <para>
-<xref linkend="instructions"> explains how instructions are used to do
+<xref linkend="instructions"/> explains how instructions are used to do
 <emphasis>acquisition</emphasis> on channels. This section explains
 how they are used to <emphasis>configure</emphasis> a subdevice.
 There are various sorts of configurations, and the
@@ -485,7 +489,7 @@ Instruction for internal triggering
 </title>
 <para>
 This special instruction has
-<anchor id="insn-inttrig">INSN_INTTRIG as the
+<anchor id="insn-inttrig"/>INSN_INTTRIG as the
 <link linkend="insn-data-structure-insn">insn</link> flag in its
 <link linkend="insn-data-structure">instruction data structure</link>.
 Its execution causes an
@@ -618,47 +622,47 @@ The command data structure
 The command executes according to the information about the requested
 acquisition, which is stored in the
 <link linkend="ref-type-comedi-cmd">comedi_cmd</link>
-<anchor id="command-data-struct">data structure:
+<anchor id="command-data-struct"/>data structure:
 <programlisting>
 typedef struct comedi_cmd_struct comedi_cmd;
 
 struct comedi_cmd_struct{
   unsigned int subdev;         // which subdevice to sample
-  unsigned int <anchor id="command-data-struct-flags">flags;          // encode some configuration possibilities
+  unsigned int <anchor id="command-data-struct-flags"/>flags;          // encode some configuration possibilities
                                // of the command execution; e.g.,
                                // whether a callback routine is to be
                                // called at the end of the command
 
-  unsigned int <anchor id="command-data-struct-start-src">start_src;      // event to make the acquisition start
-  unsigned int <anchor id="command-data-struct-start-arg">start_arg;      // parameters that influence this start
+  unsigned int <anchor id="command-data-struct-start-src"/>start_src;      // event to make the acquisition start
+  unsigned int <anchor id="command-data-struct-start-arg"/>start_arg;      // parameters that influence this start
 
-  unsigned int <anchor id="command-data-struct-scan-begin-src">scan_begin_src; // event to make a particular scan start
-  unsigned int <anchor id="command-data-struct-scan-begin-arg">scan_begin_arg; // parameters that influence this start`
+  unsigned int <anchor id="command-data-struct-scan-begin-src"/>scan_begin_src; // event to make a particular scan start
+  unsigned int <anchor id="command-data-struct-scan-begin-arg"/>scan_begin_arg; // parameters that influence this start`
 
-  unsigned int <anchor id="command-data-struct-convert-src">convert_src;    // event to make a particular conversion start
-  unsigned int <anchor id="command-data-struct-convert-arg">convert_arg;    // parameters that influence this start
+  unsigned int <anchor id="command-data-struct-convert-src"/>convert_src;    // event to make a particular conversion start
+  unsigned int <anchor id="command-data-struct-convert-arg"/>convert_arg;    // parameters that influence this start
 
-  unsigned int <anchor id="command-data-struct-scan-end-src">scan_end_src;   // event to make a particular scan terminate
-  unsigned int <anchor id="command-data-struct-scan-end-arg">scan_end_arg;   // parameters that influence this termination
+  unsigned int <anchor id="command-data-struct-scan-end-src"/>scan_end_src;   // event to make a particular scan terminate
+  unsigned int <anchor id="command-data-struct-scan-end-arg"/>scan_end_arg;   // parameters that influence this termination
 
-  unsigned int <anchor id="command-data-struct-stop-src">stop_src;       // what make the acquisition terminate
-  unsigned int <anchor id="command-data-struct-stop-arg">stop_arg;       // parameters that influence this termination
+  unsigned int <anchor id="command-data-struct-stop-src"/>stop_src;       // what make the acquisition terminate
+  unsigned int <anchor id="command-data-struct-stop-arg"/>stop_arg;       // parameters that influence this termination
 
-  unsigned int <anchor id="command-data-struct-chanlist">*chanlist;      // pointer to list of channels to be sampled
-  unsigned int <anchor id="command-data-struct-chanlist-len">chanlist_len;   // number of channels to be sampled
+  unsigned int <anchor id="command-data-struct-chanlist"/>*chanlist;      // pointer to list of channels to be sampled
+  unsigned int <anchor id="command-data-struct-chanlist-len"/>chanlist_len;   // number of channels to be sampled
 
-  sampl_t *<anchor id="command-data-struct-data">data;               // address of buffer
-  unsigned int <anchor id="command-data-struct-data-len">data_len;       // number of samples to acquire
+  sampl_t *<anchor id="command-data-struct-data"/>data;               // address of buffer
+  unsigned int <anchor id="command-data-struct-data-len"/>data_len;       // number of samples to acquire
 };
 </programlisting>
 The start and end of the whole command acquisition sequence, and the
 start and end of each scan and of each conversion, is triggered by a
 so-called <emphasis>event</emphasis>. More on these in
-<xref linkend="comedicmdsources">.
+<xref linkend="comedicmdsources"/>.
 </para>
 
 <para>
-The <parameter class=function>subdev</parameter> member of the
+The <parameter class="function">subdev</parameter> member of the
 <link linkend="ref-type-comedi-cmd">comedi_cmd</link> structure is
 the index of the subdevice the command is intended for.  The
 <link linkend="func-ref-comedi-find-subdevice-by-type">comedi_find_subdevice_by_type()</link>
@@ -681,7 +685,7 @@ that should be stepped through for each scan.  The elements of the
 <link linkend="command-data-struct-chanlist">chanlist</link> array should be
 initialized by <quote>packing</quote> the channel, range and reference
 information together with the
-<parameter class=function>
+<parameter class="function">
  <link linkend="ref-macro-CR-PACK">CR_PACK()</link>
 </parameter>
 macro.
@@ -712,7 +716,7 @@ these bits are explained in a
 <section id="comedicmdsources">
 <title>
 The command trigger events
-<anchor id="source.trigger.anchor">
+<anchor id="source.trigger.anchor"/>
 </title>
 <para>
 A command is a very versatile acquisition instruction, in the sense
@@ -726,10 +730,10 @@ start a <link linkend="scan">scan</link>, start a
 <link linkend="conversion">conversion</link>, stop a scan, and stop
 the acquisition.  Each event can be given its own
 <emphasis><link linkend="source.trigger.anchor">source</link></emphasis>
-(the <parameter class=function>*_src</parameter> members in the
+(the <parameter class="function">*_src</parameter> members in the
 <link linkend="ref-type-comedi-cmd">comedi_cmd</link> data
 structure). And each event source can have a corresponding
-argument (the <parameter class=function>*_arg</parameter> members of
+argument (the <parameter class="function">*_arg</parameter> members of
 the <link linkend="ref-type-comedi-cmd">comedi_cmd</link> data
 structure) whose meaning depends on the type of source trigger.
 For example, to specify an external digital line <quote>3</quote> as a
@@ -740,8 +744,8 @@ sources), you would use
 </para>
 <para>
 The following paragraphs discuss in somewhat more detail the trigger
-event sources(<parameter class=function>*_src</parameter>), and the
-corresponding arguments (<parameter class=function>*_arg</parameter>).
+event sources(<parameter class="function">*_src</parameter>), and the
+corresponding arguments (<parameter class="function">*_arg</parameter>).
 </para>
 <para>
 The start of an acquisition is controlled by the
@@ -751,7 +755,7 @@ The available options are:
 
 <listitem>
 <para>
-<anchor id="trig-now-start-src">
+<anchor id="trig-now-start-src"/>
 TRIG_NOW: the
 <link linkend="command-data-struct-start-src">start_src</link>
 event occurs
@@ -766,7 +770,7 @@ supported.
 
 <listitem>
 <para>
-<anchor id="trig-follow-start-src">
+<anchor id="trig-follow-start-src"/>
 TRIG_FOLLOW:  (For an output device.) The
 <link linkend="command-data-struct-start-src">start_src</link>
 event occurs when data is written to the buffer.
@@ -775,7 +779,7 @@ event occurs when data is written to the buffer.
 
 <listitem>
 <para>
-<anchor id="trig-ext-start-src">
+<anchor id="trig-ext-start-src"/>
 TRIG_EXT: the start event occurs when an external trigger signal
 occurs; e.g., a rising edge of a digital line.
 <link linkend="command-data-struct-start-arg">start_arg</link>
@@ -785,7 +789,7 @@ chooses the particular digital line.
 
 <listitem>
 <para>
-<anchor id="trig-int-start-src">
+<anchor id="trig-int-start-src"/>
 TRIG_INT: the start event occurs on a &comedi; internal signal, which
 is typically caused by an
 <link linkend="insn-inttrig">INSN_INTTRIG instruction</link>.
@@ -801,7 +805,7 @@ The available options are:
 
 <listitem>
 <para>
-<anchor id="trig-timer-start-scan">
+<anchor id="trig-timer-start-scan"/>
 TRIG_TIMER:
 <link linkend="command-data-struct-scan-begin-src">scan_begin</link>
 events occur periodically.  The time between
@@ -814,7 +818,7 @@ nanoseconds.
 
 <listitem>
 <para>
-<anchor id="trig-follow-start-scan">
+<anchor id="trig-follow-start-scan"/>
 TRIG_FOLLOW:  The
 <link linkend="command-data-struct-scan-begin-src">scan_begin</link>
 event occurs immediately after a
@@ -825,7 +829,7 @@ event occurs.
 
 <listitem>
 <para>
-<anchor id="trig-ext-start-scan">
+<anchor id="trig-ext-start-scan"/>
 TRIG_EXT: the
 <link linkend="command-data-struct-scan-begin-src">scan_begin</link>
 event occurs when an external trigger signal
@@ -851,8 +855,8 @@ fields:
 
 <listitem>
 <para>
-<anchor id="convert-trig-timer">
-<anchor id="trig-timer">
+<anchor id="convert-trig-timer"/>
+<anchor id="trig-timer"/>
 TRIG_TIMER: the conversion events occur periodically.  The time
 between convert events is
 <link linkend="command-data-struct-convert-arg">convert_arg</link>
@@ -862,8 +866,8 @@ nanoseconds.
 
 <listitem>
 <para>
-<anchor id="convert-trig-ext">
-<anchor id="trig-ext">
+<anchor id="convert-trig-ext"/>
+<anchor id="trig-ext"/>
 TRIG_EXT: the conversion events occur when an external trigger signal
 occurs, e.g., a rising edge of a digital line.
 <link linkend="command-data-struct-convert-arg">convert_arg</link>
@@ -873,8 +877,8 @@ chooses the particular digital line.
 
 <listitem>
 <para>
-<anchor id="convert-trig-now">
-<anchor id="trig-now">
+<anchor id="convert-trig-now"/>
+<anchor id="trig-now"/>
 TRIG_NOW: All conversion events in a
 <link linkend="scan">scan</link> occur simultaneously.
 </para>
@@ -899,8 +903,8 @@ and <link linkend="command-data-struct-stop-arg">stop_arg</link>:
 
 <listitem>
 <para>
-<anchor id="acquisition-end-trig-count">
-<anchor id="trig-count">
+<anchor id="acquisition-end-trig-count"/>
+<anchor id="trig-count"/>
 TRIG_COUNT:  stop the acquisition after
 <link linkend="command-data-struct-stop-arg">stop_arg</link>
 scans.
@@ -909,8 +913,8 @@ scans.
 
 <listitem>
 <para>
-<anchor id="acquisition-end-trig-none">
-<anchor id="trig-none">
+<anchor id="acquisition-end-trig-none"/>
+<anchor id="trig-none"/>
 TRIG_NONE: perform continuous acquisition, until stopped using
 <link linkend="func-ref-comedi-cancel">comedi_cancel()</link>.
 </para>
@@ -928,7 +932,7 @@ There are a couple of less usual or not yet implemented events:
 
 <listitem>
 <para>
-<anchor id="trig-time">
+<anchor id="trig-time"/>
 TRIG_TIME:
 cause an event to occur at a particular time.
 </para>
@@ -939,7 +943,7 @@ cause an event to occur at a particular time.
 
 <listitem>
 <para>
-<anchor id="trigother-event">
+<anchor id="trigother-event"/>
 TRIG_OTHER: driver specific event trigger.
 </para>
 <para>
@@ -971,7 +975,7 @@ supports.
 <section id="comedicmdflags">
 <title>
 The command flags
-<anchor id="source.flags.anchor">
+<anchor id="source.flags.anchor"/>
 </title>
 
 <para>
@@ -985,7 +989,7 @@ The meaning of the field is as follows:
 
 <listitem>
 <para>
-<anchor id="trig-rt">
+<anchor id="trig-rt"/>
 TRIG_RT: ask the driver to use a
 <emphasis role="strong">hard real-time</emphasis> interrupt handler.
 This will reduce latency in handling interrupts from your data
@@ -1001,7 +1005,7 @@ nothing.
 
 <listitem>
 <para>
-<anchor id="trig-wake-eos">
+<anchor id="trig-wake-eos"/>
 TRIG_WAKE_EOS:
 where <quote>EOS</quote> stands for <quote>End of Scan</quote>. Some
 drivers will change their behaviour when this flag is set, trying to
@@ -1015,7 +1019,7 @@ frequent event than the filling up of the data buffer.
 
 <listitem>
 <para>
-<anchor id="trig-round-nearest">
+<anchor id="trig-round-nearest"/>
 TRIG_ROUND_NEAREST:
 round to nearest supported timing period, the default.
 This flag (as well as the following three), indicates how timing
@@ -1026,21 +1030,21 @@ timing requested.
 
 <listitem>
 <para>
-<anchor id="trig-round-down">
+<anchor id="trig-round-down"/>
 TRIG_ROUND_DOWN: round period down.
 </para>
 </listitem>
 
 <listitem>
 <para>
-<anchor id="trig-round-up">
+<anchor id="trig-round-up"/>
 TRIG_ROUND_UP: round period up.
 </para>
 </listitem>
 
 <listitem>
 <para>
-<anchor id="trig-round-up-next">
+<anchor id="trig-round-up-next"/>
 TRIG_ROUND_UP_NEXT:
 this one doesn't do anything, and I don't know what it was intended
 to do&hellip;?
@@ -1049,7 +1053,7 @@ to do&hellip;?
 
 <listitem>
 <para>
-<anchor id="trig-dither">
+<anchor id="trig-dither"/>
 TRIG_DITHER: enable dithering? Dithering is a software technique to
 smooth the influence of discretization <quote>noise</quote>.
 </para>
@@ -1057,7 +1061,7 @@ smooth the influence of discretization <quote>noise</quote>.
 
 <listitem>
 <para>
-<anchor id="trig-deglitch">
+<anchor id="trig-deglitch"/>
 TRIG_DEGLITCH: enable deglitching? Another <quote>noise</quote>
 smoothing technique.
 </para>
@@ -1065,7 +1069,7 @@ smoothing technique.
 
 <listitem>
 <para>
-<anchor id="trig-write">
+<anchor id="trig-write"/>
 TRIG_WRITE:
 write to bidirectional devices.  Could be useful, in principle, if
 someone wrote a driver that supported commands for a digital I/O
@@ -1075,14 +1079,14 @@ device that could do either input or output.
 
 <listitem>
 <para>
-<anchor id="trig-bogus">
+<anchor id="trig-bogus"/>
 TRIG_BOGUS: do the motions?
 </para>
 </listitem>
 
 <listitem>
 <para>
-<anchor id="trig-other">
+<anchor id="trig-other"/>
 TRIG_CONFIG: perform configuration, not triggering.  This is a legacy
 of the deprecated
 <link linkend="ref-type-comedi-cmd">comedi_trig_struct</link>
