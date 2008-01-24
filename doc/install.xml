@@ -14,10 +14,9 @@
 		This section assumes that you have successfully compiled and installed
 		the &comedi; software, that your hardware device is in your computer,
 		and that you know the relevant details about it, i.e., what kind of
-		card it is, the I/O base, the IRQ, jumper settings related to input
-		ranges, etc.
+		card it is, any jumper settings related to input ranges, the
+		I/O base address and IRQ for old non-plug-n-play boards, etc.
 	</para>
-
 
 	<section id="cardconfiguration">
 		<title>
@@ -28,31 +27,18 @@
 			to tell the &comedi; core kernel module which device you have, which
 			driver you want to attach to the card, and which run-time options
 			you want to give to the driver. This configuration is done by running
-			the <command>comedi_config</command> command. (As root of course.)
+			the <command>comedi_config</command> command (as root).
 			Here is an example of how to use the command (perhaps you should read
 			its <command>man</command> page now):
 <screen>
-PATH=/sbin:/usr/sbin:/usr/local/sbin:$PATH
 comedi_config /dev/comedi0 labpc-1200 0x260,3
 </screen>
 			This command says that the <quote>file</quote>
 			<filename>/dev/comedi0</filename> can be used to access the &comedi;
 			device that uses the <parameter>labpc-1200</parameter> board, and that
 			you give it two run-time parameters (<literal>0x260</literal> and
-			<literal>3</literal>). More parameters are possible, for example to
-			discriminate between two or more identical cards in your system.
-		</para>
-		<para>
-			If you want to have the board configured in this way every time you
-			boot, put the lines above into a start-up script file of your Linux
-			system (for example, the
-			<filename>/etc/rc.d/rc.local</filename> file), or for PCMCIA
-			boards the appropriate place is the /etc/pcmcia/comedi script.
-			For non-PCMCIA boards, you can also arrange to have your driver
-			loaded and comedi_config run with by adding a few lines
-			to /etc/modules.conf (see the INSTALL file for the comedi
-			kernel modules). You can, of course, also run comedi_config
-			at a command prompt.
+			<literal>3</literal>). More parameters are possible, and their
+			meaning is driver dependant.
 		</para>
 
 		<para>
@@ -70,59 +56,62 @@ comedi_config /dev/comedi0 labpc-1200 0x260,3
 <screen>
 comedi_config /dev/comedi0 ni_atmio
 </screen>
+		For the preceding comedi_config command to succeed, the
+		ni_atmio kernel module must
+		be loaded first.    For plug-n-play boards on
+		modern kernels, the appropriate comedi kernel modules should get loaded
+		automatically when your computer is booted.
+		The <command>modprobe</command> command can
+		be used to manually load/unload kernel modules, and <command>lsmod</command>
+		will list all the currently loaded modules.
 		</para>
 		<para>
-			For the <literal>Data Translation</literal> board, you need to have a
-			list of the jumper settings; these are given in the &comedi; manual
-			section about this card. (Check first to see whether they are still
-			correct!)
-			The card discussed her is a <literal>DT2821-f-8di</literal>.  The
-			<command>man</command> page of <command>comedi_config</command> tells
-			you that you need to know the I/O base, IRQ, DMA 1, DMA 2.  However,
-			the &comedi; driver also recognizes the
-			differential/single-ended and unipolar/bipolar jumpers.  As always,
-			the source is the final authority, and looking in
-			<filename>module/dt282x.c</filename>
-			tells us that the options list is interpreted as:
-		</para>
-		<para>
-			(... TO BE FILLED IN ...)
+			For the <literal>Data Translation</literal> board, you need to know
+			how the board's jumpers are configured in order to specify the correct
+			comedi_config parameters.  These parameters for the board are given in the
+			<link endterm="lowleveldrivers">kernel drivers</link> section about the dt282x
+			driver.
+			The card discussed here is a <literal>DT2821-f-8di</literal>.  The
+			entry for the dt282x driver tells you that the
+			comedi_config parameters give the driver the I/O base,
+			IRQ, DMA 1, DMA 2, and
+			in addition the states of the
+			differential/single-ended and unipolar/bipolar jumpers:
+			<itemizedlist>
+				<title>dt282x configuration options:</title>
+				<listitem><para>[0] - I/O port base address</para></listitem>
+				<listitem><para>[1] - IRQ</para></listitem>
+				<listitem><para>[2] - DMA 1</para></listitem>
+				<listitem><para>[3] - DMA 2</para></listitem>
+				<listitem><para>[4] - AI jumpered for 0=single ended, 1=differential</para></listitem>
+				<listitem><para>[5] - AI jumpered for 0=straight binary, 1=2's complement</para></listitem>
+				<listitem><para>[6] - AO 0 jumpered for 0=straight binary, 1=2's complement</para></listitem>
+				<listitem><para>[7] - AO 1 jumpered for 0=straight binary, 1=2's complement</para></listitem>
+				<listitem><para>[8] - AI jumpered for 0=[-10,10]V, 1=[0,10], 2=[-5,5], 3=[0,5]</para></listitem>
+				<listitem><para>[9] - AO 0 jumpered for 0=[-10,10]V, 1=[0,10], 2=[-5,5], 3=[0,5],
+					4=[-2.5,2.5]</para></listitem>
+				<listitem><para>[10]- A0 1 jumpered for 0=[-10,10]V, 1=[0,10], 2=[-5,5], 3=[0,5],
+					4=[-2.5,2.5]</para></listitem>
+			</itemizedlist>
 		</para>
 
-		<!-- XXX
-		<itemize>
-		<item>I/O base
-		<item>IRQ
-		<item>1=differential, 0=single ended
-		<item>ai 0=unipolar, 1=bipolar
-		<item>ao0 0=unipolar, 1=bipolar
-		<item>ao1 0=unipolar, 1=bipolar
-		<item>dma1
-		<item>dma2
-		</itemize>
-		(ai=analog input, ao=analog output.)
-		-->
-
 		<para>
-			So, the appropriate options list is:
+			So, the appropriate options list might be:
 <screen>
-0x200,4,,1,1,1
+0x200,4,0,0,1,1,1,1,0,2,2
 </screen>
 			and the full configuration command is:
 <screen>
-comedi_config /dev/comedi1 dt2821-f-8di 0x200,4,,1,1,1
+comedi_config /dev/comedi1 dt2821-f-8di 0x200,4,0,0,1,1,1,1,0,2,2
 </screen>
-			The differential/single-ended number is left blank, since the
-			driver already knowns (from the board name), that it is
-			differential. Also the DMA numbers are left blank, since we
-			don't want the driver to use DMA.  (Which could interfere
-			with the sound card...)
+			Setting the DMA channels to 0 disables the use of DMA.
 		</para>
 
 		<para>
 			So now you have your boards configured correctly.
 			Since data acquisition boards are not typically well-engineered,
-			&comedi; sometimes can't figure out if the board is actually there.
+			&comedi; sometimes can't figure out if an old non-plug-n-play
+			board is actually in the computer and at the base address you specified.
 			If it can't, it assumes you are right.  Both of these boards
 			are well-made, so &comedi; will give an error message if it
 			can't find them.  The &comedi; kernel module, since it is a part
@@ -157,8 +146,9 @@ comedi0: ni_atmio: 0x0260 at-mio-16e-10 ( irq = 3 )
 
 		<para>
 			So now that you have &comedi; talking to the hardware, try to
-			talk to &comedi;.  Here's some pretty low-level information, which can
-			sometimes be useful for debugging:
+			talk to &comedi;.  Here's some information from comedi's proc
+			file, which indicates what drivers are loaded and which
+			boards are configured:
 		</para>
 
 <screen>
@@ -166,31 +156,43 @@ cat /proc/comedi
 </screen>
 
 		<para>
-			On the particular system this demonstration was carried out, this
-			command gives:
+			For example, on a computer with an NI pxi-6281 configured on
+			<filename>/dev/comedi0</filename> and
+			a pxi-6602 configured on <filename>/dev/comedi1</filename> you might
+			see something like:
 		</para>
 
 <screen>
-comedi version 0.6.4
-format string
-0: ni_atmio             at-mio-16e-10           7
-1: dt282x               dt2821-f-8di            4
+comedi version 0.7.74
+format string: "%2d: %-20s %-20s %4d",i,driver_name,board_name,n_subdevices
+ 0: ni_pcimio            pxi-6281               14
+ 1: ni_660x              PXI-6602               10
+ni_pcimio:
+ ni_pcimio
+8255:
+ 8255
+ni_660x:
+ ni_660x
 </screen>
 
 		<para>
 			This documentation feature is not well-developed yet.  Basically, it
 			currently returns the driver name, the device name, and the number of
-			subdevices.
+			subdevices.  Following those lines are a list of the comedi kernel
+			driver modules currently loaded, each followed by a list of the board
+			names it recognizes (names that can be used with comedi_config).
 		</para>
 
 		<para>
-			In the <filename role="directory">demo/</filename> directory, there is a
+			In the <filename role="directory">demo/</filename> subdirectory of
+			Comedilib, there is a
 			command called <command>info</command>, which provides information
 			about each subdevice on the board.  Its output can be rather long,
 			if the board has several subdevices.
 			Here's part of the output of the <literal>National Instruments</literal>
 			board (which is on <filename>/dev/comedi0</filename>), as a result of
-			the command <command>demo/info /dev/comedi0</command>:
+			the command <command>demo/info /dev/comedi0</command> (run from the
+			top-level directory of comedilib):
 		</para>
 
 <screen>
