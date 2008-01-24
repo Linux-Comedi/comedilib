@@ -15,24 +15,18 @@
 		<author>
 			<firstname>David</firstname>
 			<surname>Schleef</surname>
-			<affiliation>
-				<address>ds@schleef.org</address>
-			</affiliation>
+			<email>ds@schleef.org</email>
 		</author>
 		<author>
 			<firstname>Frank</firstname>
 			<othername>Mori</othername>
 			<surname>Hess</surname>
-			<affiliation>
-				<address>fmhess@users.sourceforge.net</address>
-			</affiliation>
+			<email>fmhess@users.sourceforge.net</email>
 		</author>
 		<author>
 			<firstname>Herman</firstname>
 			<surname>Bruyninckx</surname>
-			<affiliation>
-				<address>Herman.Bruyninckx@mech.kuleuven.ac.be</address>
-			</affiliation>
+			<email>Herman.Bruyninckx@mech.kuleuven.ac.be</email>
 		</author>
 		<copyright>
 			<year>1998-2003</year>
