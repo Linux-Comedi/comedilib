@@ -14,25 +14,6 @@
 
 #define BUFSZ 2000
 
-int comedi_internal_trigger(comedi_t *device,unsigned int subdevice,
-	unsigned int trignum)
-{
-	comedi_insn insn;
-	lsampl_t data = 0;
-
-#ifndef INSN_INTTRIG
-#define INSN_INTTRIG		( 6 | INSN_MASK_WRITE|INSN_MASK_SPECIAL)
-#endif
-	memset(&insn,0,sizeof(insn));
-	insn.subdev = subdevice;
-	insn.insn = INSN_INTTRIG;
-	insn.n = 1;
-	insn.data = &data;
-
-	return comedi_do_insn(device,&insn);
-}
-
-
 int test_cmd_start_inttrig(void)
 {
 	comedi_cmd cmd;
