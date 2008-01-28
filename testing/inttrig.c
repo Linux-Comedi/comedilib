@@ -44,7 +44,7 @@ int test_cmd_start_inttrig(void)
 	unsigned int flags;
 
 	flags = comedi_get_subdevice_flags(device,subdevice);
-	if(!(flags&SDF_CMD) || flags&SDF_WRITEABLE){
+	if(!(flags&SDF_CMD) || (comedi_get_read_subdevice(device)!=subdevice)){
 		printf("not applicable\n");
 		return 0;
 	}
