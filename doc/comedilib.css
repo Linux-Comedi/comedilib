@@ -1,0 +1,5 @@
+/* give <programlisting> a light grey background */
+.programlisting
+{
+	background-color: #E0E0E0;
+}

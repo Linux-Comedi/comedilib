@@ -3,12 +3,13 @@ XML = calibration_funcref.xml command_funcref.xml dio_funcref.xml \
 	deprecated_funcref.xml error_funcref.xml extensions_funcref.xml \
 	drivers.xml funcref.xml glossary.xml \
 	install.xml intro.xml other.xml reference.xml tutorial.xml \
-	driverwriting.xml comedilib.xml
+	driverwriting.xml comedilib.xml comedilib.ent
 
 EXTRA_DIST = $(XML) calibration_funcref.txt command_funcref.txt dio_funcref.txt \
 	deprecated_funcref.txt error_funcref.txt extensions_funcref.txt \
 	funcref mkref drivers.txt mkdr FAQ \
-	acq-seq.gif doc_html man
+	acq-seq.gif doc_html man comedilib_html_config.xsl\
+	comedilib.css
 
 BUILT_SOURCES = calibration_funcref.xml command_funcref.xml dio_funcref.xml \
 	deprecated_funcref.xml error_funcref.xml extensions_funcref.xml \
@@ -46,7 +47,7 @@ uninstall-local: $(uninstall_html) $(uninstall_man)
 
 #named this doc_html to avoid phony html target that is automatically generated
 #(at least by automake1.8)
-$(srcdir)/doc_html: $(XML)
+$(srcdir)/doc_html: $(XML) comedilib_html_config.xsl
 	{ $(XMLTO) -o $(srcdir)/doc_html -m $(srcdir)/comedilib_html_config.xsl --skip-validation html $(srcdir)/comedilib.xml && touch $(srcdir)/doc_html; } || { $(RM) -r $(srcdir)/doc_html; exit 1; }
 
 install_html:
