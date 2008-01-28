@@ -22,8 +22,6 @@
 
 #define N_SAMPLES 10000
 
-#define MAPLEN 20480
-
 sigjmp_buf jump_env;
 
 void segv_handler(int num)
@@ -67,6 +65,7 @@ int test_mmap(void)
 	unsigned int flags;
 	int i;
 	unsigned sample_size;
+	unsigned map_len;
 
 	flags = comedi_get_subdevice_flags(device,subdevice);
 
@@ -76,6 +75,7 @@ int test_mmap(void)
 	}
 	if(flags & SDF_LSAMPL) sample_size = sizeof(lsampl_t);
 	else sample_size = sizeof(sampl_t);
+	map_len = sample_size * N_SAMPLES;
 
 	if(comedi_get_cmd_generic_timed(device, subdevice, &cmd, 1, 1)<0){
 		printf("E: comedi_get_cmd_generic_timed failed\n");
@@ -84,14 +84,14 @@ int test_mmap(void)
 
 	buf=malloc(sample_size * N_SAMPLES);
 
-	map=mmap(NULL,MAPLEN,PROT_READ,MAP_SHARED,comedi_fileno(device),0);
+	map = mmap(NULL, map_len,PROT_READ, MAP_SHARED, comedi_fileno(device),0);
 	if(!map){
 		printf("E: mmap() failed\n");
 		return 0;
 	}
 
 	/* test readability */
-	for(adr=map;adr<map+MAPLEN;adr+=PAGE_SIZE){
+	for(adr = map; adr < map + map_len; adr += PAGE_SIZE){
 		ret=test_segfault(adr);
 		if(ret){
 			printf("E: %p failed\n",adr);
@@ -143,10 +143,10 @@ int test_mmap(void)
 	}
 	if(fails==0) printf("compare ok\n");
 
-	munmap(map,MAPLEN);
+	munmap(map, map_len);
 
 	/* test if area is really unmapped */
-	for(adr=map;adr<map+MAPLEN;adr+=PAGE_SIZE){
+	for(adr = map; adr < map + map_len; adr += PAGE_SIZE){
 		ret=test_segfault(adr);
 		if(ret){
 			printf("%p segfaulted (ok)\n",adr);
