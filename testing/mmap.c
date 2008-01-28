@@ -22,8 +22,6 @@
 
 #define N_SAMPLES 10000
 
-#define BUFSZ N_SAMPLES*sizeof(sampl_t)
-
 #define MAPLEN 20480
 
 sigjmp_buf jump_env;
@@ -68,6 +66,7 @@ int test_mmap(void)
 	unsigned char *map;
 	unsigned int flags;
 	int i;
+	unsigned sample_size;
 
 	flags = comedi_get_subdevice_flags(device,subdevice);
 
@@ -75,13 +74,15 @@ int test_mmap(void)
 		printf("not applicable\n");
 		return 0;
 	}
+	if(flags & SDF_LSAMPL) sample_size = sizeof(lsampl_t);
+	else sample_size = sizeof(sampl_t);
 
 	if(comedi_get_cmd_generic_timed(device, subdevice, &cmd, 1, 1)<0){
 		printf("E: comedi_get_cmd_generic_timed failed\n");
 		return 0;
 	}
 
-	buf=malloc(BUFSZ);
+	buf=malloc(sample_size * N_SAMPLES);
 
 	map=mmap(NULL,MAPLEN,PROT_READ,MAP_SHARED,comedi_fileno(device),0);
 	if(!map){
@@ -112,7 +113,7 @@ int test_mmap(void)
 	go=1;
 	b=buf;
 	while(go){
-		ret = read(comedi_fileno(device),b,BUFSZ);
+		ret = read(comedi_fileno(device), b, N_SAMPLES * sample_size);
 		if(ret<0){
 			if(errno==EAGAIN){
 				usleep(10000);
