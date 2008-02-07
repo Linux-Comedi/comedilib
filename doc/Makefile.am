@@ -48,12 +48,15 @@ uninstall-local: $(uninstall_html) $(uninstall_man)
 #named this doc_html to avoid phony html target that is automatically generated
 #(at least by automake1.8)
 $(srcdir)/doc_html: $(XML) comedilib_html_config.xsl
-	{ $(XMLTO) -o $(srcdir)/doc_html -m $(srcdir)/comedilib_html_config.xsl --skip-validation html $(srcdir)/comedilib.xml && touch $(srcdir)/doc_html; } || { $(RM) -r $(srcdir)/doc_html; exit 1; }
+	{ $(XMLTO) -o $(srcdir)/doc_html -m $(srcdir)/comedilib_html_config.xsl --skip-validation html $(srcdir)/comedilib.xml && \
+		(cd $(srcdir)/doc_html && $(LN_S) -f ../comedilib.css . && $(LN_S) -f ../acq-seq.gif .) && \
+		touch $(srcdir)/doc_html;} || \
+		{ $(RM) -r $(srcdir)/doc_html; exit 1; }
 
 install_html:
 	$(mkdir_p) $(DESTDIR)$(htmldir)/html
 	chmod u+w $(DESTDIR)$(htmldir)/html
-	for each in $(srcdir)/doc_html/*.html $(srcdir)/*.gif ; do \
+	for each in $(srcdir)/doc_html/*.html $(srcdir)/*.gif $(srcdir)/*.css; do \
 		$(INSTALL_DATA) $$each $(DESTDIR)$(htmldir)/html ; done
 
 uninstall_html:
