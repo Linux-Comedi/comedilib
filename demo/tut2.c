@@ -20,7 +20,8 @@ int range = 0;			/* more on this later */
 int aref = AREF_GROUND;		/* more on this later */
 const char filename[] = "/dev/comedi0";
 
-/* initialize a comedi_polynomial_t so it can be used with comedi_to_physical */
+/* figure out if we are talking to a hardware-calibrated or software-calibrated board,
+	then obtain a comedi_polynomial_t which can be used with comedi_to_physical */
 int get_converter(comedi_t *device, unsigned subdevice, unsigned channel,
 	unsigned range, comedi_polynomial_t *converter)
 {
