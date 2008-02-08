@@ -153,6 +153,39 @@ and converting from a physical value to Comedi's integer sample values (COMEDI_F
 
 </section>
 
+<section id="ref-enum-comedi-subdevice-type">
+<title>
+enum comedi_subdevice_type
+</title>
+
+<para>
+<programlisting>
+enum comedi_subdevice_type {
+	COMEDI_SUBD_UNUSED,	/* subdevice is unused by driver */
+	COMEDI_SUBD_AI,	/* analog input */
+	COMEDI_SUBD_AO,	/* analog output */
+	COMEDI_SUBD_DI,	/* digital input */
+	COMEDI_SUBD_DO,	/* digital output */
+	COMEDI_SUBD_DIO,	/* digital input/output */
+	COMEDI_SUBD_COUNTER,	/* counter */
+	COMEDI_SUBD_TIMER,	/* timer */
+	COMEDI_SUBD_MEMORY,	/* memory, EEPROM, DPRAM */
+	COMEDI_SUBD_CALIB,	/* calibration DACs and pots*/
+	COMEDI_SUBD_PROC,	/* processor, DSP */
+	COMEDI_SUBD_SERIAL,	/* serial IO */
+	COMEDI_SUBD_PWM	/* pulse width modulation */
+};
+</programlisting>
+</para>
+<para>
+The comedi_subdevice_type enumeration specifies the possible values for
+a subdevice type.  These values are used by the functions
+<link linkend="func-ref-comedi-get-subdevice-type"><function>comedi_get_subdevice_type</function></link> and
+<link linkend="func-ref-comedi-find-subdevice-by-type"><function>comedi_find_subdevice_by_type</function></link>.
+</para>
+
+</section>
+
 </section>
 
 <section id="datatypesstructures">
@@ -373,7 +406,7 @@ deprecated, and should not be used in new applications.
 
 <section id="ref-type-comedi-sv-t">
 <title>
-comedi_sv_t
+comedi_sv_t (deprecated)
 </title>
 
 <programlisting>
