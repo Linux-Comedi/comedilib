@@ -12,9 +12,7 @@
 		drivers, tools, and libraries for various forms of
 		<emphasis>data acquisition</emphasis>: reading and writing of analog
 		signals; reading and writing of digital inputs/outputs; pulse and
-		frequency counting; pulse generation; reading encoders; etc. The
-		project's home page may be found at
-		<ulink url="http://www.comedi.org">http://www.comedi.org</ulink>.
+		frequency counting; pulse generation; reading encoders; etc.
 		The source code is distributed in two main packages, comedi and
 		comedilib:
 		<itemizedlist>

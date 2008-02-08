@@ -5,13 +5,13 @@
 %comedilib_entities;
 ]>
 
-<section id="writingprograms">
+<section id="writingprograms" xmlns:xi="http://www.w3.org/2001/XInclude">
 <title>
 Writing &comedi; programs
 </title>
 <para>
-This Section describes how a well-installed and configured &comedi;
-package can be used in an application, to communicate data with a set
+This section describes how &comedi;
+can be used in an application, to communicate data with a set
 of &comedi; devices.
 <xref linkend="acquisitionfunctions"/> gives more details about
 the various acquisition functions with which the application
@@ -33,49 +33,26 @@ Your first &comedi; program
 This example requires a card that has analog or digital input. This
 progam opens the device, gets the data, and prints it out:
 <programlisting>
-#include <![CDATA[<stdio.h>]]>   /* for printf() */
-#include <![CDATA[<]]><link linkend="comedi-comedilib-h">comedilib.h</link><![CDATA[>]]>
-
-int subdev = 0;         /* change this to your input subdevice */
-int chan = 0;           /* change this to your channel */
-int range = 0;          /* more on this later */
-int aref = <link linkend="aref-ground">AREF_GROUND</link>; /* more on this later */
-
-int main(int argc,char *argv[])
-{
-  <link linkend="ref-type-comedi-t">comedi_t</link> *it;
-  <link linkend="ref-type-lsampl-t">lsampl_t</link> data;
-
-  it=<link linkend="func-ref-comedi-open">comedi_open</link>("/dev/comedi0");
-
-  <link linkend="func-ref-comedi-data-read">comedi_data_read</link>(it,subdev,chan,range,aref, &amp;data);
-
-  printf("%d\n",data);
-
-  return 0;
-}
+<xi:include href="../demo/tut1.c" parse="text"/>
 </programlisting>
-The
-<function>
- <link linkend="func-ref-comedi-open">comedi_open()</link>
-</function> can only be successful if the
-<filename>comedi0</filename> device file is configured to point to a
-valid &comedi; driver. <xref linkend="cardconfiguration"/> explains
-how this driver is linked to the <quote>device file</quote>.
 </para>
 <para>
-The code above is basically the guts of
-<filename>demo/inp.c</filename>, without error checking or fancy
-options.  Compile the program using
+The source code file for the above program can be found in Comedilib,
+at <filename>demo/tut1.c</filename>.  You can compile the program using
 </para>
 
 <screen>
 cc tut1.c -lcomedi -o tut1
 </screen>
 <para>
-(Replace <literal>cc</literal> by your favourite C compiler command.)
+The
+<function>
+ <link linkend="func-ref-comedi-open">comedi_open</link>
+</function> call can only be successful if the
+<filename>comedi0</filename> device file is configured with a
+valid &comedi; driver. <xref linkend="cardconfiguration"/> explains
+how this driver is linked to the <quote>device file</quote>.
 </para>
-
 <para>
 The <parameter class="function">range</parameter> variable tells
 &comedi; which gain to use when measuring an analog voltage.  Since we
@@ -89,568 +66,78 @@ analog reference used.
 
 <section id="convertingsamples">
 <title>
-Converting samples to voltages
+Converting between integer data and physical units
 </title>
 
 <para>
 If you selected an analog input subdevice, you probably noticed
-that the output of <command>tut1</command> is a number between
-<literal>0</literal> and <literal>4095</literal>, or
-<literal>0</literal> and <literal>65535</literal>, depending on the
-number of bits in the A/D converter. &comedi; samples are
-<emphasis>always</emphasis> unsigned,
+that the output of <command>tut1</command> is an unsigned number, for
+example between <literal>0</literal> and <literal>65535</literal>
+for a 16 bit analog input. &comedi; samples are
+unsigned,
 with <literal>0</literal>  representing the lowest voltage of the ADC,
-and <literal>4095</literal>
-the highest.  &comedi; compensates for anything else the manual for
-your device says.  However, you probably prefer to have this number
+and a hardware-dependent maximum value representing the highest voltage.
+&comedi; compensates for anything else the manual for
+your device says (for example, many boards represent bipolar
+analog input voltages as signed integers).  However, you probably prefer to have this number
 translated to a voltage.  Naturally, as a good programmer, your first
 question is: <quote>How do I do this in a device-independent
 manner?</quote>
 </para>
 
 <para>
-Most devices give you a choice of gain and unipolar/bipolar
-input, and &comedi; allows you to select which of these to use.  This
-parameter is called the <quote>range parameter,</quote> since it
-specifies the <quote>input range</quote> for analog input (or
-<quote>output range</quote> for analog output.)  The range parameter
-represents both the gain and the unipolar/bipolar aspects.
+The functions
+<link linkend="func-ref-comedi-to-physical"><function>comedi_to_physical</function></link> and
+<link linkend="func-ref-comedi-from-physical"><function>comedi_from_physical</function></link>
+are used to convert between &comedi;'s integer data and floating point numbers corresponding
+to physical values (voltages, etc.).  In order to use the conversion functions, you must
+first obtain a <link linkend="ref-type-comedi-polynomial-t">comedi_polynomial_t</link>
+corresponding to the subdevice, range, and possibly channel the integer data is associated
+with.  The comedi_polynomial_t object specifies the polynomial function that will be applied
+to convert between &comedi;'s integer data and physical values.
 </para>
 
 <para>
-&comedi; keeps the number of available ranges and the largest
-sample value for each subdevice/channel combination.  (Some
-devices allow different input/output ranges for different
-channels in a subdevice.)
-</para>
-
-<para>
-The largest sample value can be found using the function
-<programlisting>
- <link linkend="ref-type-lsampl-t">lsampl_t</link> <link linkend="func-ref-comedi-get-maxdata">comedi_get_maxdata</link>(<link linkend="ref-type-comedi-t">comedi_t</link> * device, unsigned int subdevice, unsigned int channel))
-</programlisting>
-The number of available ranges can be found using the function:
-<programlisting>
- int <link linkend="func-ref-comedi-get-n-ranges">comedi_get_n_ranges</link>(<link linkend="ref-type-comedi-t">comedi_t</link> * device, unsigned int subdevice, unsigned int channel);
-</programlisting>
-</para>
-
-<para>
-For each value of the range parameter for a particular
-subdevice/channel, you can get range information using:
-<programlisting>
- <link linkend="ref-type-comedi-range">comedi_range</link> * <link linkend="func-ref-comedi-get-range">comedi_get_range</link>(<link linkend="ref-type-comedi-t">comedi_t</link> * device,
-                                 unsigned int subdevice, unsigned int channel, unsigned int range);
-</programlisting>
-which returns a pointer to a
-<link linkend="ref-type-comedi-range">comedi_range</link>
-structure, which has the following contents:
-<programlisting>
-typedef struct{
-        double min;
-        double max;
-        unsigned int unit;
-}comedi_range;
-</programlisting>
-The structure element <parameter class="function">min</parameter>
-represents the voltage corresponding to
-<link linkend="func-ref-comedi-data-read">comedi_data_read()</link>
-returning <literal>0</literal>,
-and <parameter class="function">max</parameter> represents
-<link linkend="func-ref-comedi-data-read">comedi_data_read()</link>
-returning <parameter class="function">maxdata</parameter>,
-(i.e., <literal>4095</literal> for <literal>12</literal> bit A/C
-converters, <literal>65535</literal> for <literal>16</literal> bit,
-or, <literal>1</literal> for digital input; more on this in a bit.)
-The <parameter class="function">unit</parameter> entry tells you if
-<parameter class="function">min</parameter> and
-<parameter class="function">max</parameter> refer to voltage, current,
-or are dimensionless (e.g., for digital I/O).
-</para>
-
-<para>
-<quote>Could it get easier?</quote> you say.  Well, yes.  Use
-the function <function>comedi_to_phys()</function>
-<link linkend="func-ref-comedi-to-phys">comedi_to_phys()</link>, which
-converts data values to physical units.  Call it using something like
-</para>
-
-<programlisting>
-volts=<link linkend="func-ref-comedi-to-phys">comedi_to_phys</link>(it,data,range,maxdata);
-</programlisting>
-
-<para>
-and the opposite
-</para>
-
-<programlisting>
-data=<link linkend="func-ref-comedi-from-phys">comedi_from_phy</link>s(it,volts,range,maxdata);
-</programlisting>
-
-</section>
-
-<section id="usingfileinterface">
-<title>
-Using the file interface
-</title>
-
-
-<para>
-In addition to providing low level routines for data
-access, the &comedi; library provides higher-level access,
-much like the standard <acronym>C</acronym> library provides
-<function>fopen()</function>, etc.  as a high-level (and portable)
-alternative to the direct <acronym>UNIX</acronym> system calls
-<function>open()</function>, etc.  Similarily to
-<function>fopen()</function>, we have
-<link linkend="func-ref-comedi-open">comedi_open()</link>:
-</para>
-
-<programlisting>
-file=<link linkend="func-ref-comedi-open">comedi_open</link>("/dev/comedi0");
-</programlisting>
-
-<para>
-where <parameter class="function">file</parameter> is of type
-<parameter>(<link linkend="ref-type-comedi-t">comedi_t</link> *)</parameter>.
-This function calls <function>open()</function>, as done explicitly in
-a previous section, but also fills the
-<link linkend="ref-type-comedi-t">comedi_t</link>
-structure with lots of goodies; this information will be useful soon.
-</para>
-
-<para>
-Specifically, you need to know
-<parameter class="function">maxdata</parameter> for a specific
-subdevice/channel. How about:
-
-<programlisting>
-maxdata=<link linkend="func-ref-comedi-get-maxdata">comedi_get_maxdata</link>(file,subdevice,channel);
-</programlisting>
-
-Wow! How easy. And the range information?
-
-<programlisting>
-<link linkend="ref-type-comedi-range">comedi_range</link> * <link linkend="func-ref-comedi-get-range">comedi_get_range</link>
-(<link linkend="ref-type-comedi-t">comedi_t</link>comedi_t *it,unsigned int subdevice,unsigned int chan,unsigned int range);
-</programlisting>
-
+A  <link linkend="ref-type-comedi-polynomial-t">comedi_polynomial_t</link> may be obtained
+from one of two functions:
+<link linkend="func-ref-comedi-get-hardcal-converter"><function>comedi_get_hardcal_converter</function></link> or
+<link linkend="func-ref-comedi-get-softcal-converter"><function>comedi_get_softcal_converter</function></link>.
+Which function to use depends on whether your board does calibration in hardware, or relies on
+the host computer for a software calibration.  The
+SDF_SOFT_CALIBRATED flag (queried by calling
+<link linkend="func-ref-comedi-get-subdevice-flags"><function>comedi_get_subdevice_flags</function></link>)
+will be set for boards that use software calibration.
 </para>
 
 </section>
-
 
 <section id="secondprogram">
 <title>
-Your second &comedi; program: simple acquisition
+Your second &comedi; program
 </title>
 
 
 <para>
-Actually, this is the first &comedi; program again, just
-that we've added what we've learned.
+Actually, this is the first &comedi; program again, except
+we've added code to convert the integer data value to physical units.
+The program handles both the case of a software-calibrated
+board and a hardware-calibrated board.
 </para>
-
 
 <programlisting>
-#include &lt;stdio.h&gt;      /* for printf() */
-#include <![CDATA[<]]><link linkend="comedi-comedilib-h">comedilib.h</link><![CDATA[>]]>
-
-int subdev = 0;         /* change this to your input subdevice */
-int chan = 0;           /* change this to your channel */
-int range = 0;          /* more on this later */
-int aref = 0;           /* more on this later */
-
-int main(int argc,char *argv[])
-{
-  <link linkend="ref-type-comedi-t">comedi_t</link> *cf;
-  int chan=0;
-  <link linkend="ref-type-lsampl-t">lsampl_t</link> data;
-  int maxdata,rangetype;
-  double volts;
-
-  cf=<link linkend="func-ref-comedi-open">comedi_open</link>("/dev/comedi0");
-
-  maxdata=<link linkend="func-ref-comedi-get-maxdata">comedi_get_maxdata</link>(cf,subdev,chan);
-
-  rangetype=comedi_get_rangetype(cf,subdev,chan);
-
-  <link linkend="func-ref-comedi-data-read">comedi_data_read</link>(cf->fd,subdev,chan,range,aref,&amp;data);
-
-  volts=<link linkend="func-ref-comedi-to-phys">comedi_to_phys</link>(data,rangetype,range,maxdata);
-
-  printf("%d %g\n",data,volts);
-
- return 0;
-}
+<xi:include href="../demo/tut2.c" parse="text"/>
 </programlisting>
-
+<para>
+The source code file for the above program can be found in Comedilib, at demo/tut2.c.
+</para>
 </section>
 
-<section id="thirdprogram">
-<title>
-Your third &comedi; program: instructions
-</title>
-<para>
-This program (taken from the set of demonstration examples that come
-with &comedi;) shows how to use a somewhat more flexible acquisition
-function, the so-called <link linkend="instructions">instruction</link>.
-<programlisting>
-<![CDATA[
-#include <stdio.h>
-#include <]]><link linkend="comedi-comedilib-h">comedilib.h</link><![CDATA[>
-#include <fcntl.h>
-#include <unistd.h>
-#include <errno.h>
-#include <sys/time.h>
-#include <unistd.h>
-#include "examples.h"
-]]>
-
-/*
- * This example does 3 instructions in one system call.  It does
- * a gettimeofday() call, then reads N_SAMPLES samples from an
- * analog input, and the another gettimeofday() call.
- *
- * (Note: The gettimeofday() value is obtained using an INSN_GTOD
- * instruction, which places the seconds value in data[0] and the
- * microseconds in data[1], so the seconds value is limited to
- * 32-bits even on 64-bit systems.)
- */
-
-#define MAX_SAMPLES 128
-
-<link linkend="ref-type-comedi-t">comedi_t</link> *device;
-
-int main(int argc, char *argv[])
-{
-  int ret,i;
-  <link linkend="ref-type-comedi-insn">comedi_insn</link> insn[3];
-  <link linkend="ref-type-comedi-insnlist">comedi_insnlist</link> il;
-  <link linkend="ref-type-lsampl-t">lsampl_t</link> t1[2], t2[2];
-  <link linkend="ref-type-lsampl-t">lsampl_t</link> data[MAX_SAMPLES];
-
-  parse_options(argc,argv);
-
-
-  device=<link linkend="func-ref-comedi-open">comedi_open</link>(filename);
-  if(!device){
-    <link linkend="func-ref-comedi-perror">comedi_perror</link>(filename);
-    exit(0);
-  }
-
-  if(verbose){
-    printf("measuring device=%s subdevice=%d channel=%d range=%d analog reference=%d\n",
-      filename,subdevice,channel,range,aref);
-  }
-
-  /* Set up a the "instruction list", which is just a pointer
-   * to the array of instructions and the number of instructions.
-   */
-  il.n_insns=3;
-  il.insns=insn;
-
-  /* Instruction 0: perform a gettimeofday() */
-  insn[0].insn=<link linkend="insn-gtod">INSN_GTOD</link>;
-  insn[0].n=2;
-  insn[0].data=t1;
-
-  /* Instruction 1: do 10 analog input reads */
-  insn[1].insn=<link linkend="insn-read">INSN_READ</link>;
-  insn[1].n=n_scan;
-  insn[1].data=data;
-  insn[1].subdev=subdevice;
-  insn[1].chanspec=<link linkend="ref-macro-CR-PACK">CR_PACK</link>(channel,range,aref);
-
-  /* Instruction 2: perform a gettimeofday() */
-  insn[2].insn=<link linkend="insn-gtod">INSN_GTOD</link>;
-  insn[2].n=2;
-  insn[2].data=t2;
-
-  ret=<link linkend="func-ref-comedi-do-insnlist">comedi_do_insnlist</link>(device,&amp;il);
-  if(ret<![CDATA[<]]>0){
-    <link linkend="func-ref-comedi-perror">comedi_perror</link>(filename);
-    exit(0);
-  }
-
-  printf("initial time: %d.%06d\n",t1[0],t1[1]);
-  for(i=0;i<![CDATA[<]]>n_scan;i++){
-    printf("%d\n",data[i]);
-  }
-  printf("final time: %d.%06d\n",t2[0],t2[1]);
-
-  printf("difference (us): %ld\n",(long)(t2[0]-t1[0])*1000000+(t2[1]-t1[1]));
-
-  return 0;
-}
-</programlisting>
-</para>
-
+<section>
+	<title>Further examples</title>
+	<para>
+		See the demo subdirectory of Comedilib for more example programs.  The directory contains
+		a README file with descriptions of the various demo programs.
+	</para>
 </section>
-
-<section id="fourthprogram">
-<title>
-Your fourth &comedi; program: commands
-</title>
-
-<para>
-This example programs an analog output subdevice with &comedi;'s most
-powerful acquisition function, the asynchronous
-<link linkend="commandsstreaming">command</link>, to generate a waveform.
-</para>
-
-<para>
-The waveform in this example is a sine wave, but this can be easily
-changed to make a generic function generator.
-</para>
-
-<para>
-The function generation algorithm is the same as what is typically
-used in digital function generators.  A 32-bit accumulator is
-incremented by a phase factor, which is the amount (in radians) that
-the generator advances each time step.  The accumulator is then
-shifted right by 20 bits, to get a 12 bit offset into a lookup table.
-The value in the lookup table at that offset is then put into a buffer
-for output to the DAC.
-</para>
-
-<para>
-Once you have
-issued the command, &comedi; expects you to keep the buffer full of
-data to output to the acquisition card.  This is done by
-<function>write()</function>.  Since there may be a delay between the
-<link linkend="func-ref-comedi-command">comedi_command()</link>
-and a subsequent <function>write()</function>, you
-should fill the buffer using <function>write()</function> before you call
-<link linkend="func-ref-comedi-command">comedi_command()</link>,
-as is done here.
-<programlisting>
-<![CDATA[
-#include <stdio.h>
-#include <]]><link linkend="comedi-comedilib-h">comedilib.h</link><![CDATA[>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <errno.h>
-#include <getopt.h>
-#include <ctype.h>
-#include <math.h>
-#include "examples.h"
-]]>
-
-double waveform_frequency = 10.0; /* frequency of the sine wave to output */
-double amplitude          = 4000; /* peak-to-peak amplitude, in DAC units (i.e., 0-4095) */
-double offset             = 2048; /* offset, in DAC units */
-
-/* This is the size of chunks we deal with when creating and
-   outputting data.  This *could* be 1, but that would be
-   inefficient */
-#define BUF_LEN 4096
-
-int subdevice;
-int external_trigger_number = 0;
-
-sampl_t data[BUF_LEN];
-
-void <link linkend="dds-output">dds_output</link>(sampl_t *buf,int n);
-void <link linkend="dds-init">dds_init</link>(void);
-
-/* This define determines which waveform to use. */
-#define <anchor id="dds-init-function"/>dds_init_function <link linkend="dds-init-sine">dds_init_sine</link>
-
-void <link linkend="dds-init-sine">dds_init_sine</link>(void);
-void <link linkend="dds-init-pseudocycloid">dds_init_pseudocycloid</link>(void);
-void <link linkend="dds-init-sawtooth">dds_init_sawtooth</link>(void);
-
-int <anchor id="comedi-internal-trigger"/>comedi_internal_trigger(<link linkend="ref-type-comedi-t">comedi_t</link> *dev, unsigned int subd, unsigned int trignum)
-{
-  <link linkend="ref-type-comedi-insn">comedi_insn</link> insn;
-  <link linkend="ref-type-lsampl-t">lsampl_t</link> data[1];
-
-  memset(<![CDATA[&insn]]>, 0, sizeof(<link linkend="ref-type-comedi-insn">comedi_insn</link>));
-  insn.insn = <link linkend="insn-inttrig">INSN_INTTRIG</link>;
-  insn.subdev = subd;
-  insn.data = data;
-  insn.n = 1;
-
-  data[0] = trignum;
-
-  return <link linkend="func-ref-comedi-do-insn">comedi_do_insn</link>(dev, <![CDATA[&insn]]>);
-}
-
-
-int main(int argc, char *argv[])
-{
-  <link linkend="ref-type-comedi-cmd">comedi_cmd</link> cmd;
-  int err;
-  int n,m;
-  int total=0;
-  <link linkend="ref-type-comedi-t">comedi_t</link> *dev;
-  unsigned int chanlist[16];
-  unsigned int maxdata;
-  <link linkend="ref-type-comedi-range">comedi_range</link> *rng;
-  int ret;
-  <link linkend="ref-type-lsampl-t">lsampl_t</link> insn_data = 0;
-
-  parse_options(argc,argv);
-
-  /* Force n_chan to be 1 */
-  n_chan = 2;
-
-  if(value){ waveform_frequency = value; }
-
-  dev = <link linkend="func-ref-comedi-open">comedi_open</link>(filename);
-  if(dev == NULL){
-    fprintf(stderr, "error opening %s\n", filename);
-    return -1;
-  }
-  subdevice = <link linkend="func-ref-comedi-find-subdevice-by-type">comedi_find_subdevice_by_type</link>(dev,COMEDI_SUBD_AO,0);
-
-  maxdata   = <link linkend="func-ref-comedi-get-maxdata">comedi_get_maxdata</link>(dev,subdevice,0);
-  rng       = <link linkend="func-ref-comedi-get-range">comedi_get_range</link>(dev,subdevice,0,0);
-  offset    = (double)<link linkend="func-ref-comedi-from-phys">comedi_from_phys</link>(0.0,rng,maxdata);
-  amplitude = (double)<link linkend="func-ref-comedi-from-phys">comedi_from_phys</link>(1.0,rng,maxdata) - offset;
-
-  memset(<![CDATA[&cmd]]>,0,sizeof(cmd));
-  /* fill in the <link linkend="ref-type-comedi-cmd">command data structure</link>: */
-  cmd.subdev         = subdevice;
-  cmd.flags          = 0;
-  cmd.start_src      = <link linkend="trig-int-start-src">TRIG_INT</link>;
-  cmd.start_arg      = 0;
-  cmd.scan_begin_src = <link linkend="trig-timer">TRIG_TIMER</link>;
-  cmd.scan_begin_arg = 1e9/freq;
-  cmd.convert_src    = <link linkend="trig-now">TRIG_NOW</link>;
-  cmd.convert_arg    = 0;
-  cmd.scan_end_src   = <link linkend="trig-count">TRIG_COUNT</link>;
-  cmd.scan_end_arg   = n_chan;
-  cmd.stop_src       = <link linkend="trig-none">TRIG_NONE</link>;
-  cmd.stop_arg       = 0;
-
-  cmd.chanlist       = chanlist;
-  cmd.chanlist_len   = n_chan;
-
-  chanlist[0] = <link linkend="ref-macro-CR-PACK">CR_PACK</link>(channel,range,aref);
-  chanlist[1] = <link linkend="ref-macro-CR-PACK">CR_PACK</link>(channel+1,range,aref);
-
-  <link linkend="dds-init">dds_init</link>();
-
-  <link linkend="dds-output">dds_output</link>(data,BUF_LEN);
-  <link linkend="dds-output">dds_output</link>(data,BUF_LEN);
-
-  dump_cmd(stdout,&amp;cmd);
-
-  if ((err = <link linkend="func-ref-comedi-command">comedi_command</link>(dev, &amp;cmd)) &lt; 0) {
-    <link linkend="func-ref-comedi-perror">comedi_perror</link>("comedi_command");
-    exit(1);
-  }
-
-  m=write(comedi_fileno(dev),data,BUF_LEN*sizeof(sampl_t));
-  if(m &lt; 0){
-    perror("write");
-    exit(1);
-  }
-  printf("m=%d\n",m);
-
-  ret = <link linkend="comedi-internal-trigger">comedi_internal_trigger</link>(dev, subdevice, 0);
-  if(ret &lt; 0){
-    perror("comedi_internal_trigger\n");
-    exit(1);
-  }
-
-  while(1){
-    <link linkend="dds-output">dds_output</link>(data,BUF_LEN);
-    n=BUF_LEN*sizeof(sampl_t);
-    while(n>0){
-      m=write(comedi_fileno(dev),(void *)data+(BUF_LEN*sizeof(sampl_t)-n),n);
-      if(m &lt; 0){
-        perror("write");
-        exit(0);
-      }
-      printf("m=%d\n",m);
-      n-=m;
-    }
-    total+=BUF_LEN;
-  }
-
-  return 0;
-}
-
-#define WAVEFORM_SHIFT 16
-#define WAVEFORM_LEN (1 &lt;&lt; WAVEFORM_SHIFT)
-#define WAVEFORM_MASK (WAVEFORM_LEN - 1)
-
-sampl_t waveform[WAVEFORM_LEN];
-
-unsigned int acc;
-unsigned int adder;
-
-void <anchor id="dds-init"/>dds_init(void)
-{
-<![CDATA[
-  adder=waveform_frequency/freq*(1<<16)*(1<<WAVEFORM_SHIFT);
-]]>
-
-  <link linkend="dds-init-function">dds_init_function</link>();
-}
-
-void <anchor id="dds-output"/>dds_output(sampl_t *buf,int n)
-{
-  int i;
-  sampl_t *p=buf;
-
-  <![CDATA[
-  for(i=0;i<n;i++){
-  *p=waveform[(acc>>16)&WAVEFORM_MASK];
-  ]]>
-  p++;
-  acc+=adder;
-  }
-}
-
-
-void <anchor id="dds-init-sine"/>dds_init_sine(void)
-{
-  int i;
-
-  <![CDATA[
-  for(i=0;i<WAVEFORM_LEN;i++){
-  waveform[i]=rint(offset+0.5*amplitude*cos(i*2*M_PI/WAVEFORM_LEN));
-  ]]>
-  }
-}
-
-/* Yes, I know this is not the proper equation for a cycloid.  Fix it. */
-void <anchor id="dds-init-pseudocycloid"/>dds_init_pseudocycloid(void)
-{
-  int i;
-  double t;
-
-  <![CDATA[
-  for(i=0;i<WAVEFORM_LEN/2;i++){
-  t=2*((double)i)/WAVEFORM_LEN;
-  waveform[i]=rint(offset+amplitude*sqrt(1-4*t*t));
-  }
-  for(i=WAVEFORM_LEN/2;i<WAVEFORM_LEN;i++){
-  t=2*(1-((double)i)/WAVEFORM_LEN);
-  waveform[i]=rint(offset+amplitude*sqrt(1-t*t));
-  }
-  ]]>
-}
-
-void <anchor id="dds-init-sawtooth"/>dds_init_sawtooth(void)
-{
-  int i;
-
-  <![CDATA[
-  for(i=0;i<WAVEFORM_LEN;i++){
-  waveform[i]=rint(offset+amplitude*((double)i)/WAVEFORM_LEN);
-  ]]>
-  }
-}
-</programlisting>
-</para>
-
-</section>
-
 </section>
 
