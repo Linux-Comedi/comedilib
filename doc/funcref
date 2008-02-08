@@ -2,9 +2,10 @@ Function: comedi_close -- close a Comedi device
 Retval: int
 Param: comedi * device
 Description:
- Close a device previously opened by comedi_open().
+ Close a device previously opened by
+ <link linkend="func-ref-comedi-open"><function>comedi_open</function></link>.
 Returns:
- If sucessful, comedi_close returns 0.  On failure, -1 is returned.
+ If successful, comedi_close returns 0.  On failure, -1 is returned.
 
 Function: comedi_data_read -- read single sample from channel
 Retval: int
@@ -16,34 +17,40 @@ Param: unsigned int aref
 Param: lsampl_t * data
 Description:
  Reads a single sample on the channel specified by the Comedi
- device device, the subdevice subdevice, and the channel channel.
+ device <parameter>device</parameter>, the subdevice
+ <parameter>subdevice</parameter>, and the channel
+ <parameter>channel</parameter>.
  For the A/D conversion (if appropriate),
  the device is configured to use range specification
- range and (if appropriate) analog reference type
- aref. Analog reference types that are not supported
+ <parameter>range</parameter> and (if appropriate) analog reference type
+ <parameter>aref</parameter>. Analog reference types that are not supported
  by the device are silently ignored.
 
  The function comedi_data_read() reads one data value from
- the specified channel and places the data value in the
- location pointed to by data.
+ the specified channel and stores the value in
+ <parameter>*data</parameter>.
 
  WARNING: comedi_data_read() does not do any pausing to
  allow multiplexed analog inputs to settle before
- performing an analog to digital conversion.  If you are
+ starting an analog to digital conversion.  If you are
  switching between different channels and need to allow
  your analog input to settle for an accurate reading,
- use comedi_data_read_delayed(), or set the
+ use
+ <link linkend="func-ref-comedi-data-read-delayed"><function>comedi_data_read_delayed</function></link>,
+ or set the
  input channel at an earlier time with
- comedi_data_read_hint().
-
- On sucess, comedi_data_read() returns 1 (the number of samples
- read).  If there is an error, -1 is returned.
+ <link linkend="func-ref-comedi-data-read-hint"><function>comedi_data_read_hint</function></link>.
 
  Data values returned by this function are unsigned integers
  less than or equal to the maximum sample value of the channel,
- which can be determined using the function comedi_get_maxdata().
+ which can be determined using the function
+ <link linkend="func-ref-comedi-get-maxdata"><function>comedi_get_maxdata</function></link>.
  Conversion of data values to physical units can be performed
- by the function comedi_to_phys().
+ by the function
+ <link linkend="func-ref-comedi-to-physical"><function>comedi_to_physical</function></link>.
+Returns:
+ On success, comedi_data_read() returns 1 (the number of samples
+ read).  If there is an error, -1 is returned.
 
 Function: comedi_data_read_delayed -- read single sample from channel after delaying for specified settling time
 Retval: int
@@ -55,7 +62,9 @@ Param: unsigned int aref
 Param: lsampl_t * data
 Param: unsigned int nanosec
 Description:
- Similar to comedi_data_read() except it will wait for the
+ Similar to
+ <link linkend="func-ref-comedi-data-read"><function>comedi_data_read</function></link>
+ except it will wait for the
  specified number of nanoseconds between setting the input
  channel and taking a sample.  For analog inputs, most
  boards have a single
@@ -79,7 +88,8 @@ Param: unsigned int range
 Param: unsigned int aref
 Description:
  Used to prepare an analog input for a subsequent call to
- comedi_data_read().  It is not necessary to use this
+ <link linkend="func-ref-comedi-data-read"><function>comedi_data_read</function></link>.
+ It is not necessary to use this
  function, but it can be useful for eliminating inaccuaracies
  caused by insufficient settling times when switching the
  channel
@@ -87,7 +97,8 @@ Description:
  to the channel, range, and aref specified but does not
  perform an actual analog to digital conversion.
 
- Alternatively, one can simply use comedi_data_read_delayed(),
+ Alternatively, one can simply use
+ <link linkend="func-ref-comedi-data-read-delayed"><function>comedi_data_read_delayed</function></link>,
  which sets up the
  input, pauses to allow settling, then performs a conversion.
 
@@ -101,16 +112,19 @@ Param: unsigned int aref
 Param: lsampl_t data
 Description:
  Writes a single sample on the channel that is specified by the
- Comedi device device, the subdevice subdevice, and the channel
- channel.  If appropriate, the device is configured to use range
- specification range and analog reference type aref.  Analog
+ Comedi device <parameter>device</parameter>, the subdevice
+ <parameter>subdevice</parameter>, and the channel
+ <parameter>channel</parameter>.  If appropriate, the device is
+ configured to use range
+ specification <parameter>range</parameter> and analog
+ reference type <parameter>aref</parameter>.  Analog
  reference types that are not supported by the device are
  silently ignored.
 
  The function comedi_data_write() writes the data value specified
- by the parameter data to the specified channel.
-
- On sucess, comedi_data_write() returns 1 (the number of samples
+ by the parameter <parameter>data</parameter> to the specified channel.
+Returns:
+ On success, comedi_data_write() returns 1 (the number of samples
  written).  If there is an error, -1 is returned.
 
 Function: comedi_do_insn -- perform instruction
@@ -119,11 +133,12 @@ Param: comedi_t * device
 Param: comedi_insn * instruction
 Description:
  The function comedi_do_insn() performs a single instruction.
- If sucessful, comedi_do_insn() returns the number of samples
- measured, which may be less than the number of requested
- samples.  Comedi limits the number of requested samples in
- order to enforce fairness among processes.  If there is an
- error, -1 is returned.
+Returns:
+ If successful, returns a non-negative number.  For the case
+ of INSN_READ or INSN_WRITE instructions,
+ <function>comedi_do_insn</function> returns the number of samples
+ read or written, which may be less than the number requested.
+ If there is an error, -1 is returned.
 
 Function: comedi_do_insnlist -- perform multiple instructions
 Retval: int
@@ -131,37 +146,32 @@ Param: comedi_t * device
 Param: comedi_insnlist * list
 Description:
  The function comedi_do_insnlist() performs multiple Comedi
- instructions as part of one system call.  In addition, Comedi
- attempts to perform the instructions atomically, that is, on
- standard Linux kernels, no process preemption should occur
- during the instructions.  However, the process may be preempted
- before or after the group of instructions.
-
- This function can be used to avoid the overhead of multiple
- system calls, or to ensure that multiple instructions occur
- without significant delay between them.
-
- Preemption may occur if any of the instructions or the data
- arrays of any of the instructions exist in non-resident or
- copy-on-write pages.
+ instructions as part of one system call. This function
+ can be used to avoid the overhead of multiple
+ system calls.
 Returns:
  The function comedi_do_insnlist() returns the number of
- sucessfully completed instructions.  Error information for
- the unsucessful instruction is not available.  If there is
+ successfully completed instructions.  Error information for
+ the unsuccessful instruction is not available.  If there is
  an error before the first instruction can be executed, -1
  is returned.
 
-Function: comedi_fileno -- integer descriptor of Comedilib device
+Function: comedi_fileno -- get file descriptor for open Comedilib device
 Retval: int
 Param: comedi_t * device
 Description:
- The function comedi_fileno returns the integer descriptor for
+ The function comedi_fileno returns the file descriptor for
  the device dev.  This descriptor can then be used as the
  file descriptor parameter of read(), write(), etc.
  This function is intended to mimic the standard C library
- function fileno().  If dev is an invalid comedi_t
- pointer, the function returns -1 and sets the appropriate
- Comedilib error value.
+ function fileno().
+
+ The returned file descriptor should not be closed, and will
+ become invalid when
+ <link linkend="func-ref-comedi-close"><function>comedi_close</function></link>
+ is called on <parameter>device</parameter>.
+Returns:
+ A file descriptor, or -1 on error.
 
 Function: comedi_find_range -- search for range
 Retval: int
@@ -173,9 +183,11 @@ Param: double min
 Param: double max
 Description:
  The function comedi_find_range() tries to
- locate the optimal (smallest) range for the channel chan
- belonging to a subdevice of the comedi device device,
- that includes both min and max in units.
+ locate the optimal (smallest) range for the channel <parameter>channel</parameter>
+ belonging to a subdevice of the comedi device <parameter>device</parameter>,
+ that includes both <parameter>min</parameter> and <parameter>max</parameter> in
+ units of <parameter>unit</parameter>.
+Returns:
  If a matching range is found, the index of the matching range is
  returned.  If no matching range is available, the function returns
  -1.
@@ -186,13 +198,16 @@ Param: comedi_t * device
 Param: int type
 Param: unsigned int start_subdevice
 Description:
- The function comedi_find_subdevice_by_type() tries to
- locate a subdevice belonging to comedi device device,
- having type type, starting with the subdevice
- start_subdevice.  If it finds a subdevice with the requested
- type, it returns its index.  If it does not locate the requested
- subdevice, it returns -1 and sets the Comedilib error number to
- XXX "subdevice not found".  If there is an error, the function
+ The function <function>comedi_find_subdevice_by_type</function> tries to
+ locate a subdevice belonging to comedi device <parameter>device</parameter>,
+ having type <parameter>type</parameter>, starting with the subdevice
+ <parameter>start_subdevice</parameter>. The
+ <link linkend="ref-enum-comedi-subdevice-type">comedi_subdevice_type</link> enum
+ specifies the possible subdevice types.
+
+Returns:
+ If it finds a subdevice with the requested
+ type, it returns its index.  If there is an error, the function
  returns -1 and sets the appropriate error.
 
 Function: comedi_from_physical -- convert physical units to sample
@@ -203,14 +218,18 @@ Description:
  Converts <parameter>data</parameter> given in physical units into Comedi's
  integer sample values
  (lsampl_t, between 0 and maxdata).  The <parameter>conversion_polynomial</parameter>
- parameter is obtained from either comedi_get_hardcal_converter()
- or comedi_get_softcal_converter().  The result will be rounded
+ parameter is obtained from either
+ <link linkend="func-ref-comedi-get-hardcal-converter"><function>comedi_get_hardcal_converter</function></link> or
+ <link linkend="func-ref-comedi-get-softcal-converter"><function>comedi_get_softcal_converter</function></link>.
+ The result will be rounded
  using the C library's current rounding direction.
  No range checking of the input
  <parameter>data</parameter> is performed.  It is up to you to insure
  your data is within the limits of the output range you are using.
 
- This function is intended to supplant comedi_from_phys(), and was
+ This function is intended to supplant
+ <link linkend="func-ref-comedi-from-phys"><function>comedi_from_phys</function></link>,
+ and was
  introduced in order to support software calibrations.
 Returns:
  Comedi sample value corresponding to input physical value.
@@ -272,7 +291,7 @@ Retval: int
 Param: comedi_t * device
 Description:
  Returns the number of subdevices belonging to the Comedi
- device referenced by the parameter device.
+ device referenced by the parameter device, or -1 on error.
 
 Function: comedi_get_range -- range information of channel
 Retval: comedi_range *
@@ -282,10 +301,13 @@ Param: unsigned int channel
 Param: unsigned int range
 Description:
  The function comedi_get_range() returns a pointer to a
- comedi_range structure that contains information that can be used to
- convert sample values to or from physical units.  The pointer is valid
- until the Comedi device device is closed.  If there is an
- error, NULL is returned.
+ <link linkend="ref-type-comedi-range">comedi_range</link>
+ structure that contains information on
+ the range specified by the <parameter>subdevice</parameter>,
+ <parameter>channel</parameter>, and <parameter>range</parameter>
+ parameters.
+ The pointer is valid until the Comedi device device is closed.
+ If there is an error, NULL is returned.
 
 Function: comedi_get_subdevice_flags -- properties of subdevice
 Retval: int
@@ -436,10 +458,13 @@ Param: unsigned int subdevice
 Description:
  The function comedi_get_subdevice_type() returns an
  integer describing the type of subdevice that belongs to the comedi
- device device and has the index subdevice.  The
- function returns -1 if there is an error.
-
- XXX Subdevice type table
+ device <parameter>device</parameter> and has the index
+ <parameter>subdevice</parameter>.  The
+ <link linkend="ref-enum-comedi-subdevice-type">comedi_subdevice_type</link> enum
+ specifies the possible values for the subdevice type.
+Returns:
+ The function returns the subdevice type, or
+ -1 if there is an error.
 
 Function: comedi_get_version_code -- Comedi version code
 Retval: int
@@ -484,10 +509,13 @@ Description:
  current process.  While the lock is held, no other process is
  allowed to read, write, or configure that subdevice, although
  other processes can read information about the subdevice.  The
- lock is released when comedi_unlock() is called, or the device
- is closed.
+ lock is released by
+ <link linkend="func-ref-comedi-unlock"><function>comedi_unlock</function></link>,
+ or when
+ <link linkend="func-ref-comedi-close"><function>comedi_close</function></link>
+ is called on <parameter>device</parameter>.
 Returns:
- If sucessful, 0 is returned.  If there is an error,
+ If successful, 0 is returned.  If there is an error,
  -1 is returned.
 
 Function: comedi_maxdata_is_chan_specific -- maximum sample depends on channel
@@ -495,7 +523,7 @@ Retval: int
 Param: comedi_t * device
 Param: unsigned int subdevice
 Description:
- If each channel of the specified subdevice has different maximum
+ If each channel of the specified subdevice may have different maximum
  sample values, this function returns 1.  Otherwise, this function
  returns 0.  On error, this function returns -1.
 
@@ -505,7 +533,7 @@ Param: const char * filename
 Description:
  Open a Comedi device specified by the file filename.
 Returns:
- If sucessful, comedi_open returns a pointer to a valid comedi_t
+ If successful, comedi_open returns a pointer to a valid comedi_t
  structure.  This structure is transparent; the pointer should not
  be dereferenced by the application.  NULL is returned on failure.
 
@@ -514,24 +542,9 @@ Retval: int
 Param: comedi_t * device
 Param: unsigned int subdevice
 Description:
- If each channel of the specified subdevice has different range
+ If each channel of the specified subdevice may have different range
  information, this function returns 1.  Otherwise, this function
  returns 0.  On error, this function returns -1.
-
-Function: comedi_set_global_oor_behavior -- out-of-range behavior
-Retval: int
-Param: enum comedi_oor_behavior behavior
-Status: alpha
-Description:
- This function changes the Comedilib out-of-range behavior.
- This currently affects the behavior of comedi_to_phys() when
- converting endpoint sample values, that is, sample values
- equal to 0 or maxdata.  If the out-of-range behavior is set to
- COMEDI_OOR_NAN, endpoint values are converted to NAN.  If the
- out-of-range behavior is set to COMEDI_OOR_NUMBER, the endpoint
- values are converted similarly to other values.
-
- The previous out-of-range behavior is returned.
 
 Function: comedi_to_physical -- convert sample to physical units
 Retval: double
@@ -542,14 +555,17 @@ Description:
  sample values (lsampl_t, between 0 and
  maxdata) into physical units (double).  The
  <parameter>conversion_polynomial</parameter>
- parameter is obtained from either comedi_get_hardcal_converter()
- or comedi_get_softcal_converter().  No range checking of the
+ parameter is obtained from either
+ <link linkend="func-ref-comedi-get-hardcal-converter"><function>comedi_get_hardcal_converter</function></link> or
+ <link linkend="func-ref-comedi-get-softcal-converter"><function>comedi_get_softcal_converter</function></link>.
+ No range checking of the
  input <parameter>data</parameter> is performed.  It is up to
  you to check for <parameter>data</parameter> values of
  0 or maxdata if you want to detect possibly out-of-range readings.
 
- This function is intended to supplant comedi_to_phys(), and was
- introduced in order to support software calibrations.
+ This function is intended to supplant
+ <link linkend="func-ref-comedi-to-phys"><function>comedi_to_phys</function></link>,
+ and was introduced in order to support software calibrations.
 Returns:
  Physical value corresponding to the input sample value.
 
@@ -558,6 +574,9 @@ Retval: int
 Param: comedi_t * device
 Param: unsigned int subdevice
 Description:
- The function comedi_unlock() released a subdevice lock acquired
- by comedi_lock().  If sucessful, 0 is returned, otherwise -1.
+ The function comedi_unlock() releases a subdevice locked
+ by
+ <link linkend="func-ref-comedi-lock"><function>comedi_lock</function></link>.
+Returns:
+ Zero on success, otherwise -1.
 
