@@ -64,7 +64,7 @@ Param: double * data
 Status: deprecated
 Description:
  The function comedi_sv_measure() uses the slowly varying Comedi
- structure sv to measure a slowly varying signal.  If sucessful,
+ structure sv to measure a slowly varying signal.  If successful,
  the result (in physical units) is stored in the location pointed
  to by data, and the number of samples is returned.  On error, -1
  is returned.

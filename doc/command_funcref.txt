@@ -9,7 +9,7 @@ Description:
  This may not return the subdevice to a ready state, since there may
  be samples in the buffer that need to be read.
 
- If sucessful, 0 is returned, otherwise -1.
+ If successful, 0 is returned, otherwise -1.
 
 Function: comedi_command -- start streaming input/output
 Retval: int
@@ -24,7 +24,7 @@ Description:
  function read().  For output subdevices, sample values are written
  using the function write().
 
- If sucessful, 0 is returned, otherwise -1.
+ If successful, 0 is returned, otherwise -1.
 
 Function: comedi_command_test -- test streaming input/output configuration
 Retval: int
@@ -33,7 +33,7 @@ Param: comedi_cmd * command
 Description:
  The function comedi_command_test() tests the command structure pointed
  to by the parameter command and returns an integer describing the
- testing stages that were sucessfully passed.  In addition, if elements
+ testing stages that were successfully passed.  In addition, if elements
  of the command structure are invalid, they may be modified.  Source
  elements are modified to remove invalid source triggers.  Argument
  elements are adjusted or rounded to the nearest valid value.
@@ -115,7 +115,7 @@ Description:
  The command measures scans consisting of chanlist_len channels
  at a scan rate that corresponds to the
  period scan_period_ns.  The rate is adjusted to a rate that the device
- can handle.  If sucessful, 0 is returned, otherwise -1.
+ can handle.  If successful, 0 is returned, otherwise -1.
 
 Function: comedi_get_cmd_src_mask -- streaming input/output capabilities
 Retval: int
@@ -128,7 +128,7 @@ Description:
  command structure pointed to by the parameter command.  The trigger
  source elements of the command structure are set to the logical OR
  value of possible trigger sources.  Other elements in the structure
- are undefined.  If sucessful, 0 is returned, otherwise -1.
+ are undefined.  If successful, 0 is returned, otherwise -1.
 
 Function: comedi_get_max_buffer_size -- maximum streaming buffer size
 Retval: int
@@ -202,7 +202,7 @@ Description:
  Comedi command in progress in order to update the streaming buffer.
  If supported by the driver, all available samples are copied to
  the streaming buffer.  These samples may be pending in DMA buffers
- or device FIFOs.  If sucessful, the number of additional bytes
+ or device FIFOs.  If successful, the number of additional bytes
  available is returned.  If there is an error, -1 is returned.
 
 Function: comedi_set_buffer_size -- streaming buffer size of subdevice
@@ -228,5 +228,5 @@ Description:
  The function comedi_set_max_buffer_size() changes the maximum
  allowable size (in bytes) of the streaming buffer for the subdevice
  specified by device and subdevice.  Changing the maximum buffer
- size requires appropriate privileges.  If sucessful, the old buffer
+ size requires appropriate privileges.  If successful, the old buffer
  size is returned.  On error, -1 is returned.

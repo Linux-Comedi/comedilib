@@ -44,7 +44,7 @@ Description:
  case, a single call to comedi_dio_config() for any channel in the
  group will affect the entire group.
 
- If sucessful, 1 is returned, otherwise -1.
+ If successful, 1 is returned, otherwise -1.
 
 Function: comedi_dio_get_config -- query input/output properties of channel
 Retval: int
@@ -59,7 +59,7 @@ Description:
  On success, the variable specified by the "direction" pointer will
  be set to either COMEDI_INPUT or COMEDI_OUTPUT.
 
- If sucessful, 0 is returned, otherwise -1.
+ If successful, 0 is returned, otherwise -1.
 
 Function: comedi_dio_read -- read single bit from digital channel
 Retval: int
