@@ -7,7 +7,7 @@
 
 <section id="comedireference" xmlns:xi="http://www.w3.org/2001/XInclude">
 	<title>
-		&comedi; Reference
+		&comedi; reference
 	</title>
 
 <section id="comedi-comedilib-h">
@@ -29,7 +29,7 @@ The following Sections give more details.
 
 <section id="constantsmacros">
 <title>
-Constants and Macros
+Constants and macros
 </title>
 
 <section id="ref-macro-CR-PACK">
@@ -190,7 +190,7 @@ a subdevice type.  These values are used by the functions
 
 <section id="datatypesstructures">
 <title>
-Data Types and Structures
+Data types and structures
 </title>
 <para>
 This Section explains the data structures that users of the &comedi;
@@ -681,7 +681,7 @@ a list of instructions.
 			<xi:include href="funcref.xml"/>
 		</section>
 		<section>
-			<title>Asyncronous Commands</title>
+			<title>Asyncronous commands</title>
 			<xi:include href="command_funcref.xml"/>
 		</section>
 		<section>
@@ -693,7 +693,7 @@ a list of instructions.
 			<xi:include href="dio_funcref.xml"/>
 		</section>
 		<section>
-			<title>Error Reporting</title>
+			<title>Error reporting</title>
 			<xi:include href="error_funcref.xml"/>
 		</section>
 		<section>
@@ -705,4 +705,5 @@ a list of instructions.
 			<xi:include href="deprecated_funcref.xml"/>
 		</section>
 	</section>
+	<xi:include href="drivers.xml"/>
 </section>
