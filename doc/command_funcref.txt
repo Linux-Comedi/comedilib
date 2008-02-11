@@ -3,12 +3,13 @@ Retval: int
 Param: comedi_t * device
 Param: unsigned int subdevice
 Description:
- The function comedi_cancel() can be used to stop a Comedi command
- previously started by comedi_command() that is still in progress
- on the subdevice indicated by the parameters device and subdevice.
- This may not return the subdevice to a ready state, since there may
- be samples in the buffer that need to be read.
-
+ The function comedi_cancel() can be used to stop a command
+ previously started by
+ <link linkend="func-ref-comedi-command"><function>comedi_command</function></link>
+ which is still in progress
+ on the subdevice indicated by the parameters <parameter>device</parameter>
+ and <parameter>subdevice</parameter>.
+Returns:
  If successful, 0 is returned, otherwise -1.
 
 Function: comedi_command -- start streaming input/output
