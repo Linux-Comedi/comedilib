@@ -55,7 +55,7 @@ while($s = <>){
     <funcsynopsis>
       <funcsynopsisinfo>$header</funcsynopsisinfo>
       <funcprototype>
-        <funcdef>$1 <function>$funcname</function></funcdef>
+        <funcdef><type>$1</type> <function>$funcname</function></funcdef>
 ";
 		$end =
 "      </funcprototype>
@@ -66,7 +66,7 @@ while($s = <>){
 		$p = $1;
 		$p =~ m/(.*) (.*)/;
 		print
-"        <paramdef>$1 <parameter>$2</parameter></paramdef>
+"        <paramdef><type>$1</type> <parameter>$2</parameter></paramdef>
 "
 	}elsif($s =~ m/^Description:/){
 		print $end;
