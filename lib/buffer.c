@@ -34,7 +34,6 @@ int _comedi_set_buffer_size(comedi_t *it, unsigned int subdev, unsigned int size
 	bc.subdevice = subdev;
 	bc.size = size;
 	ret = comedi_ioctl(it->fd, COMEDI_BUFCONFIG, (unsigned long)&bc);
-	__comedi_errno = errno;
 	if(ret < 0) return ret;
 
 	return bc.size;
@@ -50,7 +49,6 @@ int _comedi_set_max_buffer_size(comedi_t *it, unsigned int subdev, unsigned int 
 	bc.subdevice = subdev;
 	bc.maximum_size = max_size;
 	ret = comedi_ioctl(it->fd, COMEDI_BUFCONFIG, (unsigned long)&bc);
-	__comedi_errno = errno;
 	if(ret < 0) return ret;
 
 	return bc.maximum_size;
@@ -71,7 +69,18 @@ int _comedi_get_buffer_size(comedi_t *it, unsigned int subdev)
 EXPORT_ALIAS_DEFAULT(_comedi_get_buffer_contents,comedi_get_buffer_contents,0.7.18);
 int _comedi_get_buffer_contents(comedi_t *it, unsigned int subdev)
 {
-	return comedi_mark_buffer_read(it, subdev, 0);
+	int ret;
+	comedi_bufinfo bi;
+
+	memset(&bi, 0, sizeof(bi));
+	bi.subdevice = subdev;
+	ret = comedi_ioctl(it->fd, COMEDI_BUFINFO, (unsigned long)&bi);
+	if(ret < 0)
+	{
+		if(__comedi_errno == EPIPE)__comedi_errno = EBUF_OVR;
+		return ret;
+	}
+	return bi.buf_write_count - bi.buf_read_count;
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_mark_buffer_read,comedi_mark_buffer_read,0.7.18);
@@ -86,11 +95,10 @@ int _comedi_mark_buffer_read(comedi_t *it, unsigned int subdev, unsigned int byt
 	ret = comedi_ioctl(it->fd, COMEDI_BUFINFO, (unsigned long)&bi);
 	if(ret < 0)
 	{
-		__comedi_errno = errno;
 		if(__comedi_errno == EPIPE)__comedi_errno = EBUF_OVR;
-		return ret;
+		return -1;
 	}
-	return bi.buf_write_count - bi.buf_read_count;
+	return bi.bytes_read;
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_mark_buffer_written,comedi_mark_buffer_written,0.8.0);
@@ -105,11 +113,10 @@ int _comedi_mark_buffer_written(comedi_t *it, unsigned int subdev, unsigned int 
 	ret = comedi_ioctl(it->fd, COMEDI_BUFINFO, (unsigned long)&bi);
 	if(ret < 0)
 	{
-		__comedi_errno = errno;
 		if(__comedi_errno == EPIPE)__comedi_errno = EBUF_UNDR;
-		return ret;
+		return -1;
 	}
-	return bi.buf_write_count - bi.buf_read_count;
+	return bi.bytes_written;
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_get_buffer_offset,comedi_get_buffer_offset,0.7.18);
