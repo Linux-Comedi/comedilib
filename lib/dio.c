@@ -35,9 +35,10 @@
 
 
 EXPORT_ALIAS_DEFAULT(_comedi_dio_config,comedi_dio_config,0.7.18);
-int _comedi_dio_config(comedi_t *it,unsigned int subdev,unsigned int chan,unsigned int io)
+int _comedi_dio_config(comedi_t *it, unsigned int subdev, unsigned int chan, unsigned int io)
 {
 	subdevice *s;
+	enum configuration_ids config_id;
 
 	if(!valid_chan(it,subdev,chan))
 		return -1;
@@ -47,13 +48,21 @@ int _comedi_dio_config(comedi_t *it,unsigned int subdev,unsigned int chan,unsign
 		internal_error(EINVAL_SUBD);
 		return -1;
 	}
-	if(io!=COMEDI_INPUT && io!=COMEDI_OUTPUT){
+	switch(io)
+	{
+	case COMEDI_INPUT:
+		config_id = INSN_CONFIG_DIO_INPUT;
+		break;
+	case COMEDI_OUTPUT:
+		config_id = INSN_CONFIG_DIO_OUTPUT;
+		break;
+	default:
 		internal_error(EINVAL);
 		return -1;
 	}
 	if(it->has_insnlist_ioctl){
 		comedi_insn insn;
-		lsampl_t data;
+		lsampl_t data = config_id;
 
 		memset(&insn,0,sizeof(insn));
 		insn.insn = INSN_CONFIG;
@@ -61,13 +70,13 @@ int _comedi_dio_config(comedi_t *it,unsigned int subdev,unsigned int chan,unsign
 		insn.data = &data;
 		insn.subdev = subdev;
 		insn.chanspec = CR_PACK(chan,0,0);
-		data=io;
 
-		return comedi_do_insn(it,&insn);
+		if(comedi_do_insn(it,&insn) < 0) return -1;
+		else return 0;
 	}else
 	{
 		comedi_trig trig;
-		sampl_t data=io;
+		sampl_t data = config_id;
 
 		memset(&trig,0,sizeof(trig));
 		trig.flags=TRIG_CONFIG|TRIG_WRITE;
@@ -77,7 +86,8 @@ int _comedi_dio_config(comedi_t *it,unsigned int subdev,unsigned int chan,unsign
 		trig.chanlist=&chan;
 		trig.data=&data;
 
-		return comedi_trigger(it,&trig);
+		if(comedi_trigger(it,&trig) < 0) return -1;
+		else return 0;
 	}
 }
 
