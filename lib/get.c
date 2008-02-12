@@ -93,7 +93,7 @@ int _comedi_get_subdevice_flags(comedi_t *it,unsigned int subd)
 		libc_error();
 		return -1;
 	}
-	ret = comedi_ioctl(it->fd, COMEDI_SUBDINFO, (unsigned long)s);
+	ret = comedi_ioctl(it->fd, COMEDI_SUBDINFO, s);
 	if(ret < 0)
 	{
 		free(s);

@@ -33,7 +33,7 @@ int _comedi_set_buffer_size(comedi_t *it, unsigned int subdev, unsigned int size
 	memset(&bc, 0, sizeof(bc));
 	bc.subdevice = subdev;
 	bc.size = size;
-	ret = comedi_ioctl(it->fd, COMEDI_BUFCONFIG, (unsigned long)&bc);
+	ret = comedi_ioctl(it->fd, COMEDI_BUFCONFIG, &bc);
 	if(ret < 0) return ret;
 
 	return bc.size;
@@ -48,7 +48,7 @@ int _comedi_set_max_buffer_size(comedi_t *it, unsigned int subdev, unsigned int 
 	memset(&bc, 0, sizeof(bc));
 	bc.subdevice = subdev;
 	bc.maximum_size = max_size;
-	ret = comedi_ioctl(it->fd, COMEDI_BUFCONFIG, (unsigned long)&bc);
+	ret = comedi_ioctl(it->fd, COMEDI_BUFCONFIG, &bc);
 	if(ret < 0) return ret;
 
 	return bc.maximum_size;
@@ -74,7 +74,7 @@ int _comedi_get_buffer_contents(comedi_t *it, unsigned int subdev)
 
 	memset(&bi, 0, sizeof(bi));
 	bi.subdevice = subdev;
-	ret = comedi_ioctl(it->fd, COMEDI_BUFINFO, (unsigned long)&bi);
+	ret = comedi_ioctl(it->fd, COMEDI_BUFINFO, &bi);
 	if(ret < 0)
 	{
 		if(__comedi_errno == EPIPE)__comedi_errno = EBUF_OVR;
@@ -92,7 +92,7 @@ int _comedi_mark_buffer_read(comedi_t *it, unsigned int subdev, unsigned int byt
 	memset(&bi, 0, sizeof(bi));
 	bi.subdevice = subdev;
 	bi.bytes_read = bytes;
-	ret = comedi_ioctl(it->fd, COMEDI_BUFINFO, (unsigned long)&bi);
+	ret = comedi_ioctl(it->fd, COMEDI_BUFINFO, &bi);
 	if(ret < 0)
 	{
 		if(__comedi_errno == EPIPE)__comedi_errno = EBUF_OVR;
@@ -110,7 +110,7 @@ int _comedi_mark_buffer_written(comedi_t *it, unsigned int subdev, unsigned int 
 	memset(&bi, 0, sizeof(bi));
 	bi.subdevice = subdev;
 	bi.bytes_written = bytes;
-	ret = comedi_ioctl(it->fd, COMEDI_BUFINFO, (unsigned long)&bi);
+	ret = comedi_ioctl(it->fd, COMEDI_BUFINFO, &bi);
 	if(ret < 0)
 	{
 		if(__comedi_errno == EPIPE)__comedi_errno = EBUF_UNDR;
@@ -127,7 +127,7 @@ int _comedi_get_buffer_offset(comedi_t *it, unsigned int subdev)
 
 	memset(&bi, 0, sizeof(bi));
 	bi.subdevice = subdev;
-	ret = comedi_ioctl(it->fd, COMEDI_BUFINFO, (unsigned long)&bi);
+	ret = comedi_ioctl(it->fd, COMEDI_BUFINFO, &bi);
 	if(ret < 0) return ret;
 	return bi.buf_read_ptr;
 }
@@ -140,7 +140,7 @@ int _comedi_get_front_count(comedi_t *it, unsigned int subdev)
 
 	memset(&bi, 0, sizeof(bi));
 	bi.subdevice = subdev;
-	ret = comedi_ioctl(it->fd, COMEDI_BUFINFO, (unsigned long)&bi);
+	ret = comedi_ioctl(it->fd, COMEDI_BUFINFO, &bi);
 	if(ret < 0) return ret;
 	return bi.buf_write_count;
 }

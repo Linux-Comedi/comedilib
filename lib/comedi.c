@@ -65,7 +65,7 @@ comedi_t* _comedi_open(const char *fn)
 		goto cleanup;
 	}
 
-	if(comedi_ioctl(it->fd, COMEDI_DEVINFO, (unsigned long)&it->devinfo)<0)
+	if(comedi_ioctl(it->fd, COMEDI_DEVINFO, &it->devinfo) < 0)
 		goto cleanup;
 
 	it->n_subdevices=it->devinfo.n_subdevs;
@@ -124,13 +124,13 @@ int _comedi_close(comedi_t *it)
 EXPORT_ALIAS_DEFAULT(_comedi_cancel,comedi_cancel,0.7.18);
 int _comedi_cancel(comedi_t *it,unsigned int subdevice)
 {
-	return comedi_ioctl(it->fd,COMEDI_CANCEL,subdevice);
+	return comedi_ioctl(it->fd, COMEDI_CANCEL, (void*)subdevice);
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_poll,comedi_poll,0.7.18);
 int _comedi_poll(comedi_t *it,unsigned int subdevice)
 {
-	return comedi_ioctl(it->fd,COMEDI_POLL,subdevice);
+	return comedi_ioctl(it->fd, COMEDI_POLL, (void*)subdevice);
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_fileno,comedi_fileno,0.7.18);
@@ -148,14 +148,14 @@ int _comedi_trigger(comedi_t *it,comedi_trig *t)
 	if(!it || !t)
 		return -1;
 
-	return comedi_ioctl(it->fd, COMEDI_TRIG, (unsigned long)t);
+	return comedi_ioctl(it->fd, COMEDI_TRIG, t);
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_command,comedi_command,0.7.18);
 int _comedi_command(comedi_t *it,comedi_cmd *t)
 {
 	int ret;
-	ret = comedi_ioctl(it->fd, COMEDI_CMD, (unsigned long)t);
+	ret = comedi_ioctl(it->fd, COMEDI_CMD, t);
 	__comedi_errno = errno;
 	switch(__comedi_errno){
 	case EIO:
@@ -169,7 +169,7 @@ EXPORT_ALIAS_DEFAULT(_comedi_command_test,comedi_command_test,0.7.18);
 int _comedi_command_test(comedi_t *it,comedi_cmd *t)
 {
 	int ret;
-	ret = comedi_ioctl(it->fd, COMEDI_CMDTEST, (unsigned long)t);
+	ret = comedi_ioctl(it->fd, COMEDI_CMDTEST, t);
 	__comedi_errno = errno;
 	switch(__comedi_errno){
 	case EIO:
@@ -183,7 +183,7 @@ EXPORT_ALIAS_DEFAULT(_comedi_do_insnlist,comedi_do_insnlist,0.7.18);
 int _comedi_do_insnlist(comedi_t *it,comedi_insnlist *il)
 {
 	int ret;
-	ret = comedi_ioctl(it->fd, COMEDI_INSNLIST, (unsigned long)il);
+	ret = comedi_ioctl(it->fd, COMEDI_INSNLIST, il);
 	__comedi_errno = errno;
 	return ret;
 }
@@ -192,7 +192,7 @@ EXPORT_ALIAS_DEFAULT(_comedi_do_insn,comedi_do_insn,0.7.18);
 int _comedi_do_insn(comedi_t *it,comedi_insn *insn)
 {
 	if(it->has_insn_ioctl){
-		return comedi_ioctl(it->fd, COMEDI_INSN, (unsigned long)insn);
+		return comedi_ioctl(it->fd, COMEDI_INSN, insn);
 	}else{
 		comedi_insnlist il;
 		int ret;
@@ -200,7 +200,7 @@ int _comedi_do_insn(comedi_t *it,comedi_insn *insn)
 		il.n_insns = 1;
 		il.insns = insn;
 
-		ret = comedi_ioctl(it->fd, COMEDI_INSNLIST, (unsigned long)&il);
+		ret = comedi_ioctl(it->fd, COMEDI_INSNLIST, &il);
 
 		if(ret<0)return ret;
 		return insn->n;
@@ -210,12 +210,12 @@ int _comedi_do_insn(comedi_t *it,comedi_insn *insn)
 EXPORT_ALIAS_DEFAULT(_comedi_lock,comedi_lock,0.7.18);
 int _comedi_lock(comedi_t *it,unsigned int subdevice)
 {
-	return comedi_ioctl(it->fd, COMEDI_LOCK, subdevice);
+	return comedi_ioctl(it->fd, COMEDI_LOCK, (void*)subdevice);
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_unlock,comedi_unlock,0.7.18);
 int _comedi_unlock(comedi_t *it,unsigned int subdevice)
 {
-	return comedi_ioctl(it->fd, COMEDI_UNLOCK, subdevice);
+	return comedi_ioctl(it->fd, COMEDI_UNLOCK, (void*)subdevice);
 }
 

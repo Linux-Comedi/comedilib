@@ -60,7 +60,7 @@ int get_subdevices(comedi_t *it)
 		goto cleanup;
 	}
 
-	ret = comedi_ioctl(it->fd, COMEDI_SUBDINFO, (unsigned long)s);
+	ret = comedi_ioctl(it->fd, COMEDI_SUBDINFO, s);
 	if(ret < 0)
 	{
 		debug_int(ret);
@@ -118,7 +118,7 @@ int get_subdevices(comedi_t *it)
 		ci.flaglist = r[i].flags_list;
 		ci.rangelist = r[i].range_type_list;
 		ci.maxdata_list = r[i].maxdata_list;
-		ret = comedi_ioctl(it->fd, COMEDI_CHANINFO, (unsigned long)&ci);
+		ret = comedi_ioctl(it->fd, COMEDI_CHANINFO, &ci);
 		if(ret < 0){
 			debug_int(ret);
 			goto cleanup;
@@ -155,7 +155,7 @@ int get_subdevices(comedi_t *it)
 	return 0;
 
 cleanup:
-	
+
 	if(s)
 		free(s);
 
@@ -211,7 +211,7 @@ comedi_range *get_rangeinfo(int fd,unsigned int range_type)
 	memset(&ri, 0, sizeof(ri));
 	ri.range_type = range_type;
 	ri.range_ptr = kr;
-	ret = comedi_ioctl(fd, COMEDI_RANGEINFO, (unsigned long)&ri);
+	ret = comedi_ioctl(fd, COMEDI_RANGEINFO, &ri);
 	if(ret<0){
 		fprintf(stderr,"ioctl(%d,COMEDI_RANGEINFO,0x%08x,%p)\n",fd,range_type,kr);
 		free(r);
@@ -252,7 +252,7 @@ static int do_test_for_cmd(comedi_t *dev,unsigned int subdevice)
 		it.scan_end_src = TRIG_ANY;
 		it.stop_src = TRIG_ANY;
 
-		ret = comedi_ioctl(dev->fd, COMEDI_CMDTEST, (unsigned long)&it);
+		ret = comedi_ioctl(dev->fd, COMEDI_CMDTEST, &it);
 
 		if(ret<0 && errno==EIO){
 			return 0;
@@ -281,7 +281,7 @@ static int do_test_for_insnlist(comedi_t *dev)
 	insn.data = data;
 	memset(insn.data, 0, insn.n * sizeof(insn.data[0]));
 
-	ret = comedi_ioctl(dev->fd, COMEDI_INSNLIST, (unsigned long)&il);
+	ret = comedi_ioctl(dev->fd, COMEDI_INSNLIST, &il);
 
 	if(ret<0){
 		if(errno!=EIO){
@@ -309,7 +309,7 @@ static int do_test_for_insn(comedi_t *dev)
 	insn.data = data;
 	memset(insn.data, 0, insn.n * sizeof(insn.data[0]));
 
-	ret = comedi_ioctl(dev->fd, COMEDI_INSN, (unsigned long)&insn);
+	ret = comedi_ioctl(dev->fd, COMEDI_INSN, &insn);
 
 	if(ret<0){
 		if(errno!=EIO){

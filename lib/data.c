@@ -82,7 +82,7 @@ int _comedi_data_write(comedi_t *it,unsigned int subdev,unsigned int chan,unsign
 		}
 		cmd.chanlist=&chan;
 
-		return comedi_ioctl(it->fd, COMEDI_TRIG, (unsigned long)&cmd);
+		return comedi_ioctl(it->fd, COMEDI_TRIG, &cmd);
 	}
 }
 
@@ -132,7 +132,7 @@ static int comedi_internal_data_read_n(comedi_t *it,
 			cmd.data=sdata;
 		}
 
-		ret = comedi_ioctl(it->fd, COMEDI_TRIG, (unsigned long)&cmd);
+		ret = comedi_ioctl(it->fd, COMEDI_TRIG, &cmd);
 		if(ret<0)
 			return ret;
 
