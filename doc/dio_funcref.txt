@@ -22,9 +22,9 @@ Description:
  reading an output channel is the last
  value written to the output channel.
 
- All the channels may not be read or written at the exact same time.
+ All the channels might not be read or written at the exact same time.
  For example, the driver may need to sequentially write to
- several ports in order to set all the digital channels specified
+ several registers in order to set all the digital channels specified
  by the <parameter>write_mask</parameter>.
 
 Function: comedi_dio_config -- change input/output properties of channel
@@ -36,15 +36,16 @@ Param: unsigned int direction
 Description:
  The function comedi_dio_config() configures individual channels
  in a digital I/O subdevice to be either input or output, depending
- on the value of parameter direction.  Valid directions are
+ on the value of <parameter>direction</parameter>.  Valid directions are
  COMEDI_INPUT or COMEDI_OUTPUT.
 
- Depending on the capabilities of the hardware device, multiple
- channels may be grouped together to determine direction.  In this
+ Depending on the characteristics of the hardware device, multiple
+ channels might be grouped together in hardware when
+ configuring the input/output direction.  In this
  case, a single call to comedi_dio_config() for any channel in the
  group will affect the entire group.
-
- If successful, 1 is returned, otherwise -1.
+Returns:
+ If successful, 0 is returned, otherwise -1.
 
 Function: comedi_dio_get_config -- query input/output properties of channel
 Retval: int
@@ -53,12 +54,13 @@ Param: unsigned int subdevice
 Param: unsigned int channel
 Param: unsigned int * direction
 Description:
- The function comedi_dio_get_config() querys the configuration of
+ The function comedi_dio_get_config() querys the input/output configuration of
  an individual channel
- in a digital I/O subdevice (see comedi_dio_config()).
- On success, the variable specified by the "direction" pointer will
+ in a digital I/O subdevice (see
+ <link linkend="func-ref-comedi-dio-config"><function>comedi_dio_config</function></link>).
+ On success, *<parameter>direction</parameter> will
  be set to either COMEDI_INPUT or COMEDI_OUTPUT.
-
+Returns:
  If successful, 0 is returned, otherwise -1.
 
 Function: comedi_dio_read -- read single bit from digital channel
@@ -68,14 +70,25 @@ Param: unsigned int subdevice
 Param: unsigned int channel
 Param: unsigned int * bit
 Description:
- The function reads the channel channel belonging to the
- subdevice subdevice of device device.  The data value that is
- read is stored in the location pointed to by bit.  This function
- is equivalent to comedi_data_read(device,subdevice,channel,0,0,bit).
+ The function comedi_dio_read reads the channel <parameter>channel</parameter>
+ belonging to the
+ subdevice <parameter>subdevice</parameter> of device <parameter>device</parameter>.
+ The data value that is
+ read is stored in the *<parameter>bit</parameter>.  This function
+ is equivalent to:
+ <programlisting>
+ <link linkend="func-ref-comedi-data-read">comedi_data_read</link>(device, subdevice, channel, 0, 0, bit);
+ </programlisting>
  This function does not require a digital subdevice or a subdevice
  with a maximum data value of 1 to work properly.
 
- Return values and errors are the same as comedi_data_read().
+ If you wish to read multiple digital channels at once, it is more efficient to
+ use
+ <link linkend="func-ref-comedi-dio-bitfield2"><function>comedi_dio_bitfield2</function></link>
+ than to call this function multiple times.
+Returns:
+ Return values and errors are the same as
+ <link linkend="func-ref-comedi-data-read"><function>comedi_data_read</function></link>.
 
 Function: comedi_dio_write -- write single bit to digital channel
 Retval: int
@@ -84,10 +97,21 @@ Param: unsigned int subdevice
 Param: unsigned int channel
 Param: unsigned int bit
 Description:
- The function writes the value bit to the channel channel belonging
- to the subdevice subdevice of device device.  This function
- is equivalent to comedi_data_write(device,subdevice,channel,0,0,bit).
+ The function writes the value <parameter>bit</parameter> to the channel
+ <parameter>channel</parameter> belonging
+ to the subdevice <parameter>subdevice</parameter> of device
+ <parameter>device</parameter>.  This function
+ is equivalent to:
+ <programlisting>
+ comedi_data_write(device, subdevice, channel, 0, 0, bit);
+ </programlisting>
  This function does not require a digital subdevice or a subdevice
  with a maximum data value of 1 to work properly.
 
- Return values and errors are the same as comedi_data_write().
+ If you wish to write multiple digital channels at once, it is more efficient to
+ use
+ <link linkend="func-ref-comedi-dio-bitfield2"><function>comedi_dio_bitfield2</function></link>
+ than to call this function multiple times.
+Returns:
+ Return values and errors are the same as
+ <link linkend="func-ref-comedi-data-write"><function>comedi_data_write</function></link>.
