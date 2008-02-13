@@ -62,6 +62,10 @@ while($s = <>){
     </funcsynopsis>
   </refsynopsisdiv>
 ";
+	}elsif($s =~ m/^Param:[[:space:]]*void/){
+		print
+"        <void/>
+"
 	}elsif($s =~ m/^Param: (.*)/){
 		$p = $1;
 		$p =~ m/(.*) (.*)/;
@@ -110,7 +114,7 @@ while($s = <>){
 ";
 	}elsif($s eq ""){
 		print "</para><para>\n";
-	}elsif($s =~ m/^ (.*)/){
+	}elsif($s =~ m/^[\s](.*)/){
 		print "$1\n";
 	}
 }
