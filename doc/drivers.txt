@@ -181,12 +181,12 @@ Configuration options:
 
 Driver: adq12b
 Description: driver for MicroAxial ADQ12-B data acquisition and control card
-Devices: (MicroAxial) ADQ12-B [adq12b]
+Devices: [MicroAxial] ADQ12-B (adq12b)
 Author: jeremy theler <thelerg@ib.cnea.gov.ar>
-Updated: Mon, 28 Oct 2007 14:58:02 -0300
-Status: experimental
+Updated: Thu, 21 Feb 2008 02:56:27 -0300
+Status: works
 
-Driver for the acquisition card ADQ12-B.
+Driver for the acquisition card ADQ12-B (without any add-on).
 
  - Analog input is subdevice 0 (16 channels single-ended or 8 differential)
  - Digital input is subdevice 1 (5 channels)
@@ -228,7 +228,10 @@ If you do not specify any options, they will default to
    universidad nacional de cuyo
    argentina
 
-   v0.1 13-oct-2007
+   21-feb-2008
+     + changed supported devices string (missused the [] and ())
+
+   13-oct-2007
      + first try
 
 
@@ -890,7 +893,7 @@ Only simple analog output writing is supported.
 
 So far it has only been tested with:
   - PCI-DDA08/12
-Please report sucess/failure with other different cards to
+Please report success/failure with other different cards to
 <comedi@comedi.org>.
 
 
@@ -1920,6 +1923,25 @@ are not supported.
 
 
 
+Driver: ni_daq_700
+Description: National Instruments PCMCIA DAQCard-700 DIO only
+Author: Fred Brooks <nsaspook@nsaspook.com>,
+  based on ni_daq_dio24 by Daniel Vecino Castel <dvecino@able.es>
+Devices: [National Instruments] PCMCIA DAQ-Card-700 (ni_daq_700)
+Status: works
+Updated: Thu, 21 Feb 2008 12:07:20 +0000
+
+The daqcard-700 appears in Comedi as a single digital I/O subdevice with
+16 channels.  The channel 0 corresponds to the daqcard-700's output
+port, bit 0; channel 8 corresponds to the input port, bit 0.
+
+Direction configuration: channels 0-7 output, 8-15 input (8225 device
+emu as port A output, port B input, port C N/A).
+
+IRQ is assigned but not used.
+
+
+
 Driver: ni_daq_dio24
 Description: National Instruments PCMCIA DAQ-Card DIO-24
 Author: Daniel Vecino Castel <dvecino@able.es>
@@ -2722,10 +2744,16 @@ Driver: s626
 Description: Sensoray 626 driver
 Devices: [Sensoray] 626 (s626)
 Authors: Gianluca Palli <gpalli@deis.unibo.it>,
-Updated: Thu, 12 Jul 2005
+Updated: Fri, 15 Feb 2008 10:28:42 +0000
 Status: experimental
 
-  Configuration Options:
+Configuration options:
+  [0] - PCI bus of device (optional)
+  [1] - PCI slot of device (optional)
+  If bus/slot is not specified, the first supported
+  PCI device found will be used.
+
+INSN_CONFIG instructions:
   analog input:
    none
 
