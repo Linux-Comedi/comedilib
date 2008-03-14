@@ -263,6 +263,7 @@ static comedi_calibration_t* alloc_calib_parse( void )
 EXPORT_ALIAS_DEFAULT(_comedi_cleanup_calibration,comedi_cleanup_calibration,0.7.20);
 extern void _comedi_cleanup_calibration( comedi_calibration_t *file_contents )
 {
+	if(file_contents == NULL) return;
 	if( file_contents->driver_name )
 	{
 		free( file_contents->driver_name );
