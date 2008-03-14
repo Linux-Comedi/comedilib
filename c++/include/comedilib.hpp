@@ -79,7 +79,15 @@ namespace comedi
 		}
 		std::string default_calibration_path() const
 		{
-			return comedi_get_default_calibration_path(comedi_handle());
+			char *c_string_file_path = comedi_get_default_calibration_path(comedi_handle());
+			if(c_string_file_path == NULL)
+			{
+				comedi_perror("comedi_get_default_calibration_path");
+				throw std::runtime_error(__PRETTY_FUNCTION__);
+			}
+			std::string file_path = c_string_file_path;
+			free(c_string_file_path);
+			return file_path;
 		}
 		void do_insn(comedi_insn *instruction) const
 		{
@@ -164,6 +172,38 @@ namespace comedi
 		boost::shared_ptr<comedi_t> _comedi_handle;
 	};
 
+	class calibration
+	{
+	public:
+		calibration(const device &dev)
+		{
+			init(dev.default_calibration_path());
+		}
+		calibration(const std::string &file_path)
+		{
+			init(file_path);
+		}
+		const comedi_calibration_t* c_calibration() const
+		{
+			return _c_calibration.get();
+		}
+	private:
+		init(const std::string &file_path)
+		{
+			comedi_calibration_t *cal = comedi_parse_calibration_file(file_path.c_str());
+			if(cal == NULL)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_parse_calibration_file() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_parse_calibration_file");
+				throw std::runtime_error(message.str());
+			}
+			_c_calibration.reset(cal, &comedi_cleanup_calibration);
+		}
+		boost::shared_ptr<comedi_calibration_t> _c_calibration;
+	};
+
 	class subdevice
 	{
 	public:
@@ -179,6 +219,20 @@ namespace comedi
 				std::cerr << message.str() << std::endl;
 				throw std::invalid_argument(message.str());
 			}
+		}
+		void apply_hard_calibration(unsigned channel, unsigned range, unsigned aref, const calibration &cal)
+		{
+			int retval = comedi_apply_parsed_calibration(comedi_handle(), index(),
+				channel, range, aref, cal.c_calibration());
+			if(retval < 0)
+			{
+				comedi_perror("comedi_apply_parsed_calibration");
+				throw std::runtime_error(__PRETTY_FUNCTION__);
+			}
+		}
+		void apply_hard_calibration(unsigned channel, unsigned range, unsigned aref)
+		{
+			apply_hard_calibration(channel, range, aref, calibration(dev()));
 		}
 		unsigned buffer_size() const
 		{
@@ -296,6 +350,19 @@ namespace comedi
 			}
 			return retval;
 		}
+		comedi_polynomial_t hardcal_converter(unsigned channel, unsigned range,
+			enum comedi_conversion_direction direction)
+		{
+			comedi_polynomial_t result;
+			int retval = comedi_get_hardcal_converter(comedi_handle(), index(),
+				channel, range, direction, &result);
+			if(retval < 0)
+			{
+				comedi_perror("comedi_get_hardcal_converter");
+				throw std::runtime_error(__PRETTY_FUNCTION__);
+			}
+			return result;
+		}
 		unsigned index() const {return _index;};
 		unsigned max_buffer_size() const
 		{
@@ -385,6 +452,19 @@ namespace comedi
 				comedi_perror("comedi_set_max_buffer_size");
 				throw std::runtime_error(message.str());
 			}
+		}
+		comedi_polynomial_t softcal_converter(unsigned channel, unsigned range,
+			enum comedi_conversion_direction direction, const calibration &cal)
+		{
+			comedi_polynomial_t result;
+			int retval = comedi_get_softcal_converter(index(),
+				channel, range, direction, cal.c_calibration(), &result);
+			if(retval < 0)
+			{
+				comedi_perror("comedi_get_softcal_converter");
+				throw std::runtime_error(__PRETTY_FUNCTION__);
+			}
+			return result;
 		}
 	private:
 		comedi_t* comedi_handle() const {return dev().comedi_handle();}
