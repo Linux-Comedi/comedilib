@@ -8,7 +8,7 @@ Param: unsigned int aref
 Param: const char *file_path
 Status: alpha
 Description:
- This function sets the calibration of the specified subdevice
+ This function sets the hardware calibration for the specified subdevice
  so that it is in proper calibration when using the specified
  channel, range and aref.  It does so by performing writes
  to the appropriate channels of the board's calibration
