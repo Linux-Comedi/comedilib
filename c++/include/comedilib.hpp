@@ -44,7 +44,7 @@ namespace comedi
 			return comedi_to_physical(data, &_polynomial);
 		}
 	private:
-		comedi_polynomial_t _polynomial
+		comedi_polynomial_t _polynomial;
 	};
 
 	// wrapper for comedi_from_physical()
@@ -59,7 +59,7 @@ namespace comedi
 			return comedi_from_physical(physical_value, &_polynomial);
 		}
 	private:
-		comedi_polynomial_t _polynomial
+		comedi_polynomial_t _polynomial;
 	};
 
 	class device	{
