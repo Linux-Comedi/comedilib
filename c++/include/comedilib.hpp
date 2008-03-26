@@ -32,6 +32,36 @@ namespace comedi
 {
 	class subdevice;
 
+	// wrapper for comedi_to_physical()
+	class to_physical
+	{
+	public:
+		to_physical(const comedi_polynomial_t &polynomial):
+			_polynomial(polynomial)
+		{}
+		double operator()(lsampl_t data) const
+		{
+			return comedi_to_physical(data, &_polynomial);
+		}
+	private:
+		comedi_polynomial_t _polynomial
+	};
+
+	// wrapper for comedi_from_physical()
+	class from_physical
+	{
+	public:
+		from_physical(const comedi_polynomial_t &polynomial):
+			_polynomial(polynomial)
+		{}
+		lsampl_t operator()(double physical_value) const
+		{
+			return comedi_from_physical(physical_value, &_polynomial);
+		}
+	private:
+		comedi_polynomial_t _polynomial
+	};
+
 	class device	{
 	public:
 		device() {}
@@ -175,6 +205,7 @@ namespace comedi
 	class calibration
 	{
 	public:
+		calibration() {}
 		calibration(const device &dev)
 		{
 			init(dev.default_calibration_path());
@@ -222,6 +253,7 @@ namespace comedi
 		}
 		void apply_hard_calibration(unsigned channel, unsigned range, unsigned aref, const calibration &cal)
 		{
+			if(cal.c_calibration() == 0) throw std::invalid_argument(__PRETTY_FUNCTION__);
 			int retval = comedi_apply_parsed_calibration(comedi_handle(), index(),
 				channel, range, aref, cal.c_calibration());
 			if(retval < 0)
@@ -456,6 +488,7 @@ namespace comedi
 		comedi_polynomial_t softcal_converter(unsigned channel, unsigned range,
 			enum comedi_conversion_direction direction, const calibration &cal)
 		{
+			if(cal.c_calibration() == 0) throw std::invalid_argument(__PRETTY_FUNCTION__);
 			comedi_polynomial_t result;
 			int retval = comedi_get_softcal_converter(index(),
 				channel, range, direction, cal.c_calibration(), &result);
