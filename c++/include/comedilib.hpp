@@ -22,6 +22,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <comedilib.h>
+#include <cstring>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
@@ -36,6 +37,10 @@ namespace comedi
 	class to_physical
 	{
 	public:
+		to_physical()
+		{
+			memset(&_polynomial, 0, sizeof(_polynomial));
+		}
 		to_physical(const comedi_polynomial_t &polynomial):
 			_polynomial(polynomial)
 		{}
@@ -51,6 +56,10 @@ namespace comedi
 	class from_physical
 	{
 	public:
+		from_physical()
+		{
+			memset(&_polynomial, 0, sizeof(_polynomial));
+		}
 		from_physical(const comedi_polynomial_t &polynomial):
 			_polynomial(polynomial)
 		{}
@@ -383,7 +392,7 @@ namespace comedi
 			return retval;
 		}
 		comedi_polynomial_t hardcal_converter(unsigned channel, unsigned range,
-			enum comedi_conversion_direction direction)
+			enum comedi_conversion_direction direction) const
 		{
 			comedi_polynomial_t result;
 			int retval = comedi_get_hardcal_converter(comedi_handle(), index(),
@@ -486,7 +495,7 @@ namespace comedi
 			}
 		}
 		comedi_polynomial_t softcal_converter(unsigned channel, unsigned range,
-			enum comedi_conversion_direction direction, const calibration &cal)
+			enum comedi_conversion_direction direction, const calibration &cal) const
 		{
 			if(cal.c_calibration() == 0) throw std::invalid_argument(__PRETTY_FUNCTION__);
 			comedi_polynomial_t result;
