@@ -218,7 +218,7 @@ int test_cmd_write_fast_1chan(void)
 
 	ret = comedi_internal_trigger(device, subdevice, 0);
 	if(ret<0){
-		perror("E: comedi_inttrig");
+		comedi_perror("E: comedi_internal_trigger");
 		comedi_cancel(device, subdevice);
 		return 0;
 	}
