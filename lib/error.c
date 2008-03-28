@@ -59,7 +59,7 @@ int _comedi_errno(void)
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_strerror,comedi_strerror,0.7.18);
-char* _comedi_strerror(int errnum)
+const char* _comedi_strerror(int errnum)
 {
 	if(errnum<COMEDI_NOERROR || errnum>=COMEDI_NOERROR+n_errors)
 		return strerror(errnum);

@@ -108,4 +108,5 @@ v0.9.0 {
 		comedi_internal_trigger;
 		comedi_set_other_source;
 		comedi_set_routing;
+		comedi_get_hardware_buffer_size;
 } v0.8.0;

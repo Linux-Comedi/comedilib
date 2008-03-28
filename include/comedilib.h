@@ -71,7 +71,7 @@ int comedi_close(comedi_t *it);
 /* logging */
 int comedi_loglevel(int loglevel);
 void comedi_perror(const char *s);
-char *comedi_strerror(int errnum);
+const char *comedi_strerror(int errnum);
 int comedi_errno(void);
 int comedi_fileno(comedi_t *it);
 
@@ -286,6 +286,7 @@ int comedi_set_gate_source(comedi_t *device, unsigned subdevice, unsigned channe
 int comedi_set_other_source(comedi_t *device, unsigned subdevice, unsigned channel,
 	unsigned other, unsigned source);
 int comedi_set_routing(comedi_t *device, unsigned subdevice, unsigned channel, unsigned routing);
+int comedi_get_hardware_buffer_size(comedi_t *device, unsigned subdevice, enum comedi_io_direction direction);
 
 #endif
 

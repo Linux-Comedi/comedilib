@@ -276,3 +276,22 @@ int _comedi_set_routing(comedi_t *device, unsigned subdevice, unsigned channel, 
 	if(comedi_do_insn(device, &insn) >= 0) return 0;
 	else return -1;
 }
+
+EXPORT_ALIAS_DEFAULT(_comedi_get_hardware_buffer_size,comedi_get_hardware_buffer_size,0.9.0);
+int _comedi_get_hardware_buffer_size(comedi_t *device, unsigned subdevice, enum comedi_io_direction direction)
+{
+	comedi_insn insn;
+	lsampl_t data[3];
+
+	memset(&insn, 0, sizeof(comedi_insn));
+	insn.insn = INSN_CONFIG;
+	insn.subdev = subdevice;
+	insn.data = data;
+	insn.n = sizeof(data) / sizeof(data[0]);
+	memset(insn.data, 0, insn.n * sizeof(insn.data[0]));
+	data[0] = INSN_CONFIG_GET_HARDWARE_BUFFER_SIZE;
+	data[1] = direction;
+
+	if(comedi_do_insn(device, &insn) >= 0) return data[2];
+	else return -1;
+}
