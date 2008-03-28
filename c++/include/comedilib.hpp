@@ -405,6 +405,18 @@ namespace comedi
 			return result;
 		}
 		unsigned index() const {return _index;};
+		void internal_trigger(unsigned trig_num) const
+		{
+			int retval = comedi_internal_trigger(comedi_handle(), index(), trig_num);
+			if(retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_internal_trigger() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_internal_trigger");
+				throw std::runtime_error(message.str());
+			}
+		}
 		unsigned max_buffer_size() const
 		{
 			int retval = comedi_get_max_buffer_size(comedi_handle(), index());
