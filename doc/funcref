@@ -499,6 +499,8 @@ Description:
  with a start_src of TRIG_INT, and
  a start_arg of 5.  Then the start event would only be triggered if comedi_internal_trigger() were
  called on the subdevice with a <parameter>trig_num</parameter> equal to the same value of 5.
+Returns:
+ 0 on success, -1 on error.
 
 Function: comedi_lock -- subdevice reservation
 Retval: int
