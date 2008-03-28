@@ -153,6 +153,30 @@ and converting from a physical value to Comedi's integer sample values (COMEDI_F
 
 </section>
 
+<section id="ref-enum-comedi-io-direction">
+<title>
+enum comedi_io_direction
+</title>
+
+<para>
+<programlisting>
+enum comedi_io_direction
+{
+	COMEDI_INPUT,
+	COMEDI_OUTPUT
+};
+</programlisting>
+</para>
+<para>
+A comedi_io_direction is used to select between input or output.  For example,
+<link linkend="func-ref-comedi-dio-config"><function>comedi_dio_config</function></link>
+uses the COMEDI_INPUT and COMEDI_OUTPUT values to specify
+whether a configurable digital i/o channel should be configured as an input
+or output.
+</para>
+
+</section>
+
 <section id="ref-enum-comedi-subdevice-type">
 <title>
 enum comedi_subdevice_type

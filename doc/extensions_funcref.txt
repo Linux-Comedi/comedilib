@@ -66,6 +66,25 @@ Description:
 Returns:
  0 on success, -1 on error.
 
+Function: comedi_get_hardware_buffer_size -- get size of subdevice's hardware buffer
+Retval: int
+Param: comedi_t *device
+Param: unsigned int subdevice
+Param: <link linkend="ref-enum-comedi-io-direction">enum comedi_io_direction</link> direction
+Description:
+	This functions returns the number of bytes the subdevice can hold in it's hardware buffer.
+	The term "hardware buffer" refers to any fifos, etc. on the acquisition board itself which
+	are used during streaming commands.  This does not include the buffer maintained by
+	the comedi kernel module in host memory, whose size may be queried by
+	<link linkend="func-ref-comedi-get-buffer-size"><function>comedi_get_buffer_size</function></link>.
+	The <parameter>direction</parameter> parameter of type
+	<link linkend="ref-enum-comedi-io-direction">enum comedi_io_direction</link>
+	should be set to COMEDI_INPUT to query the input buffer size (e.g., the buffer of an analog
+	input subdevice), or COMEDI_OUTPUT to query the output buffer size (e.g., the buffer of
+	an analog output).
+Returns:
+	Number of bytes, or -1 on error.
+
 Function: comedi_get_routing -- get routing for an output
 Retval: int
 Param: comedi_t * device
