@@ -378,6 +378,20 @@ namespace comedi
 				throw std::runtime_error(message.str());
 			}
 		}
+		unsigned find_range(unsigned channel, unsigned unit, double min, double max)
+		{
+			int retval = comedi_find_range(comedi_handle(), index(), channel,
+				unit, min, max);
+			if(retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_find_range() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_find_range");
+				throw std::runtime_error(message.str());
+			}
+			return retval;
+		}
 		unsigned flags() const
 		{
 			int retval = comedi_get_subdevice_flags(comedi_handle(), index());
@@ -403,6 +417,19 @@ namespace comedi
 				throw std::runtime_error(__PRETTY_FUNCTION__);
 			}
 			return result;
+		}
+		unsigned hardware_buffer_size(enum comedi_io_direction direction) const
+		{
+			int retval = comedi_get_hardware_buffer_size(comedi_handle(), index(), direction);
+			if(retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_get_hardware_buffer_size() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_get_hardware_buffer_size");
+				throw std::runtime_error(message.str());
+			}
+			return retval;
 		}
 		unsigned index() const {return _index;};
 		void internal_trigger(unsigned trig_num) const
