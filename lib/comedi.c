@@ -124,13 +124,13 @@ int _comedi_close(comedi_t *it)
 EXPORT_ALIAS_DEFAULT(_comedi_cancel,comedi_cancel,0.7.18);
 int _comedi_cancel(comedi_t *it,unsigned int subdevice)
 {
-	return comedi_ioctl(it->fd, COMEDI_CANCEL, (void*)subdevice);
+	return comedi_ioctl(it->fd, COMEDI_CANCEL, (void*)(unsigned long)subdevice);
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_poll,comedi_poll,0.7.18);
 int _comedi_poll(comedi_t *it,unsigned int subdevice)
 {
-	return comedi_ioctl(it->fd, COMEDI_POLL, (void*)subdevice);
+	return comedi_ioctl(it->fd, COMEDI_POLL, (void*)(unsigned long)subdevice);
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_fileno,comedi_fileno,0.7.18);
@@ -210,12 +210,12 @@ int _comedi_do_insn(comedi_t *it,comedi_insn *insn)
 EXPORT_ALIAS_DEFAULT(_comedi_lock,comedi_lock,0.7.18);
 int _comedi_lock(comedi_t *it,unsigned int subdevice)
 {
-	return comedi_ioctl(it->fd, COMEDI_LOCK, (void*)subdevice);
+	return comedi_ioctl(it->fd, COMEDI_LOCK, (void*)(unsigned long)subdevice);
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_unlock,comedi_unlock,0.7.18);
 int _comedi_unlock(comedi_t *it,unsigned int subdevice)
 {
-	return comedi_ioctl(it->fd, COMEDI_UNLOCK, (void*)subdevice);
+	return comedi_ioctl(it->fd, COMEDI_UNLOCK, (void*)(unsigned long)subdevice);
 }
 
