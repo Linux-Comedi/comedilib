@@ -26,6 +26,8 @@ Description:
  For example, the driver may need to sequentially write to
  several registers in order to set all the digital channels specified
  by the <parameter>write_mask</parameter>.
+Returns:
+ If successful, 0 is returned, otherwise -1.
 
 Function: comedi_dio_config -- change input/output properties of channel
 Retval: int
