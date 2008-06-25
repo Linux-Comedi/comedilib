@@ -509,6 +509,18 @@ namespace comedi
 			}
 			return cRange;
 		}
+		void reset() const
+		{
+			int retval = comedi_reset(comedi_handle(), index());
+			if(retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_reset() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_reset");
+				throw std::runtime_error(message.str());
+			}
+		}
 		void set_buffer_size(unsigned num_bytes) const
 		{
 			int retval = comedi_set_buffer_size(comedi_handle(), index(), num_bytes);
