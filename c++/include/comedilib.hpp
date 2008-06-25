@@ -533,6 +533,42 @@ namespace comedi
 				throw std::runtime_error(message.str());
 			}
 		}
+		void set_clock_source(unsigned clock, unsigned period_ns)
+		{
+			int retval = comedi_set_clock_source(comedi_handle(), index(), clock, period_ns);
+			if(retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_set_clock_source() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_set_clock_source");
+				throw std::runtime_error(message.str());
+			}
+		}
+		void set_counter_mode(unsigned channel, unsigned mode_bits)
+		{
+			int retval = comedi_set_counter_mode(comedi_handle(), index(), channel, mode_bits);
+			if(retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_set_counter_mode() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_set_counter_mode");
+				throw std::runtime_error(message.str());
+			}
+		}
+		void set_gate_source(unsigned channel, unsigned gate_index, unsigned gate_source)
+		{
+			int retval = comedi_set_gate_source(comedi_handle(), index(), channel, gate_index, gate_source);
+			if(retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_set_gate_source() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_set_gate_source");
+				throw std::runtime_error(message.str());
+			}
+		}
 		void set_max_buffer_size(unsigned num_bytes) const
 		{
 			int retval = comedi_set_max_buffer_size(comedi_handle(), index(), num_bytes);
