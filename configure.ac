@@ -2,6 +2,7 @@
 AC_INIT([comedilib], [0.9.0])
 AC_CANONICAL_TARGET([])
 
+AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([.])
 #COMEDILIB_DEBUG="-Wall -Werror"
 COMEDILIB_DEBUG="-Wall"
