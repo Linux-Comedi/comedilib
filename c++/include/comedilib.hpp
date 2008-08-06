@@ -405,6 +405,18 @@ namespace comedi
 			}
 			return retval;
 		}
+		void get_clock_source(unsigned *clock, unsigned *period_ns) const
+		{
+			int retval = comedi_get_clock_source(comedi_handle(), index(), clock, period_ns);
+			if(retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_set_clock_source() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_set_clock_source");
+				throw std::runtime_error(message.str());
+			}
+		}
 		comedi_polynomial_t hardcal_converter(unsigned channel, unsigned range,
 			enum comedi_conversion_direction direction) const
 		{
@@ -605,7 +617,7 @@ namespace comedi
 	subdevice device::find_subdevice_by_type(int type, const subdevice *start_subdevice) const
 	{
 		unsigned start_index;
-		if(start_subdevice) start_index = start_subdevice->index();
+		if(start_subdevice) start_index = start_subdevice->index() + 1;
 		else start_index = 0;
 		int subdev = comedi_find_subdevice_by_type(comedi_handle(), type, start_index);
 		if(subdev < 0)
