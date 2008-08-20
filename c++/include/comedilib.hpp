@@ -411,11 +411,25 @@ namespace comedi
 			if(retval < 0)
 			{
 				std::ostringstream message;
-				message << __PRETTY_FUNCTION__ << ": comedi_set_clock_source() failed.";
+				message << __PRETTY_FUNCTION__ << ": comedi_get_clock_source() failed.";
 				std::cerr << message.str() << std::endl;
-				comedi_perror("comedi_set_clock_source");
+				comedi_perror("comedi_get_clock_source");
 				throw std::runtime_error(message.str());
 			}
+		}
+		unsigned get_routing(unsigned channel) const
+		{
+			unsigned routing = 0;
+			int retval = comedi_get_routing(comedi_handle(), index(), channel, &routing);
+			if(retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_get_routing() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_get_routing");
+				throw std::runtime_error(message.str());
+			}
+			return routing;
 		}
 		comedi_polynomial_t hardcal_converter(unsigned channel, unsigned range,
 			enum comedi_conversion_direction direction) const
@@ -590,6 +604,18 @@ namespace comedi
 				message << __PRETTY_FUNCTION__ << ": comedi_set_max_buffer_size() failed.";
 				std::cerr << message.str() << std::endl;
 				comedi_perror("comedi_set_max_buffer_size");
+				throw std::runtime_error(message.str());
+			}
+		}
+		void set_routing(unsigned channel, unsigned routing)
+		{
+			int retval = comedi_set_routing(comedi_handle(), index(), channel, routing);
+			if(retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_set_routing() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_set_routing");
 				throw std::runtime_error(message.str());
 			}
 		}
