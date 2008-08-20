@@ -45,6 +45,8 @@ int ni_gpct_start_encoder(comedi_t *device, unsigned subdevice,
 
 	comedi_set_gate_source(device, subdevice, 0, 0, NI_GPCT_DISABLED_GATE_SELECT);
 	comedi_set_gate_source(device, subdevice, 0, 1, NI_GPCT_DISABLED_GATE_SELECT);
+	/* note, the comedi_set_other_source calls will fail on 660x boards, since they
+	 * don't support user selection of the inputs used for the A/B/Z signals. */
 	comedi_set_other_source(device, subdevice, 0, NI_GPCT_SOURCE_ENCODER_A, a);
 	comedi_set_other_source(device, subdevice, 0, NI_GPCT_SOURCE_ENCODER_B, b);
 	comedi_set_other_source(device, subdevice, 0, NI_GPCT_SOURCE_ENCODER_Z, z);
