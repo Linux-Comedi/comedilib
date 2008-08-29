@@ -101,6 +101,7 @@ static void free_settings( comedi_calibration_t *file_contents )
 	{
 		free_calibration_setting( &file_contents->settings[ i ] );
 	}
+	free(file_contents->settings);
 	file_contents->settings = NULL;
 }
 
