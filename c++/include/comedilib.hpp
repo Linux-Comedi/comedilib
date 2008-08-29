@@ -228,7 +228,7 @@ namespace comedi
 			return _c_calibration.get();
 		}
 	private:
-		init(const std::string &file_path)
+		void init(const std::string &file_path)
 		{
 			comedi_calibration_t *cal = comedi_parse_calibration_file(file_path.c_str());
 			if(cal == NULL)
