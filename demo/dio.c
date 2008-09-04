@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 		exit(-1);
 	}
 
-	printf("configuring pin %d or subdevice %d ", options.channel, options.subdevice);
+	printf("configuring pin %d on subdevice %d ", options.channel, options.subdevice);
 	if(options.value)
 	{
 		printf("for output.\n");
