@@ -143,10 +143,23 @@ int get_subdevices(comedi_t *it)
 		}
 
 		r[i].has_cmd = do_test_for_cmd(it,i);
-		if(it->has_insnlist_ioctl){
-			r[i].has_insn_bits = do_test_for_insn_bits(it,i);
-		}else{
+		switch(s[i].insn_bits_support)
+		{
+		case COMEDI_UNKNOWN_SUPPORT:
+			if(it->has_insnlist_ioctl){
+				r[i].has_insn_bits = do_test_for_insn_bits(it,i);
+			}else{
+				r[i].has_insn_bits = 0;
+			}
+			break;
+		case COMEDI_SUPPORTED:
+			r[i].has_insn_bits = 1;
+			break;
+		case COMEDI_UNSUPPORTED:
 			r[i].has_insn_bits = 0;
+			break;
+		default:
+			assert(0);
 		}
 	}
 
