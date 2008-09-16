@@ -633,6 +633,19 @@ namespace comedi
 			}
 			return result;
 		}
+		comedi_subdevice_type subdevice_type() const
+		{
+			int retval = comedi_get_subdevice_type(comedi_handle(), index());
+			if(retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_get_subdevice_type() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_get_subdevice_type");
+				throw std::runtime_error(message.str());
+			}
+			return comedi_subdevice_type(retval);
+		}
 	private:
 		comedi_t* comedi_handle() const {return dev().comedi_handle();}
 
