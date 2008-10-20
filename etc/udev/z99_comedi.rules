@@ -14,7 +14,7 @@ ACTION!="add", GOTO="comedi_add_end"
 KERNEL=="comedi[0-9]*", KERNEL!="comedi[0-9]*_subd[0-9]*", SUBSYSTEMS=="pci", SYMLINK+="comedi/by-id/pci-$id"
 
 #persistent subdevice symlinks
-KERNEL=="comedi[0-9]*subd[0-9]*", SUBSYSTEMS=="pci", SYMLINK+="comedi/by-id/pci-$id-subd%n"
+KERNEL=="comedi[0-9]*subd[0-9]*", SUBSYSTEMS=="pci", SYMLINK+="comedi/by-id/pci-$id_subd%n"
 
 
 #The following line would automatically run comedi_config on main device file
