@@ -136,6 +136,7 @@ int _comedi_get_n_ranges(comedi_t *it,unsigned int subd,unsigned int chan)
 EXPORT_ALIAS_DEFAULT(_comedi_range_is_chan_specific,comedi_range_is_chan_specific,0.7.18);
 int _comedi_range_is_chan_specific(comedi_t *it,unsigned int subd)
 {
+	if(!valid_subd(it,subd)) return -1;
 	return (it->subdevices[subd].subd_flags&SDF_RANGETYPE)?1:0;
 }
 

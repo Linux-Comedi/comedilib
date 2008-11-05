@@ -72,6 +72,8 @@ int _comedi_sv_update(comedi_sv_t *it)
 EXPORT_ALIAS_DEFAULT(_comedi_sv_measure,comedi_sv_measure,0.7.18);
 int _comedi_sv_measure(comedi_sv_t *it,double *data)
 {
+	if(!it)return -1;
+	if(!valid_subd(it->dev,it->subdevice))return -1;
 	if(it->dev->subdevices[it->subdevice].subd_flags & SDF_LSAMPL){
 		return sv_measure_l(it,data);
 	}else{

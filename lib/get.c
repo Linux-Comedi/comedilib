@@ -74,7 +74,7 @@ const char* _comedi_get_board_name(comedi_t *it)
 EXPORT_ALIAS_VER(_comedi_get_subdevice_flags_old, comedi_get_subdevice_flags,0.7.18);
 int _comedi_get_subdevice_flags_old(comedi_t *it,unsigned int subd)
 {
-	if(!valid_dev(it))
+	if(!valid_subd(it,subd))
 		return 0;
 	return it->subdevices[subd].subd_flags;
 }
@@ -85,7 +85,7 @@ int _comedi_get_subdevice_flags(comedi_t *it,unsigned int subd)
 	comedi_subdinfo *s;
 	int flags;
 	int ret;
-	if(!valid_dev(it))
+	if(!valid_subd(it,subd))
 		return -1;
 	s = calloc(it->n_subdevices, sizeof(comedi_subdinfo));
 	if(s == NULL)
@@ -107,7 +107,7 @@ int _comedi_get_subdevice_flags(comedi_t *it,unsigned int subd)
 EXPORT_ALIAS_DEFAULT(_comedi_get_subdevice_type,comedi_get_subdevice_type,0.7.18);
 int _comedi_get_subdevice_type(comedi_t *it,unsigned int subd)
 {
-	if(!valid_dev(it))
+	if(!valid_subd(it,subd))
 		return -1;
 
 	return it->subdevices[subd].type;
@@ -171,6 +171,8 @@ lsampl_t _comedi_get_maxdata(comedi_t *it,unsigned int subdevice,unsigned int ch
 EXPORT_ALIAS_DEFAULT(_comedi_maxdata_is_chan_specific,comedi_maxdata_is_chan_specific,0.7.18);
 int _comedi_maxdata_is_chan_specific(comedi_t *it,unsigned int subdevice)
 {
+	if(!valid_subd(it,subdevice))
+		return -1;
 	if(it->subdevices[subdevice].maxdata_list)
 		return 1;
 	return 0;

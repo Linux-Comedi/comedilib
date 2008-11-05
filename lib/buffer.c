@@ -30,6 +30,7 @@ int _comedi_set_buffer_size(comedi_t *it, unsigned int subdev, unsigned int size
 	int ret;
 	comedi_bufconfig bc;
 
+	if(!valid_subd(it,subdev)) return -1;
 	memset(&bc, 0, sizeof(bc));
 	bc.subdevice = subdev;
 	bc.size = size;
@@ -45,6 +46,7 @@ int _comedi_set_max_buffer_size(comedi_t *it, unsigned int subdev, unsigned int 
 	int ret;
 	comedi_bufconfig bc;
 
+	if(!valid_subd(it,subdev)) return -1;
 	memset(&bc, 0, sizeof(bc));
 	bc.subdevice = subdev;
 	bc.maximum_size = max_size;
@@ -72,6 +74,7 @@ int _comedi_get_buffer_contents(comedi_t *it, unsigned int subdev)
 	int ret;
 	comedi_bufinfo bi;
 
+	if(!valid_subd(it,subdev)) return -1;
 	memset(&bi, 0, sizeof(bi));
 	bi.subdevice = subdev;
 	ret = comedi_ioctl(it->fd, COMEDI_BUFINFO, &bi);
@@ -89,6 +92,7 @@ int _comedi_mark_buffer_read(comedi_t *it, unsigned int subdev, unsigned int byt
 	int ret;
 	comedi_bufinfo bi;
 
+	if(!valid_subd(it,subdev)) return -1;
 	memset(&bi, 0, sizeof(bi));
 	bi.subdevice = subdev;
 	bi.bytes_read = bytes;
@@ -107,6 +111,7 @@ int _comedi_mark_buffer_written(comedi_t *it, unsigned int subdev, unsigned int 
 	int ret;
 	comedi_bufinfo bi;
 
+	if(!valid_subd(it,subdev)) return -1;
 	memset(&bi, 0, sizeof(bi));
 	bi.subdevice = subdev;
 	bi.bytes_written = bytes;
@@ -125,6 +130,7 @@ int _comedi_get_buffer_offset(comedi_t *it, unsigned int subdev)
 	int ret;
 	comedi_bufinfo bi;
 
+	if(!valid_subd(it,subdev)) return -1;
 	memset(&bi, 0, sizeof(bi));
 	bi.subdevice = subdev;
 	ret = comedi_ioctl(it->fd, COMEDI_BUFINFO, &bi);
@@ -138,6 +144,7 @@ int _comedi_get_front_count(comedi_t *it, unsigned int subdev)
 	int ret;
 	comedi_bufinfo bi;
 
+	if(!valid_subd(it,subdev)) return -1;
 	memset(&bi, 0, sizeof(bi));
 	bi.subdevice = subdev;
 	ret = comedi_ioctl(it->fd, COMEDI_BUFINFO, &bi);
