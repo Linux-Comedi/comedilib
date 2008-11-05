@@ -13,7 +13,7 @@
 #include "comedi_test.h"
 
 
-static char *subdevice_types[]={
+static const char * const subdevice_types[]={
 	"unused",
 	"analog input",
 	"analog output",
@@ -25,7 +25,8 @@ static char *subdevice_types[]={
 	"memory",
 	"calibration",
 	"processor",
-	"serial"
+	"serial",
+	"pwm"
 };
 
 
@@ -33,6 +34,7 @@ int test_info(void)
 {
 	int j;
 	int type;
+	const char *type_str;
 	int chan,n_chans;
 	int n_ranges;
 	comedi_range *rng;
@@ -40,7 +42,12 @@ int test_info(void)
 	printf("rev 1\n");
 
 	type = comedi_get_subdevice_type(device,subdevice);
-	printf("I: subdevice type: %d (%s)\n",type,subdevice_types[type]);
+	if(type < (int)(sizeof(subdevice_types) / sizeof(subdevice_types[0]))) {
+		type_str = subdevice_types[type];
+	}else{
+		type_str = "UNKNOWN";
+	}
+	printf("I: subdevice type: %d (%s)\n",type,type_str);
 	if(type==COMEDI_SUBD_UNUSED)
 		return 0;
 	n_chans=comedi_get_n_channels(device,subdevice);

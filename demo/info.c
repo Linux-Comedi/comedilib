@@ -22,7 +22,7 @@ void help(void)
 
 char *tobinary(char *s,int bits,int n);
 
-char *subdevice_types[]={
+static const char * const subdevice_types[]={
 	"unused",
 	"analog input",
 	"analog output",
@@ -34,7 +34,8 @@ char *subdevice_types[]={
 	"memory",
 	"calibration",
 	"processor",
-	"serial digital I/O"
+	"serial digital I/O",
+	"pwm"
 };
 
 comedi_t *it;
@@ -45,6 +46,7 @@ int main(int argc,char *argv[])
 {
 	int i,j;
 	int n_subdevices,type;
+	const char *type_str;
 	int chan,n_chans;
 	int n_ranges;
 	int subdev_flags;
@@ -69,7 +71,12 @@ int main(int argc,char *argv[])
 	for(i = 0; i < n_subdevices; i++){
 		printf("subdevice %d:\n",i);
 		type = comedi_get_subdevice_type(it, i);
-		printf("  type: %d (%s)\n",type,subdevice_types[type]);
+		if(type < (int)(sizeof(subdevice_types) / sizeof(subdevice_types[0]))){
+			type_str = subdevice_types[type];
+		}else{
+			type_str = "UNKNOWN";
+		}
+		printf("  type: %d (%s)\n",type,type_str);
 		if(type==COMEDI_SUBD_UNUSED)
 			continue;
 		subdev_flags = comedi_get_subdevice_flags(it, i);
