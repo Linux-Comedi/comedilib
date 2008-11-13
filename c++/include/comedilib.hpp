@@ -405,6 +405,19 @@ namespace comedi
 			}
 			return retval;
 		}
+		unsigned get_buffer_contents() const
+		{
+			int retval = comedi_get_buffer_contents(comedi_handle(), index());
+			if(retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_get_buffer_contents() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_get_buffer_contents");
+				throw std::runtime_error(message.str());
+			}
+			return retval;
+		}
 		void get_clock_source(unsigned *clock, unsigned *period_ns) const
 		{
 			int retval = comedi_get_clock_source(comedi_handle(), index(), clock, period_ns);
