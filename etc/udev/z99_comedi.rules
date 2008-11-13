@@ -1,6 +1,6 @@
 #This file provides some example udev rules which may be helpful for comedi.
 #It includes rules for creating symlinks to the device file with 
-#persistent names in /dev/comedi/by-id/, setting permissions and
+#persistent names in /dev/comedi/by-path/, setting permissions and
 #group ownership on the comedi device files, and examples showing
 #adjustment of a device file's buffer size.
 
@@ -11,10 +11,10 @@ ACTION!="add", GOTO="comedi_add_end"
 
 
 #create symlink with persistent name based on hardware path
-KERNEL=="comedi[0-9]*", KERNEL!="comedi[0-9]*_subd[0-9]*", SUBSYSTEMS=="pci", SYMLINK+="comedi/by-id/pci-$id"
+KERNEL=="comedi[0-9]*", KERNEL!="comedi[0-9]*_subd[0-9]*", SUBSYSTEMS=="pci", SYMLINK+="comedi/by-path/pci-$id"
 
 #persistent subdevice symlinks
-KERNEL=="comedi[0-9]*subd[0-9]*", SUBSYSTEMS=="pci", SYMLINK+="comedi/by-id/pci-$id_subd%n"
+KERNEL=="comedi[0-9]*subd[0-9]*", SUBSYSTEMS=="pci", SYMLINK+="comedi/by-path/pci-$id_subd%n"
 
 
 #The following line would automatically run comedi_config on main device file
