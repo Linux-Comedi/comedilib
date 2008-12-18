@@ -309,12 +309,8 @@ static int do_test_for_insnlist(comedi_t *dev)
 static int do_test_for_insn(comedi_t *dev)
 {
 	comedi_insn insn;
-	comedi_insnlist il;
 	lsampl_t data[2];
 	int ret;
-
-	il.n_insns = 1;
-	il.insns = &insn;
 
 	memset(&insn,0,sizeof(insn));
 	insn.insn = INSN_GTOD;
