@@ -350,7 +350,7 @@ static int do_test_for_insn_bits(comedi_t *dev,unsigned int subdevice)
 	insn.subdev = subdevice;
 	memset(data, 0, insn.n * sizeof(data[0]));
 
-	ret = comedi_do_insnlist(dev,&il);
+	ret = comedi_ioctl(dev->fd, COMEDI_INSNLIST, &il);
 
 	if(ret<0 && (errno==EINVAL || errno==EIO)){
 		return 0;
