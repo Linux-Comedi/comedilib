@@ -186,18 +186,18 @@ ni_660x:
 		<para>
 			In the <filename role="directory">demo/</filename> subdirectory of
 			Comedilib, there is a
-			command called <command>info</command>, which provides information
+			command called <command>board_info</command>, which provides information
 			about each subdevice on the board.  Its output can be rather long,
 			if the board has several subdevices.
 			Here's part of the output of the <literal>National Instruments</literal>
 			board (which is on <filename>/dev/comedi0</filename>), as a result of
-			the command <command>demo/info /dev/comedi0</command> (run from the
+			the command <command>demo/board_info /dev/comedi0</command> (run from the
 			top-level directory of comedilib):
 		</para>
 
 <screen>
 overall info:
-	version code: 0x000604
+	version code: 0x00074a
 	driver name: ni_atmio
 	board name: at-mio-16e-10
 	number of subdevices: 7
