@@ -222,7 +222,7 @@ subdevice 0:
 
 		<para>
 			&comedi; has more information about the device than what is displayed
-			above, but <command>demo/info</command> doesn't currently display
+			above, but <command>demo/board_info</command> doesn't currently display
 			this.
 		</para>
 
