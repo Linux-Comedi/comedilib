@@ -298,7 +298,7 @@ static int do_test_for_insnlist(comedi_t *dev)
 
 	if(ret<0){
 		if(errno!=EIO){
-			fprintf(stderr,"BUG in do_test_for_insn()\n");
+			fprintf(stderr,"BUG in do_test_for_insnlist()\n");
 		}
 		return 0;
 	}
