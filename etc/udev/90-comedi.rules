@@ -1,5 +1,1 @@
-ACTION=="add", BUS=="usb", SYSFS{idVendor}=="13d8", SYSFS{idProduct}=="0001", RUN+="/lib/udev/usbdux"
-ACTION=="add", BUS=="usb", SYSFS{idVendor}=="13d8", SYSFS{idProduct}=="0002", RUN+="/lib/udev/usbdux"
-ACTION=="add", BUS=="usb", SYSFS{idVendor}=="13d8", SYSFS{idProduct}=="0010", RUN+="/lib/udev/usbduxfast"
-
 KERNEL=="comedi[0-9]*", MODE="0666"
