@@ -17,4 +17,4 @@ pyexec_SCRIPTS = comedi.py
 EXTRA_DIST = README.txt setup.py test_comedi.py
 
 comedi_python_wrap.c comedi.py: $(srcdir)/../comedi.i
-	$(SWIG) -python -o comedi_python_wrap.c $(srcdir)/../comedi.i
+	$(SWIG) -python -o comedi_python_wrap.c -I$(top_srcdir)/include $(srcdir)/../comedi.i

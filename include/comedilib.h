@@ -34,6 +34,17 @@
 extern "C" {
 #endif
 
+/* Macros for swig to %include this file. */
+#ifdef SWIG
+#define SWIG_OUTPUT(x)  OUTPUT
+#define SWIG_INPUT(x)   INPUT
+#define SWIG_INOUT(x)   INOUT
+#else
+#define SWIG_OUTPUT(x)  x
+#define SWIG_INPUT(x)   x
+#define SWIG_INOUT(x)   x
+#endif
+
 typedef struct comedi_t_struct comedi_t;
 
 typedef struct{
@@ -130,29 +141,29 @@ int comedi_sampl_from_phys(sampl_t *dest,int dst_stride,double *src,
 
 /* syncronous stuff */
 int comedi_data_read(comedi_t *it,unsigned int subd,unsigned int chan,
-	unsigned int range,unsigned int aref,lsampl_t *data);
+	unsigned int range,unsigned int aref,lsampl_t *SWIG_OUTPUT(data));
 int comedi_data_read_n(comedi_t *it,unsigned int subd,unsigned int chan,
-	unsigned int range,unsigned int aref,lsampl_t *data, unsigned int n);
+	unsigned int range,unsigned int aref,lsampl_t *SWIG_OUTPUT(data), unsigned int n);
 int comedi_data_read_hint(comedi_t *it,unsigned int subd,unsigned int chan,
 	unsigned int range,unsigned int aref);
 int comedi_data_read_delayed(comedi_t *it,unsigned int subd,unsigned int chan,
-	unsigned int range,unsigned int aref,lsampl_t *data, unsigned int nano_sec);
+	unsigned int range,unsigned int aref,lsampl_t *SWIG_OUTPUT(data), unsigned int nano_sec);
 int comedi_data_write(comedi_t *it,unsigned int subd,unsigned int chan,
 	unsigned int range,unsigned int aref,lsampl_t data);
 int comedi_dio_config(comedi_t *it,unsigned int subd,unsigned int chan,
 	unsigned int dir);
 int comedi_dio_get_config(comedi_t *it,unsigned int subd,unsigned int chan,
-	unsigned int *dir);
+	unsigned int *SWIG_OUTPUT(dir));
 int comedi_dio_read(comedi_t *it,unsigned int subd,unsigned int chan,
-	unsigned int *bit);
+	unsigned int *SWIG_OUTPUT(bit));
 int comedi_dio_write(comedi_t *it,unsigned int subd,unsigned int chan,
 	unsigned int bit);
 int comedi_dio_bitfield2(comedi_t *it,unsigned int subd,
-	unsigned int write_mask, unsigned int *bits, unsigned int base_channel);
+	unsigned int write_mask, unsigned int *SWIG_INOUT(bits), unsigned int base_channel);
 /* Should be moved to _COMEDILIB_DEPRECATED once bindings for other languages are updated
  * to use comedi_dio_bitfield2() instead.*/
 int comedi_dio_bitfield(comedi_t *it,unsigned int subd,
-	unsigned int write_mask, unsigned int *bits);
+	unsigned int write_mask, unsigned int *SWIG_INOUT(bits));
 
 /* slowly varying stuff */
 int comedi_sv_init(comedi_sv_t *it,comedi_t *dev,unsigned int subd,unsigned int chan);
@@ -162,12 +173,12 @@ int comedi_sv_measure(comedi_sv_t *it,double *data);
 /* streaming I/O (commands) */
 
 int comedi_get_cmd_src_mask(comedi_t *dev,unsigned int subdevice,
-	comedi_cmd *cmd);
+	comedi_cmd *SWIG_INOUT(cmd));
 int comedi_get_cmd_generic_timed(comedi_t *dev,unsigned int subdevice,
-	comedi_cmd *cmd, unsigned chanlist_len, unsigned scan_period_ns);
+	comedi_cmd *SWIG_INOUT(cmd), unsigned chanlist_len, unsigned scan_period_ns);
 int comedi_cancel(comedi_t *it,unsigned int subdevice);
 int comedi_command(comedi_t *it,comedi_cmd *cmd);
-int comedi_command_test(comedi_t *it,comedi_cmd *cmd);
+int comedi_command_test(comedi_t *it,comedi_cmd *SWIG_INOUT(cmd));
 int comedi_poll(comedi_t *dev,unsigned int subdevice);
 
 /* buffer control */
@@ -262,10 +273,10 @@ enum comedi_conversion_direction
 int comedi_get_softcal_converter(
 	unsigned subdevice, unsigned channel, unsigned range,
 	enum comedi_conversion_direction direction,
-	const comedi_calibration_t *calibration, comedi_polynomial_t* polynomial);
+	const comedi_calibration_t *calibration, comedi_polynomial_t* SWIG_OUTPUT(polynomial));
 int comedi_get_hardcal_converter(
 	comedi_t *dev, unsigned subdevice, unsigned channel, unsigned range,
-	enum comedi_conversion_direction direction, comedi_polynomial_t* polynomial);
+	enum comedi_conversion_direction direction, comedi_polynomial_t* SWIG_OUTPUT(polynomial));
 double comedi_to_physical(lsampl_t data,
 	const comedi_polynomial_t *conversion_polynomial);
 lsampl_t comedi_from_physical(double data,
@@ -275,10 +286,10 @@ int comedi_internal_trigger(comedi_t *dev, unsigned subd, unsigned trignum);
 /* INSN_CONFIG wrappers */
 int comedi_arm(comedi_t *device, unsigned subdevice, unsigned source);
 int comedi_reset(comedi_t *device, unsigned subdevice);
-int comedi_get_clock_source(comedi_t *device, unsigned subdevice, unsigned *clock, unsigned *period_ns);
+int comedi_get_clock_source(comedi_t *device, unsigned subdevice, unsigned *SWIG_OUTPUT(clock), unsigned *SWIG_OUTPUT(period_ns));
 int comedi_get_gate_source(comedi_t *device, unsigned subdevice, unsigned channel,
-	unsigned gate, unsigned *source);
-int comedi_get_routing(comedi_t *device, unsigned subdevice, unsigned channel, unsigned *routing);
+	unsigned gate, unsigned *SWIG_OUTPUT(source));
+int comedi_get_routing(comedi_t *device, unsigned subdevice, unsigned channel, unsigned *SWIG_OUTPUT(routing));
 int comedi_set_counter_mode(comedi_t *device, unsigned subdevice, unsigned channel, unsigned mode_bits);
 int comedi_set_clock_source(comedi_t *device, unsigned subdevice, unsigned clock, unsigned period_ns);
 int comedi_set_filter(comedi_t *device, unsigned subdevice, unsigned channel, unsigned filter);
