@@ -234,6 +234,9 @@ typedef unsigned short sampl_t;
 #define SDF_RUNNING	0x08000000	/* subdevice is acquiring data */
 #define SDF_LSAMPL	0x10000000	/* subdevice uses 32-bit samples */
 #define SDF_PACKED	0x20000000	/* subdevice can do packed DIO */
+/* re recyle these flags for PWM */
+#define SDF_PWM_COUNTER SDF_MODE0       /* PWM can automatically switch off */
+#define SDF_PWM_HBRIDGE SDF_MODE1       /* PWM is signed (H-bridge) */
 
 /* subdevice types */
 
@@ -250,7 +253,8 @@ enum comedi_subdevice_type
 	COMEDI_SUBD_MEMORY,	/* memory, EEPROM, DPRAM */
 	COMEDI_SUBD_CALIB,	/* calibration DACs */
 	COMEDI_SUBD_PROC,	/* processor, DSP */
-	COMEDI_SUBD_SERIAL	/* serial IO */
+	COMEDI_SUBD_SERIAL,	/* serial IO */
+	COMEDI_SUBD_PWM         /* PWM */
 };
 
 /* configuration instructions */
@@ -290,11 +294,18 @@ enum configuration_ids
 	INSN_CONFIG_GET_CLOCK_SRC = 2004,	// Get master clock source
 	INSN_CONFIG_SET_OTHER_SRC = 2005,       // Set other source
 //	INSN_CONFIG_GET_OTHER_SRC = 2006,	// Get other source
+	INSN_CONFIG_GET_HARDWARE_BUFFER_SIZE = 2006,	// Get size in bytes of subdevice's on-board fifos used during streaming input/output
 	INSN_CONFIG_SET_COUNTER_MODE = 4097,
 	INSN_CONFIG_8254_SET_MODE = INSN_CONFIG_SET_COUNTER_MODE,	/* deprecated */
 	INSN_CONFIG_8254_READ_STATUS = 4098,
 	INSN_CONFIG_SET_ROUTING = 4099,
 	INSN_CONFIG_GET_ROUTING = 4109,
+/* PWM */
+	INSN_CONFIG_PWM_SET_PERIOD = 5000,   /* sets frequency */
+	INSN_CONFIG_PWM_GET_PERIOD = 5001,   /* gets frequency */
+	INSN_CONFIG_GET_PWM_STATUS = 5002,          /* is it running? */
+	INSN_CONFIG_PWM_SET_H_BRIDGE = 5003, /* sets H bridge: duty cycle and sign bit for a relay  at the same time*/
+	INSN_CONFIG_PWM_GET_H_BRIDGE = 5004  /* gets H bridge data: duty cycle and the sign bit */
 };
 
 enum comedi_io_direction
@@ -302,6 +313,13 @@ enum comedi_io_direction
 	COMEDI_INPUT = 0,
 	COMEDI_OUTPUT = 1,
 	COMEDI_OPENDRAIN = 2
+};
+
+enum comedi_support_level
+{
+        COMEDI_UNKNOWN_SUPPORT = 0,
+        COMEDI_SUPPORTED,
+        COMEDI_UNSUPPORTED
 };
 
 /* ioctls */
@@ -424,7 +442,8 @@ struct comedi_subdinfo_struct{
 	unsigned int	flags;		/* channel flags */
 	unsigned int	range_type;	/* lookup in kernel */
 	unsigned int	settling_time_0;
-	unsigned int unused[9];
+        unsigned insn_bits_support;	/* see support_level enum for values*/
+	unsigned int unused[8];
 };
 
 struct comedi_devinfo_struct{
@@ -527,6 +546,19 @@ enum i8254_mode
 	I8254_BINARY = 0
 };
 
+static inline unsigned NI_USUAL_PFI_SELECT(unsigned pfi_channel) {
+        if (pfi_channel < 10)
+                return 0x1 + pfi_channel;
+        else
+                return 0xb + pfi_channel;
+}
+static inline unsigned NI_USUAL_RTSI_SELECT(unsigned rtsi_channel) {
+        if (rtsi_channel < 7)
+                return 0xb + rtsi_channel;
+        else
+                return 0x1b;
+}
+
 /* mode bits for NI general-purpose counters, set with INSN_CONFIG_SET_COUNTER_MODE */
 #define NI_GPCT_COUNTING_MODE_SHIFT 16
 #define NI_GPCT_INDEX_PHASE_BITSHIFT 20
@@ -602,6 +634,15 @@ enum ni_gpct_clock_source_bits
 	NI_GPCT_PRESCALE_X8_CLOCK_SRC_BITS = 0x20000000,	/* divide source by 8 */
 	NI_GPCT_INVERT_CLOCK_SRC_BIT = 0x80000000
 };
+static inline unsigned NI_GPCT_SOURCE_PIN_CLOCK_SRC_BITS(unsigned n) {	/* NI 660x-specific */
+        return 0x10 + n;
+}
+static inline unsigned NI_GPCT_RTSI_CLOCK_SRC_BITS(unsigned n) {
+        return 0x18 + n;
+}
+static inline unsigned NI_GPCT_PFI_CLOCK_SRC_BITS(unsigned n) {	/* no pfi on NI 660x */
+        return 0x20 + n;
+}
 
 /* Possibilities for setting a gate source with
 INSN_CONFIG_SET_GATE_SRC when using NI general-purpose counters.
@@ -627,6 +668,18 @@ enum ni_gpct_gate_select
 	we should add them here with an offset of 0x300 when known. */
 	NI_GPCT_DISABLED_GATE_SELECT = 0x8000,
 };
+static inline unsigned NI_GPCT_GATE_PIN_GATE_SELECT(unsigned n) {
+        return 0x102 + n;
+}
+static inline unsigned NI_GPCT_RTSI_GATE_SELECT(unsigned n) {
+        return NI_USUAL_RTSI_SELECT(n);
+}
+static inline unsigned NI_GPCT_PFI_GATE_SELECT(unsigned n) {
+        return NI_USUAL_PFI_SELECT(n);
+}
+static inline unsigned NI_GPCT_UP_DOWN_PIN_GATE_SELECT(unsigned n) {
+        return 0x202 + n;
+}
 
 /* Possibilities for setting a source with
 INSN_CONFIG_SET_OTHER_SRC when using NI general-purpose counters. */
@@ -641,6 +694,9 @@ enum ni_gpct_other_select
         // Still unknown, probably only need NI_GPCT_PFI_OTHER_SELECT
 	NI_GPCT_DISABLED_OTHER_SELECT = 0x8000,
 };
+static inline unsigned NI_GPCT_PFI_OTHER_SELECT(unsigned n) {
+        return NI_USUAL_PFI_SELECT(n);
+}
 
 
 /* start sources for ni general-purpose counters for use with
@@ -687,6 +743,9 @@ enum ni_mio_clock_source
 	NI_MIO_PLL_PXI10_CLOCK = 3,
 	NI_MIO_PLL_RTSI0_CLOCK = 4
 };
+static inline unsigned NI_MIO_PLL_RTSI_CLOCK(unsigned rtsi_channel) {
+        return NI_MIO_PLL_RTSI0_CLOCK + rtsi_channel;
+}
 
 /* Signals which can be routed to an NI RTSI pin with INSN_CONFIG_SET_ROUTING.
  The numbers assigned are not arbitrary, they correspond to the bits required
@@ -704,6 +763,9 @@ enum ni_rtsi_routing
 	NI_RTSI_OUTPUT_RTSI_BRD_0 = 8,
 	NI_RTSI_OUTPUT_RTSI_OSC = 12 /* pre-m-series always have RTSI clock on line 7 */
 };
+static inline unsigned NI_RTSI_OUTPUT_RTSI_BRD(unsigned n) {
+        return NI_RTSI_OUTPUT_RTSI_BRD_0 + n;
+}
 
 /* Signals which can be routed to an NI PFI pin on an m-series board
  with INSN_CONFIG_SET_ROUTING.  These numbers are also returned
@@ -738,9 +800,29 @@ enum ni_pfi_routing
 	NI_PFI_OUTPUT_CDI_SAMPLE = 29,
 	NI_PFI_OUTPUT_CDO_UPDATE = 30
 };
+static inline unsigned NI_PFI_OUTPUT_RTSI(unsigned rtsi_channel) {
+        return NI_PFI_OUTPUT_RTSI0 + rtsi_channel;
+}
+
+/* Signals which can be routed to output on a NI PFI pin on a 660x board
+ with INSN_CONFIG_SET_ROUTING.  The numbers assigned are
+ not arbitrary, they correspond to the bits required
+ to program the board.  Lines 0 to 7 can only be set to
+ NI_660X_PFI_OUTPUT_DIO.  Lines 32 to 39 can only be set to
+ NI_660X_PFI_OUTPUT_COUNTER. */
+enum ni_660x_pfi_routing {
+	NI_660X_PFI_OUTPUT_COUNTER = 1,	// counter
+	NI_660X_PFI_OUTPUT_DIO = 2,	// static digital output
+};
 
 /* NI External Trigger lines.  These values are not arbitrary, but are related to
 	the bits required to program the board (offset by 1 for historical reasons). */
+static inline unsigned NI_EXT_PFI(unsigned pfi_channel) {
+        return NI_USUAL_PFI_SELECT(pfi_channel) - 1;
+}
+static inline unsigned NI_EXT_RTSI(unsigned rtsi_channel) {
+        return NI_USUAL_RTSI_SELECT(rtsi_channel) - 1;
+}
 
 /* status bits for INSN_CONFIG_GET_COUNTER_STATUS */
 enum comedi_counter_status_flags
@@ -748,6 +830,87 @@ enum comedi_counter_status_flags
 	COMEDI_COUNTER_ARMED = 0x1,
 	COMEDI_COUNTER_COUNTING = 0x2,
 	COMEDI_COUNTER_TERMINAL_COUNT = 0x4,
+};
+
+/* Clock sources for CDIO subdevice on NI m-series boards.
+Used as the scan_begin_arg for a comedi_command. These
+sources may also be bitwise-or'd with CR_INVERT to change polarity. */
+enum ni_m_series_cdio_scan_begin_src {
+        NI_CDIO_SCAN_BEGIN_SRC_GROUND = 0,
+        NI_CDIO_SCAN_BEGIN_SRC_AI_START = 18,
+        NI_CDIO_SCAN_BEGIN_SRC_AI_CONVERT = 19,
+        NI_CDIO_SCAN_BEGIN_SRC_PXI_STAR_TRIGGER = 20,
+        NI_CDIO_SCAN_BEGIN_SRC_G0_OUT = 28,
+        NI_CDIO_SCAN_BEGIN_SRC_G1_OUT = 29,
+        NI_CDIO_SCAN_BEGIN_SRC_ANALOG_TRIGGER = 30,
+        NI_CDIO_SCAN_BEGIN_SRC_AO_UPDATE = 31,
+        NI_CDIO_SCAN_BEGIN_SRC_FREQ_OUT = 32,
+        NI_CDIO_SCAN_BEGIN_SRC_DIO_CHANGE_DETECT_IRQ = 33
+};
+static inline unsigned NI_CDIO_SCAN_BEGIN_SRC_PFI(unsigned pfi_channel) {
+        return NI_USUAL_PFI_SELECT(pfi_channel);
+}
+static inline unsigned NI_CDIO_SCAN_BEGIN_SRC_RTSI(unsigned
+        rtsi_channel) {
+        return NI_USUAL_RTSI_SELECT(rtsi_channel);
+}
+
+/* scan_begin_src for scan_begin_arg==TRIG_EXT with analog output command
+on NI boards.  These scan begin sources can also be bitwise-or'd with
+CR_INVERT to change polarity. */
+static inline unsigned NI_AO_SCAN_BEGIN_SRC_PFI(unsigned pfi_channel) {
+        return NI_USUAL_PFI_SELECT(pfi_channel);
+}
+static inline unsigned NI_AO_SCAN_BEGIN_SRC_RTSI(unsigned rtsi_channel) {
+        return NI_USUAL_RTSI_SELECT(rtsi_channel);
+}
+
+/* Bits for setting a clock source with
+ * INSN_CONFIG_SET_CLOCK_SRC when using NI frequency output subdevice. */
+enum ni_freq_out_clock_source_bits {
+        NI_FREQ_OUT_TIMEBASE_1_DIV_2_CLOCK_SRC,	// 10 MHz
+        NI_FREQ_OUT_TIMEBASE_2_CLOCK_SRC	// 100 KHz
+};
+
+/* Values for setting a clock source with INSN_CONFIG_SET_CLOCK_SRC for
+ * 8254 counter subdevices on Amplicon DIO boards (amplc_dio200 driver). */
+enum amplc_dio_clock_source {
+        AMPLC_DIO_CLK_CLKN,	/* per channel external clock
+                                   input/output pin (pin is only an
+                                   input when clock source set to this
+                                   value, otherwise it is an output) */
+        AMPLC_DIO_CLK_10MHZ,	/* 10 MHz internal clock */
+        AMPLC_DIO_CLK_1MHZ,	/* 1 MHz internal clock */
+        AMPLC_DIO_CLK_100KHZ,	/* 100 kHz internal clock */
+        AMPLC_DIO_CLK_10KHZ,	/* 10 kHz internal clock */
+        AMPLC_DIO_CLK_1KHZ,	/* 1 kHz internal clock */
+        AMPLC_DIO_CLK_OUTNM1,	/* output of preceding counter channel
+                                   (for channel 0, preceding counter
+                                   channel is channel 2 on preceding
+                                   counter subdevice, for first counter
+                                   subdevice, preceding counter
+                                   subdevice is the last counter
+                                   subdevice) */
+        AMPLC_DIO_CLK_EXT	/* per chip external input pin */
+};
+
+/* Values for setting a gate source with INSN_CONFIG_SET_GATE_SRC for
+ * 8254 counter subdevices on Amplicon DIO boards (amplc_dio200 driver). */
+enum amplc_dio_gate_source {
+        AMPLC_DIO_GAT_VCC,	/* internal high logic level */
+        AMPLC_DIO_GAT_GND,	/* internal low logic level */
+        AMPLC_DIO_GAT_GATN,	/* per channel external gate input */
+        AMPLC_DIO_GAT_NOUTNM2,	/* negated output of counter channel
+                                   minus 2 (for channels 0 or 1,
+                                   channel minus 2 is channel 1 or 2 on
+                                   the preceding counter subdevice, for
+                                   the first counter subdevice the
+                                   preceding counter subdevice is the
+                                   last counter subdevice) */
+        AMPLC_DIO_GAT_RESERVED4,
+        AMPLC_DIO_GAT_RESERVED5,
+        AMPLC_DIO_GAT_RESERVED6,
+        AMPLC_DIO_GAT_RESERVED7
 };
 
 /* comedilib.h */
@@ -865,10 +1028,12 @@ int comedi_dio_read(comedi_t *it,unsigned int subd,unsigned int chan,
 	unsigned int *OUTPUT);
 int comedi_dio_write(comedi_t *it,unsigned int subd,unsigned int chan,
 	unsigned int bit);
-int comedi_dio_bitfield(comedi_t *it,unsigned int subd,
-	unsigned int write_mask, unsigned int *INOUT);
 int comedi_dio_bitfield2(comedi_t *it, unsigned int subd,
 	unsigned int write_mask, unsigned int *INOUT, unsigned base_channel);
+/* Should be moved to _COMEDILIB_DEPRECATED once bindings for other languages are updated
+ * to use comedi_dio_bitfield2() instead.*/
+int comedi_dio_bitfield(comedi_t *it,unsigned int subd,
+	unsigned int write_mask, unsigned int *INOUT);
 
 /* slowly varying stuff */
 int comedi_sv_init(comedi_sv_t *it,comedi_t *dev,unsigned int subd,unsigned int chan);
@@ -908,8 +1073,6 @@ int comedi_timed_1chan(comedi_t *it,unsigned int subdev,unsigned int chan,
 	unsigned int n_samples,double *data);
 int comedi_get_rangetype(comedi_t *it,unsigned int subdevice,
 	unsigned int chan);
-int comedi_dio_bitfield(comedi_t *it,unsigned int subd,
-	unsigned int write_mask, unsigned int *bits);
 #endif
 
 
@@ -988,5 +1151,22 @@ double comedi_to_physical(lsampl_t data,
 	const comedi_polynomial_t *conversion_polynomial);
 lsampl_t comedi_from_physical(double data,
 	const comedi_polynomial_t *conversion_polynomial);
+
+int comedi_internal_trigger(comedi_t *dev, unsigned subd, unsigned trignum);
+/* INSN_CONFIG wrappers */
+int comedi_arm(comedi_t *device, unsigned subdevice, unsigned source);
+int comedi_reset(comedi_t *device, unsigned subdevice);
+int comedi_get_clock_source(comedi_t *device, unsigned subdevice, unsigned *OUTPUT, unsigned *OUTPUT);
+int comedi_get_gate_source(comedi_t *device, unsigned subdevice, unsigned channel,
+	unsigned gate, unsigned *OUTPUT);
+int comedi_get_routing(comedi_t *device, unsigned subdevice, unsigned channel, unsigned *OUTPUT);
+int comedi_set_counter_mode(comedi_t *device, unsigned subdevice, unsigned channel, unsigned mode_bits);
+int comedi_set_clock_source(comedi_t *device, unsigned subdevice, unsigned clock, unsigned period_ns);
+int comedi_set_filter(comedi_t *device, unsigned subdevice, unsigned channel, unsigned filter);
+int comedi_set_gate_source(comedi_t *device, unsigned subdevice, unsigned channel, unsigned gate_index, unsigned gate_source);
+int comedi_set_other_source(comedi_t *device, unsigned subdevice, unsigned channel,
+	unsigned other, unsigned source);
+int comedi_set_routing(comedi_t *device, unsigned subdevice, unsigned channel, unsigned routing);
+int comedi_get_hardware_buffer_size(comedi_t *device, unsigned subdevice, enum comedi_io_direction direction);
 
 #endif
