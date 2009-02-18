@@ -185,6 +185,7 @@ char* _comedi_get_default_calibration_path( comedi_t *dev )
 	const char *temp;
 	char *board_name;
 	const char *driver_name;
+	int err;
 
 	if(!valid_dev(dev)) return NULL;
 	if( fstat( comedi_fileno( dev ), &file_stats ) < 0 )
@@ -206,10 +207,14 @@ char* _comedi_get_default_calibration_path( comedi_t *dev )
 	board_name = strdup( temp );
 
 	fixup_board_name( board_name );
-	asprintf( &file_path, LOCALSTATEDIR "/lib/comedi/calibrations/%s_%s_comedi%li",
+	err = asprintf( &file_path, LOCALSTATEDIR "/lib/comedi/calibrations/%s_%s_comedi%li",
 		driver_name, board_name, ( unsigned long ) minor( file_stats.st_rdev ) );
 
 	free( board_name );
+	if( err < 0 )
+	{
+		return NULL;
+	}
 	return file_path;
 }
 
