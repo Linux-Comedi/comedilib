@@ -1,7 +1,7 @@
 
 lib_LTLIBRARIES = libcomedi.la
 
-noinst_HEADERS = calib_lex.h calib_yacc.h comedi_errno.h libinternal.h
+noinst_HEADERS = calib_lex.h calib_yacc.h libinternal.h
 
 CLEANFILES = grammar.output
 
