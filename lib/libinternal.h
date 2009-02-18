@@ -26,6 +26,7 @@
 
 #define _COMEDILIB_DEPRECATED
 
+#include "config.h"
 #include "comedilib.h"
 #include "comedi.h"
 #include "comedi_errno.h"
@@ -66,7 +67,7 @@
 
 extern int __comedi_init;
 extern int __comedi_loglevel;
-extern int __comedi_errno;
+extern TLS int __comedi_errno;
 
 #if 0
 

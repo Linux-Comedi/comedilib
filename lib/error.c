@@ -40,7 +40,7 @@ char *__comedilib_error_strings[]={
 #define n_errors (sizeof(__comedilib_error_strings)/sizeof(void *))
 
 int __comedi_loglevel=1;
-int __comedi_errno=0;
+TLS int __comedi_errno=0;
 
 EXPORT_ALIAS_DEFAULT(_comedi_loglevel,comedi_loglevel,0.7.18);
 int _comedi_loglevel(int loglevel)
