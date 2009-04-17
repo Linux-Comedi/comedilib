@@ -3,12 +3,11 @@
 # no warranty
 #
 
-all: as31 usbdux_firmware.hex
+all: as31 usbdux_firmware.hex usbdux_firmware.bin
 
 as31:
 	make -C as31-2.1
 
-#deprecated
 usbdux_firmware.bin: fx2-include.asm usbdux_firmware.asm as31
 	as31-2.1/as31 -Fbin usbdux_firmware.asm
 
