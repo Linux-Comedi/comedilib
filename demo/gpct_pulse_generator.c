@@ -105,11 +105,18 @@ int main(int argc, char *argv[])
 	struct parsed_options options;
 
 	init_parsed_options(&options);
-	options.value = -1.;
+	options.value = -0.5;
 	parse_options(&options, argc, argv);
 	period_ns = lrint(1e9 / options.freq);
 	if(options.value < 0.)
-		up_time = period_ns / 2;
+	{
+		double duty;
+		if(-options.value < 1.0)
+			duty = -options.value;
+		else
+			duty = 1.0 / -options.value;
+		up_time = lrint(duty * period_ns);
+	}
 	else
 		up_time = lrint(options.value);
 	device = comedi_open(options.filename);
