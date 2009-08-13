@@ -102,6 +102,7 @@ int main(int argc, char *argv[])
 	unsigned up_time;
 	unsigned period_ns;
 	int retval;
+	int subdevice_type;
 	struct parsed_options options;
 
 	init_parsed_options(&options);
@@ -125,7 +126,18 @@ int main(int argc, char *argv[])
 		comedi_perror(options.filename);
 		exit(-1);
 	}
-	/*FIXME: check that device is counter */
+	subdevice_type = comedi_get_subdevice_type(device, options.subdevice);
+	if(subdevice_type < 0)
+	{
+		comedi_perror("comedi_get_subdevice_type()");
+		return -1;
+	}
+	if(subdevice_type != COMEDI_SUBD_COUNTER)
+	{
+		fprintf(stderr, "Subdevice is not a counter (type %i), but of type %i.\n",
+			COMEDI_SUBD_COUNTER, subdevice_type);
+		return -1;
+	}
 	printf("Generating pulse train on subdevice %d.\n", options.subdevice);
 	printf("Period = %d ns.\n", period_ns);
 	printf("Up Time = %d ns.\n", up_time);
