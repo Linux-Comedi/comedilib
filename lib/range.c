@@ -111,7 +111,7 @@ int _comedi_find_range(comedi_t *it,unsigned int subd,unsigned int chan,unsigned
 	best_ptr=NULL;
 	for(i=0;i<RANGE_LENGTH(range_type);i++){
 		range_ptr=comedi_get_range(it,subd,chan,i);
-		if(range_ptr->min<=min && range_ptr->max>=max){
+		if(range_ptr->unit==unit && range_ptr->min<=min && range_ptr->max>=max){
 			if(best<0 || (range_ptr->max-range_ptr->min) < 
 			   (best_ptr->max-best_ptr->min)){
 				best=i;
