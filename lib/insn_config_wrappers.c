@@ -63,8 +63,8 @@ int _comedi_arm(comedi_t *device, unsigned subdevice, unsigned target)
 	else return -1;
 }
 
-EXPORT_ALIAS_DEFAULT(_comedi_get_clock_source,comedi_get_clock_source,0.9.0);
-int _comedi_get_clock_source(comedi_t *device, unsigned subdevice, unsigned *clock, unsigned *period_ns)
+EXPORT_ALIAS_DEFAULT(_comedi_get_clock_source,comedi_get_clock_source,0.10.0);
+int _comedi_get_clock_source(comedi_t *device, unsigned subdevice, unsigned channel, unsigned *clock, unsigned *period_ns)
 {
 	comedi_insn insn;
 	lsampl_t data[3];
@@ -73,7 +73,7 @@ int _comedi_get_clock_source(comedi_t *device, unsigned subdevice, unsigned *clo
 	memset(&insn, 0, sizeof(comedi_insn));
 	insn.insn = INSN_CONFIG;
 	insn.subdev = subdevice;
-	insn.chanspec = 0;
+	insn.chanspec = channel;
 	insn.data = data;
 	insn.n = sizeof(data) / sizeof(data[0]);
 	memset(data, 0, insn.n * sizeof(data[0]));
@@ -84,6 +84,12 @@ int _comedi_get_clock_source(comedi_t *device, unsigned subdevice, unsigned *clo
 	if(clock) *clock = insn.data[1];
 	if(period_ns) *period_ns = insn.data[2];
 	return 0;
+}
+
+EXPORT_ALIAS_VER(_comedi_get_clock_source_chan0,comedi_get_clock_source,0.9.0);
+int _comedi_get_clock_source_chan0(comedi_t *device, unsigned subdevice, unsigned *clock, unsigned *period_ns)
+{
+	return _comedi_get_clock_source(device, subdevice, 0, clock, period_ns);
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_get_gate_source,comedi_get_gate_source,0.9.0);
@@ -151,8 +157,8 @@ int _comedi_set_counter_mode(comedi_t *device, unsigned subdevice, unsigned chan
 	else return -1;
 }
 
-EXPORT_ALIAS_DEFAULT(_comedi_set_clock_source,comedi_set_clock_source,0.9.0);
-int _comedi_set_clock_source(comedi_t *device, unsigned subdevice, unsigned clock, unsigned period_ns)
+EXPORT_ALIAS_DEFAULT(_comedi_set_clock_source,comedi_set_clock_source,0.10.0);
+int _comedi_set_clock_source(comedi_t *device, unsigned subdevice, unsigned channel, unsigned clock, unsigned period_ns)
 {
 	comedi_insn insn;
 	lsampl_t data[3];
@@ -169,6 +175,12 @@ int _comedi_set_clock_source(comedi_t *device, unsigned subdevice, unsigned cloc
 
 	if(comedi_do_insn(device, &insn) >= 0) return 0;
 	else return -1;
+}
+
+EXPORT_ALIAS_VER(_comedi_set_clock_source_chan0,comedi_set_clock_source,0.9.0);
+int _comedi_set_clock_source_chan0(comedi_t *device, unsigned subdevice, unsigned clock, unsigned period_ns)
+{
+	return _comedi_set_clock_source(device, subdevice, 0, clock, period_ns);
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_set_filter,comedi_set_filter,0.9.0);

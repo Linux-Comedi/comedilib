@@ -110,3 +110,9 @@ v0.9.0 {
 		comedi_set_routing;
 		comedi_get_hardware_buffer_size;
 } v0.8.0;
+
+v0.10.0 {
+	global:
+		comedi_get_clock_source;
+		comedi_set_clock_source;
+} v0.9.0;

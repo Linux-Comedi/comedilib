@@ -73,7 +73,7 @@ int ni_gpct_start_pulse_generator(comedi_t *device, unsigned subdevice, unsigned
 	if(retval < 0) return retval;
 
 	/* 20MHz clock */
-	retval = comedi_set_clock_source(device, subdevice, NI_GPCT_TIMEBASE_1_CLOCK_SRC_BITS, clock_period_ns);
+	retval = comedi_set_clock_source(device, subdevice, 0, NI_GPCT_TIMEBASE_1_CLOCK_SRC_BITS, clock_period_ns);
 	if(retval < 0) return retval;
 
 	up_ticks = (up_time_ns + clock_period_ns / 2) / clock_period_ns;

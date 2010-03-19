@@ -18,6 +18,7 @@ Function: comedi_get_clock_source -- get master clock for a subdevice
 Retval: int
 Param: comedi_t * device
 Param: unsigned int subdevice
+Param: unsigned int channel
 Param: unsigned int *clock
 Param: unsigned int *period_ns
 Status: alpha
@@ -32,6 +33,9 @@ Description:
  The frequency of the clock in nanoseconds (or zero if it is unknown)
  will be written to
  *<parameter>period_ns</parameter>.
+ If the subdevice does not support configuring its master clocks
+ on a per-channel basis, then the <parameter>channel</parameter>
+ parameter will be ignored.
 
  It is safe to pass NULL pointers as the <parameter>clock</parameter> or
  <parameter>period_ns</parameter>
@@ -123,12 +127,17 @@ Function: comedi_set_clock_source -- set master clock for a subdevice
 Retval: int
 Param: comedi_t * device
 Param: unsigned int subdevice
+Param: unsigned int channel
 Param: unsigned int clock
 Param: unsigned int period_ns
 Status: alpha
 Description:
  This function selects a master clock for a subdevice.  The <parameter>clock</parameter>
- parameter selects the master clock, and is driver-dependant.  The <parameter>period_ns</parameter>
+ parameter selects the master clock, and is driver-dependant.  
+ If the subdevice does not support configuring its master clocks on a
+ per-channel basis, then the <parameter>channel</parameter> parameter
+ will be ignored.
+ The <parameter>period_ns</parameter>
  parameter specifies the clock's period in nanoseconds.  It may left unspecified by using
  a value of zero.  Drivers will ignore the clock period if they already
  know what the clock period should be for the specified clock (i.e. for an

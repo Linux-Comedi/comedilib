@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 	else
 		period_ns = 0;
 	clock_selection = options.value;
-	printf("Selecting master clock %d on subdevice %d.\n", clock_selection, options.subdevice);
+	printf("Selecting master clock %d for channel %d on subdevice.\n", clock_selection, options.channel, options.subdevice);
 	if(period_ns)
 	{
 		printf("Clock period = %d nanoseconds.\n", period_ns);
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 		printf("Clock period unspecified.\n");
 	}
 
-	retval = comedi_set_clock_source(device, options.subdevice, clock_selection, period_ns);
+	retval = comedi_set_clock_source(device, options.subdevice, options.channel, clock_selection, period_ns);
 	if(retval < 0) comedi_perror("comedi_set_clock_source");
 
 	comedi_close(device);

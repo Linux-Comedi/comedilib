@@ -418,15 +418,27 @@ namespace comedi
 			}
 			return retval;
 		}
-		void get_clock_source(unsigned *clock, unsigned *period_ns) const
+		void get_clock_source(unsigned channel, unsigned *clock, unsigned *period_ns) const
 		{
-			int retval = comedi_get_clock_source(comedi_handle(), index(), clock, period_ns);
+			int retval = comedi_get_clock_source(comedi_handle(), index(), channel, clock, period_ns);
 			if(retval < 0)
 			{
 				std::ostringstream message;
 				message << __PRETTY_FUNCTION__ << ": comedi_get_clock_source() failed.";
 				std::cerr << message.str() << std::endl;
 				comedi_perror("comedi_get_clock_source");
+				throw std::runtime_error(message.str());
+			}
+		}
+		void get_gate_source(unsigned channel, unsigned gate_index, unsigned *gate_source)
+		{
+			int retval = comedi_get_gate_source(comedi_handle(), index(), channel, gate_index, gate_source);
+			if (retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_get_gate_source() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_get_gate_source");
 				throw std::runtime_error(message.str());
 			}
 		}
@@ -572,9 +584,9 @@ namespace comedi
 				throw std::runtime_error(message.str());
 			}
 		}
-		void set_clock_source(unsigned clock, unsigned period_ns)
+		void set_clock_source(unsigned channel, unsigned clock, unsigned period_ns)
 		{
-			int retval = comedi_set_clock_source(comedi_handle(), index(), clock, period_ns);
+			int retval = comedi_set_clock_source(comedi_handle(), index(), channel, clock, period_ns);
 			if(retval < 0)
 			{
 				std::ostringstream message;

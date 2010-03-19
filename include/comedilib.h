@@ -286,12 +286,12 @@ int comedi_internal_trigger(comedi_t *dev, unsigned subd, unsigned trignum);
 /* INSN_CONFIG wrappers */
 int comedi_arm(comedi_t *device, unsigned subdevice, unsigned source);
 int comedi_reset(comedi_t *device, unsigned subdevice);
-int comedi_get_clock_source(comedi_t *device, unsigned subdevice, unsigned *SWIG_OUTPUT(clock), unsigned *SWIG_OUTPUT(period_ns));
+int comedi_get_clock_source(comedi_t *device, unsigned subdevice, unsigned channel, unsigned *SWIG_OUTPUT(clock), unsigned *SWIG_OUTPUT(period_ns));
 int comedi_get_gate_source(comedi_t *device, unsigned subdevice, unsigned channel,
 	unsigned gate, unsigned *SWIG_OUTPUT(source));
 int comedi_get_routing(comedi_t *device, unsigned subdevice, unsigned channel, unsigned *SWIG_OUTPUT(routing));
 int comedi_set_counter_mode(comedi_t *device, unsigned subdevice, unsigned channel, unsigned mode_bits);
-int comedi_set_clock_source(comedi_t *device, unsigned subdevice, unsigned clock, unsigned period_ns);
+int comedi_set_clock_source(comedi_t *device, unsigned subdevice, unsigned channel, unsigned clock, unsigned period_ns);
 int comedi_set_filter(comedi_t *device, unsigned subdevice, unsigned channel, unsigned filter);
 int comedi_set_gate_source(comedi_t *device, unsigned subdevice, unsigned channel, unsigned gate_index, unsigned gate_source);
 int comedi_set_other_source(comedi_t *device, unsigned subdevice, unsigned channel,

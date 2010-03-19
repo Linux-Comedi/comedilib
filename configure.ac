@@ -1,5 +1,5 @@
 
-AC_INIT([comedilib], [0.9.0])
+AC_INIT([comedilib], [0.10.0])
 AC_CANONICAL_TARGET([])
 
 AC_CONFIG_MACRO_DIR([m4])
@@ -23,7 +23,7 @@ AM_INIT_AUTOMAKE([-Wall -Werror])
 # age to 0.
 #
 # AS_LIBTOOL arguments are (prefix, current, revision, age)
-AS_LIBTOOL(COMEDILIB, 9, 0, 9)
+AS_LIBTOOL(COMEDILIB, 10, 0, 10)
 #libscxi c:r:a
 SCXI_SO_VERSION=9:0:9
 AC_SUBST(SCXI_SO_VERSION)
