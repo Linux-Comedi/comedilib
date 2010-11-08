@@ -30,6 +30,7 @@
 *
 ***********************************************************/
 %module comedi
+#define SWIG_USE_OLD_TYPEMAPS
 %{
 #include "comedilib.h"
 %}
