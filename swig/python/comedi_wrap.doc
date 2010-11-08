@@ -1036,7 +1036,7 @@ comedi_sv_measure(it,data)
 comedi_get_cmd_src_mask(dev,subdevice,cmd)
         [ returns int  ]
 
-comedi_get_cmd_generic_timed(dev,subdevice,cmd,ns)
+comedi_get_cmd_generic_timed(dev,subdevice,cmd,chanlist_len,ns)
         [ returns int  ]
 
 comedi_cancel(it,subdevice)
