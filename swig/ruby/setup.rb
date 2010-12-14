@@ -41,6 +41,9 @@ def File.dir?(path)
   File.directory?((path[-1,1] == '/') ? path : path + '/')
 end
 
+if ENV['DESTDIR'] then
+  DESTDIR = ENV['DESTDIR']
+end
 
 class ConfigTable
 
