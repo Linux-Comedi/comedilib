@@ -7,5 +7,5 @@ Name: Comedilib
 Description: Comedi Library
 Requires: 
 Version: @VERSION@
-Libs: -L${libdir} -lcomedi
+Libs: -L${libdir} -lcomedi -lm
 Cflags: -I${includedir}
