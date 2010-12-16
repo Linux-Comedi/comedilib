@@ -168,7 +168,7 @@ int comedi_dio_bitfield(comedi_t *it,unsigned int subd,
 /* slowly varying stuff */
 int comedi_sv_init(comedi_sv_t *it,comedi_t *dev,unsigned int subd,unsigned int chan);
 int comedi_sv_update(comedi_sv_t *it);
-int comedi_sv_measure(comedi_sv_t *it,double *data);
+int comedi_sv_measure(comedi_sv_t *it,double *SWIG_OUTPUT(data));
 
 /* streaming I/O (commands) */
 
