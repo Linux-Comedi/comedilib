@@ -57,9 +57,11 @@ static unsigned int cr_aref(unsigned int a){
 
 %array_class(unsigned int, chanlist);
 
-%typemap(ruby, argout) comedi_cmd *INOUT(VALUE info) {
+#ifdef SWIGRUBY
+%typemap(argout) comedi_cmd *INOUT(VALUE info) {
     $result = output_helper($result, $arg);
 };
+#endif
 
 %include "comedi.h"
 %include "comedilib.h"
