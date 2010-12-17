@@ -4,7 +4,7 @@ module1 = Extension('_comedi',
 			define_macros = [('MAJOR_VERSION','0'),
 					('MINOR_VERSION','1')],
 			include_dirs = ['../../include'],
-			library_dirs = ['../../lib'],
+			library_dirs = ['../../lib/.libs'],
 			swig_opts = ['-I../../include', '-I..'],
 			libraries = ['comedi'],
 			sources = ['comedi_python.i'])
