@@ -55,8 +55,6 @@ static unsigned int cr_aref(unsigned int a){
 }
 %}
 
-%array_class(unsigned int, chanlist);
-
 #ifdef SWIGRUBY
 %typemap(argout) comedi_cmd *INOUT(VALUE info) {
     $result = output_helper($result, $arg);
@@ -66,3 +64,19 @@ static unsigned int cr_aref(unsigned int a){
 %include "comedi.h"
 %include "comedilib.h"
 
+/* These typedefs work around limitations in SWIG's array_class().
+ * Without them, you get errors like:
+ * >>> import comedi
+ * >>> cmd = comedi.comedi_cmd_struct()
+ * >>> data = comedi.sampl_array(3)
+ * >>> cmd.data = data
+ * Traceback (most recent call last):
+ *   ...
+ * TypeError: in method 'comedi_cmd_struct_data_set', argument 2 of type 'sampl_t *'
+ */
+typedef unsigned short sampl_array;
+typedef unsigned int lsampl_array;
+
+%array_class(unsigned int, chanlist);
+%array_class(sampl_t, sampl_array);
+%array_class(lsampl_t, lsampl_array);
