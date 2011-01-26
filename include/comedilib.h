@@ -26,6 +26,7 @@
 #define _COMEDILIB_H
 
 #include <comedi.h>
+#include <comedilib_version.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <stdio.h>

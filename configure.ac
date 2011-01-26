@@ -1,13 +1,3 @@
-
-AC_INIT([comedilib], [0.10.0])
-AC_CANONICAL_TARGET([])
-
-AC_CONFIG_MACRO_DIR([m4])
-AC_CONFIG_AUX_DIR([.])
-#COMEDILIB_DEBUG="-Wall -Werror"
-COMEDILIB_DEBUG="-Wall"
-AM_INIT_AUTOMAKE([-Wall -Werror])
-
 # libtool version: current:revision:age
 #
 # If the library source code has changed at all since the last update, then
@@ -22,10 +12,59 @@ AM_INIT_AUTOMAKE([-Wall -Werror])
 # If any interfaces have been removed since the last public release, then set
 # age to 0.
 #
-# AS_LIBTOOL arguments are (prefix, current, revision, age)
-AS_LIBTOOL(COMEDILIB, 10, 0, 10)
+# In summary:
+#
+#  If any interface has been changed or removed, `c:r:a' becomes `c+1:0:0';
+#  else if any interface has been added, `c:r:a' becomes `c+1:0:a+1';
+#  else, `c:r:a' becomes `c:r+1:a'.
+#
+m4_define([comedilib_lt_current], [10])
+m4_define([comedilib_lt_revision], [0])
+m4_define([comedilib_lt_age], [10])
+
 #libscxi c:r:a
-SCXI_SO_VERSION=9:0:9
+m4_define([scxi_lt_current], [9])
+m4_define([scxi_lt_revision], [0])
+m4_define([scxi_lt_age], [9])
+
+# comedilib version: major.minor.micro
+#
+# Currently:
+#  * 'major' may be incremented at the whim of the maintainers.
+#  * 'minor' is libtool 'current' minus the value of 'current' when major
+#    changed (comedilib_major_base_current).
+#  * 'micro' is libtool 'revision'.
+
+# Manually set 'comedilib_major_base_current' to new 'comedilib_lt_current'
+# whenever 'comedilib_version_major' is incremented below.
+m4_define([comedilib_major_base_current], [0])
+
+m4_define([comedilib_version_major], [0])
+m4_define([comedilib_version_minor],
+	  [m4_eval(comedilib_lt_current - comedilib_major_base_current)])
+m4_define([comedilib_version_micro], [comedilib_lt_revision])
+m4_define([comedilib_pkg_version],
+	  [comedilib_version_major.comedilib_version_minor.comedilib_version_micro])
+
+AC_INIT([comedilib], [comedilib_pkg_version])
+AC_CANONICAL_TARGET([])
+
+COMEDILIB_VERSION_MAJOR=comedilib_version_major
+COMEDILIB_VERSION_MINOR=comedilib_version_minor
+COMEDILIB_VERSION_MICRO=comedilib_version_micro
+AC_SUBST(COMEDILIB_VERSION_MAJOR)
+AC_SUBST(COMEDILIB_VERSION_MINOR)
+AC_SUBST(COMEDILIB_VERSION_MICRO)
+
+AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_AUX_DIR([.])
+#COMEDILIB_DEBUG="-Wall -Werror"
+COMEDILIB_DEBUG="-Wall"
+AM_INIT_AUTOMAKE([-Wall -Werror])
+
+# AS_LIBTOOL arguments are (prefix, current, revision, age)
+AS_LIBTOOL(COMEDILIB, comedilib_lt_current, comedilib_lt_revision, comedilib_lt_age)
+SCXI_SO_VERSION=scxi_lt_current:scxi_lt_revision:scxi_lt_age
 AC_SUBST(SCXI_SO_VERSION)
 
 AM_CONFIG_HEADER(config.h)
@@ -208,6 +247,7 @@ etc/udev/Makefile
 doc/Makefile
 demo/Makefile
 include/Makefile
+include/comedilib_version.h
 lib/Makefile
 man/Makefile
 scxi/Makefile
