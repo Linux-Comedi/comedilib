@@ -39,13 +39,18 @@ it correctly!) to comedi-request@comedi.org.
 
 * More Information:
 
-Comedi also has a web page, at http://www.comedi.org/comedi.  New versions
-of comedi can be found on the ftp site ftp://ftp.comedi.org/pub/comedi.
+Comedi also has a web page at <http://www.comedi.org/> from where
+updated versions may be downloaded.
 
 Often bugfixes and new features that are not in the current release
-can be found in the CVS repository.  Instructions for anonymous CVS
-access to the Comedi and Comedilib repositories are found at
-http://www.comedi.org/download.php
+can be found in the Git repository.  Instructions for access to the
+Comedi and Comedilib repositories can be found at
+<http://www.comedi.org/download.html>.  Git snapshots for Comedilib
+can be created automatically at
+<http://comedi.org/git?p=comedi/comedilib.git;a=tree>.  The Git
+repository can be cloned locally using:
+
+  git clone git://comedi.org/git/comedilib.git
 
 Comedilib may be freely distibuted and modified in accordance with
 the GNU Lesser General Public License.  Portions of the Comedilib
