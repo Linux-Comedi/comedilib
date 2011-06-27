@@ -140,7 +140,6 @@ int test_mmap(void)
 			if(fails==0)printf("E: mmap compare failed\n");
 			printf("offset %d (read=%02x mmap=%02x)\n",i,
 				buf[i], map[i]);
-			go = 0;
 			fails++;
 			if(fails>10)break;
 		}
