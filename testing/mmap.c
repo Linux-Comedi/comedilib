@@ -113,7 +113,8 @@ int test_mmap(void)
 	go=1;
 	b=buf;
 	while(go){
-		ret = read(comedi_fileno(device), b, N_SAMPLES * sample_size);
+		ret = read(comedi_fileno(device), b,
+				(N_SAMPLES * sample_size) - total);
 		if(ret<0){
 			if(errno==EAGAIN){
 				usleep(10000);
@@ -127,6 +128,9 @@ int test_mmap(void)
 			total += ret;
 			b += ret;
 			if(verbose) printf("read %d %d\n",ret,total);
+			if(total >= (N_SAMPLES * sample_size)){
+				go = 0;
+			}
 		}
 	}
 
