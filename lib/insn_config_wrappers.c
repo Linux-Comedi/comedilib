@@ -166,7 +166,7 @@ int _comedi_set_clock_source(comedi_t *device, unsigned subdevice, unsigned chan
 	memset(&insn, 0, sizeof(comedi_insn));
 	insn.insn = INSN_CONFIG;
 	insn.subdev = subdevice;
-	insn.chanspec = 0;
+	insn.chanspec = channel;
 	insn.data = data;
 	insn.n = sizeof(data) / sizeof(data[0]);
 	data[0] = INSN_CONFIG_SET_CLOCK_SRC;
