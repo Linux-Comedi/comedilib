@@ -86,7 +86,7 @@ def probe_max_1chan(dev,s):
 	buf=""
 	cmd=c.comedi_cmd_struct()
 	print "\tcommand fast 1chan:"
-	if(c.comedi_get_cmd_generic_timed(dev,s,cmd,1)<0):
+	if(c.comedi_get_cmd_generic_timed(dev,s,cmd,1,1)<0):
 		print "\t\tnot supported"
 	else:
 		print "\tstart: %s %d" % (cmd_src(cmd.start_src,buf),cmd.start_arg)
