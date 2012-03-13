@@ -93,7 +93,7 @@ def prepare_cmd(dev, subdev, C):
     C.start_src = c.TRIG_NOW
     C.start_arg = 0
     C.scan_begin_src = c.TRIG_TIMER
-    C.scan_begin_arg = 1e9/freq
+    C.scan_begin_arg = int(1e9/freq)
     C.convert_src = c.TRIG_TIMER
     C.convert_arg = 1
     C.scan_end_src = c.TRIG_COUNT
