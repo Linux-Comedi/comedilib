@@ -4,8 +4,9 @@
 
 ## It emulates the program "mmap" which is distributed with
 ## the comedilib software
-## Copyright (C) May 2003  Luc Lefebvre
-## luc.lefebvre@mcgill.ca
+## Copyright (C) May 2003  Luc Lefebvre <luc.lefebvre@mcgill.ca>
+##               Mar 2012  W. Trevor King <wking@drexel.edu>
+##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
 ## as published by the Free Software Foundation; either version 2
