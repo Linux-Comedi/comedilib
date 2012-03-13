@@ -86,7 +86,8 @@ def dump_cmd(cmd):
 #construct a comedi command
 cmd = c.comedi_cmd_struct()
 
-ret = c.comedi_get_cmd_generic_timed(dev,subdevice,cmd,nchans,1.0e9/freq)
+period = int(1.0e9/freq)  # in nanoseconds
+ret = c.comedi_get_cmd_generic_timed(dev,subdevice,cmd,nchans,period)
 if ret: raise "Error comedi_get_cmd_generic failed"
 	
 cmd.chanlist = mylist # adjust for our particular context
