@@ -5,6 +5,7 @@
     Copyright (C) 1998-2002 David A. Schleef <ds@schleef.org>
     Copyright (C) 2003,2004 Frank Mori Hess <fmhess@users.sourceforge.net>
     Copyright (C) 2003 Steven Jenkins <steven.jenkins@ieee.org>
+    Copyright (C) 2010-2012 W. Trevor King <wking@drexel.edu>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published by
