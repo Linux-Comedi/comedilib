@@ -24,7 +24,6 @@ import sys, os, string, struct, time, array
 sys.path.append(sys.path.pop(0))
 import mmap
 
-sys.path.append('./build/lib.linux-i586-2.1')
 import comedi as c
 
 #open a comedi device

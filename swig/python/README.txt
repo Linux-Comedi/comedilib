@@ -18,6 +18,11 @@
     $ python setup.py build
     $ python setup.py install
 
+  If you want to test the wrappers before installing them, you will
+  need to set the `PYTHONPATH` environment variable so Python can find
+  the compiled modules.  On my system, that looks like
+    $ PYTHONPATH=build/lib.linux-i686-2.7/ ../../demo/python/info.py
+
 2) Using the module
   All the comedilib functions are translated directly to python
   function. The various comedi structs are now available as python

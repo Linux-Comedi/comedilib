@@ -16,7 +16,6 @@
 
 #set the paths so python can find the comedi module
 import sys, os, string
-sys.path.append('./build/lib.linux-i586-2.1')
 
 import comedi as c
 
