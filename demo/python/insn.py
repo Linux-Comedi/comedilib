@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) May 2012  W. Trevor King <wking@drexel.edu>
+# Copyright (C) Mar 2012  W. Trevor King <wking@drexel.edu>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
