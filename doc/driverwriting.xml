@@ -765,7 +765,7 @@ The possible event bits are:
 <para>
 <anchor id="comedi-cb-overflow"/>
 <parameter>COMEDI_CB_OVERFLOW</parameter>: execute the callback when a
-buffer overflow has occurred.
+buffer overflow or underflow has occurred.
 </para>
 </listitem>
 
