@@ -749,7 +749,7 @@ The possible event bits are:
 <para>
 <anchor id="comedi-cb-eoa"/>
 <parameter>COMEDI_CB_EOA</parameter>: execute the callback at the
-<quote>End Of-Acquisition</quote>.
+<quote>End-Of-Acquisition</quote> (or <quote>End-Of-Output</quote>).
 </para>
 </listitem>
 
