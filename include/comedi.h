@@ -256,7 +256,7 @@ extern "C" {
 		INSN_CONFIG_GET_CLOCK_SRC = 2004,	// Get master clock source
 		INSN_CONFIG_SET_OTHER_SRC = 2005,	// Set other source
 //      INSN_CONFIG_GET_OTHER_SRC = 2006,       // Get other source
-		INSN_CONFIG_GET_HARDWARE_BUFFER_SIZE,	// Get size in bytes of subdevice's on-board fifos used during streaming input/output
+		INSN_CONFIG_GET_HARDWARE_BUFFER_SIZE = 2006,	// Get size in bytes of subdevice's on-board fifos used during streaming input/output
 		INSN_CONFIG_SET_COUNTER_MODE = 4097,
 		INSN_CONFIG_8254_SET_MODE = INSN_CONFIG_SET_COUNTER_MODE,	/* deprecated */
 		INSN_CONFIG_8254_READ_STATUS = 4098,
@@ -466,8 +466,8 @@ extern "C" {
 /* only relevant to kernel modules. */
 
 #define COMEDI_CB_EOS		1	/* end of scan */
-#define COMEDI_CB_EOA		2	/* end of acquisition */
-#define COMEDI_CB_BLOCK		4	/* DEPRECATED: convenient block size */
+#define COMEDI_CB_EOA		2	/* end of acquisition/output */
+#define COMEDI_CB_BLOCK		4	/* new data has arrived: wakes up write()/read() */
 #define COMEDI_CB_EOBUF		8	/* DEPRECATED: end of buffer */
 #define COMEDI_CB_ERROR		16	/* card error during acquisition */
 #define COMEDI_CB_OVERFLOW	32	/* buffer overflow/underflow */
