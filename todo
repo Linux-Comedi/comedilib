@@ -5,3 +5,5 @@ and libinternal.h) are broken - FMH
 
 fix lib/timed.c  (What's wrong with it?)
 
+Ruby bindings do not currently build cleanly so they are disabled in
+the default configuration. - IJA
