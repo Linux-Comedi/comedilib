@@ -696,6 +696,33 @@ a list of instructions.
 
 </section>
 
+<section id="ref-type-comedi-polynomial-t">
+<title>
+comedi_polynomial_t
+</title>
+
+<programlisting>
+#define COMEDI_MAX_NUM_POLYNOMIAL_COEFFICIENTS 4
+typedef struct {
+  double coefficients[COMEDI_MAX_NUM_POLYNOMIAL_COEFFICIENTS];
+  double expansion_origin;
+  unsigned order;
+} comedi_polynomial_t;
+</programlisting>
+
+<para>
+A comedi_polynomial_t holds calibration data for a channel of a
+subdevice.  It is initialized by the
+<link linkend="func-ref-comedi-get-hardcal-converter"><function>comedi_get_hardcal_converter</function></link>
+or <link linkend="func-ref-comedi-get-softcal-converter"><function>comedi_get_softcal_converter</function></link>
+calibration functions and is passed to the
+<link linkend="func-ref-comedi-to-physical"><function>comedi_to_physical</function></link>
+and <link linkend="func-ref-comedi-from-physical"><function>comedi_from_physical</function></link>
+raw/physical conversion functions.
+</para>
+
+</section>
+
 </section>
 
 	<section id="functionreference">
