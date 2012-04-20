@@ -133,8 +133,8 @@ AS_COMPILER_FLAG([-Wno-unused-function],[PYTHON_QUIET="$PYTHON_QUIET -Wno-unused
 AC_SUBST(PYTHON_QUIET)
 
 # ruby
-AC_ARG_ENABLE([ruby-binding], [  --disable-ruby-binding	Disable building of Ruby binding],
-	[ENABLE_RUBY=$enableval], [ENABLE_RUBY="yes"])
+AC_ARG_ENABLE([ruby-binding], [  --enable-ruby-binding	Enable building of Ruby binding],
+	[ENABLE_RUBY=$enableval], [ENABLE_RUBY="no"])
 if test "$ENABLE_RUBY" == "yes" && test "$SWIG" != "no"; then
 	AC_PATH_PROG(RUBY, ruby, no)
 	if test "$RUBY" != "no" ; then
