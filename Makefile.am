@@ -16,7 +16,6 @@ ACLOCAL_AMFLAGS = -I m4
 DISTCHECK_CONFIGURE_FLAGS = RUBY_PREFIX='$${prefix}' --disable-ruby-binding
 
 dist-hook:
-	rm -rf `find $(distdir) -name CVS`
 
 dev:
 	-for i in `seq 0 15`; do \
