@@ -118,7 +118,9 @@ if test "$SWIG" == "no" ; then
 fi
 
 #python
-AC_ARG_ENABLE([python-binding],[  --disable-python-binding	Disable building of Python binding],
+AC_ARG_ENABLE([python-binding],
+	[AS_HELP_STRING([--disable-python-binding],
+		[Disable building of Python binding])],
 	[ENABLE_PYTHON=$enableval],[ENABLE_PYTHON="yes"])
 if test "$ENABLE_PYTHON" == "yes" && test "$SWIG" != "no"; then
 	AM_PATH_PYTHON
@@ -133,7 +135,9 @@ AS_COMPILER_FLAG([-Wno-unused-function],[PYTHON_QUIET="$PYTHON_QUIET -Wno-unused
 AC_SUBST(PYTHON_QUIET)
 
 # ruby
-AC_ARG_ENABLE([ruby-binding], [  --enable-ruby-binding	Enable building of Ruby binding],
+AC_ARG_ENABLE([ruby-binding],
+	[AS_HELP_STRING([--enable-ruby-binding],
+		[Enable building of Ruby binding])],
 	[ENABLE_RUBY=$enableval], [ENABLE_RUBY="no"])
 if test "$ENABLE_RUBY" == "yes" && test "$SWIG" != "no"; then
 	AC_PATH_PROG(RUBY, ruby, no)
@@ -161,12 +165,15 @@ fi
 AC_SUBST(RUBY_CONFIG_OPTIONS)
 
 # scxi
-AC_ARG_ENABLE([scxi], [  --enable-scxi  Enable SCXI convenience library],
+AC_ARG_ENABLE([scxi],
+	[AS_HELP_STRING([--enable-scxi], [Enable SCXI convenience library])],
 	[ENABLE_SCXI=$enableval], [ENABLE_SCXI="no"])
 AM_CONDITIONAL(BUILD_SCXI, [test "$ENABLE_SCXI" == "yes"])
 
 # docbook
-AC_ARG_ENABLE([docbook], [  --disable-docbook         Disable docbook],[ENABLE_DOCBOOK=$enableval],[ENABLE_DOCBOOK="yes"])
+AC_ARG_ENABLE([docbook],
+	[AS_HELP_STRING([--disable-docbook], [Disable docbook])],
+	[ENABLE_DOCBOOK=$enableval],[ENABLE_DOCBOOK="yes"])
 
 if test "$ENABLE_DOCBOOK" == "yes"; then
 	AC_PATH_PROG(XMLTO, xmlto, no)
@@ -184,7 +191,8 @@ AC_SUBST(pcmciadir)
 
 
 # new udev hotplug
-AC_ARG_WITH([udev-hotplug], [  --with-udev-hotplug=[[/lib]]    enable udev hotplug],
+AC_ARG_WITH([udev-hotplug],
+	[AS_HELP_STRING([--with-udev-hotplug=[[/lib]]], [enable udev hotplug])],
 	[ENABLE_UDEVHOTPLUG=$withval], [ENABLE_UDEVHOTPLUG="no"])
 AM_CONDITIONAL(INSTALL_UDEVHOTPLUG, [test "$ENABLE_UDEVHOTPLUG" != "no"])
 if test "$ENABLE_UDEVHOTPLUG" != "no"; then
@@ -209,7 +217,9 @@ fi
 
 
 # old hotplug mechanism
-AC_ARG_ENABLE([etc-hotplug], [  --enable-etc-hotplug    enable old hotplug in /etc/hotplug],
+AC_ARG_ENABLE([etc-hotplug],
+	[AS_HELP_STRING([--enable-etc-hotplug],
+		[enable old hotplug in /etc/hotplug])],
 	[ENABLE_ETCHOTPLUG=$enableval], [ENABLE_ETCHOTPLUG="no"])
 AM_CONDITIONAL(INSTALL_ETCHOTPLUG, [test "$ENABLE_ETCHOTPLUG" != "no"])
 
