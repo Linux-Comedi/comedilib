@@ -8,7 +8,7 @@ XML = calibration_funcref.xml command_funcref.xml dio_funcref.xml \
 EXTRA_DIST = $(XML) calibration_funcref.txt command_funcref.txt dio_funcref.txt \
 	deprecated_funcref.txt error_funcref.txt extensions_funcref.txt \
 	funcref mkref drivers.txt mkdr FAQ \
-	acq-seq.gif doc_html man comedilib_html_config.xsl\
+	acq-seq.gif doc_html man comedilib_html_config.xsl \
 	comedilib.css
 
 BUILT_SOURCES = calibration_funcref.xml command_funcref.xml dio_funcref.xml \
@@ -60,7 +60,7 @@ install_html:
 		$(INSTALL_DATA) $$each $(DESTDIR)$(htmldir)/html ; done
 
 uninstall_html:
-	for each in $(srcdir)/doc_html/*.html $(srcdir)/*.gif ; do \
+	for each in $(srcdir)/doc_html/*.html $(srcdir)/*.gif $(srcdir)/*.css; do \
 		$(RM) $(DESTDIR)$(htmldir)/html/`basename $$each` ; done
 
 $(srcdir)/man: $(XML)
