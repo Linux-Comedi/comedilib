@@ -727,34 +727,13 @@ raw/physical conversion functions.
 
 	<section id="functionreference">
 		<title>Functions</title>
-		<section>
-			<title>Core</title>
 			<xi:include href="funcref.xml"/>
-		</section>
-		<section>
-			<title>Asyncronous commands</title>
 			<xi:include href="command_funcref.xml"/>
-		</section>
-		<section>
-			<title>Calibration</title>
 			<xi:include href="calibration_funcref.xml"/>
-		</section>
-		<section>
-			<title>Digital I/O</title>
 			<xi:include href="dio_funcref.xml"/>
-		</section>
-		<section>
-			<title>Error reporting</title>
 			<xi:include href="error_funcref.xml"/>
-		</section>
-		<section>
-			<title>Extensions</title>
 			<xi:include href="extensions_funcref.xml"/>
-		</section>
-		<section>
-			<title>Deprecated</title>
 			<xi:include href="deprecated_funcref.xml"/>
-		</section>
 	</section>
 	<xi:include href="drivers.xml"/>
 </section>

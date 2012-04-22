@@ -1,3 +1,4 @@
+Calibration
 Function: comedi_apply_calibration -- set hardware calibration from file
 Retval: int
 Param: comedi_t *device

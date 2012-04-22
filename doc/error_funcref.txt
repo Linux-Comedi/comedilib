@@ -1,3 +1,4 @@
+Error reporting
 Function: comedi_errno -- number of last Comedilib error
 Retval: int
 Param: void

@@ -1,3 +1,4 @@
+Digital I/O
 Function: comedi_dio_bitfield2 -- read/write multiple digital channels
 Retval: int
 Param: comedi_t * device

@@ -1,3 +1,4 @@
+Deprecated functions
 Function: comedi_dio_bitfield -- read/write multiple digital channels
 Retval: int
 Param: comedi_t * device

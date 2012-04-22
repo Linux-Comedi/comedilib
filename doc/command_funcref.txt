@@ -1,3 +1,4 @@
+Asynchronous commands
 Function: comedi_cancel -- stop streaming input/output in progress
 Retval: int
 Param: comedi_t * device

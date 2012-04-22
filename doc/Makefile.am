@@ -20,8 +20,7 @@ all_html = $(srcdir)/doc_html
 install_html = install_html
 uninstall_html = uninstall_html
 
-#pdf output for xmlto is broken in debian etch
-#dist_pdf_DATA = comedilib.pdf
+# dist_pdf_DATA = comedilib.pdf
 dist_pdf_DATA =
 
 all_man = $(srcdir)/man

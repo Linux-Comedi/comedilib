@@ -1,3 +1,4 @@
+Core Functions
 Function: comedi_close -- close a Comedi device
 Retval: int
 Param: comedi * device

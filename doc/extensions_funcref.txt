@@ -1,3 +1,4 @@
+Extensions
 Function: comedi_arm -- arm a subdevice
 Retval: int
 Param: comedi_t * device

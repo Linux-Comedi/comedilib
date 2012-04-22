@@ -81,19 +81,12 @@
 
 	</articleinfo>
 
-	<section>
-		<!--			This section prevents docbook from pulling the entire next section into the
-			main table of contents page of the html output//-->
-	</section>
-	<section>
-		<title>&comedi;</title>
-		<xi:include href="intro.xml"/>
-		<xi:include href="install.xml"/>
-		<xi:include href="tutorial.xml"/>
-		<xi:include href="other.xml"/>
-		<xi:include href="driverwriting.xml"/>
-	</section>
+	<xi:include href="intro.xml"/>
+	<xi:include href="install.xml"/>
+	<xi:include href="tutorial.xml"/>
+	<xi:include href="other.xml"/>
 	<xi:include href="reference.xml"/>
+	<xi:include href="driverwriting.xml"/>
 	<xi:include href="glossary.xml"/>
 
 </article>
