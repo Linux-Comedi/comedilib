@@ -21,7 +21,7 @@ install_html = install_html
 uninstall_html = uninstall_html
 
 if HAVE_DBLATEX
-dist_pdf_DATA = comedilib.pdf
+dist_pdf_DATA = $(srcdir)/pdf/comedilib.pdf
 else
 dist_pdf_DATA =
 endif
@@ -76,7 +76,7 @@ install_man:
 uninstall_man:
 	for each in `find $(srcdir)/man/ -name '*.3'`; do $(RM) $(DESTDIR)$(mandir)/man3/`basename $$each` ; done
 
-comedilib.pdf: $(XML)
+$(srcdir)/pdf/comedilib.pdf: $(XML)
 	$(DBLATEX) -o $(srcdir)/pdf -t pdf $(srcdir)/comedilib.xml
 
 funcref.xml: funcref mkref
