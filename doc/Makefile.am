@@ -20,8 +20,11 @@ all_html = $(srcdir)/doc_html
 install_html = install_html
 uninstall_html = uninstall_html
 
-# dist_pdf_DATA = comedilib.pdf
+if HAVE_DBLATEX
+dist_pdf_DATA = comedilib.pdf
+else
 dist_pdf_DATA =
+endif
 
 all_man = $(srcdir)/man
 install_man = install_man
@@ -74,7 +77,7 @@ uninstall_man:
 	for each in `find $(srcdir)/man/ -name '*.3'`; do $(RM) $(DESTDIR)$(mandir)/man3/`basename $$each` ; done
 
 comedilib.pdf: $(XML)
-	$(XMLTO) -o $(srcdir)/pdf --skip-validation pdf $(srcdir)/comedilib.xml
+	$(DBLATEX) -o $(srcdir)/pdf -t pdf $(srcdir)/comedilib.xml
 
 funcref.xml: funcref mkref
 	$(srcdir)/mkref $(srcdir)/funcref >$(srcdir)/funcref.xml

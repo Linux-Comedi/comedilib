@@ -180,10 +180,16 @@ if test "$ENABLE_DOCBOOK" == "yes"; then
 	if test "$XMLTO" = "no" ; then
   		AC_MSG_WARN([xmlto not found, will not be able to rebuild documentation])
 	fi
+	AC_PATH_PROG(DBLATEX, dblatex, no)
+        if test "$DBLATEX" = "no" ; then
+                AC_MSG_WARN([dblatex not found, will not be able to generate pdfs])
+        fi
 else
 	XMLTO="no"
+	DBLATEX="no"
 fi
 AM_CONDITIONAL(HAVE_XMLTO, [test "$XMLTO" != "no"])
+AM_CONDITIONAL(HAVE_DBLATEX, [test "$DBLATEX" != "no"])
 
 pcmciadir="\${sysconfdir}/pcmcia"
 AC_SUBST(pcmciadir)
