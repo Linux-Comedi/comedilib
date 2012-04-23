@@ -77,6 +77,7 @@ uninstall_man:
 	for each in `find $(srcdir)/man/ -name '*.3'`; do $(RM) $(DESTDIR)$(mandir)/man3/`basename $$each` ; done
 
 $(srcdir)/pdf/comedilib.pdf: $(XML)
+	$(mkdir_p) $(srcdir)/pdf
 	$(DBLATEX) -o $(srcdir)/pdf -t pdf $(srcdir)/comedilib.xml
 
 funcref.xml: funcref mkref
