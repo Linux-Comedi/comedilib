@@ -17,10 +17,3 @@ usbdux_firmware.hex: fx2-include.asm usbdux_firmware.asm as31
 clean:
 	rm -f *.bin *~ *.lst *.bin *.hex
 	make -C as31-2.1 clean
-
-install:
-	mkdir -p /usr/share/usb/
-	install usbdux_firmware.hex /usr/share/usb/usbdux_firmware.hex
-	mkdir -p /etc/hotplug/usb
-	install hotplug/usbdux /etc/hotplug/usb/usbdux
-

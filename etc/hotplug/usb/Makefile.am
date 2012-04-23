@@ -1,1 +1,1 @@
-SUBDIRS = usbdux usbduxfast
+SUBDIRS = usbdux usbduxfast usbduxsigma

@@ -1,0 +1,17 @@
+To compile the firmware:
+------------------------
+Download the as31 from:
+
+http://www.berndporr.me.uk/as31/
+
+(this is a patched version of as31 which supports an
+include directive).
+
+Install it in this directory.
+
+Then run "make -f Makefile_asm".
+
+
+
+Feedback:
+BerndPorr@f2s.com

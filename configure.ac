@@ -259,6 +259,7 @@ etc/hotplug/Makefile
 etc/hotplug/usb/Makefile
 etc/hotplug/usb/usbdux/Makefile
 etc/hotplug/usb/usbduxfast/Makefile
+etc/hotplug/usb/usbduxsigma/Makefile
 etc/udev/Makefile
 doc/Makefile
 demo/Makefile
