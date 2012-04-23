@@ -50,43 +50,69 @@ Configuration Options:
   none
 
 References:
-	- ni_660x.c		
+	- ni_660x.c
 	- adl_pci9111.c		copied the entire pci setup section
-	- adl_pci9118.c		
+	- adl_pci9118.c
+
+
+
+Driver: adl_pci7230
+Description: Driver for the Adlink PCI-7230 32 ch. isolated digital io board
+Devices: [ADLink] PCI-7230 (adl_pci7230)
+Author: David Fernandez <dfcastelao@gmail.com>
+Status: experimental
+Updated: Mon, 14 Apr 2008 15:08:14 +0100
+
+Configuration Options:
+  [0] - PCI bus of device (optional)
+  [1] - PCI slot of device (optional)
+  If bus/slot is not specified, the first supported
+  PCI device found will be used.
 
 
 
 Driver: adl_pci7296
 Description: Driver for the Adlink PCI-7296 96 ch. digital io board
-Devices: [ADLink] PCI-7296 (pci7296)
+Devices: [ADLink] PCI-7296 (adl_pci7296)
 Author: Jon Grierson <jd@renko.co.uk>
-Updated: 2.8.2006
+Updated: Mon, 14 Apr 2008 15:05:56 +0100
 Status: testing
 
 Configuration Options:
-  none
+  [0] - PCI bus of device (optional)
+  [1] - PCI slot of device (optional)
+  If bus/slot is not specified, the first supported
+  PCI device found will be used.
 
 
 
 Driver: adl_pci7432
 Description: Driver for the Adlink PCI-7432 64 ch. isolated digital io board
-Devices: [ADLink] PCI-7432 (pci7432)
+Devices: [ADLink] PCI-7432 (adl_pci7432)
 Author: Michel Lachaine <mike@mikelachaine.ca>
 Status: experimental
+Updated: Mon, 14 Apr 2008 15:08:14 +0100
 
 Configuration Options:
-  none
+  [0] - PCI bus of device (optional)
+  [1] - PCI slot of device (optional)
+  If bus/slot is not specified, the first supported
+  PCI device found will be used.
 
 
 
 Driver: adl_pci8164
 Description: Driver for the Adlink PCI-8164 4 Axes Motion Control board
-Devices: [ADLink] PCI-8164 (pci8164)
+Devices: [ADLink] PCI-8164 (adl_pci8164)
 Author: Michel Lachaine <mike@mikelachaine.ca>
 Status: experimental
+Updated: Mon, 14 Apr 2008 15:10:32 +0100
 
 Configuration Options:
-  none
+  [0] - PCI bus of device (optional)
+  [1] - PCI slot of device (optional)
+  If bus/slot is not specified, the first supported
+  PCI device found will be used.
 
 
 
@@ -242,9 +268,9 @@ Driver: adv_pci1710
 Description: Advantech PCI-1710, PCI-1710HG, PCI-1711, PCI-1713,
              Advantech PCI-1720, PCI-1731
 Author: Michal Dobes <dobes@tesnet.cz>
-Devices: [Advantech] PCI-1710 (pci1710), PCI-1710HG (pci1710hg),
-  PCI-1711 (pci1711), PCI-1713 (pci1713), PCI-1720 (pci1720),
-  PCI-1731 (pci1731)
+Devices: [Advantech] PCI-1710 (adv_pci1710), PCI-1710HG (pci1710hg),
+  PCI-1711 (adv_pci1710), PCI-1713, PCI-1720,
+  PCI-1731
 Status: works
 
 This driver supports AI, AO, DI and DO subdevices.
@@ -263,17 +289,47 @@ Configuration options:
 
 
 
+Driver: adv_pci1723
+Description: Advantech PCI-1723
+Author: yonggang <rsmgnu@gmail.com>, Ian Abbott <abbotti@mev.co.uk>
+Devices: [Advantech] PCI-1723 (adv_pci1723)
+Updated: Mon, 14 Apr 2008 15:12:56 +0100
+Status: works
+
+Configuration Options:
+  [0] - PCI bus of device (optional)
+  [1] - PCI slot of device (optional)
+
+  If bus/slot is not specified, the first supported
+  PCI device found will be used.
+
+Subdevice 0 is 8-channel AO, 16-bit, range +/- 10 V.
+
+Subdevice 1 is 16-channel DIO.  The channels are configurable as input or
+output in 2 groups (0 to 7, 8 to 15).  Configuring any channel implicitly
+configures all channels in the same group.
+
+TODO:
+
+1. Add the two milliamp ranges to the AO subdevice (0 to 20 mA, 4 to 20 mA).
+2. Read the initial ranges and values of the AO subdevice at start-up instead
+   of reinitializing them.
+3. Implement calibration.
+
+
+
 Driver: adv_pci_dio
-Description: Advantech PCI-1730, PCI-1733, PCI-1734, PCI-1750, PCI-1751,
-             PCI-1752, PCI-1753/E, PCI-1754, PCI-1756, PCI-1762
+Description: Advantech PCI-1730, PCI-1733, PCI-1734, PCI-1735U,
+             PCI-1736UP, PCI-1750, PCI-1751, PCI-1752, PCI-1753/E,
+             PCI-1754, PCI-1756, PCI-1762
 Author: Michal Dobes <dobes@tesnet.cz>
-Devices: [Advantech] PCI-1730 (pci1730), PCI-1733 (pci1733),
-  PCI-1734 (pci1734), PCI-1750 (pci1750), PCI-1751 (pci1751),
-  PCI-1752 (pci1752), PCI-1753 (pci1753), PCI-1753+PCI-1753E (pci1753e),
-  PCI-1754 (pci1754), PCI-1756 (pci1756), PCI-1760(pci1760),
-  PCI-1762 (pci1762)
+Devices: [Advantech] PCI-1730 (adv_pci_dio), PCI-1733,
+  PCI-1734, PCI-1735U, PCI-1736UP, PCI-1739U, PCI-1750,
+  PCI-1751, PCI-1752, PCI-1753,
+  PCI-1753+PCI-1753E, PCI-1754, PCI-1756,
+  PCI-1760, PCI-1762
 Status: untested
-Updated: 2003-04-06
+Updated: Tue, 04 May 2010 13:00:00 +0000
 
 This driver supports now only insn interface for DI/DO/DIO.
 
@@ -320,8 +376,9 @@ Driver: amplc_dio200
 Description: Amplicon 200 Series Digital I/O
 Author: Ian Abbott <abbotti@mev.co.uk>
 Devices: [Amplicon] PC212E (pc212e), PC214E (pc214e), PC215E (pc215e),
-  PCI215 (pci215), PC218E (pc218e), PC272E (pc272e), PCI272 (pci272)
-Updated: Mon, 05 Nov 2007 14:04:04 +0000
+  PCI215 (pci215 or amplc_dio200), PC218E (pc218e), PC272E (pc272e),
+  PCI272 (pci272 or amplc_dio200)
+Updated: Wed, 22 Oct 2008 13:36:02 +0100
 Status: works
 
 Configuration options - PC212E, PC214E, PC215E, PC218E, PC272E:
@@ -499,8 +556,8 @@ order they appear in the channel list.
 Driver: amplc_pc236
 Description: Amplicon PC36AT, PCI236
 Author: Ian Abbott <abbotti@mev.co.uk>
-Devices: [Amplicon] PC36AT (pc36at), PCI236 (pci236)
-Updated: Fri, 23 Aug 2002 11:41:11 +0100
+Devices: [Amplicon] PC36AT (pc36at), PCI236 (pci236 or amplc_pc236)
+Updated: Wed, 01 Apr 2009 15:41:25 +0100
 Status: works
 
 Configuration options - PC36AT:
@@ -518,7 +575,7 @@ as subdevice 0.
 
 Subdevice 1 pretends to be a digital input device, but it always returns
 0 when read. However, if you run a command with scan_begin_src=TRIG_EXT,
-a rising edge on port C bit 7 acts as an external trigger, which can be
+a rising edge on port C bit 3 acts as an external trigger, which can be
 used to wake up tasks.  This is like the comedi_parport device, but the
 only way to physically disable the interrupt on the PC36AT is to remove
 the IRQ jumper.  If no interrupt is connected, then subdevice 1 is
@@ -529,8 +586,8 @@ unused.
 Driver: amplc_pc263
 Description: Amplicon PC263, PCI263
 Author: Ian Abbott <abbotti@mev.co.uk>
-Devices: [Amplicon] PC263 (pc263), PCI263 (pci263)
-Updated: Tue, 20 Aug 2002 11:41:01 +0100
+Devices: [Amplicon] PC263 (pc263), PCI263 (pci263 or amplc_pc263)
+Updated: Wed, 22 Oct 2008 14:10:53 +0100
 Status: works
 
 Configuration options - PC263:
@@ -551,8 +608,9 @@ The state of the outputs can be read.
 Driver: amplc_pci224
 Description: Amplicon PCI224, PCI234
 Author: Ian Abbott <abbotti@mev.co.uk>
-Devices: [Amplicon] PCI224 (pci224), PCI234 (pci234)
-Updated: Thu, 24 Feb 2005 12:29:26 +0000
+Devices: [Amplicon] PCI224 (amplc_pci224 or pci224),
+  PCI234 (amplc_pci224 or pci234)
+Updated: Wed, 22 Oct 2008 12:25:08 +0100
 Status: works, but see caveats
 
 Supports:
@@ -633,9 +691,10 @@ Description: Amplicon PCI230, PCI260 Multifunction I/O boards
 Author: Allan Willcox <allanwillcox@ozemail.com.au>,
   Steve D Sharples <steve.sharples@nottingham.ac.uk>,
   Ian Abbott <abbotti@mev.co.uk>
-Updated: Mon, 03 Dec 2007 17:11:47 +0000
-Devices: [Amplicon] PCI230 (pci230 or amplc_pci230), PCI230+ (pci230+),
-  PCI260 (pci260 or amplc_pci230), PCI260+ (pci260+)
+Updated: Wed, 22 Oct 2008 12:34:49 +0100
+Devices: [Amplicon] PCI230 (pci230 or amplc_pci230),
+  PCI230+ (pci230+ or amplc_pci230),
+  PCI260 (pci260 or amplc_pci230), PCI260+ (pci260+ or amplc_pci230)
 Status: works
 
 Configuration options:
@@ -645,18 +704,18 @@ Configuration options:
           will be used.
 
 Configuring a "amplc_pci230" will match any supported card and it will
-be treated as "pci230" or "pci260".  Configuring a "pci230" will match a
-PCI230 or PCI230+ card and it will be treated as a PCI230.  Configuring
-a "pci260" will match a PCI260 or PCI260+ card and it will be treated as
-a PCI260.  Configuring a "pci230+" will match a PCI230+ card.
-Configuring a "pci260+" will match a PCI260+ card.
+choose the best match, picking the "+" models if possible.  Configuring
+a "pci230" will match a PCI230 or PCI230+ card and it will be treated as
+a PCI230.  Configuring a "pci260" will match a PCI260 or PCI260+ card
+and it will be treated as a PCI260.  Configuring a "pci230+" will match
+a PCI230+ card.  Configuring a "pci260+" will match a PCI260+ card.
 
 Subdevices:
 
                 PCI230(+)    PCI260(+)
                 ---------    ---------
   Subdevices       3            1
-        0          AI           AI 
+        0          AI           AI
 	1          AO
 	2          DIO
 
@@ -664,10 +723,10 @@ AI Subdevice:
 
   The AI subdevice has 16 single-ended channels or 8 differential
   channels.
-  
+
   The PCI230 and PCI260 cards have 12-bit resolution.  The PCI230+ and
   PCI260+ cards have 16-bit resolution.
-  
+
   For differential mode, use inputs 2N and 2N+1 for channel N (e.g. use
   inputs 14 and 15 for channel 7).  If the card is physically a PCI230
   or PCI260 then it actually uses a "pseudo-differential" mode where the
@@ -850,8 +909,9 @@ https://bugs.comedi.org.
 Driver: cb_pcidas
 Description: MeasurementComputing PCI-DAS series with the AMCC S5933 PCI controller
 Author: Ivan Martinez <imr@oersted.dtu.dk>,
-  Frank Mori Hess <fmhess@users.sourceforge.net>
-Updated: 2003-3-11
+  Frank Mori Hess <fmhess@users.sourceforge.net>,
+  Brice Dubost <braice@braice.net>
+Updated: 2010-11-19
 Devices: [Measurement Computing] PCI-DAS1602/16 (cb_pcidas),
   PCI-DAS1602/16jr, PCI-DAS1602/12, PCI-DAS1200, PCI-DAS1200jr,
   PCI-DAS1000, PCI-DAS1001, PCI_DAS1002
@@ -873,6 +933,15 @@ Configuration options:
 For commands, the scanned channels must be consecutive
 (i.e. 4-5-6-7, 2-3-4,...), and must all have the same
 range and aref.
+
+AI Triggering:
+   For start_src == TRIG_EXT, the A/D EXTERNAL TRIGGER IN (pin 45) is used.
+   For 1602 series, the start_arg is interpreted as follows:
+     start_arg == 0                   => gated triger (level high)
+     start_arg == CR_INVERT           => gated triger (level low)
+     start_arg == CR_EDGE             => Rising edge
+     start_arg == CR_EDGE | CR_INVERT => Falling edge
+   For the other boards the trigger will be done on rising edge
 
 
 
@@ -941,7 +1010,7 @@ Driver: cb_pcimdda
 Description: Measurement Computing PCIM-DDA06-16
 Devices: [Measurement Computing] PCIM-DDA06-16 (cb_pcimdda)
 Author: Calin Culianu <calin@ajvar.org>
-Updated: Thu, 20 Jun 2002 16:19:41 -0500
+Updated: Mon, 14 Apr 2008 15:15:51 +0100
 Status: works
 
 All features of the PCIM-DDA06-16 board are supported.  This board
@@ -973,8 +1042,8 @@ output modes on the board:
     to initiate the simultaneous XFER.
 
 Configuration Options:
-  [0] PCI bus (optional) (unimplemented)
-  [1] PCI slot (optional) (unimplemented)
+  [0] PCI bus (optional)
+  [1] PCI slot (optional)
   [2] analog output range jumper setting
       0 == +/- 5 V
       1 == +/- 10 V
@@ -1130,29 +1199,33 @@ Driver: daqboard2000
 Description: IOTech DAQBoard/2000
 Author: Anders Blomdell <anders.blomdell@control.lth.se>
 Status: works
+Updated: Mon, 14 Apr 2008 15:28:52 +0100
 Devices: [IOTech] DAQBoard/2000 (daqboard2000)
 
 Much of the functionality of this driver was determined from reading
 the source code for the Windows driver.
 
-The FPGA on the board requires initialization code, which can 
+The FPGA on the board requires initialization code, which can
 be loaded by comedi_config using the -i
 option.  The initialization code is available from http://www.comedi.org
 in the comedi_nonfree_firmware tarball.
 
 Configuration options:
-    none
+  [0] - PCI bus of device (optional)
+  [1] - PCI slot of device (optional)
+  If bus/slot is not specified, the first supported
+  PCI device found will be used.
 
 
 
 Driver: das08
 Description: DAS-08 compatible boards
 Author: Warren Jasper, ds, Frank Hess
-Devices: [Keithley Metrabyte] DAS08 (das08), [ComputerBoards] DAS08 (das08),
+Devices: [Keithley Metrabyte] DAS08 (isa-das08), [ComputerBoards] DAS08 (isa-das08),
   DAS08-PGM (das08-pgm),
   DAS08-PGH (das08-pgh), DAS08-PGL (das08-pgl), DAS08-AOH (das08-aoh),
   DAS08-AOL (das08-aol), DAS08-AOM (das08-aom), DAS08/JR-AO (das08/jr-ao),
-  DAS08/JR-16-AO (das08jr-16-ao), PCI-DAS08 (pci-das08),
+  DAS08/JR-16-AO (das08jr-16-ao), PCI-DAS08 (das08),
   PC104-DAS08 (pc104-das08), DAS08/JR/16 (das08jr/16)
 Status: works
 
@@ -1164,7 +1237,6 @@ Options (for ISA cards):
 Options (for pci-das08):
         [0] - bus  (optional)
         [1] = slot (optional)
-Use the name 'pci-das08' for the pci-das08, NOT 'das08'.
 
 The das08 driver doesn't support asynchronous commands, since
 the cheap das08 hardware doesn't really support them.  The
@@ -1509,7 +1581,14 @@ Description: Data Translation DT3000 series
 Author: ds
 Devices: [Data Translation] DT3001 (dt3000), DT3001-PGL, DT3002, DT3003,
   DT3003-PGL, DT3004, DT3005, DT3004-200
+Updated: Mon, 14 Apr 2008 15:41:24 +0100
 Status: works
+
+Configuration Options:
+  [0] - PCI bus of device (optional)
+  [1] - PCI slot of device (optional)
+  If bus/slot is not specified, the first supported
+  PCI device found will be used.
 
 There is code to support AI commands, but it may not work.
 
@@ -1636,9 +1715,9 @@ Author: Anders Blomdell <anders.blomdell@control.lth.se>
 Status: works
 Devices: [JR3] PCI force sensor board (jr3_pci)
 
-  The DSP on the board requires initialization code, which can 
-  be loaded by placing it in /lib/firmware/comedi.  
-  The initialization code should be somewhere on the media you got 
+  The DSP on the board requires initialization code, which can
+  be loaded by placing it in /lib/firmware/comedi.
+  The initialization code should be somewhere on the media you got
   with your card. One version is available from http://www.comedi.org
   in the comedi_nonfree_firmware tarball.
 
@@ -1654,8 +1733,14 @@ Driver: ke_counter
 Description: Driver for Kolter Electronic Counter Card
 Devices: [Kolter Electronic] PCI Counter Card (ke_counter)
 Author: Michael Hillmann
-Updated: 2002.4.11
+Updated: Mon, 14 Apr 2008 15:42:42 +0100
 Status: tested
+
+Configuration Options:
+  [0] - PCI bus of device (optional)
+  [1] - PCI slot of device (optional)
+  If bus/slot is not specified, the first supported
+  PCI device found will be used.
 
 This driver is a simple driver to read the counter values from
 Kolter Electronic PCI Counter Card.
@@ -1958,7 +2043,7 @@ Driver: ni_labpc
 Description: National Instruments Lab-PC (& compatibles)
 Author: Frank Mori Hess <fmhess@users.sourceforge.net>
 Devices: [National Instruments] Lab-PC-1200 (labpc-1200),
-  Lab-PC-1200AI (labpc-1200ai), Lab-PC+ (lab-pc+), PCI-1200 (pci-1200)
+  Lab-PC-1200AI (labpc-1200ai), Lab-PC+ (lab-pc+), PCI-1200 (ni_labpc)
 Status: works
 
 Tested with lab-pc-1200.  For the older Lab-PC+, not all input ranges
@@ -2057,6 +2142,11 @@ supports simple digital I/O; no handshaking is supported.
 
 DMA mostly works for the PCI-DIO32HS, but only in timed input mode.
 
+The PCI-DIO-32HS/PCI-6533 has a configurable external trigger. Setting
+scan_begin_arg to 0 or CR_EDGE triggers on the leading edge. Setting
+scan_begin_arg to CR_INVERT or (CR_EDGE | CR_INVERT) triggers on the
+trailing edge.
+
 This driver could be easily modified to support AT-MIO32HS and
 AT-MIO96.
 
@@ -2076,14 +2166,15 @@ Devices: [National Instruments] PCI-MIO-16XE-50 (ni_pcimio),
   PCI-MIO-16XE-10, PXI-6030E, PCI-MIO-16E-1, PCI-MIO-16E-4, PCI-6014, PCI-6040E,
   PXI-6040E, PCI-6030E, PCI-6031E, PCI-6032E, PCI-6033E, PCI-6071E, PCI-6023E,
   PCI-6024E, PCI-6025E, PXI-6025E, PCI-6034E, PCI-6035E, PCI-6052E,
-  PCI-6110, PCI-6111, PCI-6220, PCI-6221, PCI-6224, PCI-6225, PCI-6229,
-  PCI-6250, PCI-6251, PCIe-6251, PCI-6254, PCI-6259, PCIe-6259,
+  PCI-6110, PCI-6111, PCI-6220, PCI-6221, PCI-6224, PXI-6224,
+  PCI-6225, PXI-6225, PCI-6229, PCI-6250, PCI-6251, PCIe-6251, PXIe-6251,
+  PCI-6254, PCI-6259, PCIe-6259,
   PCI-6280, PCI-6281, PXI-6281, PCI-6284, PCI-6289,
   PCI-6711, PXI-6711, PCI-6713, PXI-6713,
   PXI-6071E, PCI-6070E, PXI-6070E,
   PXI-6052E, PCI-6036E, PCI-6731, PCI-6733, PXI-6733,
   PCI-6143, PXI-6143
-Updated: Wed Nov 29 10:30:36 EST 2006
+Updated: Tue, 15 Nov 2011 15:10:37 +0000
 
 These boards are almost identical to the AT-MIO E series, except that
 they use the PCI bus instead of ISA (i.e., AT).  See the notes for
@@ -2141,6 +2232,31 @@ is used by other drivers (for example ni_660x and ni_pcimio)
 to provide support for NI's general purpose counters.  It was
 originally based on the counter code from ni_660x.c and
 ni_mio_common.c.
+
+References:
+DAQ 660x Register-Level Programmer Manual  (NI 370505A-01)
+DAQ 6601/6602 User Manual (NI 322137B-01)
+340934b.pdf  DAQ-STC reference manual
+
+
+
+
+Driver: ni_tiocmd
+Description: National Instruments general purpose counters command support
+Devices:
+Author: J.P. Mellor <jpmellor@rose-hulman.edu>,
+	Herman.Bruyninckx@mech.kuleuven.ac.be,
+	Wim.Meeussen@mech.kuleuven.ac.be,
+	Klaas.Gadeyne@mech.kuleuven.ac.be,
+	Frank Mori Hess <fmhess@users.sourceforge.net>
+Updated: Fri, 11 Apr 2008 12:32:35 +0100
+Status: works
+
+This module is not used directly by end-users.  Rather, it
+is used by other drivers (for example ni_660x and ni_pcimio)
+to provide command support for NI's general purpose counters.
+It was originally split out of ni_tio.c to stop the 'ni_tio'
+module depending on the 'mite' module.
 
 References:
 DAQ 660x Register-Level Programmer Manual  (NI 370505A-01)
@@ -2659,8 +2775,8 @@ Devices: [Quatech] DAQP-208 (daqp), DAQP-308
 Driver: rtd520
 Description: Real Time Devices PCI4520/DM7520
 Author: Dan Christian
-Devices: [Real Time Devices] DM7520HR-1 (DM7520), DM7520HR-8 (DM7520-8),
-  PCI4520 (PCI4520), PCI4520-8 (PCI4520-8)
+Devices: [Real Time Devices] DM7520HR-1 (rtd520), DM7520HR-8,
+  PCI4520, PCI4520-8
 Status: Works.  Only tested on DM7520-8.  Not SMP safe.
 
 Configuration options:
@@ -2675,6 +2791,7 @@ Driver: rti800
 Description: Analog Devices RTI-800/815
 Author: ds
 Status: unknown
+Updated: Fri, 05 Sep 2008 14:50:44 +0100
 Devices: [Analog Devices] RTI-800 (rti800), RTI-815 (rti815)
 
 Configuration options:
@@ -2694,11 +2811,11 @@ Configuration options:
   [5] - DAC 0 range
           0 = [-10,10]
           1 = [0,10]
-  [5] - DAC 0 encoding
+  [6] - DAC 0 encoding
           0 = two's complement
           1 = straight binary
-  [6] - DAC 1 range (same as DAC 0)
-  [7] - DAC 1 encoding (same as DAC 0)
+  [7] - DAC 1 range (same as DAC 0)
+  [8] - DAC 1 encoding (same as DAC 0)
 
 
 
@@ -2839,8 +2956,8 @@ Driver: usbdux
 Description: University of Stirling USB DAQ & INCITE Technology Limited
 Devices: [ITL] USB-DUX (usbdux.o)
 Author: Bernd Porr <BerndPorr@f2s.com>
-Updated: 25 Nov 2007
-Status: Testing
+Updated: 8 Dec 2008
+Status: Stable
 Configuration options:
   You have to upload firmware with the -i option. The
   firmware is usually installed under /usr/share/usb or
@@ -2860,7 +2977,16 @@ Driver: usbduxfast
 Description: ITL USB-DUXfast
 Devices: [ITL] USB-DUX (usbduxfast.o)
 Author: Bernd Porr <BerndPorr@f2s.com>
-Updated: 04 Dec 2006
+Updated: 08 Dec 2008
+Status: stable
+
+
+
+Driver: usbduxsigma
+Description: University of Stirling USB DAQ & INCITE Technology Limited
+Devices: [ITL] USB-DUX (usbduxsigma.o)
+Author: Bernd Porr <BerndPorr@f2s.com>
+Updated: 21 Jul 2011
 Status: testing
 
 
