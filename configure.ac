@@ -202,7 +202,6 @@ AC_ARG_WITH([udev-hotplug],
 	[ENABLE_UDEVHOTPLUG=$withval], [ENABLE_UDEVHOTPLUG="no"])
 AM_CONDITIONAL(INSTALL_UDEVHOTPLUG, [test "$ENABLE_UDEVHOTPLUG" != "no"])
 if test "$ENABLE_UDEVHOTPLUG" != "no"; then
-	udevrulesdir="\${sysconfdir}/udev/rules.d/"
 	if  test "$ENABLE_UDEVHOTPLUG" == "yes"; then
 		AC_MSG_ERROR([udev-hotplug needs a path as an argument (usually: --enable-udev-hotplug=/lib).])
 	fi
@@ -212,6 +211,7 @@ if test "$ENABLE_UDEVHOTPLUG" != "no"; then
 	if test "$sysconfdir" != "/etc"; then
 		AC_MSG_WARN([udev hotplug works only if sysconfdir is set to /etc.])
 	fi
+	udevrulesdir="$ENABLE_UDEVHOTPLUG/udev/rules.d/"
 	udevfirmwaredir="$ENABLE_UDEVHOTPLUG/firmware"
 	udevscriptsdir="$ENABLE_UDEVHOTPLUG/udev"
 	AC_SUBST(udevrulesdir)
