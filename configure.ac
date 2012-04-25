@@ -180,16 +180,53 @@ if test "$ENABLE_DOCBOOK" == "yes"; then
 	if test "$XMLTO" = "no" ; then
   		AC_MSG_WARN([xmlto not found, will not be able to rebuild documentation])
 	fi
-	AC_PATH_PROG(DBLATEX, dblatex, no)
-        if test "$DBLATEX" = "no" ; then
-                AC_MSG_WARN([dblatex not found, will not be able to generate pdfs])
-        fi
 else
 	XMLTO="no"
-	DBLATEX="no"
 fi
+
+if test "$XMLTO" != "no"; then
+	AC_ARG_WITH([pdf-backend],
+		[AS_HELP_STRING([--with-pdf-backend=[[yes|no|dblatex|fop|default]]],
+			[Enable or disable PDF generation with backend])],
+		[WITH_PDF_BACKEND=$withval],[WITH_PDF_BACKEND="yes"])
+	case "$WITH_PDF_BACKEND" in
+	no)
+		PDF_BACKEND="no"
+		;;
+	yes)
+		# Prefer dblatex, then default backend.
+		# Could use [dblatex fop] to prefer dblatex or fop.
+		AC_CHECK_PROGS([PDF_BACKEND], [dblatex], [default])
+		AC_MSG_NOTICE([Will use $PDF_BACKEND backend for PDF generation])
+		;;
+	default)
+		# Use xmlto's default backend.
+		PDF_BACKEND="default"
+		;;
+	dblatex|fop)
+		AC_CHECK_PROG([PDF_BACKEND], [$WITH_PDF_BACKEND],
+			[$WITH_PDF_BACKEND], [no])
+		if test "$PDF_BACKEND" = "no"; then
+			AC_MSG_WARN([$WITH_PDF_BACKEND not found, disabling PDF generation])
+		fi
+		;;
+	*)
+		AC_MSG_WARN([Bad --with-pdf-backend option, disabling PDF generation])
+		PDF_BACKEND="no"
+		;;
+	esac
+else
+	PDF_BACKEND="no"
+fi
+case $PDF_BACKEND in
+fop|default)
+	AC_MSG_WARN([$PDF_BACKEND PDF backend might not work.  --without-pdf-backend disables PDF generation.])
+	;;
+esac
 AM_CONDITIONAL(HAVE_XMLTO, [test "$XMLTO" != "no"])
-AM_CONDITIONAL(HAVE_DBLATEX, [test "$DBLATEX" != "no"])
+AM_CONDITIONAL(BUILD_PDF, [test "$PDF_BACKEND" != "no"])
+AM_CONDITIONAL(BUILD_PDF_USING_DBLATEX, [test "$PDF_BACKEND" = "dblatex"])
+AM_CONDITIONAL(BUILD_PDF_USING_FOP, [test "$PDF_BACKEND" = "fop"])
 
 pcmciadir="\${sysconfdir}/pcmcia"
 AC_SUBST(pcmciadir)

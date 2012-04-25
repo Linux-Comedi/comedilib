@@ -19,13 +19,6 @@ if HAVE_XMLTO
 all_html = $(srcdir)/doc_html
 install_html = install_html
 uninstall_html = uninstall_html
-
-if HAVE_DBLATEX
-dist_pdf_DATA = $(srcdir)/pdf/comedilib.pdf
-else
-dist_pdf_DATA =
-endif
-
 all_man = $(srcdir)/man
 install_man = install_man
 uninstall_man = uninstall_man
@@ -33,12 +26,25 @@ else
 all_html =
 install_html =
 uninstall_html =
-
-dist_pdf_DATA =
-
 all_man =
 install_man =
 uninstall_man =
+endif
+
+if BUILD_PDF
+dist_pdf_DATA = $(srcdir)/pdf/comedilib.pdf
+else
+dist_pdf_DATA =
+endif
+
+if BUILD_PDF_USING_DBLATEX
+XMLTO_PDF_WITH = --with-dblatex
+else
+if BUILD_PDF_USING_FOP
+XMLTO_PDF_WITH = --with-fop
+else
+XMLTO_PDF_WITH =
+endif
 endif
 
 all-local: $(all_html) $(all_man)
@@ -77,8 +83,7 @@ uninstall_man:
 	for each in `find $(srcdir)/man/ -name '*.3'`; do $(RM) $(DESTDIR)$(mandir)/man3/`basename $$each` ; done
 
 $(srcdir)/pdf/comedilib.pdf: $(XML)
-	$(mkdir_p) $(srcdir)/pdf
-	$(DBLATEX) -o $(srcdir)/pdf -t pdf $(srcdir)/comedilib.xml
+	$(XMLTO) -o $(srcdir)/pdf --skip-validation $(XMLTO_PDF_WITH) pdf $(srcdir)/comedilib.xml
 
 funcref.xml: funcref mkref
 	$(srcdir)/mkref $(srcdir)/funcref >$(srcdir)/funcref.xml
