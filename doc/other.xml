@@ -383,6 +383,10 @@ each type of configuration instruction.
 
 <informaltable>
 <tgroup cols='4' align='left'>
+<colspec colwidth='4*' />
+<colspec colwidth='4*' />
+<colspec colwidth='1*' />
+<colspec colwidth='4*' />
 <thead>
 <row>
 <entry>data[0]</entry>
@@ -427,11 +431,7 @@ bitwise or'd with the CR_ALT_SOURCE flag.
 </entry>
 <entry>2</entry>
 <entry>
-<simplelist type='vert' columns='1'>
-<member>
 data[1]: alternate input source.
-</member>
-</simplelist>
 </entry>
 </row>
 <row>
@@ -446,13 +446,9 @@ interrupted with a new chunk of data.
 </entry>
 <entry>2</entry>
 <entry>
-<simplelist type='vert' columns='1'>
-<member>
 data[1]: The desired block size in bytes.  The actual configured block size is
 writen back to data[1] after the instruction completes.  This instruction
 acts purely as a query if the block size is set to zero.
-</member>
-</simplelist>
 </entry>
 </row>
 <row>
@@ -464,11 +460,7 @@ than to use this instruction directly.
 </entry>
 <entry>2</entry>
 <entry>
-<simplelist type='vert' columns='1'>
-<member>
 data[1]: The instruction sets this element to either COMEDI_INPUT or COMEDI_OUTPUT.
-</member>
-</simplelist>
 </entry>
 </row>
 </tbody>
