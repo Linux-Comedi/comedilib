@@ -231,7 +231,10 @@ AM_CONDITIONAL(BUILD_PDF_USING_FOP, [test "$PDF_BACKEND" = "fop"])
 pcmciadir="\${sysconfdir}/pcmcia"
 AC_SUBST(pcmciadir)
 
-
+# firmware
+AC_ARG_ENABLE([firmware],
+	[AS_HELP_STRING([--disable-firmware], [Disable installation of firmware files])],
+	[ENABLE_FIRMWARE=$enableval],[ENABLE_FIRMWARE="yes"])
 
 # new udev hotplug
 AC_ARG_WITH([udev-hotplug],
@@ -245,43 +248,19 @@ if test "$ENABLE_UDEVHOTPLUG" != "no"; then
 	if test "$ENABLE_UDEVHOTPLUG" != "/lib"; then
 		AC_MSG_WARN([Installing the udev scripts in the non-standard location: $ENABLE_UDEVHOTPLUG (should be --enable-udev-hotplug=/lib)])
 	fi
-	if test "$sysconfdir" != "/etc"; then
-		AC_MSG_WARN([udev hotplug works only if sysconfdir is set to /etc.])
-	fi
 	udevrulesdir="$ENABLE_UDEVHOTPLUG/udev/rules.d/"
-	udevfirmwaredir="$ENABLE_UDEVHOTPLUG/firmware"
 	udevscriptsdir="$ENABLE_UDEVHOTPLUG/udev"
 	AC_SUBST(udevrulesdir)
-	AC_SUBST(udevfirmwaredir)
 	AC_SUBST(udevscriptsdir)
+	if test "$ENABLE_FIRMWARE" == "yes"; then
+	udevfirmwaredir="$ENABLE_UDEVHOTPLUG/firmware"
+	AC_SUBST(udevfirmwaredir)
+	fi
 else
 	ENABLE_UDEVHOTPLUG="no"
 fi
 
-
-# old hotplug mechanism
-AC_ARG_ENABLE([etc-hotplug],
-	[AS_HELP_STRING([--enable-etc-hotplug],
-		[enable old hotplug in /etc/hotplug])],
-	[ENABLE_ETCHOTPLUG=$enableval], [ENABLE_ETCHOTPLUG="no"])
-AM_CONDITIONAL(INSTALL_ETCHOTPLUG, [test "$ENABLE_ETCHOTPLUG" != "no"])
-
-if test "$ENABLE_ETCHOTPLUG" != "no"; then
-#see: http://linux-hotplug.sourceforge.net/
-#the hotplug expects the device dependent scripts here:
-	usbhotplugdir="\${sysconfdir}/hotplug/usb"
-	AC_SUBST(usbhotplugdir)
-
-#firmware for the hotplug script
-#see: http://linux-hotplug.sourceforge.net/
-	usbfirmwaredir="\${datadir}/usb"
-	AC_SUBST(usbfirmwaredir)
-	if test "$sysconfdir" != "/etc"; then
-		AC_MSG_WARN([hotplug works only if sysconfdir is set to /etc.])
-	fi
-fi
-
-if test "$ENABLE_ETCHOTPLUG" = "no" && test "$ENABLE_UDEVHOTPLUG" = "no" ; then
+if test "$ENABLE_UDEVHOTPLUG" = "no" ; then
 		AC_MSG_WARN([No hotplug mechanism will be installed. Consult ./configure --help if you want hotplug.])
 fi
 
