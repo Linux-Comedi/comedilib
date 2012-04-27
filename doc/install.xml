@@ -23,90 +23,108 @@
 			Configuration
 		</title>
 		<para>
-			Before being able to get information from a DAQ card, you first have
-			to tell the &comedi; core kernel module which device you have, which
-			driver you want to attach to the card, and which run-time options
-			you want to give to the driver. This configuration is done by running
-			the <command>comedi_config</command> command (as root).
-			Here is an example of how to use the command (perhaps you should read
-			its <command>man</command> page now):
+		  The good news is: on most systems PCI and USB based boards are
+		  configured automatically. The kernel will
+		  detect your data acquisition devices, will load the appropriate
+		  kernel drivers and will create the /dev/comedi entries.
 <screen>
-comedi_config /dev/comedi0 labpc-1200 0x260,3
+bp1@bp1-x61:~/sandbox/comedilib$ ls -l /dev/comedi0*
+crw-rw---- 1 root iocard 98,  0 2012-04-26 23:41 /dev/comedi0
+crw-rw---- 1 root iocard 98, 48 2012-04-26 23:41 /dev/comedi0_subd0
+crw-rw---- 1 root iocard 98, 49 2012-04-26 23:41 /dev/comedi0_subd1
 </screen>
-			This command says that the <quote>file</quote>
-			<filename>/dev/comedi0</filename> can be used to access the &comedi;
-			device that uses the <parameter>labpc-1200</parameter> board, and that
-			you give it two run-time parameters (<literal>0x260</literal> and
-			<literal>3</literal>). More parameters are possible, and their
-			meaning is driver dependant.
+		  Usually these devices belong to the group "iocard" as shown here. The only
+		  action you need to take is to become member of this group and
+		  then the &comedi; device is ready to be used.
 		</para>
 
 		<para>
-			This tutorial goes through the process of configuring &comedi;
-			for two devices, a
-			<literal>National Instruments AT-MIO-16E-10</literal>, and a
-			<literal>Data Translation DT2821-F-8DI</literal>.
+		  Old ISA based cards need to be manually configured which is
+		  explained here. You only need to read on here 
+		  if you have one of these old cards.
+                  On embedded systems it might also be necessary to load the
+                  driver and then to configure the boards manually.
+		  In general manual configuration is done by running
+		  the <command>comedi_config</command> command (as root).
+		  Here is an example of how to use the command (perhaps you should read
+		  its <command>man</command> page now):
+		  <screen>
+		    comedi_config /dev/comedi0 labpc-1200 0x260,3
+		  </screen>
+		  This command says that the <quote>file</quote>
+		  <filename>/dev/comedi0</filename> can be used to access the &comedi;
+		  device that uses the <parameter>labpc-1200</parameter> board, and that
+		  you give it two run-time parameters (<literal>0x260</literal> and
+		  <literal>3</literal>). More parameters are possible, and their
+		  meaning is driver dependant.
 		</para>
 
 		<para>
-			The NI board is plug-and-play.  The current ni_atmio driver
-			has kernel-level ISAPNP support, which is used by default
-			if you do not specify a base address.  So you could simply
-			run comedi_config as
-<screen>
-comedi_config /dev/comedi0 ni_atmio
-</screen>
-		For the preceding comedi_config command to succeed, the
-		ni_atmio kernel module must
-		be loaded first.    For plug-n-play boards on
-		modern kernels, the appropriate comedi kernel modules should get loaded
-		automatically when your computer is booted.
-		The <command>modprobe</command> command can
-		be used to manually load/unload kernel modules, and <command>lsmod</command>
-		will list all the currently loaded modules.
-		</para>
-		<para>
-			For the <literal>Data Translation</literal> board, you need to know
-			how the board's jumpers are configured in order to specify the correct
-			comedi_config parameters.  These parameters for the board are given in the
-			<link endterm="lowleveldrivers">kernel drivers</link> section about the dt282x
-			driver.
-			The card discussed here is a <literal>DT2821-f-8di</literal>.  The
-			entry for the dt282x driver tells you that the
-			comedi_config parameters give the driver the I/O base,
-			IRQ, DMA 1, DMA 2, and
-			in addition the states of the
-			differential/single-ended and unipolar/bipolar jumpers:
-			<itemizedlist>
-				<title>dt282x configuration options:</title>
-				<listitem><para>[0] - I/O port base address</para></listitem>
-				<listitem><para>[1] - IRQ</para></listitem>
-				<listitem><para>[2] - DMA 1</para></listitem>
-				<listitem><para>[3] - DMA 2</para></listitem>
-				<listitem><para>[4] - AI jumpered for 0=single ended, 1=differential</para></listitem>
-				<listitem><para>[5] - AI jumpered for 0=straight binary, 1=2's complement</para></listitem>
-				<listitem><para>[6] - AO 0 jumpered for 0=straight binary, 1=2's complement</para></listitem>
-				<listitem><para>[7] - AO 1 jumpered for 0=straight binary, 1=2's complement</para></listitem>
-				<listitem><para>[8] - AI jumpered for 0=[-10,10]V, 1=[0,10], 2=[-5,5], 3=[0,5]</para></listitem>
-				<listitem><para>[9] - AO 0 jumpered for 0=[-10,10]V, 1=[0,10], 2=[-5,5], 3=[0,5],
-					4=[-2.5,2.5]</para></listitem>
-				<listitem><para>[10]- A0 1 jumpered for 0=[-10,10]V, 1=[0,10], 2=[-5,5], 3=[0,5],
-					4=[-2.5,2.5]</para></listitem>
-			</itemizedlist>
+		  This tutorial goes through the process of configuring &comedi;
+		  for two devices, a
+		  <literal>National Instruments AT-MIO-16E-10</literal>, and a
+		  <literal>Data Translation DT2821-F-8DI</literal>.
 		</para>
 
 		<para>
-			So, the appropriate options list might be:
-<screen>
-0x200,4,0,0,1,1,1,1,0,2,2
-</screen>
-			and the full configuration command is:
-<screen>
-comedi_config /dev/comedi1 dt2821-f-8di 0x200,4,0,0,1,1,1,1,0,2,2
-</screen>
-			Setting the DMA channels to 0 disables the use of DMA.
+		  The NI board is plug-and-play.  The current ni_atmio driver
+		  has kernel-level ISAPNP support, which is used by default
+		  if you do not specify a base address.  So you could simply
+		  run comedi_config as
+		  <screen>
+		    comedi_config /dev/comedi0 ni_atmio
+		  </screen>
+		  For the preceding comedi_config command to succeed, the
+		  ni_atmio kernel module must
+		  be loaded first.    For plug-n-play boards on
+		  modern kernels, the appropriate comedi kernel modules should get loaded
+		  automatically when your computer is booted.
+		  The <command>modprobe</command> command can
+		  be used to manually load/unload kernel modules, and <command>lsmod</command>
+		  will list all the currently loaded modules.
 		</para>
-
+		<para>
+		  For the <literal>Data Translation</literal> board, you need to know
+		  how the board's jumpers are configured in order to specify the correct
+		  comedi_config parameters.  These parameters for the board are given in the
+		  <link endterm="lowleveldrivers">kernel drivers</link> section about the dt282x
+		  driver.
+		  The card discussed here is a <literal>DT2821-f-8di</literal>.  The
+		  entry for the dt282x driver tells you that the
+		  comedi_config parameters give the driver the I/O base,
+		  IRQ, DMA 1, DMA 2, and
+		  in addition the states of the
+		  differential/single-ended and unipolar/bipolar jumpers:
+		  <itemizedlist>
+		    <title>dt282x configuration options:</title>
+		    <listitem><para>[0] - I/O port base address</para></listitem>
+		    <listitem><para>[1] - IRQ</para></listitem>
+		    <listitem><para>[2] - DMA 1</para></listitem>
+		    <listitem><para>[3] - DMA 2</para></listitem>
+		    <listitem><para>[4] - AI jumpered for 0=single ended, 1=differential</para></listitem>
+		    <listitem><para>[5] - AI jumpered for 0=straight binary, 1=2's complement</para></listitem>
+		    <listitem><para>[6] - AO 0 jumpered for 0=straight binary, 1=2's complement</para></listitem>
+		    <listitem><para>[7] - AO 1 jumpered for 0=straight binary, 1=2's complement</para></listitem>
+		    <listitem><para>[8] - AI jumpered for 0=[-10,10]V, 1=[0,10], 2=[-5,5], 3=[0,5]</para></listitem>
+		    <listitem><para>[9] - AO 0 jumpered for 0=[-10,10]V, 1=[0,10], 2=[-5,5], 3=[0,5],
+			4=[-2.5,2.5]</para></listitem>
+		    <listitem><para>[10]- A0 1 jumpered for 0=[-10,10]V, 1=[0,10], 2=[-5,5], 3=[0,5],
+			4=[-2.5,2.5]</para></listitem>
+		  </itemizedlist>
+		</para>
+		
+		<para>
+		  So, the appropriate options list might be:
+		  <screen>
+		    0x200,4,0,0,1,1,1,1,0,2,2
+		  </screen>
+		  and the full configuration command is:
+		  <screen>
+		    comedi_config /dev/comedi1 dt2821-f-8di 0x200,4,0,0,1,1,1,1,0,2,2
+		  </screen>
+		  Setting the DMA channels to 0 disables the use of DMA.
+		</para>
+		
 		<para>
 			So now you have your boards configured correctly.
 			Since data acquisition boards are not typically well-engineered,
@@ -134,9 +152,9 @@ comedi0: ni_atmio: 0x0260 at-mio-16e-10 ( irq = 3 )
 </screen>
 
 		<para>
-			Note that it also correctly identified the board.
+		  Note that it also correctly identified the board.
 		</para>
-
+		
 	</section>
 
 	<section id="gettinginformation">
@@ -145,10 +163,10 @@ comedi0: ni_atmio: 0x0260 at-mio-16e-10 ( irq = 3 )
 		</title>
 
 		<para>
-			So now that you have &comedi; talking to the hardware, try to
-			talk to &comedi;.  Here's some information from comedi's proc
-			file, which indicates what drivers are loaded and which
-			boards are configured:
+		  So now that you have &comedi; talking to the hardware, try to
+		  talk to &comedi;.  Here's some information from comedi's proc
+		  file, which indicates what drivers are loaded and which
+		  boards are configured:
 		</para>
 
 <screen>
@@ -156,17 +174,17 @@ cat /proc/comedi
 </screen>
 
 		<para>
-			For example, on a computer with an NI pxi-6281 configured on
-			<filename>/dev/comedi0</filename> and
-			a pxi-6602 configured on <filename>/dev/comedi1</filename> you might
-			see something like:
+		  For example, on a computer with an NI pxi-6281 configured on
+		  <filename>/dev/comedi0</filename> and
+		  a pxi-6602 configured on <filename>/dev/comedi1</filename> you might
+		  see something like:
 		</para>
-
+		
 <screen>
 comedi version 0.7.74
 format string: "%2d: %-20s %-20s %4d",i,driver_name,board_name,n_subdevices
- 0: ni_pcimio            pxi-6281               14
- 1: ni_660x              PXI-6602               10
+0: ni_pcimio            pxi-6281               14
+1: ni_660x              PXI-6602               10
 ni_pcimio:
  ni_pcimio
 8255:

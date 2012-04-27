@@ -5,7 +5,7 @@ noinst_PROGRAMS = \
 	gpct_encoder gpct_pulse_generator \
 	gpct_simple_counting inp inpn insn ledclock \
 	mmap outp poll receiver select \
-	sender sigio sv tut1 tut2
+	sender sigio sv tut1 tut2 tut3
 
 noinst_HEADERS = examples.h
 
@@ -130,3 +130,6 @@ tut2_CFLAGS = $(COMEDILIB_CFLAGS)
 tut2_LDADD = $(COMEDILIB_LIBS)
 
 
+tut3_SOURCES = tut3.c
+tut3_CFLAGS = $(COMEDILIB_CFLAGS)
+tut3_LDADD = $(COMEDILIB_LIBS)
