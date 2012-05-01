@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
-	"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
+        "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
 <!ENTITY % comedilib_entities SYSTEM "comedilib.ent">
 %comedilib_entities;
 ]>
@@ -58,8 +58,10 @@ digital subdevices on a particular board.
 Individual bits on a digital I/O device can be read and written using
 the functions
 <programlisting>
-  int <link linkend="func-ref-comedi-dio-read">comedi_dio_read</link>(device,subdevice,channel,unsigned int *bit);
-  int <link linkend="func-ref-comedi-dio-write">comedi_dio_write</link>(device,subdevice,channel,unsigned int bit);
+int <link linkend="func-ref-comedi-dio-read">comedi_dio_read</link>(<link linkend="ref-type-comedi-t">comedi_t</link> *device, unsigned int subdevice, unsigned int channel,
+                unsigned int *bit);
+int <link linkend="func-ref-comedi-dio-write">comedi_dio_write</link>(<link linkend="ref-type-comedi-t">comedi_t</link> *device, unsigned int subdevice, unsigned int channel,
+                unsigned int bit);
 </programlisting>
 The <parameter class="function">device</parameter> parameter is a
 <link linkend="ref-type-comedi-t">pointer</link>
@@ -74,7 +76,8 @@ contains the value of the acquired bit.
 The direction of bidirectional lines can be configured using
 the function
 <programlisting>
-  <link linkend="func-ref-comedi-dio-config">comedi_dio_config</link>(device,subdevice,channel,unsigned int dir);
+int <link linkend="func-ref-comedi-dio-config">comedi_dio_config</link>(<link linkend="ref-type-comedi-t">comedi_t</link> *device, unsigned int subdevice, unsigned int channel,
+                unsigned int dir);
 </programlisting>
 The parameter <parameter class="function">dir</parameter> should be
 either <literal>COMEDI_INPUT</literal> or
@@ -88,7 +91,8 @@ the entire block.
 Multiple channels can be read and written simultaneously using the
 function
 <programlisting>
-  <link linkend="func-ref-comedi-dio-bitfield">comedi_dio_bitfield</link>(device,subdevice,unsigned int write_mask,unsigned int *bits);
+int <link linkend="func-ref-comedi-dio-bitfield">comedi_dio_bitfield</link>(<link linkend="ref-type-comedi-t">comedi_t</link> *device, unsigned int subdevice,
+                unsigned int write_mask, unsigned int *bits);
 </programlisting>
 Each channel is assigned to a bit in the
 <parameter class="function">write_mask</parameter> and
@@ -131,25 +135,26 @@ the range of, typically, <literal>8</literal>, <literal>10</literal>,
 <para>
 The
 <programlisting>
- int <link linkend="func-ref-comedi-data-read">comedi_data_read</link>(<link linkend="ref-type-comedi-t">comedi_t</link> * device, unsigned int subdevice, unsigned int channel,
-                    unsigned int range, unsigned int aref, <link linkend="ref-type-lsampl-t">lsampl_t</link> * data);
+int <link linkend="func-ref-comedi-data-read">comedi_data_read</link>(<link linkend="ref-type-comedi-t">comedi_t</link> *device, unsigned int subdevice, unsigned int channel,
+                unsigned int range, unsigned int aref, <link linkend="ref-type-lsampl-t">lsampl_t</link> * data);
 </programlisting>
 function reads one such data value from a &comedi; channel, and puts it in
 the user-specified <parameter>data</parameter> buffer. The
 <programlisting>
- int <link linkend="func-ref-comedi-data-write">comedi_data_write</link>(<link linkend="ref-type-comedi-t">comedi_t</link> * device, unsigned int subdevice, unsigned int channel,
-                       unsigned int range, unsigned int aref, <link linkend="ref-type-lsampl-t">lsampl_t</link> data);
+int <link linkend="func-ref-comedi-data-write">comedi_data_write</link>(<link linkend="ref-type-comedi-t">comedi_t</link> *device, unsigned int subdevice, unsigned int channel,
+                unsigned int range, unsigned int aref, <link linkend="ref-type-lsampl-t">lsampl_t</link> data);
 </programlisting>
 works in the opposite direction. Data values returned by this function
 are unsigned integers less than, or equal to, the maximum sample value
 of the channel, which can be determined using the function
 <programlisting>
- <link linkend="ref-type-lsampl-t">lsampl_t</link> <link linkend="func-ref-comedi-get-maxdata">comedi_get_maxdata</link>(<link linkend="ref-type-comedi-t">comedi_t</link> * device, unsigned int subdevice, unsigned int channel);
+<link linkend="ref-type-lsampl-t">lsampl_t</link> <link linkend="func-ref-comedi-get-maxdata">comedi_get_maxdata</link>(<link linkend="ref-type-comedi-t">comedi_t</link> *device, unsigned int subdevice,
+                unsigned int channel);
 </programlisting>
 Conversion of data values to physical units can be performed by the
 function
 <programlisting>
- double <link linkend="func-ref-comedi-to-phys">comedi_to_phys</link>(<link linkend="ref-type-lsampl-t">lsampl_t</link> data, comedi_range * range,  <link linkend="ref-type-lsampl-t">lsampl_t</link> maxdata);
+double <link linkend="func-ref-comedi-to-phys">comedi_to_phys</link>(<link linkend="ref-type-lsampl-t">lsampl_t</link> data, comedi_range * range,  <link linkend="ref-type-lsampl-t">lsampl_t</link> maxdata);
 </programlisting>
 There are two data structures in these commands that are not fully
 self-explanatory:
@@ -188,8 +193,8 @@ function call are checked. If multiple acquisitions must be done on
 the same channel, this overhead can be avoided by using a function
 that can read more than one sample:
 <programlisting>
-  int <link linkend="func-ref-comedi-dio-read">comedi_data_read_n</link>(<link linkend="ref-type-comedi-t">comedi_t</link> *it, unsigned int subdev, unsigned int chan, unsigned int range,
-      unsigned int aref, <link linkend="ref-type-lsampl-t">lsampl_t</link> *data, unsigned int n)
+int <link linkend="func-ref-comedi-data-read-n">comedi_data_read_n</link>(<link linkend="ref-type-comedi-t">comedi_t</link> *it, unsigned int subdev, unsigned int chan,
+                unsigned int range, unsigned int aref, <link linkend="ref-type-lsampl-t">lsampl_t</link> *data, unsigned int n);
 </programlisting>
 The number of samples, <parameter class="function">n</parameter>, is
 limited by the &comedi; implementation (to a maximum of 100 samples),
@@ -199,8 +204,9 @@ because the call is blocking.
 The start of the data acquisition can also be delayed by a specified
 number of nano-seconds:
 <programlisting>
-int <link linkend="func-ref-comedi-data-read-delayed">comedi_data_read_delayed</link>(<link linkend="ref-type-comedi-t">comedi_t</link> *it, unsigned int subdev, unsigned int chan, unsigned int range,
-    unsigned int aref, <link linkend="ref-type-lsampl-t">lsampl_t</link> *data, unsigned int nano_sec)
+int <link linkend="func-ref-comedi-data-read-delayed">comedi_data_read_delayed</link>(<link linkend="ref-type-comedi-t">comedi_t</link> *it, unsigned int subdev, unsigned int chan,
+                unsigned int range, unsigned int aref, <link linkend="ref-type-lsampl-t">lsampl_t</link> *data,
+                unsigned int nano_sec);
 </programlisting>
 All these read and write acquisition functions are implemented on top
 of the generic <link linkend="instructions">instruction</link>
@@ -245,7 +251,7 @@ All the information needed to execute an instruction is stored in the
 <link linkend="ref-type-comedi-insn">comedi_insn</link>
 data structure:
 <programlisting>
-struct <anchor id="insn-data-structure"/>comedi_insn_struct{
+struct <anchor id="insn-data-structure"/>comedi_insn_struct {
   <anchor id="insn-data-structure-insn"/>unsigned int insn;      // integer encoding the type of acquisition
                           // (or configuration)
   unsigned int n;         // number of elements in data array
@@ -317,7 +323,7 @@ Instruction execution
 Once an instruction data structure has been filled in, the
 corresponding instruction is executed as follows:
 <programlisting>
- int <link linkend="func-ref-comedi-do-insn">comedi_do_insn</link>(<link linkend="ref-type-comedi-t">comedi_t</link> *it, <link linkend="ref-type-comedi-insn">comedi_insn</link> * instruction);
+int <link linkend="func-ref-comedi-do-insn">comedi_do_insn</link>(<link linkend="ref-type-comedi-t">comedi_t</link> *it, <link linkend="ref-type-comedi-insn">comedi_insn</link> *instruction);
 </programlisting>
 Many &comedi; instructions are shortcuts that relieve the programmer
 from explicitly filling in the data structure and calling the
@@ -327,7 +333,7 @@ function.
 <para>
 The
 <programlisting>
- int <link linkend="func-ref-comedi-do-insnlist">comedi_do_insnlist</link><link linkend="ref-type-comedi-t">comedi_t</link> *it, <link linkend="ref-type-comedi-insnlist">comedi_insnlist</link> * list)
+int <link linkend="func-ref-comedi-do-insnlist">comedi_do_insnlist</link>(<link linkend="ref-type-comedi-t">comedi_t</link> *it, <link linkend="ref-type-comedi-insnlist">comedi_insnlist</link> *list)
 </programlisting>
 instruction allows to perform a list of instructions in one function
 call. The number of instructions in the list is limited in the
@@ -580,7 +586,7 @@ Executing a command
 <para>
 A commands is executed by the following &comedi; function:
 <programlisting>
- int <link linkend="func-ref-comedi-command">comedi_command</link>(<link linkend="ref-type-comedi-t">comedi_t</link> * device,  <link linkend="ref-type-comedi-cmd">comedi_cmd</link> * command);
+int <link linkend="func-ref-comedi-command">comedi_command</link>(<link linkend="ref-type-comedi-t">comedi_t</link> *device,  <link linkend="ref-type-comedi-cmd">comedi_cmd</link> *command);
 </programlisting>
 The following sections explain the meaning of the
 <link linkend="ref-type-comedi-cmd">comedi_cmd</link> data structure.
@@ -618,7 +624,7 @@ acquisition, which is stored in the
 <programlisting>
 typedef struct comedi_cmd_struct comedi_cmd;
 
-struct comedi_cmd_struct{
+struct comedi_cmd_struct {
   unsigned int subdev;         // which subdevice to sample
   unsigned int <anchor id="command-data-struct-flags"/>flags;          // encode some configuration possibilities
                                // of the command execution; e.g.,
@@ -1188,13 +1194,14 @@ As you might have guessed, the &comedi; library has functions
 to help you in your quest to accurately measure slowly varying
 inputs:
 <programlisting>
-  int <link linkend="func-ref-comedi-sv-init">comedi_sv_init</link>(<link linkend="ref-type-comedi-sv-t">comedi_sv_t</link> * sv, <link linkend="ref-type-comedi-t">comedi_t</link> * device, unsigned int subdevice, unsigned int channel);
+int <link linkend="func-ref-comedi-sv-init">comedi_sv_init</link>(<link linkend="ref-type-comedi-sv-t">comedi_sv_t</link> *sv, <link linkend="ref-type-comedi-t">comedi_t</link> *device, unsigned int subdevice,
+                unsigned int channel);
 </programlisting>
 This function initializes the
 <link linkend="ref-type-comedi-sv-t">comedi_sv_t</link> data structure, used
 to do the averaging acquisition:
 <programlisting>
-struct comedi_sv_struct{
+struct comedi_sv_struct {
   <link linkend="ref-type-comedi-t">comedi_t</link> *dev;
   unsigned int subdevice;
   unsigned int chan;
@@ -1211,7 +1218,7 @@ struct comedi_sv_struct{
 </programlisting>
 The actual acquisition is done with:
 <programlisting>
-  int <link linkend="func-ref-comedi-sv-measure">comedi_sv_measure</link>(<link linkend="ref-type-comedi-sv-t">comedi_sv_t</link> * sv, double * data);
+int <link linkend="func-ref-comedi-sv-measure">comedi_sv_measure</link>(<link linkend="ref-type-comedi-sv-t">comedi_sv_t</link> *sv, double *data);
 </programlisting>
 The number of samples over which the
 <function>comedi_sv_measure()</function> averages is limited by the
@@ -2005,78 +2012,78 @@ An example to set up a device as a master is given below.
 </para>
 
 <programlisting><![CDATA[
-void comediEnableMaster(comedi_t* dev){
-	comedi_insn   configCmd;
-	lsampl_t      configData[2];
-	int           ret;
-	unsigned int  d = 0;
-	static const unsigned rtsi_subdev = 10;
-	static const unsigned rtsi_clock_line = 7;
+void comediEnableMaster(comedi_t *dev){
+        comedi_insn   configCmd;
+        lsampl_t      configData[2];
+        int           ret;
+        unsigned int  d = 0;
+        static const unsigned rtsi_subdev = 10;
+        static const unsigned rtsi_clock_line = 7;
 
-	/* Route RTSI clock to line 7 (not needed on pre-m-series boards since their
-		clock is always on line 7). */
-	memset(&configCmd, 0, sizeof(configCmd));
-	memset(&configData, 0, sizeof(configData));
-	configCmd.insn = INSN_CONFIG;
-	configCmd.subdev = rtsi_subdev;
-	configCmd.chanspec = rtsi_clock_line;
-	configCmd.n = 2;
-	configCmd.data = configData;
-	configCmd.data[0] = INSN_CONFIG_SET_ROUTING;
-	configCmd.data[1] = NI_RTSI_OUTPUT_RTSI_OSC;
-	ret = comedi_do_insn(dev, &configCmd);
-	if(ret < 0){
-		comedi_perror("comedi_do_insn: INSN_CONFIG");
-		exit(1);
-	}
-	// Set clock RTSI line as output
-	ret = comedi_dio_config(dev, rtsi_subdev, rtsi_clock_line, INSN_CONFIG_DIO_OUTPUT);
-	if(ret < 0){
-		comedi_perror("comedi_dio_config");
-		exit(1);
-	}
+        /* Route RTSI clock to line 7 (not needed on pre-m-series boards since their
+           clock is always on line 7). */
+        memset(&configCmd, 0, sizeof(configCmd));
+        memset(&configData, 0, sizeof(configData));
+        configCmd.insn = INSN_CONFIG;
+        configCmd.subdev = rtsi_subdev;
+        configCmd.chanspec = rtsi_clock_line;
+        configCmd.n = 2;
+        configCmd.data = configData;
+        configCmd.data[0] = INSN_CONFIG_SET_ROUTING;
+        configCmd.data[1] = NI_RTSI_OUTPUT_RTSI_OSC;
+        ret = comedi_do_insn(dev, &configCmd);
+        if(ret < 0){
+                comedi_perror("comedi_do_insn: INSN_CONFIG");
+                exit(1);
+        }
+        // Set clock RTSI line as output
+        ret = comedi_dio_config(dev, rtsi_subdev, rtsi_clock_line, INSN_CONFIG_DIO_OUTPUT);
+        if(ret < 0){
+                comedi_perror("comedi_dio_config");
+                exit(1);
+        }
 
-	/* Set routing of the 3 main AI RTSI signals and their direction to output.
-		We're reusing the already initialized configCmd instruction here since
-		it's mostly the same. */
-	configCmd.chanspec = 0;
-	configCmd.data[1] =  NI_RTSI_OUTPUT_ADR_START1;
-	ret = comedi_do_insn(dev, &configCmd);
-	if(ret < 0){
-		comedi_perror("comedi_do_insn: INSN_CONFIG");
-		exit(1);
-	}
-	ret = comedi_dio_config(dev, rtsi_subdev, 0, INSN_CONFIG_DIO_OUTPUT);
-	if(ret < 0){
-		comedi_perror("comedi_dio_config");
-		exit(1);
-	}
+        /* Set routing of the 3 main AI RTSI signals and their direction to output.
+           We're reusing the already initialized configCmd instruction here since
+           it's mostly the same. */
+        configCmd.chanspec = 0;
+        configCmd.data[1] =  NI_RTSI_OUTPUT_ADR_START1;
+        ret = comedi_do_insn(dev, &configCmd);
+        if(ret < 0){
+                comedi_perror("comedi_do_insn: INSN_CONFIG");
+                exit(1);
+        }
+        ret = comedi_dio_config(dev, rtsi_subdev, 0, INSN_CONFIG_DIO_OUTPUT);
+        if(ret < 0){
+                comedi_perror("comedi_dio_config");
+                exit(1);
+        }
 
-	configCmd.chanspec = 1;
-	configCmd.data[1] =  NI_RTSI_OUTPUT_ADR_START2;
-	ret = comedi_do_insn(dev, &configCmd);
-	if(ret < 0){
-		comedi_perror("comedi_do_insn: INSN_CONFIG");
-		exit(1);
-	}
-	ret = comedi_dio_config(dev, rtsi_subdev, 1, INSN_CONFIG_DIO_OUTPUT);
-	if(ret < 0){
-		comedi_perror("comedi_dio_config");
-		exit(1);
-	}
+        configCmd.chanspec = 1;
+        configCmd.data[1] =  NI_RTSI_OUTPUT_ADR_START2;
+        ret = comedi_do_insn(dev, &configCmd);
+        if(ret < 0){
+                comedi_perror("comedi_do_insn: INSN_CONFIG");
+                exit(1);
+        }
+        ret = comedi_dio_config(dev, rtsi_subdev, 1, INSN_CONFIG_DIO_OUTPUT);
+        if(ret < 0){
+                comedi_perror("comedi_dio_config");
+                exit(1);
+        }
 
-	configCmd.chanspec = 2;
-	configCmd.data[1] =  NI_RTSI_OUTPUT_SCLKG;
-	ret = comedi_do_insn(dev, &configCmd);
-	if(ret < 0){
-		comedi_perror("comedi_do_insn: INSN_CONFIG");
-		exit(1);
-	}
-	ret = comedi_dio_config(dev, rtsi_subdev, 2, INSN_CONFIG_DIO_OUTPUT);
-	if(ret < 0){
-		comedi_perror("comedi_dio_config");
-		exit(1);
-	}
+        configCmd.chanspec = 2;
+        configCmd.data[1] =  NI_RTSI_OUTPUT_SCLKG;
+        ret = comedi_do_insn(dev, &configCmd);
+        if(ret < 0){
+                comedi_perror("comedi_do_insn: INSN_CONFIG");
+                exit(1);
+        }
+        ret = comedi_dio_config(dev, rtsi_subdev, 2, INSN_CONFIG_DIO_OUTPUT);
+        if(ret < 0){
+                comedi_perror("comedi_dio_config");
+                exit(1);
+        }
 }
 ]]></programlisting>
 
@@ -2088,86 +2095,87 @@ external clock source instead of using its internal clock directly (for
 best syncronization).
 </para>
 <programlisting><![CDATA[
-void comediEnableSlave(comedi_t* dev){
-	comedi_insn   configCmd;
-	lsampl_t      configData[3];
-	int           ret;
-	unsigned int  d = 0;;
-	static const unsigned rtsi_subdev = 10;
-	static const unsigned rtsi_clock_line = 7;
+void comediEnableSlave(comedi_t *dev){
+        comedi_insn   configCmd;
+        lsampl_t      configData[3];
+        int           ret;
+        unsigned int  d = 0;;
+        static const unsigned rtsi_subdev = 10;
+        static const unsigned rtsi_clock_line = 7;
 
-	memset(&configCmd, 0, sizeof(configCmd));
-	memset(&configData, 0, sizeof(configData));
-	configCmd.insn = INSN_CONFIG;
-	configCmd.subdev = rtsi_subdev;
-	configCmd.chanspec = 0;
-	configCmd.n = 3;
-	configCmd.data = configData;
-	configCmd.data[0] = INSN_CONFIG_SET_CLOCK_SRC;
-	configCmd.data[1] = NI_MIO_PLL_RTSI_CLOCK(rtsi_clock_line);
-	configCmd.data[2] = 100;	/* need to give it correct external clock period */
-	ret = comedi_do_insn(dev, &configCmd);
-	if(ret < 0){
-		comedi_perror("comedi_do_insn: INSN_CONFIG");
-		exit(1);
-	}
-	/* configure RTSI clock line as input */
-	ret = comedi_dio_config(dev, rtsi_subdev, rtsi_clock_line, INSN_CONFIG_DIO_INPUT);
-	if(ret < 0){
-		comedi_perror("comedi_dio_config");
-		exit(1);
-	}
-	/* Configure RTSI lines we are using for AI signals as inputs. */
-	ret = comedi_dio_config(dev, rtsi_subdev, 0, INSN_CONFIG_DIO_INPUT);
-	if(ret < 0){
-		comedi_perror("comedi_dio_config");
-		exit(1);
-	}
-	ret = comedi_dio_config(dev, rtsi_subdev, 1, INSN_CONFIG_DIO_INPUT);
-	if(ret < 0){
-		comedi_perror("comedi_dio_config");
-		exit(1);
-	}
-	ret = comedi_dio_config(dev, rtsi_subdev, 2, INSN_CONFIG_DIO_INPUT);
-	if(ret < 0){
-		comedi_perror("comedi_dio_config");
-		exit(1);
-	}
+        memset(&configCmd, 0, sizeof(configCmd));
+        memset(&configData, 0, sizeof(configData));
+        configCmd.insn = INSN_CONFIG;
+        configCmd.subdev = rtsi_subdev;
+        configCmd.chanspec = 0;
+        configCmd.n = 3;
+        configCmd.data = configData;
+        configCmd.data[0] = INSN_CONFIG_SET_CLOCK_SRC;
+        configCmd.data[1] = NI_MIO_PLL_RTSI_CLOCK(rtsi_clock_line);
+        configCmd.data[2] = 100;        /* need to give it correct external clock period */
+        ret = comedi_do_insn(dev, &configCmd);
+        if(ret < 0){
+                comedi_perror("comedi_do_insn: INSN_CONFIG");
+                exit(1);
+        }
+        /* configure RTSI clock line as input */
+        ret = comedi_dio_config(dev, rtsi_subdev, rtsi_clock_line, INSN_CONFIG_DIO_INPUT);
+        if(ret < 0){
+                comedi_perror("comedi_dio_config");
+                exit(1);
+        }
+        /* Configure RTSI lines we are using for AI signals as inputs. */
+        ret = comedi_dio_config(dev, rtsi_subdev, 0, INSN_CONFIG_DIO_INPUT);
+        if(ret < 0){
+                comedi_perror("comedi_dio_config");
+                exit(1);
+        }
+        ret = comedi_dio_config(dev, rtsi_subdev, 1, INSN_CONFIG_DIO_INPUT);
+        if(ret < 0){
+                comedi_perror("comedi_dio_config");
+                exit(1);
+        }
+        ret = comedi_dio_config(dev, rtsi_subdev, 2, INSN_CONFIG_DIO_INPUT);
+        if(ret < 0){
+                comedi_perror("comedi_dio_config");
+                exit(1);
+        }
 }
 
-int comediSlaveStart(comedi_t* dev){
-	comedi_cmd     cmd;
-	unsigned int   nChannels = 8;
-	double         sampleRate = 50000;
-	unsigned int   chanList[8];
-	int            i;
+int comediSlaveStart(comedi_t *dev){
+        comedi_cmd     cmd;
+        unsigned int   nChannels = 8;
+        double         sampleRate = 50000;
+        unsigned int   chanList[8];
+        int            i;
 
-	// Setup chan list
-	for(i = 0; i < nChannels; i++){
-		chanList[i] = CR_PACK(i, 0, AREF_GROUND);
-	}
-	// Set up command
-	memset(&cmd, 0, sizeof(cmd));
-	ret = comedi_get_cmd_generic_timed(dev, subdevice, &cmd, int(1e9/(nChannels * sampleRate)));
-	if(ret<0){
-		printf("comedi_get_cmd_generic_timed failed\n");
-		return ret;
-	}
-	cmd.chanlist        = chanList;
-	cmd.chanlist_len    = nChannels;
-	cmd.scan_end_arg    = nChannels;
-	cmd.start_src        = TRIG_EXT;
-	cmd.start_arg        = CR_EDGE | NI_EXT_RTSI(0);
-	cmd.convert_src    = TRIG_EXT;
-	cmd.convert_arg    = CR_INVERT | CR_EDGE | NI_EXT_RTSI(2);
-	cmd.stop_src        = TRIG_NONE;
+        // Setup chan list
+        for(i = 0; i < nChannels; i++){
+                chanList[i] = CR_PACK(i, 0, AREF_GROUND);
+        }
+        // Set up command
+        memset(&cmd, 0, sizeof(cmd));
+        ret = comedi_get_cmd_generic_timed(dev, subdevice, &cmd,
+                (int)(1e9/(nChannels * sampleRate)));
+        if(ret<0){
+                printf("comedi_get_cmd_generic_timed failed\n");
+                return ret;
+        }
+        cmd.chanlist        = chanList;
+        cmd.chanlist_len    = nChannels;
+        cmd.scan_end_arg    = nChannels;
+        cmd.start_src        = TRIG_EXT;
+        cmd.start_arg        = CR_EDGE | NI_EXT_RTSI(0);
+        cmd.convert_src    = TRIG_EXT;
+        cmd.convert_arg    = CR_INVERT | CR_EDGE | NI_EXT_RTSI(2);
+        cmd.stop_src        = TRIG_NONE;
 
-	ret = comedi_command(dev0, &cmd0);
-	if(ret<0){
-		printf("comedi_command failed\n");
-		return ret;
-	}
-	return 0;
+        ret = comedi_command(dev0, &cmd0);
+        if(ret<0){
+                printf("comedi_command failed\n");
+                return ret;
+        }
+        return 0;
 }
 ]]></programlisting>
 

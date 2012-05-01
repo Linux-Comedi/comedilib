@@ -104,7 +104,8 @@
  * This prepares a command in a pretty generic way.  We ask the
  * library to create a stock command that supports periodic
  * sampling of data, then modify the parts we want. */
-int prepare_cmd_lib(comedi_t *dev, int subdevice, int n_scan, int n_chan, unsigned scan_period_nanosec, comedi_cmd *cmd)
+int prepare_cmd_lib(comedi_t *dev, int subdevice, int n_scan, int n_chan,
+		unsigned scan_period_nanosec, comedi_cmd *cmd)
 {
 	int ret;
 
