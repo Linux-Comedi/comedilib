@@ -1280,25 +1280,26 @@ input, there is a set of bits that determine the effect on the
 output value due to positive or negative transitions of the
 sensitive input.  For each transition direction, there are two
 bits defined as follows:
-<simplelist>
 
-<member>
-00: transition is ignored.
-</member>
+<variablelist spacing="compact">
+ <varlistentry>
+  <term>00</term>
+  <listitem>transition is ignored.</listitem>
+ </varlistentry>
+ <varlistentry>
+  <term>01</term>
+  <listitem>accumulator is incremented, or output is set.</listitem>
+ </varlistentry>
+ <varlistentry>
+  <term>10</term>
+  <listitem>accumulator is decremented, or output is cleared.</listitem>
+ </varlistentry>
+ <varlistentry>
+  <term>11</term>
+  <listitem>reserved.</listitem>
+ </varlistentry>
+</variablelist>
 
-<member>
-01: accumulator is incremented, or output is set.
-</member>
-
-<member>
-10: accumulator is decremented, or output is cleared.
-</member>
-
-<member>
-11: reserved.
-</member>
-
-</simplelist>
 For example, a simple digital follower is specified by the bit
 pattern 01 10, because it sets the output on positive transitions
 of the input, and clears the output on negative transitions.  A
@@ -1531,20 +1532,24 @@ structure</link> is ignored.
 The <link linkend="insn-data-structure-data">data</link> field
 of the <link linkend="insn-data-structure">instruction data
 structure</link> is used as follows:
-<simplelist>
-  <member>
-data[1]:  trigger and combining machine configuration.
-  </member>
-  <member>
-data[2]: analog triggering signal chanspec.
-  </member>
-  <member>
-data[3]: primary analog level.
-  </member>
-  <member>
-data[4]: secondary analog level.
-  </member>
-</simplelist>
+<variablelist spacing="compact">
+ <varlistentry>
+  <term>data[1]</term>
+  <listitem>trigger and combining machine configuration.</listitem>
+ </varlistentry>
+ <varlistentry>
+  <term>data[2]</term>
+  <listitem>analog triggering signal chanspec.</listitem>
+ </varlistentry>
+ <varlistentry>
+  <term>data[3]</term>
+  <listitem>primary analog level.</listitem>
+ </varlistentry>
+ <varlistentry>
+  <term>data[4]</term>
+  <listitem>secondary analog level.</listitem>
+ </varlistentry>
+</variablelist>
 </para>
 <para>
 Analog triggering is described by a digital combining machine that
@@ -1609,17 +1614,20 @@ The <link linkend="insn-data-structure-data">data</link> field
 of the <link linkend="insn-data-structure">instruction data
 structure</link> is used as follows:
 </para>
-<simplelist>
-  <member>
-data[1]: trigger flags.
-  </member>
-  <member>
-data[2]: mask.
-  </member>
-  <member>
-data[3]: pattern.
-  </member>
-</simplelist>
+<variablelist spacing="compact">
+ <varlistentry>
+  <term>data[1]</term>
+  <listitem>trigger flags.</listitem>
+ </varlistentry>
+ <varlistentry>
+  <term>data[2]</term>
+  <listitem>mask.</listitem>
+ </varlistentry>
+ <varlistentry>
+  <term>data[3]</term>
+  <listitem>pattern.</listitem>
+ </varlistentry>
+</variablelist>
 
 <para>
 The pattern matching trigger issues a trigger when all of a specifed
@@ -1672,26 +1680,32 @@ The <link linkend="insn-data-structure-data">data</link> field
 of the <link linkend="insn-data-structure">instruction data
 structure</link> is used as follows:
 </para>
-<simplelist>
-  <member>
-data[1]: trigger configuration.
-  </member>
-  <member>
-data[2]: primary input chanspec.
-  </member>
-  <member>
-data[3]: primary combining machine configuration.
-  </member>
-  <member>
-data[4]: secondary input chanspec.
-  </member>
-  <member>
-data[5]: secondary combining machine configuration.
-  </member>
-  <member>
-data[6]: latch configuration.
-  </member>
-</simplelist>
+<variablelist spacing="compact">
+ <varlistentry>
+  <term>data[1]</term>
+  <listitem>trigger configuration.</listitem>
+ </varlistentry>
+ <varlistentry>
+  <term>data[2]</term>
+  <listitem>primary input chanspec.</listitem>
+ </varlistentry>
+ <varlistentry>
+  <term>data[3]</term>
+  <listitem>primary combining machine configuration.</listitem>
+ </varlistentry>
+ <varlistentry>
+  <term>data[4]</term>
+  <listitem>secondary input chanspec.</listitem>
+ </varlistentry>
+ <varlistentry>
+  <term>data[5]</term>
+ <listitem>secondary combining machine configuration.</listitem>
+ </varlistentry>
+ <varlistentry>
+  <term>data[6]</term>
+  <listitem>latch configuration.</listitem>
+ </varlistentry>
+</variablelist>
 
 <para>
 Note that this configuration is only useful if the counting has to be
@@ -1756,28 +1770,35 @@ structure</link> is used as follows:
 </para>
 
 <para>
-<simplelist>
- <member>
-data[1]: is flags, including the flags for the command triggering
+<variablelist spacing="compact">
+ <varlistentry>
+  <term>data[1]</term>
+  <listitem>
+is flags, including the flags for the command triggering
 configuration.  If a command is not subsequently issued on the
 subdevice, the command triggering portion of the flags are ignored.
- </member>
- <member>
-data[2]: determines the mode of operation.  The mode of operation
+  </listitem>
+ </varlistentry>
+ <varlistentry>
+  <term>data[2]</term>
+  <listitem>
+determines the mode of operation.  The mode of operation
 is actually a bitfield that encodes what to do for various
 transitions of the source signals.
-</member>
-
-<member>
-data[3], data[4]: determine the primary source for the counter,
-similar to the
+  </listitem>
+ </varlistentry>
+ <varlistentry>
+  <term>data[3]</term>
+  <term>data[4]</term>
+  <listitem>
+determine the primary source for the counter, similar to the
 <link linkend="command-data-struct-scan-begin-src">_src</link> and the
 <link linkend="command-data-struct-scan-begin-arg">_arg</link> fields
 used in the
 <link linkend="command-data-struct">command data structure</link>.
-</member>
-
-</simplelist>
+  </listitem>
+ </varlistentry>
+</variablelist>
 </para>
 
 <para>
