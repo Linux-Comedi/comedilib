@@ -53,6 +53,22 @@ Returns:
  On success, comedi_data_read() returns 1 (the number of samples
  read).  If there is an error, -1 is returned.
 
+Function: comedi_data_read_n -- read multiple samples from channel
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int channel
+Param: unsigned int range
+Param: unsigned int aref
+Param: lsampl_t * data
+Param: unsigned int n
+Description:
+ Similar to
+ <link linkend="func-ref-comedi-data-read"><function>comedi_data_read</function></link>
+ except it reads <parameter>n</parameter> samples into the array
+ <parameter>data</parameter>. The precise timing of the samples is not
+ hardware controlled.
+
 Function: comedi_data_read_delayed -- read single sample from channel after delaying for specified settling time
 Retval: int
 Param: comedi_t * device
