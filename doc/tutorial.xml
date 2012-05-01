@@ -71,19 +71,18 @@
     
     <para>
       If you selected an analog input subdevice, you probably noticed
-      that the output of <command>tut1</command> is an unsigned number, for
-      example between <literal>0</literal> and <literal>65535</literal>
-      for a 16 bit analog input. &comedi; samples are
-      unsigned,
-      with <literal>0</literal>  representing the lowest voltage of the ADC,
-      and a hardware-dependent maximum value representing the highest voltage.
-      &comedi; compensates for anything else the manual for
-      your device says (for example, many boards represent bipolar
-      analog input voltages as signed integers).  
-      However, you probably prefer to have this number
-      translated to a voltage.  Naturally, as a good programmer, your first
-      question is: <quote>How do I do this in a device-independent
-    manner?</quote>
+      that the output of <command>tut1</command> is an unsigned
+      number, for example between <literal>0</literal>
+      and <literal>65535</literal> for a 16 bit analog input. &comedi;
+      samples are unsigned, with <literal>0</literal> representing the
+      lowest voltage of the ADC, and a hardware-dependent maximum
+      value representing the highest voltage.  &comedi; compensates
+      for anything else the manual for your device says (for example,
+      many boards represent bipolar analog input voltages as signed
+      integers).  However, you probably prefer to have this number
+      translated to a voltage.  Naturally, as a good programmer, your
+      first question is: <quote>How do I do this in a
+      device-independent manner?</quote>
     </para>
     
     <para>
@@ -111,7 +110,10 @@
       <xi:include href="../demo/tut2.c" parse="text"/>
     </programlisting>
     <para>
-      The source code file for the above program can be found in Comedilib, at demo/tut2.c.
+      The source code file for the above program can be found in
+      the comedilib source at demo/tut2.c and if installed as a package usually
+      at /usr/share/doc/libcomedi-dev/demo/ with all the other tutorial/demo
+      files.
     </para>
   </section>
 
@@ -121,9 +123,9 @@
     </title>
     <para>
       Of special importance is the so called
-      "asynchronous data acquisition" where the &comedi; is sampling
+      "asynchronous data acquisition" where &comedi; is sampling
       in the background at a given sample rate. The
-      the user can retrieve the data whenever it is convenient.
+      user can retrieve the data whenever it is convenient.
       &comedi; stores the data in a ring-buffer so that
       programs can perform other tasks in the foreground, for example
       plotting data or interacting with the user. 
@@ -140,15 +142,57 @@
       Then &comedi; checks our request and it might
       modify it. For example we might want to have a sampling rate of
       16kHz but we only get 1kHz. Finally we can start
-      the asynchronous acquisition. Once it is started we
+      the asynchronous acquisition. Once it has been started we
       need to check periodically if data is available and
       request it from &comedi; so that its internal buffer
       won't overrun.
     </para>
     <para>
-      The program below is a stripped down version
-      of the program <command>cmd.c</command> in
-      the demo directory. To compile it run:
+      In summary the asynchonous acquisition is performed in the following
+      way:
+    </para>
+    <itemizedlist>		  
+      <listitem>
+	Create a command structure of type <link linkend="ref-type-comedi-cmd">comedi_cmd</link>
+      </listitem>  
+      <listitem>
+	Call the
+	function <link linkend="func-ref-comedi-get-cmd-generic-timed"><function>comedi_get_cmd_generic_timed</function></link>
+	to fill the command structure with your comedi device,
+	subdevice, sampling rate and number of channels.
+      </listitem>
+      <listitem>
+	Create a channel-list and store it in the command structure. This
+	tells comedi which channels should be sampled in the background.
+      </listitem>
+      <listitem>
+	Call <link linkend="func-ref-comedi-command-test"><function>comedi_command_test</function></link> with your command structure. Comedi might modify your requested sampling rate and channels.
+      </listitem>
+      <listitem>
+	Call <link linkend="func-ref-comedi-command-test"><function>comedi_command_test</function></link> again which now should return zero for success.
+      </listitem>
+      <listitem>
+	Call <link linkend="func-ref-comedi-command"><function>comedi_command</function></link> to start the asynchronous acquisition. From now on the kernel ringbuffer will be filled at the specified sampling rate.
+      </listitem>
+      <listitem>
+	Call periodically the standard
+	function <function>read</function> and receive the data. The
+	result should always be non zero as long as the acquisition
+	is running.
+      </listitem>
+      <listitem>
+	Convert the received data either into <link linkend="ref-type-lsampl-t">lsampl_t</link> or <link linkend="ref-type-sampl-t">sampl_t</link> depending on the subdevice flag SDF_LSAMPL.
+      </listitem>
+      <listitem>
+	Poll for data with <function>read</function> as long as it returns
+	a positive result or until the program terminates.
+      </listitem>
+    </itemizedlist>
+    
+    <para>
+      The program below is a stripped down version of the
+      program <command>cmd.c</command> in the demo directory. To
+      compile it run:
     </para>
     <screen>
       gcc tut3.c -lcomedi -lm -o tut3
@@ -157,8 +201,8 @@
       It requests data from two channels at 
       a sampling rate of 1kHz and a total of 10000 samples.
       which are then printed to stdout. You can pipe the data
-      into a file and plot it with gnuplot. Central in this
-      program is the loop using the standard C read command
+      into a file and plot it with gnuplot. As mentioned above, central in this
+      program is the loop using the standard C <function>read</function> command
       which receives the buffer contents. Below is an
       extract from <filename>tut3.c</filename> showing the
       relevant commands:
@@ -166,6 +210,13 @@
     <programlisting>
       <xi:include href="../demo/tut3_part.c" parse="text"/>
     </programlisting>
+    <para>
+      For advanced programmers the
+      function <link linkend="func-ref-comedi-comedi-get-buffer-contents"><function>comedi_get_buffer_contents</function></link>
+      is useful to check if there is actually data in the ringbuffer
+      so that a call of <function>read</function> can be avoided for example
+      when the data readout is called by a timer call-back function.
+    </para>
   </section>
   
   <section>

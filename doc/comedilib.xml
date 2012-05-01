@@ -28,6 +28,11 @@
 			<surname>Bruyninckx</surname>
 			<email>Herman.Bruyninckx@mech.kuleuven.ac.be</email>
 		</author>
+		<author>
+			<firstname>Bernd</firstname>
+			<surname>Porr</surname>
+			<email>Bernd.Porr@glasgow.ac.uk</email>
+		</author>
 		<copyright>
 			<year>1998-2003</year>
 			<holder>David Schleef</holder>
@@ -39,6 +44,10 @@
 		<copyright>
 			<year>2002-2003</year>
 			<holder>Herman Bruyninckx</holder>
+		</copyright>
+		<copyright>
+			<year>2012</year>
+			<holder>Bernd Porr</holder>
 		</copyright>
 
 		<abstract>
