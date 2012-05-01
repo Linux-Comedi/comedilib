@@ -47,6 +47,8 @@ while($s = <>){
   <refmeta>
     <refentrytitle>$funcname</refentrytitle>
     <manvolnum>$manvolnum</manvolnum>
+	<refmiscinfo class=\"source\">Comedi</refmiscinfo>
+	<refmiscinfo class=\"manual\">Comedi reference</refmiscinfo>
   </refmeta>
 
   <refnamediv>
