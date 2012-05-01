@@ -197,7 +197,15 @@ if test "$XMLTO" != "no"; then
 		# Prefer dblatex, then default backend.
 		# Could use [dblatex fop] to prefer dblatex or fop.
 		AC_CHECK_PROGS([PDF_BACKEND], [dblatex], [default])
-		AC_MSG_NOTICE([Will use $PDF_BACKEND backend for PDF generation])
+		# The default backend is broken, so avoid it for now.
+		if test "$PDF_BACKEND" = "default"; then
+			AC_MSG_WARN([Default PDF backend is broken, disabling PDF generation])
+			AC_MSG_WARN([(dblatex is recommended for PDF generation)])
+			PDF_BACKEND="no"
+		fi
+		if test "$PDF_BACKEND" != "no"; then
+			AC_MSG_NOTICE([Will use $PDF_BACKEND backend for PDF generation])
+		fi
 		;;
 	default)
 		# Use xmlto's default backend.
