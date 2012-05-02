@@ -23,10 +23,12 @@ channels this will be corrected downwards to the number of available
 channels.
 .TP
 \-F SAMPLING_RATE 
-Requests the sampling rate for an asynchronous
-acquisition.  By default this is set to comedi's highest sampling rate
-so that the driver is forced to reduce it and will in most cases
-return the maximum possible sampling rate. 
+Requests a sampling rate for the asynchronous
+acquisition. By default this is set to comedi's highest sampling rate
+(1GHz) so that the driver is forced to reduce it and will 
+return the maximum possible sampling rate. This option is only provided
+for driver testing and for drivers which do not return the highest
+sampling rate.
 .TP
 \-v
 Verbose output.
