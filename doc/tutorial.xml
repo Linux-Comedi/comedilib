@@ -212,7 +212,7 @@
     </programlisting>
     <para>
       For advanced programmers the
-      function <link linkend="func-ref-comedi-comedi-get-buffer-contents"><function>comedi_get_buffer_contents</function></link>
+      function <link linkend="func-ref-comedi-get-buffer-contents"><function>comedi_get_buffer_contents</function></link>
       is useful to check if there is actually data in the ringbuffer
       so that a call of <function>read</function> can be avoided for example
       when the data readout is called by a timer call-back function.

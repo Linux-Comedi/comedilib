@@ -33,6 +33,11 @@
 			<surname>Porr</surname>
 			<email>Bernd.Porr@glasgow.ac.uk</email>
 		</author>
+		<author>
+			<firstname>Ian</firstname>
+			<surname>Abbott</surname>
+			<email>abbotti@mev.co.uk</email>
+		</author>
 		<copyright>
 			<year>1998-2003</year>
 			<holder>David Schleef</holder>
@@ -48,6 +53,10 @@
 		<copyright>
 			<year>2012</year>
 			<holder>Bernd Porr</holder>
+		</copyright>
+		<copyright>
+			<year>2012</year>
+			<holder>Ian Abbott</holder>
 		</copyright>
 
 		<abstract>
