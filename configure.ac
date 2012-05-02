@@ -275,6 +275,7 @@ fi
 AC_CONFIG_FILES(
 Makefile
 comedi_config/Makefile
+comedi_board_info/Makefile
 c++/Makefile
 c++/include/Makefile
 etc/Makefile
