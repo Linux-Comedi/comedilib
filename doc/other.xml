@@ -108,27 +108,37 @@ Multiple channels can be read and written simultaneously using the
 function
 
 <funcsynopsis><funcprototype>
-<funcdef>int <link linkend="func-ref-comedi-dio-bitfield"><function>comedi_dio_bitfield</function></link></funcdef>
+<funcdef>int <link linkend="func-ref-comedi-dio-bitfield2"><function>comedi_dio_bitfield2</function></link></funcdef>
 <paramdef><link linkend="ref-type-comedi-t">comedi_t</link> *<parameter>device</parameter></paramdef>
 <paramdef>unsigned int <parameter>subdevice</parameter></paramdef>
 <paramdef>unsigned int <parameter>write_mask</parameter></paramdef>
 <paramdef>unsigned int *<parameter>bits</parameter></paramdef>
+<paramdef>unsigned int <parameter>base_channel</parameter></paramdef>
 </funcprototype></funcsynopsis>
 
-Each channel is assigned to a bit in the
+Each channel from <parameter class="function">base_channel</parameter>
+to <parameter class="function">base_channel</parameter> &plus;
+<literal>31</literal> is assigned to a bit in the
 <parameter class="function">write_mask</parameter> and
 <parameter class="function">bits</parameter>
-bitfield.  If a bit in
+bitfield with bit 0 assigned to channel
+<parameter class="function">base_channel</parameter>, bit 1 assigned to channel
+<parameter class="function">base_channel</parameter> &plus;
+<literal>1</literal>, etc.  If a bit in
 <parameter class="function">write_mask</parameter> is set, the
 corresponding bit in <parameter class="function">*bits</parameter> will
-be written to the corresponding digital output line.
+be written to the digital output line corresponding to the channel given by
+<parameter class="function">base_channel</parameter> plus the bit number.
 Each digital line is then read and placed into
 <parameter class="function">*bits</parameter>.  The value
 of bits in <parameter class="function">*bits</parameter> corresponding
 to digital output lines is undefined and device-specific.  Channel
-<literal>0</literal> is the least significant bit in the bitfield;
-channel <literal>31</literal> is the most significant bit.  Channels
-higher than <literal>31</literal> cannot be accessed using this method.
+<parameter class="function">base_channel</parameter> &plus;
+<literal>0</literal> is the least significant bit in the bitfield.  No
+more than 32 channels at once can be accessed using this method.
+<emphasis role="strong">Warning!</emphasis> Older versions of &comedi;
+may ignore <parameter class="function">base_channel</parameter> and treat
+it as <literal>0</literal> unless the subdevice has more than 32 channels.
 </para>
 
 <para>
