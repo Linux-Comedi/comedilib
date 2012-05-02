@@ -56,19 +56,20 @@ digital subdevices on a particular board.
 
 <para>
 Individual bits on a digital I/O device can be read and written using
-the functions
+the functions <link linkend="func-ref-comedi-dio-read"><function>comedi_dio_read</function></link>
+and <link linkend="func-ref-comedi-dio-write"><function>comedi_dio_write</function></link>:
 
 <funcsynopsis><funcprototype>
-<funcdef>int <link linkend="func-ref-comedi-dio-read"><function>comedi_dio_read</function></link></funcdef>
-<paramdef><link linkend="ref-type-comedi-t">comedi_t</link> *<parameter>device</parameter></paramdef>
+<funcdef>int <function>comedi_dio_read</function></funcdef>
+<paramdef>comedi_t *<parameter>device</parameter></paramdef>
 <paramdef>unsigned int <parameter>subdevice</parameter></paramdef>
 <paramdef>unsigned int <parameter>channel</parameter></paramdef>
 <paramdef>unsigned int *<parameter>bit</parameter></paramdef>
 </funcprototype></funcsynopsis>
 
 <funcsynopsis><funcprototype>
-<funcdef>int <link linkend="func-ref-comedi-dio-write"><function>comedi_dio_write</function></link></funcdef>
-<paramdef><link linkend="ref-type-comedi-t">comedi_t</link> *<parameter>device</parameter></paramdef>
+<funcdef>int <function>comedi_dio_write</function></funcdef>
+<paramdef>comedi_t *<parameter>device</parameter></paramdef>
 <paramdef>unsigned int <parameter>subdevice</parameter></paramdef>
 <paramdef>unsigned int <parameter>channel</parameter></paramdef>
 <paramdef>unsigned int <parameter>bit</parameter></paramdef>
@@ -84,12 +85,12 @@ acquisition. The integer <parameter class="function">bit</parameter>
 contains the value of the acquired bit.
 </para>
 <para>
-The direction of bidirectional lines can be configured using
-the function
+The direction of bidirectional lines can be configured using the function
+<link linkend="func-ref-comedi-dio-config"><function>comedi_dio_config</function></link>:
 
 <funcsynopsis><funcprototype>
-<funcdef>int <link linkend="func-ref-comedi-dio-config"><function>comedi_dio_config</function></link></funcdef>
-<paramdef><link linkend="ref-type-comedi-t">comedi_t</link> *<parameter>device</parameter></paramdef>
+<funcdef>int <function>comedi_dio_config</function></funcdef>
+<paramdef>comedi_t *<parameter>device</parameter></paramdef>
 <paramdef>unsigned int <parameter>subdevice</parameter></paramdef>
 <paramdef>unsigned int <parameter>channel</parameter></paramdef>
 <paramdef>unsigned int <parameter>dir</parameter></paramdef>
@@ -105,11 +106,11 @@ the entire block.
 
 <para>
 Multiple channels can be read and written simultaneously using the
-function
+function <link linkend="func-ref-comedi-dio-bitfield2"><function>comedi_dio_bitfield2</function></link>:
 
 <funcsynopsis><funcprototype>
-<funcdef>int <link linkend="func-ref-comedi-dio-bitfield2"><function>comedi_dio_bitfield2</function></link></funcdef>
-<paramdef><link linkend="ref-type-comedi-t">comedi_t</link> *<parameter>device</parameter></paramdef>
+<funcdef>int <function>comedi_dio_bitfield2</function></funcdef>
+<paramdef>comedi_t *<parameter>device</parameter></paramdef>
 <paramdef>unsigned int <parameter>subdevice</parameter></paramdef>
 <paramdef>unsigned int <parameter>write_mask</parameter></paramdef>
 <paramdef>unsigned int *<parameter>bits</parameter></paramdef>
@@ -160,56 +161,76 @@ Single analog acquisition
 Analog &comedi; channels can produce data values that are
 <emphasis>samples</emphasis> from continuous analog signals.
 These samples are integers with a significant content in
-the range of, typically, <literal>8</literal>, <literal>10</literal>,
-<literal>12</literal>, or <literal>16</literal> bits.
+the range of, typically, 8, 10, 12, or 16 bits.
 </para>
 <para>
-The function
+Single samples can be read from an analog channel using the function
+<link linkend="func-ref-comedi-data-read"><function>comedi_data_read</function></link>:
 
 <funcsynopsis><funcprototype>
-<funcdef>int <link linkend="func-ref-comedi-data-read"><function>comedi_data_read</function></link></funcdef>
-<paramdef><link linkend="ref-type-comedi-t">comedi_t</link> *<parameter>device</parameter></paramdef>
+<funcdef>int <function>comedi_data_read</function></funcdef>
+<paramdef>comedi_t *<parameter>device</parameter></paramdef>
 <paramdef>unsigned int <parameter>subdevice</parameter></paramdef>
 <paramdef>unsigned int <parameter>channel</parameter></paramdef>
 <paramdef>unsigned int <parameter>range</parameter></paramdef>
 <paramdef>unsigned int <parameter>aref</parameter></paramdef>
-<paramdef><link linkend="ref-type-lsampl-t">lsampl_t</link> *<parameter>data</parameter></paramdef>
+<paramdef>lsampl_t *<parameter>data</parameter></paramdef>
 </funcprototype></funcsynopsis>
 
-reads one such data value from a &comedi; channel, and puts it in
-the user-specified <parameter>data</parameter> buffer. The function
+This reads one such data value from a &comedi; channel, and puts it in
+the user-specified <parameter>data</parameter> buffer.
+</para>
+
+<para>
+In the opposite direction, single samples can be written to an analog output
+channel using the function
+<link linkend="func-ref-comedi-data-write"><function>comedi_data_write</function></link>:
 
 <funcsynopsis><funcprototype>
-<funcdef>int <link linkend="func-ref-comedi-data-write"><function>comedi_data_write</function></link></funcdef>
-<paramdef><link linkend="ref-type-comedi-t">comedi_t</link> *<parameter>device</parameter></paramdef>
+<funcdef>int <function>comedi_data_write</function></funcdef>
+<paramdef>comedi_t *<parameter>device</parameter></paramdef>
 <paramdef>unsigned int <parameter>subdevice</parameter></paramdef>
 <paramdef>unsigned int <parameter>channel</parameter></paramdef>
 <paramdef>unsigned int <parameter>range</parameter></paramdef>
 <paramdef>unsigned int <parameter>aref</parameter></paramdef>
-<paramdef><link linkend="ref-type-lsampl-t">lsampl_t</link> <parameter>data</parameter></paramdef>
+<paramdef>lsampl_t <parameter>data</parameter></paramdef>
 </funcprototype></funcsynopsis>
+</para>
 
-works in the opposite direction. Data values returned by this function
+<para>
+Raw data values read or written by the above functions
 are unsigned integers less than, or equal to, the maximum sample value
 of the channel, which can be determined using the function
+<link linkend="func-ref-comedi-get-maxdata"><function>comedi_get_maxdata</function></link>:
 
 <funcsynopsis><funcprototype>
-<funcdef><link linkend="ref-type-lsampl-t">lsampl_t</link> <link linkend="func-ref-comedi-get-maxdata"><function>comedi_get_maxdata</function></link></funcdef>
-<paramdef><link linkend="ref-type-comedi-t">comedi_t</link> *<parameter>device</parameter></paramdef>
+<funcdef>lsampl_t <function>comedi_get_maxdata</function></funcdef>
+<paramdef>comedi_t *<parameter>device</parameter></paramdef>
 <paramdef>unsigned int <parameter>subdevice</parameter></paramdef>
 <paramdef>unsigned int <parameter>channel</parameter></paramdef>
 </funcprototype></funcsynopsis>
 
-Conversion of data values to physical units can be performed by the
-function
+Conversion between raw data values and uncalibrated physical units can
+be performed by the functions
+<link linkend="func-ref-comedi-to-phys"><function>comedi_to_phys</function></link>
+and <link linkend="func-ref-comedi-from-phys"><function>comedi_from_phys</function></link>:
 
 <funcsynopsis><funcprototype>
-<funcdef>double <link linkend="func-ref-comedi-to-phys"><function>comedi_to_phys</function></link></funcdef>
-<paramdef><link linkend="ref-type-lsampl-t">lsampl_t</link> <parameter>data</parameter></paramdef>
-<paramdef><link linkend="ref-type-comedi-range">comedi_range</link> *<parameter>range</parameter></paramdef>
-<paramdef><link linkend="ref-type-lsampl-t">lsampl_t</link> <parameter>maxdata</parameter></paramdef>
+<funcdef>double <function>comedi_to_phys</function></funcdef>
+<paramdef>lsampl_t <parameter>data</parameter></paramdef>
+<paramdef>comedi_range *<parameter>range</parameter></paramdef>
+<paramdef>lsampl_t <parameter>maxdata</parameter></paramdef>
 </funcprototype></funcsynopsis>
 
+<funcsynopsis><funcprototype>
+<funcdef>lsampl_t <function>comedi_from_phys</function></funcdef>
+<paramdef>double <parameter>data</parameter></paramdef>
+<paramdef>comedi_range *<parameter>range</parameter></paramdef>
+<paramdef>lsampl_t <parameter>maxdata</parameter></paramdef>
+</funcprototype></funcsynopsis>
+</para>
+
+<para>
 There are two data structures in these commands that are not fully
 self-explanatory:
 <itemizedlist>
@@ -245,16 +266,17 @@ Each single acquisition by, for example,
 requires quite some overhead, because all the arguments of the
 function call are checked. If multiple acquisitions must be done on
 the same channel, this overhead can be avoided by using a function
-that can read more than one sample:
+that can read more than one sample,
+<link linkend="func-ref-comedi-data-read-n"><function>comedi_data_read_n</function></link>:
 
 <funcsynopsis><funcprototype>
-<funcdef>int <link linkend="func-ref-comedi-data-read-n"><function>comedi_data_read_n</function></link></funcdef>
-<paramdef><link linkend="ref-type-comedi-t">comedi_t</link> *<parameter>device</parameter></paramdef>
+<funcdef>int <function>comedi_data_read_n</function></funcdef>
+<paramdef>comedi_t *<parameter>device</parameter></paramdef>
 <paramdef>unsigned int <parameter>subdevice</parameter></paramdef>
 <paramdef>unsigned int <parameter>channel</parameter></paramdef>
 <paramdef>unsigned int <parameter>range</parameter></paramdef>
 <paramdef>unsigned int <parameter>aref</parameter></paramdef>
-<paramdef><link linkend="ref-type-lsampl-t">lsampl_t</link> *<parameter>data</parameter></paramdef>
+<paramdef>lsampl_t *<parameter>data</parameter></paramdef>
 <paramdef>unsigned int <parameter>n</parameter></paramdef>
 </funcprototype></funcsynopsis>
 
@@ -263,20 +285,23 @@ limited by the &comedi; implementation (to a maximum of 100 samples),
 because the call is blocking.
 </para>
 <para>
-The start of the data acquisition can also be delayed by a specified
-number of nano-seconds:
+The start of the a single data acquisition can also be delayed by a specified
+number of nano-seconds using the function
+<link linkend="func-ref-comedi-data-read-delayed"><function>comedi_data_read_delayed</function></link>:
 
 <funcsynopsis><funcprototype>
-<funcdef>int <link linkend="func-ref-comedi-data-read-delayed"><function>comedi_data_read_delayed</function></link></funcdef>
-<paramdef><link linkend="ref-type-comedi-t">comedi_t</link> *<parameter>device</parameter></paramdef>
+<funcdef>int <function>comedi_data_read_delayed</function></funcdef>
+<paramdef>comedi_t *<parameter>device</parameter></paramdef>
 <paramdef>unsigned int <parameter>subdevice</parameter></paramdef>
 <paramdef>unsigned int <parameter>channel</parameter></paramdef>
 <paramdef>unsigned int <parameter>range</parameter></paramdef>
 <paramdef>unsigned int <parameter>aref</parameter></paramdef>
-<paramdef><link linkend="ref-type-lsampl-t">lsampl_t</link> *<parameter>data</parameter></paramdef>
+<paramdef>lsampl_t *<parameter>data</parameter></paramdef>
 <paramdef>unsigned int <parameter>nano_sec</parameter></paramdef>
 </funcprototype></funcsynopsis>
+</para>
 
+<para>
 All these read and write acquisition functions are implemented on top
 of the generic <link linkend="instructions">instruction</link>
 command.
@@ -320,7 +345,7 @@ All the information needed to execute an instruction is stored in the
 <link linkend="ref-type-comedi-insn">comedi_insn</link>
 data structure:
 <programlisting>
-struct <anchor id="insn-data-structure"/>comedi_insn_struct {
+typedef struct <anchor id="insn-data-structure"/>comedi_insn_struct {
   <anchor id="insn-data-structure-insn"/>unsigned int insn;      // integer encoding the type of acquisition
                           // (or configuration)
   unsigned int n;         // number of elements in data array
@@ -393,29 +418,42 @@ Instruction execution
 <para>
 Once an instruction data structure has been filled in, the
 corresponding instruction is executed with the function
+<link linkend="func-ref-comedi-do-insn"><function>comedi_do_insn</function></link>:
 
 <funcsynopsis><funcprototype>
-<funcdef>int <link linkend="func-ref-comedi-do-insn"><function>comedi_do_insn</function></link></funcdef>
-<paramdef><link linkend="ref-type-comedi-t">comedi_t</link> *<parameter>device</parameter></paramdef>
-<paramdef><link linkend="ref-type-comedi-insn">comedi_insn</link> *<parameter>instruction</parameter></paramdef>
+<funcdef>int <function>comedi_do_insn</function></funcdef>
+<paramdef>comedi_t *<parameter>device</parameter></paramdef>
+<paramdef>comedi_insn *<parameter>instruction</parameter></paramdef>
 </funcprototype></funcsynopsis>
 
 Many &comedi; instructions are shortcuts that relieve the programmer
 from explicitly filling in the data structure and calling the
-<link linkend="func-ref-comedi-do-insn">comedi_do_insn</link>
+<link linkend="func-ref-comedi-do-insn"><function>comedi_do_insn</function></link>
 function.
 </para>
 <para>
-The function
+A list of instructions can be executed in one function call using the function
+<link linkend="func-ref-comedi-do-insnlist"><function>comedi_do_insnlist</function></link>:
 
 <funcsynopsis><funcprototype>
-<funcdef>int <link linkend="func-ref-comedi-do-insnlist"><function>comedi_do_insnlist</function></link></funcdef>
-<paramdef><link linkend="ref-type-comedi-t">comedi_t</link> *<parameter>device</parameter></paramdef>
-<paramdef><link linkend="ref-type-comedi-insnlist">comedi_insnlist</link> *<parameter>list</parameter></paramdef>
+<funcdef>int <function>comedi_do_insnlist</function></funcdef>
+<paramdef>comedi_t *<parameter>device</parameter></paramdef>
+<paramdef>comedi_insnlist *<parameter>list</parameter></paramdef>
 </funcprototype></funcsynopsis>
 
-allows to perform a list of instructions in one function
-call. The number of instructions in the list is limited in the
+The parameter <parameter class="function">list</parameter> is a pointer to a
+<link linkend="insnlist-data-structure"><type>comedi_insnlist</type></link>
+data structure holding a pointer to an array of <type>comedi_insn</type>
+and the number of instructions in the list:
+<programlisting>
+typedef struct <anchor id="insnlist-data-structure"/>comedi_insnlist_struct {
+  unsigned int n_insns;
+  comedi_insn *insns;
+} comedi_insnlist;
+</programlisting>
+</para>
+<para>
+The number of instructions in the list is limited in the
 implementation, because instructions are executed
 <emphasis>synchronously</emphasis>, i.e., the call blocks until the
 whole instruction (list) has finished.
@@ -484,8 +522,9 @@ each type of configuration instruction.
 <row>
 <entry><constant>INSN_CONFIG_DIO_INPUT</constant></entry>
 <entry>
-Configure a dio line as input.  It is easier to use comedi_dio_config() than
-to use this configuration instruction directly.
+Configure a DIO line as input.  It is easier to use
+<link linkend="func-ref-comedi-dio-config"><function>comedi_dio_config</function>()</link>
+than to use this configuration instruction directly.
 </entry>
 <entry>1</entry>
 <entry>
@@ -495,8 +534,9 @@ n/a
 <row>
 <entry><constant>INSN_CONFIG_DIO_OUTPUT</constant></entry>
 <entry>
-Configure a dio line as output.  It is easier to use comedi_dio_config() than
-to use this configuration instruction directly.
+Configure a DIO line as output.  It is easier to use
+<link linkend="func-ref-comedi-dio-config"><function>comedi_dio_config</function>()</link>
+than to use this configuration instruction directly.
 </entry>
 <entry>1</entry>
 <entry>
@@ -506,13 +546,13 @@ n/a
 <row>
 <entry><constant>INSN_CONFIG_ALT_SOURCE</constant></entry>
 <entry>
-Select an alternate input source.  This instruction is
-used by comedi_calibrate to configure analog input channels
+Select an alternate input source.  This instruction is used by calibration
+programs to configure analog input channels
 which can be redirected to read internal calibration
-references.  You need to set the CR_ALT_SOURCE flag in the chanspec
+references.  You need to set the <constant>CR_ALT_SOURCE</constant> flag in the chanspec
 when reading to actually read from the configured alternate input source.
-If you are using comedi_data_read(), then the channel parameter can be
-bitwise or'd with the CR_ALT_SOURCE flag.
+If you are using <function>comedi_data_read</function>(), then the channel parameter can be
+bitwise or'd with the <constant>CR_ALT_SOURCE</constant> flag.
 </entry>
 <entry>2</entry>
 <entry>
@@ -539,8 +579,9 @@ acts purely as a query if the block size is set to zero.
 <row>
 <entry><constant>INSN_CONFIG_DIO_QUERY</constant></entry>
 <entry>
-Queries the configuration of a dio line to see if it is an input or output.
-It is probably easier to use the comedilib function comedi_dio_get_config()
+Queries the configuration of a DIO line to see if it is an input or output.
+It is probably easier to use the comedilib function
+<link linkend="func-ref-comedi-dio-get-config"><function>comedi_dio_get_config</function>()</link>
 than to use this instruction directly.
 </entry>
 <entry>2</entry>
@@ -554,7 +595,7 @@ data[1]: The instruction sets this element to either
 </informaltable>
 
 <para>
-See the comedilib demo program demo/choose_clock.c for an example
+See the comedilib demo program <filename>demo/choose_clock.c</filename> for an example
 of using a configuration instruction.
 </para>
 
@@ -664,23 +705,24 @@ Executing a command
 </title>
 
 <para>
-A command is executed by the following &comedi; function:
+A command is executed by the function
+<link linkend="func-ref-comedi-command"><function>comedi_command</function></link>:
 
 <funcsynopsis><funcprototype>
-<funcdef>int <link linkend="func-ref-comedi-command"><function>comedi_command</function></link></funcdef>
-<paramdef><link linkend="ref-type-comedi-t">comedi_t</link> *<parameter>device</parameter></paramdef>
-<paramdef><link linkend="ref-type-comedi-cmd">comedi_cmd</link> *<parameter>command</parameter></paramdef>
+<funcdef>int <function>comedi_command</function></funcdef>
+<paramdef>comedi_t *<parameter>device</parameter></paramdef>
+<paramdef>comedi_cmd *<parameter>command</parameter></paramdef>
 </funcprototype></funcsynopsis>
 
 The following sections explain the meaning of the
-<link linkend="ref-type-comedi-cmd">comedi_cmd</link> data structure.
+<link linkend="ref-type-comedi-cmd"><type>comedi_cmd</type></link> data structure.
 Filling in this structure can be quite complicated, and
 requires good knowledge about the exact functionalities of the DAQ
 card.  So, before launching a command, the application programmer is
 adviced to check whether this complex command data structure can be
 successfully parsed. So, the typical sequence for executing a command is
 to first send the command through
-<link linkend="func-ref-comedi-command-test">comedi_command_test()</link>
+<link linkend="func-ref-comedi-command-test"><function>comedi_command_test</function>()</link>
 once or twice.  The test will check that the command is valid for the
 particular device, and often makes some adjustments to the command
 arguments, which can then be read back by the user to see the actual
@@ -689,7 +731,7 @@ values used.
 <para>
 A &comedi; program can find out on-line what the command capabilities
 of a specific device are, by means of the
-<link linkend="func-ref-comedi-get-cmd-src-mask">comedi_get_cmd_src_mask()</link>
+<link linkend="func-ref-comedi-get-cmd-src-mask"><function>comedi_get_cmd_src_mask</function>()</link>
 function.
 </para>
 
@@ -703,7 +745,7 @@ The command data structure
 <para>
 The command executes according to the information about the requested
 acquisition, which is stored in the
-<link linkend="ref-type-comedi-cmd">comedi_cmd</link>
+<link linkend="ref-type-comedi-cmd"><type>comedi_cmd</type></link>
 <anchor id="command-data-struct"/>data structure:
 <programlisting>
 typedef struct comedi_cmd_struct comedi_cmd;
@@ -745,16 +787,16 @@ so-called <emphasis>event</emphasis>. More on these in
 
 <para>
 The <parameter class="function">subdev</parameter> member of the
-<link linkend="ref-type-comedi-cmd">comedi_cmd</link> structure is
+<link linkend="ref-type-comedi-cmd"><type>comedi_cmd</type></link> structure is
 the index of the subdevice the command is intended for.  The
-<link linkend="func-ref-comedi-find-subdevice-by-type">comedi_find_subdevice_by_type()</link>
+<link linkend="func-ref-comedi-find-subdevice-by-type"><function>comedi_find_subdevice_by_type</function>()</link>
 function can be useful in discovering the index of your desired subdevice.
 </para>
 
 <para>
 The <link linkend="command-data-struct-chanlist">chanlist</link>
 member of the
-<link linkend="ref-type-comedi-cmd">comedi_cmd</link> data
+<link linkend="ref-type-comedi-cmd"><type>comedi_cmd</type></link> data
 structure should point to an array whose number of elements is
 specificed by
 <link linkend="command-data-struct-chanlist-len">chanlist_len</link>
@@ -767,9 +809,7 @@ that should be stepped through for each scan.  The elements of the
 <link linkend="command-data-struct-chanlist">chanlist</link> array should be
 initialized by <quote>packing</quote> the channel, range and reference
 information together with the
-<parameter class="function">
- <link linkend="ref-macro-CR-PACK">CR_PACK()</link>
-</parameter>
+<link linkend="ref-macro-CR-PACK"><function>CR_PACK</function>()</link>
 macro.
 </para>
 
@@ -785,7 +825,7 @@ the buffer where the driver should write/read its data to/from.
 
 <para>
 The final member of the
-<link linkend="command-data-struct">comedi_cmd</link> structure is the
+<link linkend="command-data-struct"><type>comedi_cmd</type></link> structure is the
 <link linkend="command-data-struct-flags">flags</link> field,
 i.e., bits in a word that can be bitwise-or'd together. The meaning of
 these bits are explained in a
@@ -813,10 +853,10 @@ start a <link linkend="scan">scan</link>, start a
 the acquisition.  Each event can be given its own
 <emphasis><link linkend="source.trigger.anchor">source</link></emphasis>
 (the <parameter class="function">*_src</parameter> members in the
-<link linkend="ref-type-comedi-cmd">comedi_cmd</link> data
+<link linkend="ref-type-comedi-cmd"><type>comedi_cmd</type></link> data
 structure). And each event source can have a corresponding
 argument (the <parameter class="function">*_arg</parameter> members of
-the <link linkend="ref-type-comedi-cmd">comedi_cmd</link> data
+the <link linkend="ref-type-comedi-cmd"><type>comedi_cmd</type></link> data
 structure) whose meaning depends on the type of source trigger.
 For example, to specify an external digital line <quote>3</quote> as a
 source (in general, <emphasis>any</emphasis> of the five event
@@ -842,10 +882,8 @@ The available options are:
 <link linkend="command-data-struct-start-src">start_src</link>
 event occurs
 <link linkend="command-data-struct-start-arg">start_arg</link>
-nanoseconds after the
-<link linkend="ref-type-comedi-cmd">comedi_cmd</link>
-is called. Currently, only
-<link linkend="command-data-struct-start-arg">start_arg</link>=0 is
+nanoseconds after the command is set up. Currently, only
+<link linkend="command-data-struct-start-arg">start_arg</link>=<literal>0</literal> is
 supported.
 </para>
 </listitem>
@@ -1048,7 +1086,7 @@ Not all event sources are applicable to all events.  Supported
 trigger sources for specific events depend significantly on your
 particular device, and even more on the current state of its device
 driver. The
-<link linkend="func-ref-comedi-get-cmd-src-mask">comedi_get_cmd_src_mask()</link>
+<link linkend="func-ref-comedi-get-cmd-src-mask"><function>comedi_get_cmd_src_mask</function>()</link>
 function is useful for determining what trigger sources a subdevice
 supports.
 </para>
@@ -1174,7 +1212,7 @@ device that could do either input or output.
 <anchor id="trig-other"/>
 <constant>TRIG_CONFIG</constant>: perform configuration, not triggering.
 This is a legacy of the deprecated
-<link linkend="ref-type-comedi-cmd">comedi_trig_struct</link>
+<link linkend="ref-type-comedi-trig"><type>comedi_trig_struct</type></link>
 data structure, and has no function at present.
 </para>
 </listitem>
@@ -1228,7 +1266,7 @@ Sometimes, your input channels change slowly enough that
 you are able to average many successive input values to get a
 more accurate measurement of the actual value.  In general,
 the more samples you average, the better your estimate
-gets, roughly by a factor of sqrt(number_of_samples).
+gets, roughly by a factor of <function>sqrt</function>(number_of_samples).
 Obviously, there are limitations to this:
 </para>
 
@@ -1282,18 +1320,18 @@ to help you in your quest to accurately measure slowly varying
 inputs:
 
 <funcsynopsis><funcprototype>
-<funcdef>int <link linkend="func-ref-comedi-sv-init"><function>comedi_sv_init</function></link></funcdef>
-<paramdef><link linkend="ref-type-comedi-sv-t">comedi_sv_t</link> *<parameter>sv</parameter></paramdef>
-<paramdef><link linkend="ref-type-comedi-t">comedi_t</link> *<parameter>device</parameter></paramdef>
+<funcdef>int <function>comedi_sv_init</function></funcdef>
+<paramdef>comedi_sv_t *<parameter>sv</parameter></paramdef>
+<paramdef>comedi_t *<parameter>device</parameter></paramdef>
 <paramdef>unsigned int <parameter>subdevice</parameter></paramdef>
 <paramdef>unsigned int <parameter>channel</parameter></paramdef>
 </funcprototype></funcsynopsis>
 
-This function initializes the
-<link linkend="ref-type-comedi-sv-t">comedi_sv_t</link> data structure, used
+The above function <link linkend="func-ref-comedi-sv-init"><function>comedi_sv_init</function></link> initializes the
+<link linkend="ref-type-comedi-sv-t"><type>comedi_sv_t</type></link> data structure, used
 to do the averaging acquisition:
 <programlisting>
-struct comedi_sv_struct {
+typedef struct comedi_sv_struct {
   <link linkend="ref-type-comedi-t">comedi_t</link> *dev;
   unsigned int subdevice;
   unsigned int chan;
@@ -1306,19 +1344,20 @@ struct comedi_sv_struct {
   int n;
 
   lsampl_t maxdata;
-};
+} comedi_sv_t;
 </programlisting>
 
 The actual acquisition is done with the function
+<link linkend="func-ref-comedi-sv-measure"><function>comedi_sv_measure</function></link>:
 
 <funcsynopsis><funcprototype>
-<funcdef>int <link linkend="func-ref-comedi-sv-measure"><function>comedi_sv_measure</function></link></funcdef>
-<paramdef><link linkend="ref-type-comedi-sv-t">comedi_sv_t</link> *<parameter>sv</parameter></paramdef>
+<funcdef>int <function>comedi_sv_measure</function></funcdef>
+<paramdef>comedi_sv_t *<parameter>sv</parameter></paramdef>
 <paramdef>double *<parameter>data</parameter></paramdef>
 </funcprototype></funcsynopsis>
 
-The number of samples over which the
-<function>comedi_sv_measure()</function> averages is limited by the
+The number of samples over which the function
+<function>comedi_sv_measure</function>() averages is limited by the
 implementation (currently the limit is 100 samples).
 </para>
 
@@ -1927,11 +1966,13 @@ Each of these signal lines
 can be configured as an input or output, and the signal appearing on the output
 of each line can be configured to one of several internal board timing signals
 (although on older boards RTSI line 7 can only be used for the clock signal).
-The ni_pcimio, ni_atmio, and ni_mio_cs drivers expose the RTSI bus
+The <systemitem>ni_pcimio</systemitem>, <systemitem>ni_atmio</systemitem>, and
+<systemitem>ni_mio_cs</systemitem> drivers expose the RTSI bus
 as a digital I/O subdevice (subdevice number 10).
 </para>
 <para>
-The functions comedi_dio_config() and comedi_dio_get_config() can be used on
+The functions <function>comedi_dio_config</function>() and
+<function>comedi_dio_get_config()</function> can be used on
 the RTSI subdevice to
 set/query the direction (input or output) of each of the RTSI lines individually.
 </para>
@@ -1941,7 +1982,7 @@ The subdevice also supports the
 <constant>INSN_CONFIG_GET_CLOCK_SRC</constant> configuration
 instructions, which can be
 used to configure/query what source the board uses to synchronize its
-master clock to.  The various possibilities are defined in the comedi.h
+master clock to.  The various possibilities are defined in the <filename>comedi.h</filename>
 header file:
 </para>
 <informaltable>
@@ -1964,7 +2005,7 @@ Use the board's internal oscillator.
 <entry>
 Use the RTSI line 7 as the master clock.  This source is
 only supported on pre-m-series boards.  The newer m-series boards
-use NI_MIO_PLL_RTSI_CLOCK() instead.
+use <function>NI_MIO_PLL_RTSI_CLOCK</function>() instead.
 </entry>
 </row>
 <row>
@@ -2010,7 +2051,7 @@ Finally, the configuration instructions
 <constant>INSN_CONFIG_SET_ROUTING</constant> and
 <constant>INSN_CONFIG_GET_ROUTING</constant>
 can be used to select/query which internal signal
-will appear on a given RTSI output line.  The header file comedi.h defines
+will appear on a given RTSI output line.  The header file <filename>comedi.h</filename> defines
 the following signal sources which can be routed to an RTSI line:
 </para>
 
@@ -2107,8 +2148,8 @@ signal.
 The RTSI bus pins may be used as trigger inputs for many of the
 &comedi; trigger functions. To use the RTSI bus pins, set the source to be
 <constant>TRIG_EXT</constant> and the source argument using the return values
-from the <function>NI_EXT_RTSI()</function> function (or similarly the
-<function>NI_EXT_PFI()</function> function if you want
+from the <function>NI_EXT_RTSI</function>() function (or similarly the
+<function>NI_EXT_PFI</function>() function if you want
 to trigger from a PFI line).  The <constant>CR_EDGE</constant> and
 <constant>CR_INVERT</constant> flags may
 also be set on the trigger source argument to specify edge and
