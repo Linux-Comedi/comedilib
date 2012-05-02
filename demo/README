@@ -136,6 +136,11 @@ outp <value>:
 	Write one <value> to one channel of one subdevice.  Requires
 	a digital or analog output subdevice.
 
+pwm:
+	controls PWM devices. Use the option -N 0 and -N 1 to switch
+	it on / off respectively. Call with no arguments to get
+	a help screen.
+
 receiver:
 	This demo is meant to be used in conjunction with the sender
 	demo.  Receiver requires a digital input subdevice, and sender
