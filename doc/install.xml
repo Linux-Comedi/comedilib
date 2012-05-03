@@ -272,13 +272,6 @@ subdevice 3:
 cat /proc/comedi
 </screen>
 
-<para>
-  For example, on a computer with an NI pxi-6281 configured on
-  <filename>/dev/comedi0</filename> and
-  a pxi-6602 configured on <filename>/dev/comedi1</filename> you might
-  see something like:
-</para>
-		
 <screen>
 comedi version 0.7.76
 format string: "%2d: %-20s %-20s %4d",i,driver_name,board_name,n_subdevices
