@@ -164,86 +164,139 @@ comedi0: ni_atmio: 0x0260 at-mio-16e-10 ( irq = 3 )
 
 		<para>
 		  So now that you have &comedi; talking to the hardware, try to
-		  talk to &comedi;.  Here's some information from comedi's proc
-		  file, which indicates what drivers are loaded and which
-		  boards are configured:
+		  talk to &comedi;.
+		  Call the command <command>comedi_board_info</command>, which provides information
+		  about each subdevice on the board.
+		  Here's part of the output of the <literal>USB-DUX sigma</literal>
+		  board (which is on <filename>/dev/comedi0</filename>), as a result of
+		  the command <command>comedi_board_info -v</command>.
 		</para>
+
+<screen>
+overall info:
+  version code: 0x00074c
+  driver name: usbduxsigma
+  board name: usbduxsigma
+  number of subdevices: 4
+subdevice 0:
+  type: 1 (analog input)
+  flags: 0x10119000
+          SDF_CMD_READ:can do asynchronous input commands
+          SDF_READABLE:subdevice can be read
+          SDF_GROUND:can do aref=ground
+          SDF_LSAMPL:subdevice uses 32-bit samples for commands
+  number of channels: 16
+  max data value: 16777215
+  ranges:
+    all chans: [-1.325 V,1.325 V]
+  command:
+    start: now|int
+    scan_begin: timer
+    convert: now
+    scan_end: count
+    stop: none|count
+  command structure filled with probe_cmd_generic_timed for 16 channels:
+    start: now 0
+    scan_begin: timer 1000000
+      scan_begin_src = TRIG_TIMER:
+      The sampling rate is defined per scan
+      meaning all channels are sampled at
+      the same time. The maximum sampling rate is f=1000 Hz
+    convert: now 0
+    scan_end: count 16
+    stop: count 2
+subdevice 1:
+  type: 2 (analog output)
+  flags: 0x00125000
+          SDF_CMD_WRITE:can do asynchronous output commands
+          SDF_WRITABLE:subdevice can be written
+          SDF_GROUND:can do aref=ground
+  number of channels: 4
+  max data value: 255
+  ranges:
+    all chans: [0 V,2.5 V]
+  command:
+    start: now|int
+    scan_begin: timer
+    convert: now
+    scan_end: count
+    stop: none|count
+  command structure filled with probe_cmd_generic_timed for 4 channels:
+    start: now 0
+    scan_begin: timer 1000000
+      scan_begin_src = TRIG_TIMER:
+      The sampling rate is defined per scan
+      meaning all channels are sampled at
+      the same time. The maximum sampling rate is f=1000 Hz
+    convert: now 0
+    scan_end: count 4
+    stop: count 2
+subdevice 2:
+  type: 5 (digital I/O)
+  flags: 0x00030000
+          SDF_READABLE:subdevice can be read
+          SDF_WRITABLE:subdevice can be written
+  number of channels: 24
+  max data value: 1
+  ranges:
+    all chans: [0 V,5 V]
+  command:
+    not supported
+subdevice 3:
+  type: 12 (pwm)
+  flags: 0x00020100
+          SDF_MODE1:can do mode 1
+          SDF_WRITABLE:subdevice can be written
+  number of channels: 8
+  max data value: 512
+  ranges:
+    all chans: [0,1]
+  command:
+    not supported
+</screen>
+
+<para>
+  This board has four subdevices.  Devices are separated into
+  subdevices that each have a distinct purpose; e.g., analog
+  input, analog output, digital input/output.
+</para>
+
+
+<para>
+  Here's the information from comedi's proc
+  file, which indicates what drivers are loaded and which
+  boards are configured:
+</para>
 
 <screen>
 cat /proc/comedi
 </screen>
 
-		<para>
-		  For example, on a computer with an NI pxi-6281 configured on
-		  <filename>/dev/comedi0</filename> and
-		  a pxi-6602 configured on <filename>/dev/comedi1</filename> you might
-		  see something like:
-		</para>
+<para>
+  For example, on a computer with an NI pxi-6281 configured on
+  <filename>/dev/comedi0</filename> and
+  a pxi-6602 configured on <filename>/dev/comedi1</filename> you might
+  see something like:
+</para>
 		
 <screen>
-comedi version 0.7.74
+comedi version 0.7.76
 format string: "%2d: %-20s %-20s %4d",i,driver_name,board_name,n_subdevices
-0: ni_pcimio            pxi-6281               14
-1: ni_660x              PXI-6602               10
-ni_pcimio:
- ni_pcimio
-8255:
- 8255
-ni_660x:
- ni_660x
+ 0: usbduxsigma          usbduxsigma             4
+usbduxfast:
+ usbduxfast
+usbduxsigma:
+ usbduxsigma
 </screen>
 
-		<para>
-			This documentation feature is not well-developed yet.  Basically, it
-			currently returns the driver name, the device name, and the number of
-			subdevices.  Following those lines are a list of the comedi kernel
-			driver modules currently loaded, each followed by a list of the board
-			names it recognizes (names that can be used with comedi_config).
-		</para>
+<para>
+  This documentation feature currently returns the driver name, the device name, and the number of
+  subdevices. Following those lines are a list of the comedi kernel
+  driver modules currently loaded, each followed by a list of the board
+  names it recognizes (names that can be used with comedi_config).
+</para>
 
-		<para>
-			In the <filename role="directory">demo/</filename> subdirectory of
-			Comedilib, there is a
-			command called <command>board_info</command>, which provides information
-			about each subdevice on the board.  Its output can be rather long,
-			if the board has several subdevices.
-			Here's part of the output of the <literal>National Instruments</literal>
-			board (which is on <filename>/dev/comedi0</filename>), as a result of
-			the command <command>demo/board_info /dev/comedi0</command> (run from the
-			top-level directory of comedilib):
-		</para>
 
-<screen>
-overall info:
-	version code: 0x00074a
-	driver name: ni_atmio
-	board name: at-mio-16e-10
-	number of subdevices: 7
-subdevice 0:
-	type: 1 (analog input)
-	number of channels: 16
-	max data value: 4095
-...
-</screen>
-
-		<para>
-			The overall info gives information about the device; basically
-			the same information as <filename>/proc/comedi</filename>.
-		</para>
-
-		<para>
-			This board has seven subdevices.  Devices are separated into
-			subdevices that each have a distinct purpose; e.g., analog
-			input, analog output, digital input/output.  This board also
-			has an EEPROM and calibration DACs that are also subdevices.
-		</para>
-
-		<para>
-			&comedi; has more information about the device than what is displayed
-			above, but <command>demo/board_info</command> doesn't currently display
-			this.
-		</para>
-
-	</section>
+</section>
 
 </section>
