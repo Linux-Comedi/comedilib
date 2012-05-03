@@ -4,7 +4,7 @@ noinst_PROGRAMS = \
 	choose_routing cmd do_waveform dio eeprom_dump gpct_buffered_counting \
 	gpct_encoder gpct_pulse_generator \
 	gpct_simple_counting inp inpn insn ledclock \
-	mmap outp poll receiver select \
+	mmap outp poll receiver select pwm \
 	sender sigio sv tut1 tut2 tut3
 
 noinst_HEADERS = examples.h
@@ -100,6 +100,11 @@ outp_LDADD = $(COMEDILIB_LIBS)
 poll_SOURCES = poll.c common.c
 poll_CFLAGS = $(COMEDILIB_CFLAGS)
 poll_LDADD = $(COMEDILIB_LIBS)
+
+pwm_SOURCES = pwm.c common.c
+pwm_CFLAGS = $(COMEDILIB_CFLAGS)
+pwm_LDADD = $(COMEDILIB_LIBS)
+
 
 receiver_SOURCES = receiver.c common.c
 receiver_CFLAGS = $(COMEDILIB_CFLAGS)

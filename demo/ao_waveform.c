@@ -106,12 +106,13 @@ int main(int argc, char *argv[])
 
 	init_parsed_options(&options);
 	options.subdevice = -1;
-	options.n_chan = 0;	/* default waveform */
+	options.n_chan = -1;	/* waveform */
 	parse_options(&options, argc, argv);
 
 	/* Use n_chan to select waveform (cheat!) */
 	fn = options.n_chan;
 	if(fn < 0 || fn >= NUMFUNCS){
+		fprintf(stderr,"Use the option '-n' to select another waveform.\n");
 		fn = 0;
 	}
 
@@ -158,7 +159,8 @@ int main(int argc, char *argv[])
 
 	dds_init(waveform_frequency, options.freq, fn);
 
-	dump_cmd(stdout,&cmd);
+	if (options.verbose) 
+		dump_cmd(stdout,&cmd);
 
 	err = comedi_command_test(dev, &cmd);
 	if (err < 0) {
@@ -189,7 +191,8 @@ int main(int argc, char *argv[])
 			"See the --write-buffer option of comedi_config\n", n);
 		exit(1);
 	}
-	printf("m=%d\n",m);
+	if (options.verbose)
+		printf("m=%d\n",m);
 
 	ret = comedi_internal_trigger(dev, options.subdevice, 0);
 	if(ret < 0){
@@ -206,7 +209,8 @@ int main(int argc, char *argv[])
 				perror("write");
 				exit(0);
 			}
-			printf("m=%d\n",m);
+			if (options.verbose)
+				printf("m=%d\n",m);
 			n-=m;
 		}
 		total+=BUF_LEN;

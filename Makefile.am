@@ -1,5 +1,5 @@
 
-SUBDIRS = lib comedi_config man testing demo doc swig \
+SUBDIRS = lib comedi_config man testing demo comedi_board_info doc swig \
 	include etc scxi c++
 
 pkgconfigdir = $(libdir)/pkgconfig

@@ -1,0 +1,42 @@
+.TH COMEDI_BOARD_INFO "1" "May 2012" "comedi_board_info" "User Commands"
+.SH NAME
+comedi_board_info \- reports useful information about COMEDI devices
+.SH SYNOPSIS
+.B comedi_board_info
+[\fIOPTIONS\fR] COMEDI_DEVICE
+.SH DESCRIPTION
+This program reads information about a comedi device and
+displays it in a human-readable form. It also
+probes the asynchronous acquisition by calling the function
+probe_cmd_generic_timed
+which provides information about the maximum sampling rate of
+the board
+and how the card acquires multiple channels (e.g. at once or
+one by one).
+.TP
+\-n NUMBER_OF_CHANNELS
+Requests the number of channels for the asynchronous acquisition.
+This might influence the maximum sampling rate and the mode how
+the comedi device samples the channels.
+If the number is higher than the available
+channels this will be corrected downwards to the number of available
+channels.
+.TP
+\-F SAMPLING_RATE 
+Requests a sampling rate for the asynchronous
+acquisition. By default this is set to comedi's highest sampling rate
+(1GHz) so that the driver is forced to reduce it and will 
+return the maximum possible sampling rate. This option is only provided
+for driver testing and for drivers which do not return the highest
+sampling rate.
+.TP
+\-v
+Verbose output.
+.TP
+\-h
+Shows a brief help screen.
+.SH "SEE ALSO"
+More documentation can be found on
+http://www.comedi.org/
+.SH AUTHOR
+comedi_board_info was written by David Schleef <ds@schleef.org> and Bernd Porr <berndporr@f2s.com>.

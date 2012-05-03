@@ -133,6 +133,26 @@
       as <command>ktimetrace</command> or <command>comedirecord</command>.
     </para>
     <para>
+      There are two different ways how a sequence of channels is
+      measured during asynchronous acquisition (see also the Figure in
+      the introduction):
+    <itemizedlist>		  
+      <listitem>
+	The channels are measured with the help
+	of a multiplexer which switches to the next channel after each measurement.
+	This means that the sampling rate is divided by the number
+	of channels.
+      </listitem>
+      <listitem>
+	The channels are all measured at the same time, for example
+	when every channel has its own converter. In this case the
+	sampling rate need not to be divided by the number of channels.
+      </listitem>
+    </itemizedlist>
+    How your &comedi; device handles the asynchronous acquisition can be found out
+    with the command <command>comedi_board_info -v</command>.
+    </para> 
+    <para>
       The program <command>tut3.c</command> demonstrates the
       asynchronous acquisition. The general strategy is always
       the same: first, we tell &comedi; all sampling parameters such as
