@@ -48,10 +48,10 @@ static struct subdev_flag subdev_flags[] = {
 	{"SDF_MODE3",0x0400,"can do mode 3"},
 	{"SDF_MODE4",0x0800,"can do mode 4"},
 	{"SDF_SOFT_CALIBRATED",0x2000,"subdevice uses software calibration"},
-	{"SDF_CMD_WRITE",0x4000,"can do output commands"},
-	{"SDF_CMD_READ",0x8000,"can do input commands"},
-	{"SDF_READABLE",0x00010000,"subdevice can be read (e.g. analog input)"},
-	{"SDF_WRITABLE",0x00020000,"subdevice can be written (e.g. analog output)"},
+	{"SDF_CMD_WRITE",0x4000,"can do asynchronous output commands"},
+	{"SDF_CMD_READ",0x8000,"can do asynchronous input commands"},
+	{"SDF_READABLE",0x00010000,"subdevice can be read"},
+	{"SDF_WRITABLE",0x00020000,"subdevice can be written"},
 	{"SDF_INTERNAL",0x00040000,"subdevice does not have externally visible lines"},
 	{"SDF_GROUND",0x00100000,"can do aref=ground"},
 	{"SDF_COMMON",0x00200000,"can do aref=common"},
@@ -61,7 +61,7 @@ static struct subdev_flag subdev_flags[] = {
 	{"SDF_DEGLITCH",0x02000000,"can do deglitching"},
 	{"SDF_MMAP",0x04000000,"can do mmap()"},
 	{"SDF_RUNNING",0x08000000,"subdevice is acquiring data"},
-	{"SDF_LSAMPL",0x10000000,"subdevice uses 32-bit samples"},
+	{"SDF_LSAMPL",0x10000000,"subdevice uses 32-bit samples for commands"},
 	{"SDF_PACKED",0x20000000,"subdevice can do packed DIO"},
 	{0,0,0}};
 
