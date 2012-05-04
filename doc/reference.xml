@@ -368,7 +368,7 @@ struct comedi_trig_struct{
 The <type>comedi_trig</type> structure is a control structure used by the
 <constant>COMEDI_TRIG</constant> ioctl, an older method of communicating
 instructions to the driver and hardware.  Use of <type>comedi_trig</type> is
-deprecated, and should not be used in new applications.
+deprecated, and is no longer implemented by the &comedi; kernel layer.
 </para>
 </section>
 
@@ -399,8 +399,8 @@ struct comedi_sv_struct{
 <para>
 The <type>comedi_sv_t</type> structure is used by the <function>comedi_sv_&hellip;</function>
 functions to provide a simple method of accurately measuring
-slowly varying inputs.  See the relevant section for more
-details.
+slowly varying inputs.  This relies on the <constant>COMEDI_TRIG</constant>
+ioctl and is no longer by the &comedi; kernel layer.
 </para>
 </section>
 

@@ -1260,6 +1260,12 @@ Slowly-varying inputs
 </title>
 
 <para>
+<emphasis role="strong">Note: The functions described here use an old
+feature that is no longer implemented by the &comedi;
+kernel layer. THEY WILL NOT WORK!</emphasis>
+</para>
+
+<para>
 Sometimes, your input channels change slowly enough that
 you are able to average many successive input values to get a
 more accurate measurement of the actual value.  In general,
