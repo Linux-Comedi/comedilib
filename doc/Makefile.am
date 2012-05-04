@@ -9,6 +9,7 @@ EXTRA_DIST = $(XML) calibration_funcref.txt command_funcref.txt dio_funcref.txt 
 	deprecated_funcref.txt error_funcref.txt extensions_funcref.txt \
 	funcref mkref drivers.txt mkdr FAQ \
 	acq-seq.gif doc_html man comedilib_html_config.xsl \
+	comedilib_dblatex_config.xsl \
 	comedilib.css
 
 BUILT_SOURCES = calibration_funcref.xml command_funcref.xml dio_funcref.xml \
@@ -38,12 +39,12 @@ dist_pdf_DATA =
 endif
 
 if BUILD_PDF_USING_DBLATEX
-XMLTO_PDF_WITH = --with-dblatex
+XMLTO_PDF_OPTS = --with-dblatex -p "-p $(abs_srcdir)/comedilib_dblatex_config.xsl"
 else
 if BUILD_PDF_USING_FOP
-XMLTO_PDF_WITH = --with-fop
+XMLTO_PDF_OPTS = --with-fop
 else
-XMLTO_PDF_WITH =
+XMLTO_PDF_OPTS =
 endif
 endif
 
@@ -82,8 +83,8 @@ install_man:
 uninstall_man:
 	for each in `find $(srcdir)/man/ -name '*.3'`; do $(RM) $(DESTDIR)$(mandir)/man3/`basename $$each` ; done
 
-$(srcdir)/pdf/comedilib.pdf: $(XML)
-	$(XMLTO) -o $(srcdir)/pdf --skip-validation $(XMLTO_PDF_WITH) pdf $(srcdir)/comedilib.xml
+$(srcdir)/pdf/comedilib.pdf: $(XML) comedilib_dblatex_config.xsl
+	$(XMLTO) -o $(srcdir)/pdf --skip-validation $(XMLTO_PDF_OPTS) pdf $(srcdir)/comedilib.xml
 
 funcref.xml: funcref mkref
 	$(srcdir)/mkref $(srcdir)/funcref >$(srcdir)/funcref.xml
