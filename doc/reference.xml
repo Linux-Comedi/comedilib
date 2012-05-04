@@ -637,8 +637,11 @@ struct comedi_insnlist_struct{
 </programlisting>
 
 <para>
-An instruction list (<type>comedi_insnlist</type>) structure is used to communicate
-a list of instructions.
+A <type>comedi_insnlist</type> structure is used to communicate
+a list of instructions to the driver using the
+<function><link linkend="func-ref-comedi-do-insnlist">comedi_do_insnlist</link></function>
+function.
+
 </para>
 
 </section>
