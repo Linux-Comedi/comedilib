@@ -38,11 +38,12 @@ CR_PACK
 </title>
 
 <para>
-CR_PACK is used to initialize the elements of the
+<function>CR_PACK<parameter>chan</parameter><parameter>rng</parameter>
+<parameter>aref</parameter></function> is used to initialize the elements of the
 <parameter>chanlist</parameter> array in the
-<link linkend="ref-type-comedi-cmd">comedi_cmd</link> data structure,
+<type><link linkend="ref-type-comedi-cmd">comedi_cmd</link></type> data structure,
 and the <parameter>chanspec</parameter> member of the
-<link linkend="ref-type-comedi-insn">comedi_insn</link> structure.
+<type><link linkend="ref-type-comedi-insn">comedi_insn</link></type> structure.
 </para>
 <programlisting>
 <![CDATA[
@@ -57,9 +58,9 @@ use, with the channel numbering starting at zero.
 <para>
 The range <parameter>rng</parameter> is an index, starting at zero,
 whose meaning is device dependent.  The
-<link linkend="func-ref-comedi-get-n-ranges">comedi_get_n_ranges()</link>
+<function><link linkend="func-ref-comedi-get-n-ranges">comedi_get_n_ranges</link></function>
 and
-<link linkend="func-ref-comedi-get-range">comedi_get_range()</link>
+<function><link linkend="func-ref-comedi-get-range">comedi_get_range</link></function>
 functions are useful in discovering information about the available
 ranges.
 </para>
@@ -69,7 +70,7 @@ The <parameter>aref</parameter> argument indicates what reference you
 want the device to use.  It can be any of the following:
 <variablelist>
   <varlistentry>
-    <term>AREF_GROUND <anchor id="aref-ground"/> </term>
+    <term><constant>AREF_GROUND</constant> <anchor id="aref-ground"/> </term>
     <listitem>
       <para>
         is for inputs/outputs referenced to ground.
@@ -77,7 +78,7 @@ want the device to use.  It can be any of the following:
     </listitem>
   </varlistentry>
   <varlistentry>
-    <term>AREF_COMMON <anchor id="aref-common"/> </term>
+    <term><constant>AREF_COMMON</constant> <anchor id="aref-common"/> </term>
     <listitem>
       <para>
 	 is for a <quote>common</quote> reference (the low inputs of all the
@@ -86,7 +87,7 @@ channels are tied together, but are isolated from ground).
     </listitem>
   </varlistentry>
   <varlistentry>
-    <term>AREF_DIFF <anchor id="aref-diff"/> </term>
+    <term><constant>AREF_DIFF</constant> <anchor id="aref-diff"/> </term>
     <listitem>
       <para>
     is for differential inputs/outputs.
@@ -94,7 +95,7 @@ channels are tied together, but are isolated from ground).
     </listitem>
   </varlistentry>
   <varlistentry>
-    <term>AREF_OTHER <anchor id="aref-other"/> </term>
+    <term><constant>AREF_OTHER</constant> <anchor id="aref-other"/> </term>
     <listitem>
       <para>
     is for any reference that does not fit into the above categories.
@@ -119,12 +120,13 @@ used for communication between the kernel and library.
 </para>
 
 <para>
-The RANGE_LENGTH() macro returns the length of the array that is
-specified by the rangetype token.
+The <function>RANGE_LENGTH<parameter>rangetype</parameter></function>
+macro returns the length of the array that is
+specified by the <parameter>rangetype</parameter> token.
 </para>
 
 <para>
-The RANGE_LENGTH() macro is deprecated, and should not be used in
+The <function>RANGE_LENGTH</function> macro is deprecated, and should not be used in
 new applications.  It is scheduled to be removed from the header
 file at version 1.0.  Binary compatibility may be broken for version
 1.1.
@@ -146,9 +148,11 @@ enum comedi_conversion_direction
 </programlisting>
 </para>
 <para>
-A comedi_conversion_direction is used to choose between converting data
-from Comedi's integer sample values to a physical value (COMEDI_TO_PHYSICAL),
-and converting from a physical value to Comedi's integer sample values (COMEDI_FROM_PHYSICAL).
+A <type>comedi_conversion_direction</type> is used to choose between converting data
+from Comedi's integer sample values to a physical value
+(<constant>COMEDI_TO_PHYSICAL</constant>),
+and converting from a physical value to Comedi's integer sample values
+(<constant>COMEDI_FROM_PHYSICAL</constant>).
 </para>
 
 </section>
@@ -168,9 +172,9 @@ enum comedi_io_direction
 </programlisting>
 </para>
 <para>
-A comedi_io_direction is used to select between input or output.  For example,
-<link linkend="func-ref-comedi-dio-config"><function>comedi_dio_config</function></link>
-uses the COMEDI_INPUT and COMEDI_OUTPUT values to specify
+A <type>comedi_io_direction</type> is used to select between input or output.  For example,
+<function><link linkend="func-ref-comedi-dio-config">comedi_dio_config</link></function>
+uses the <constant>COMEDI_INPUT</constant> and <constant>COMEDI_OUTPUT</constant> values to specify
 whether a configurable digital i/o channel should be configured as an input
 or output.
 </para>
@@ -202,10 +206,10 @@ enum comedi_subdevice_type {
 </programlisting>
 </para>
 <para>
-The comedi_subdevice_type enumeration specifies the possible values for
+The <type>comedi_subdevice_type</type> enumeration specifies the possible values for
 a subdevice type.  These values are used by the functions
-<link linkend="func-ref-comedi-get-subdevice-type"><function>comedi_get_subdevice_type</function></link> and
-<link linkend="func-ref-comedi-find-subdevice-by-type"><function>comedi_find_subdevice_by_type</function></link>.
+<function><link linkend="func-ref-comedi-get-subdevice-type">comedi_get_subdevice_type</link></function> and
+<function><link linkend="func-ref-comedi-find-subdevice-by-type">comedi_find_subdevice_by_type</link></function>.
 </para>
 
 </section>
@@ -242,7 +246,7 @@ subdevice_struct
 </title>
 
 <para>
-The data type <parameter>subdevice_struct</parameter> is used to store
+The data type <type>subdevice_struct</type> is used to store
 information about a subdevice. This structure is usually filled in
 automatically when the driver is loaded (<quote>attached</quote>), so
 programmers need not access this data structure directly.
@@ -264,7 +268,7 @@ struct subdevice_struct{
   unsigned int *flags_list;
 
   <link linkend="ref-type-comedi-range">comedi_range</link> *rangeinfo;
-  <link linkend="ref-type-comedi-range">ccomedi_range</link> **rangeinfo_list;
+  <link linkend="ref-type-comedi-range">comedi_range</link> **rangeinfo_list;
 
   unsigned int has_cmd;
   unsigned int has_insn_bits;
@@ -287,7 +291,7 @@ comedi_devinfo
 </title>
 
 <para>
-The data type <parameter>comedi_devinfo</parameter> is used to store
+The data type <type>comedi_devinfo</type> is used to store
 information about a device. This structure is usually filled in
 automatically when the driver is loaded (<quote>attached</quote>), so
 programmers need not access this data structure directly.
@@ -316,7 +320,7 @@ comedi_t
 </title>
 
 <para>
-The data type <parameter>comedi_t</parameter> is used to represent an
+The data type <type>comedi_t</type> is used to represent an
 open &comedi; device:
 <programlisting>
 typedef struct comedi_t_struct comedi_t;
@@ -334,7 +338,7 @@ struct comedi_t_struct{
 </programlisting>
 A valid <parameter>comedi_t</parameter> pointer is returned by a
 successful call to
-<link linkend="func-ref-comedi-open">comedi_open()</link>,
+<function><link linkend="func-ref-comedi-open">comedi_open</link></function>,
 and should be used for subsequent access to the device.
 It is a transparent type, and pointers to type
 <parameter>comedi_t</parameter>
@@ -354,24 +358,21 @@ typedef unsigned short sampl_t;
 </programlisting>
 
 <para>
-The data type <link linkend="ref-type-sampl-t">sampl_t</link> is one
+The data type <type>sampl_t</type> is one
 of the generic
 types used to represent data values in Comedilib.  It is used in a few
 places where a data type
-shorter than <link linkend="ref-type-lsampl-t">lsampl_t</link> is
-useful.  On most architectures,
-<link linkend="ref-type-sampl-t">sampl_t</link>
-is defined to be <parameter>uint16</parameter>.
+shorter than <type><link linkend="ref-type-lsampl-t">lsampl_t</link></type> is
+useful.  On most architectures it is a 16-bit, unsigned integer.
 </para>
 
 <para>
-Most drivers represent data transferred by <function>read()</function> and
-<function>write()</function> using
-<link linkend="ref-type-sampl-t">sampl_t</link>.
+Most drivers represent data transferred by <function>read</function> and
+<function>write</function> functions using <type>sampl_t</type>.
 Applications should check the subdevice flag
-SDF_LSAMPL to determine if the subdevice uses
-<link linkend="ref-type-sampl-t">sampl_t</link> or
-<link linkend="ref-type-lsampl-t">lsampl_t</link>.
+<constant>SDF_LSAMPL</constant> to determine if the subdevice uses
+<type>sampl_t</type> or
+<type><link linkend="ref-type-lsampl-t">lsampl_t</link></type>.
 </para>
 
 </section>
@@ -387,11 +388,10 @@ typedef unsigned int lsampl_t;
 
 <para>
 The data type
-<link linkend="ref-type-lsampl-t">lsampl_t</link>
+<type><link linkend="ref-type-lsampl-t">lsampl_t</link></type>
 is the data type typically used to represent
-data values in libcomedi.  On most architectures,
-<link linkend="ref-type-lsampl-t">lsampl_t</link>
-is defined to be uint32.
+data values in Comedilib.  On most architectures it is a 32-bit,
+unsigned integer.
 </para>
 </section>
 
@@ -421,9 +421,9 @@ struct comedi_trig_struct{
 </programlisting>
 
 <para>
-The comedi_trig structure is a control structure used by the
-COMEDI_TRIG ioctl, an older method of communicating
-instructions to the driver and hardware.  Use of comedi_trig is
+The <type>comedi_trig</type> structure is a control structure used by the
+<constant>COMEDI_TRIG</constant> ioctl, an older method of communicating
+instructions to the driver and hardware.  Use of <type>comedi_trig</type> is
 deprecated, and should not be used in new applications.
 </para>
 </section>
@@ -453,7 +453,7 @@ struct comedi_sv_struct{
 </programlisting>
 
 <para>
-The comedi_sv_t structure is used by the comedi_sv_*()
+The <type>comedi_sv_t</type> structure is used by the <function>comedi_sv_&hellip;</function>
 functions to provide a simple method of accurately measuring
 slowly varying inputs.  See the relevant section for more
 details.
@@ -497,7 +497,7 @@ struct comedi_cmd_struct{
 
 <para>
 More information on using commands can be found in the
-command section.
+<link linkend="commandsstreaming">command section</link>.
 </para>
 </section>
 
@@ -520,7 +520,7 @@ struct comedi_insn_struct{
 </programlisting>
 
 <para>
-Comedi instructions are described by the comedi_insn structure.
+Comedi instructions are described by the <type>comedi_insn</type> structure.
 Applications send instructions to the driver in order to perform
 control and measurement operations that are done immediately or
 synchronously, i.e., the operations complete before program control
@@ -537,7 +537,7 @@ to the driver. Valid instruction types are:
   <varlistentry>
     <term>
 <anchor id="insn-read"/>
-INSN_READ
+<constant>INSN_READ</constant>
     </term>
     <listitem>
       <para>
@@ -548,7 +548,7 @@ read values from an input channel
   <varlistentry>
     <term>
 <anchor id="insn-write"/>
-INSN_WRITE
+<constant>INSN_WRITE</constant>
     </term>
     <listitem>
       <para>
@@ -559,7 +559,7 @@ write values to an output channel
   <varlistentry>
     <term>
 <anchor id="insn-bits"/>
-INSN_BITS
+<constant>INSN_BITS</constant>
     </term>
     <listitem>
       <para>
@@ -570,7 +570,7 @@ read/write values on multiple digital I/O channels
   <varlistentry>
     <term>
 <anchor id="insn-config"/>
-INSN_CONFIG
+<constant>INSN_CONFIG</constant>
     </term>
     <listitem>
       <para>
@@ -581,19 +581,19 @@ configure a subdevice
   <varlistentry>
     <term>
 <anchor id="insn-gtod"/>
-INSN_GTOD
+<constant>INSN_GTOD</constant>
     </term>
     <listitem>
       <para>
-read a timestamp, identical to gettimeofday() except the seconds
-and microseconds values are of type <link linkend="ref-type-lsampl-t">lsampl_t</link>.
+read a timestamp, identical to <function>gettimeofday</function> except the seconds
+and microseconds values are of type <type><link linkend="ref-type-lsampl-t">lsampl_t</link></type>.
       </para>
     </listitem>
   </varlistentry>
   <varlistentry>
     <term>
 <anchor id="insn-wait"/>
-INSN_WAIT
+<constant>INSN_WAIT</constant>
     </term>
     <listitem>
       <para>
@@ -612,9 +612,10 @@ the channel, range, and analog reference (if applicable).
 </para>
 
 <para>
-Instructions can be sent to drivers using comedi_do_insn().
-Multiple instructions can be sent to drivers in the same system
-call using comedi_do_insnlist().
+Instructions can be sent to drivers using
+<function><link linkend="func-ref-comedi-do-insn">comedi_do_insn</link></function>.
+Multiple instructions can be sent to drivers in the same system call using
+<function><link linkend="func-ref-comedi-do-insnlist">comedi_do_insnlist</link></function>.
 </para>
 </section>
 
@@ -634,12 +635,13 @@ struct comedi_range_struct{
 </programlisting>
 
 <para>
-The comedi_range structure conveys part of the information
+The <type>comedi_range</type> structure conveys part of the information
 necessary to translate sample values to physical units, in particular,
 the endpoints of the range and the physical unit type.  The
 physical unit type is specified by the field unit, which may
-take the values UNIT_volt for volts, UNIT_mA for milliamps,
-or UNIT_none for unitless.  The endpoints are specified by
+take the values <constant>UNIT_volt</constant> for volts,
+<constant>UNIT_mA</constant> for milliamps,
+or <constant>UNIT_none</constant> for unitless.  The endpoints are specified by
 the fields min and max.
 </para>
 </section>
@@ -660,17 +662,18 @@ struct comedi_krange_struct{
 </programlisting>
 
 <para>
-The comedi_krange structure is used to transfer range information
+The <type>comedi_krange</type> structure is used to transfer range information
 between the driver and Comedilib, and should not normally be used
 by applications.  The structure conveys the same information as the
 comedi_range structure, except the fields min and max
 are integers, multiplied by a factor of 1000000 compared to the
-counterparts in comedi_range.
+counterparts in <type>comedi_range</type>.
 </para>
 
 <para>
-In addition, kcomedilib uses the comedi_krange structure in place
-of the comedi_range structure.
+In addition, <systemitem>kcomedilib</systemitem> uses the
+<type>comedi_krange</type> structure in place
+of the <type>comedi_range</type> structure.
 </para>
 
 </section>
@@ -690,7 +693,7 @@ struct comedi_insnlist_struct{
 </programlisting>
 
 <para>
-An instruction list (insnlist) structure is used to communicate
+An instruction list (<type>comedi_insnlist</type>) structure is used to communicate
 a list of instructions.
 </para>
 
@@ -711,13 +714,13 @@ typedef struct {
 </programlisting>
 
 <para>
-A comedi_polynomial_t holds calibration data for a channel of a
+A <type>comedi_polynomial_t</type> holds calibration data for a channel of a
 subdevice.  It is initialized by the
-<link linkend="func-ref-comedi-get-hardcal-converter"><function>comedi_get_hardcal_converter</function></link>
-or <link linkend="func-ref-comedi-get-softcal-converter"><function>comedi_get_softcal_converter</function></link>
+<function><link linkend="func-ref-comedi-get-hardcal-converter">comedi_get_hardcal_converter</link></function>
+or <function><link linkend="func-ref-comedi-get-softcal-converter">comedi_get_softcal_converter</link></function>
 calibration functions and is passed to the
-<link linkend="func-ref-comedi-to-physical"><function>comedi_to_physical</function></link>
-and <link linkend="func-ref-comedi-from-physical"><function>comedi_from_physical</function></link>
+<function><link linkend="func-ref-comedi-to-physical">comedi_to_physical</link></function>
+and <function><link linkend="func-ref-comedi-from-physical">comedi_from_physical</link></function>
 raw/physical conversion functions.
 </para>
 
