@@ -224,7 +224,6 @@ Data types and structures
 This Section explains the data structures that users of the &comedi;
 API are confronted with:
 <programlisting>
-typedef struct subdevice_struct       <link linkend="ref-type-subdevice-struct">subdevice_struct</link>:
 typedef struct comedi_devinfo_struct  <link linkend="ref-type-comedi-devinfo">comedi_devinfo</link>;
 typedef struct comedi_t_struct        <link linkend="ref-type-comedi-t">comedi_t</link>;
 typedef struct sampl_t_struct         <link linkend="ref-type-sampl-t">sampl_t</link>;
@@ -239,50 +238,6 @@ typedef struct comedi_insnlist_struct <link linkend="ref-type-comedi-insnlist">c
 The data structures used in the implementation of the &comedi; drivers
 are treated <link linkend="driverdatastructures">elsewhere</link>.
 </para>
-
-<section id="ref-type-subdevice-struct">
-<title>
-subdevice_struct
-</title>
-
-<para>
-The data type <type>subdevice_struct</type> is used to store
-information about a subdevice. This structure is usually filled in
-automatically when the driver is loaded (<quote>attached</quote>), so
-programmers need not access this data structure directly.
-<programlisting>
-typedef struct subdevice_struct <anchor id="ref-type-subdevice"/>subdevice;
-
-struct subdevice_struct{
-  unsigned int type;
-  unsigned int n_chan;
-  unsigned int subd_flags;
-  unsigned int timer_type;
-  unsigned int len_chanlist;
-  <link linkend="ref-type-lsampl-t">lsampl_t</link> maxdata;
-  unsigned int flags;
-  unsigned int range_type;
-
-  <link linkend="ref-type-lsampl-t">lsampl_t</link> *maxdata_list;
-  unsigned int *range_type_list;
-  unsigned int *flags_list;
-
-  <link linkend="ref-type-comedi-range">comedi_range</link> *rangeinfo;
-  <link linkend="ref-type-comedi-range">comedi_range</link> **rangeinfo_list;
-
-  unsigned int has_cmd;
-  unsigned int has_insn_bits;
-
-  int cmd_mask_errno;
-  <link linkend="ref-type-comedi-cmd">comedi_cmd</link> *cmd_mask;
-  int cmd_timed_errno;
-  <link linkend="ref-type-comedi-cmd">comedi_cmd</link> *cmd_timed;
-};
-</programlisting>
-
-</para>
-
-</section>
 
 
 <section id="ref-type-comedi-devinfo">
@@ -324,23 +279,12 @@ The data type <type>comedi_t</type> is used to represent an
 open &comedi; device:
 <programlisting>
 typedef struct comedi_t_struct comedi_t;
-
-struct comedi_t_struct{
-  int magic;        // driver-specific magic number, for identification
-  int fd;           // file descriptor, for open() and close()
-  int n_subdevices; // number of subdevices on this device
-  <link linkend="ref-type-comedi-devinfo">comedi_devinfo</link> devinfo;
-  <link linkend="ref-type-subdevice">subdevice</link> *subdevices; // pointer to subdevice list
-                         // filled in automatically at load time
-  unsigned int has_insnlist_ioctl; // can process <link linkend="anchor.instruction.list">instruction lists</link>
-  unsigned int has_insn_ioctl;     // can process <link linkend="instructions">instructions</link>
-};
 </programlisting>
-A valid <parameter>comedi_t</parameter> pointer is returned by a
+A valid <type>comedi_t</type> pointer is returned by a
 successful call to
 <function><link linkend="func-ref-comedi-open">comedi_open</link></function>,
 and should be used for subsequent access to the device.
-It is a transparent type, and pointers to type
+It is an opaque type, and pointers to type
 <parameter>comedi_t</parameter>
 should not be dereferenced by the application.
 </para>
