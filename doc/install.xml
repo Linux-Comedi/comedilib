@@ -89,7 +89,7 @@ Usually these devices belong to the group <systemitem class="groupname">iocard</
 		  For the Data Translation board, you need to know
 		  how the board's jumpers are configured in order to specify the correct
 		  <command>comedi_config</command> parameters.  These parameters for the board are given in the
-		  <link endterm="lowleveldrivers">kernel drivers</link> section about the <systemitem>dt282x</systemitem>
+		  <link linkend="lowleveldrivers">kernel drivers</link> section about the <systemitem>dt282x</systemitem>
 		  driver.
 		  The card discussed here is a DT2821-f-8di.  The
 		  entry for the <systemitem>dt282x</systemitem> driver tells you that the
