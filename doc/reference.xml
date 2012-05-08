@@ -236,7 +236,7 @@ typedef struct comedi_krange_struct   <link linkend="ref-type-comedi-krange">com
 typedef struct comedi_insnlist_struct <link linkend="ref-type-comedi-insnlist">comedi_insnlist</link>;
 </programlisting>
 The data structures used in the implementation of the &comedi; drivers
-are treated <link linkend="driverdatastructures">elsewhere</link>.
+are described in <xref linkend="driverdatastructures"/>.
 </para>
 
 
