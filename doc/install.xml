@@ -26,14 +26,15 @@
 		  The good news is: on most systems PCI and USB based boards are
 		  configured automatically. The kernel will
 		  detect your data acquisition devices, will load the appropriate
-		  kernel drivers and will create the /dev/comedi entries.
+		  kernel drivers and will create the
+		  <filename>/dev/comedi</filename> entries.
 <screen>
 bp1@bp1-x61:~/sandbox/comedilib$ ls -l /dev/comedi0*
 crw-rw---- 1 root iocard 98,  0 2012-04-26 23:41 /dev/comedi0
 crw-rw---- 1 root iocard 98, 48 2012-04-26 23:41 /dev/comedi0_subd0
 crw-rw---- 1 root iocard 98, 49 2012-04-26 23:41 /dev/comedi0_subd1
 </screen>
-		  Usually these devices belong to the group "iocard" as shown here. The only
+Usually these devices belong to the group <systemitem class="groupname">iocard</systemitem> as shown here. The only
 		  action you need to take is to become member of this group and
 		  then the &comedi; device is ready to be used.
 		</para>
@@ -45,7 +46,8 @@ crw-rw---- 1 root iocard 98, 49 2012-04-26 23:41 /dev/comedi0_subd1
                   On embedded systems it might also be necessary to load the
                   driver and then to configure the boards manually.
 		  In general manual configuration is done by running
-		  the <command>comedi_config</command> command (as root).
+		  the <command>comedi_config</command> command
+		  (as <systemitem class="username">root</systemitem>).
 		  Here is an example of how to use the command (perhaps you should read
 		  its <command>man</command> page now):
 		  <screen>
@@ -53,7 +55,7 @@ crw-rw---- 1 root iocard 98, 49 2012-04-26 23:41 /dev/comedi0_subd1
 		  </screen>
 		  This command says that the <quote>file</quote>
 		  <filename>/dev/comedi0</filename> can be used to access the &comedi;
-		  device that uses the <parameter>labpc-1200</parameter> board, and that
+		  device that uses the <parameter class="command">labpc-1200</parameter> board, and that
 		  you give it two run-time parameters (<literal>0x260</literal> and
 		  <literal>3</literal>). More parameters are possible, and their
 		  meaning is driver dependant.
@@ -62,20 +64,20 @@ crw-rw---- 1 root iocard 98, 49 2012-04-26 23:41 /dev/comedi0_subd1
 		<para>
 		  This tutorial goes through the process of configuring &comedi;
 		  for two devices, a
-		  <literal>National Instruments AT-MIO-16E-10</literal>, and a
-		  <literal>Data Translation DT2821-F-8DI</literal>.
+		  National Instruments AT-MIO-16E-10, and a
+		  Data Translation DT2821-F-8DI.
 		</para>
 
 		<para>
-		  The NI board is plug-and-play.  The current ni_atmio driver
+			The NI board is plug-and-play.  The current <systemitem>ni_atmio</systemitem> driver
 		  has kernel-level ISAPNP support, which is used by default
 		  if you do not specify a base address.  So you could simply
-		  run comedi_config as
+		  run <command>comedi_config</command> as
 		  <screen>
 		    comedi_config /dev/comedi0 ni_atmio
 		  </screen>
-		  For the preceding comedi_config command to succeed, the
-		  ni_atmio kernel module must
+		  For the preceding <command>comedi_config</command> command to succeed, the
+		  <systemitem>ni_atmio</systemitem> kernel module must
 		  be loaded first.    For plug-n-play boards on
 		  modern kernels, the appropriate comedi kernel modules should get loaded
 		  automatically when your computer is booted.
@@ -84,14 +86,14 @@ crw-rw---- 1 root iocard 98, 49 2012-04-26 23:41 /dev/comedi0_subd1
 		  will list all the currently loaded modules.
 		</para>
 		<para>
-		  For the <literal>Data Translation</literal> board, you need to know
+		  For the Data Translation board, you need to know
 		  how the board's jumpers are configured in order to specify the correct
-		  comedi_config parameters.  These parameters for the board are given in the
-		  <link endterm="lowleveldrivers">kernel drivers</link> section about the dt282x
+		  <command>comedi_config</command> parameters.  These parameters for the board are given in the
+		  <link endterm="lowleveldrivers">kernel drivers</link> section about the <systemitem>dt282x</systemitem>
 		  driver.
-		  The card discussed here is a <literal>DT2821-f-8di</literal>.  The
-		  entry for the dt282x driver tells you that the
-		  comedi_config parameters give the driver the I/O base,
+		  The card discussed here is a DT2821-f-8di.  The
+		  entry for the <systemitem>dt282x</systemitem> driver tells you that the
+		  <command>comedi_config</command> parameters give the driver the I/O base,
 		  IRQ, DMA 1, DMA 2, and
 		  in addition the states of the
 		  differential/single-ended and unipolar/bipolar jumpers:
@@ -167,7 +169,7 @@ comedi0: ni_atmio: 0x0260 at-mio-16e-10 ( irq = 3 )
 		  talk to &comedi;.
 		  Call the command <command>comedi_board_info</command>, which provides information
 		  about each subdevice on the board.
-		  Here's part of the output of the <literal>USB-DUX sigma</literal>
+		  Here's part of the output for the USB-DUX sigma
 		  board (which is on <filename>/dev/comedi0</filename>), as a result of
 		  the command <command>comedi_board_info -v</command>.
 		</para>
@@ -263,7 +265,7 @@ subdevice 3:
 
 
 <para>
-  Here's the information from comedi's proc
+  Here's the information from &comedi;'s <filename>/proc/comedi</filename>
   file, which indicates what drivers are loaded and which
   boards are configured:
 </para>
@@ -284,9 +286,10 @@ usbduxsigma:
 
 <para>
   This documentation feature currently returns the driver name, the device name, and the number of
-  subdevices. Following those lines are a list of the comedi kernel
+  subdevices. Following those lines are a list of the &comedi; kernel
   driver modules currently loaded, each followed by a list of the board
-  names it recognizes (names that can be used with comedi_config).
+  names it recognizes (names that can be used with
+  <command>comedi_config</command>).
 </para>
 
 
