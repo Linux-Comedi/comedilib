@@ -7,7 +7,11 @@ Param: unsigned int write_mask
 Param: unsigned int * bits
 Status: deprecated
 Description:
- This function is deprecated.  Use comedi_dio_bitfield2() instead.
+ This function is deprecated.  Use <function><link
+ linkend="func-ref-comedi-dio-bitfield2">comedi_dio_bitfield2</link></function>
+ instead.  It is equivalent to using <function>comedi_dio_bitfield2</function>
+ with <parameter class="function">base_channel</parameter> set to
+ <literal>0</literal>.
 
 Function: comedi_from_phys -- convert physical units to sample
 Retval: lsampl_t
@@ -16,14 +20,17 @@ Param: comedi_range * range
 Param: lsampl_t maxdata
 Status: deprecated
 Description:
- Converts data given in physical units (data) into sample values
- (lsampl_t, between 0 and maxdata).  The parameter rng
+ Converts parameter <parameter class="function">data</parameter> given in
+ physical units (<type>double</type>) into sample values
+ (<type>lsampl_t</type>, between <literal>0</literal> and maxdata).
+ The parameter <parameter class="function">range</parameter>
  represents the conversion information to use, and the parameter
- maxdata represents the maximum possible data value for the
+ <parameter class="function">maxdata</parameter> represents the maximum possible data value for the
  channel that the data will be written to.
 
  Conversion is not affected by out-of-range behavior.  Out-of-range
- data parameters are silently truncated to the range 0 to maxdata.
+ data parameters are silently truncated to the range <literal>0</literal>
+ to <parameter class="function">maxdata</parameter>.
 
 Function: comedi_get_timer -- timer information (deprecated)
 Retval: int
@@ -34,12 +41,13 @@ Param: unsigned int * trigvar
 Param: double * actual_frequency
 Status: deprecated
 Description:
- The function comedi_get_timer converts the frequency frequency
- to a number suitable to send to the driver in a comedi_trig
+ The function <function>comedi_get_timer</function> converts the frequency
+ <parameter class="function">frequency</parameter>
+ to a number suitable to send to the driver in a <type>comedi_trig</type>
  structure.  This function remains for compatibility with very
  old versions of Comedi, that converted sampling rates to timer
- values in the libary.  This conversion is now done in the kernel,
- and every device has the timer type nanosec_timer, indicating
+ values in the library.  This conversion is now done in the kernel,
+ and every device has the timer type <constant>nanosec_timer</constant>, indicating
  that timer values are simply a time specified in nanoseconds.
 
 Function: comedi_set_global_oor_behavior -- out-of-range behavior
@@ -48,11 +56,13 @@ Param: enum comedi_oor_behavior behavior
 Status: deprecated
 Description:
  This function changes the Comedilib out-of-range behavior.
- This currently affects the behavior of comedi_to_phys() when
+ This currently affects the behavior of <function>comedi_to_phys</function> when
  converting endpoint sample values, that is, sample values
- equal to 0 or maxdata.  If the out-of-range behavior is set to
- COMEDI_OOR_NAN, endpoint values are converted to NAN.  If the
- out-of-range behavior is set to COMEDI_OOR_NUMBER, the endpoint
+ equal to <literal>0</literal> or <parameter
+ class="function">maxdata</parameter>.  If the out-of-range behavior is set to
+ <constant>COMEDI_OOR_NAN</constant>, endpoint values are converted to
+ <constant>NAN</constant>.  If the
+ out-of-range behavior is set to <constant>COMEDI_OOR_NUMBER</constant>, the endpoint
  values are converted similarly to other values.
 
  The previous out-of-range behavior is returned.
@@ -65,13 +75,19 @@ Param: unsigned int subdevice
 Param: unsigned int channel
 Status: deprecated
 Description:
- The function comedi_sv_init() initializes the slow varying Comedi
- structure sv to use the device device, the analog input subdevice
- subdevice, and the channel channel.  The slow varying Comedi
- structure is used by comedi_sv_measure() to accurately measure
+ The function <function>comedi_sv_init</function> initializes the slow varying Comedi
+ structure pointed to by <parameter class="function">sv</parameter> to use the
+ device <parameter class="function">device</parameter>, the analog input subdevice
+ <parameter class="function">subdevice</parameter>, and the channel
+ <parameter class="function">channel</parameter>.  The slow varying Comedi
+ structure is used by
+ <function><link linkend="func-ref-comedi-sv-measure">comedi_sv_measure</link></function>
+ to accurately measure
  an analog input by averaging over many samples.  The default
- number of samples is 100.  This function returns 0 on success,
- -1 on error.
+ number of samples is 100.
+Returns:
+ This function returns <literal>0</literal> on success,
+ <literal>-1</literal> on error.
 
 Function: comedi_sv_measure -- slowly-varying inputs
 Retval: int
@@ -79,10 +95,12 @@ Param: comedi_sv_t * sv
 Param: double * data
 Status: deprecated
 Description:
- The function comedi_sv_measure() uses the slowly varying Comedi
- structure sv to measure a slowly varying signal.  If successful,
+ The function <function>comedi_sv_measure</function> uses the slowly varying Comedi
+ structure pointed to by <parameter class="function">sv</parameter>
+ to measure a slowly varying signal.  If successful,
  the result (in physical units) is stored in the location pointed
- to by data, and the number of samples is returned.  On error, -1
+ to by <parameter class="function">data</parameter>, and the number of samples
+ is returned.  On error, <literal>-1</literal>
  is returned.
 
 Function: comedi_sv_update -- slowly-varying inputs
@@ -90,8 +108,9 @@ Retval: int
 Param: comedi_sv_t * sv
 Status: deprecated
 Description:
- The function comedi_sv_update() updates internal parameters of
- the slowly varying Comedi structure sv.
+ The function <function>comedi_sv_update</function> updates internal parameters of
+ the slowly varying Comedi structure pointed to by
+ <parameter class="function">sv</parameter>.
 
 Function: comedi_timed_1chan -- streaming input (deprecated)
 Retval: int
@@ -114,20 +133,25 @@ Param: comedi_range * range
 Param: lsampl_t maxdata
 Status: deprecated
 Description:
- Converts data given in sample values (lsampl_t, between 0 and
- maxdata) into physical units (double).  The parameter range
+ Converts parameter <parameter class="function">data</parameter> given in sample values
+ (<type>lsampl_t</type>, between <literal>0</literal> and
+ <parameter class="function">maxdata</parameter>) into physical units
+ (<type>double</type>).  The parameter <parameter
+ class="function">range</parameter>
  represents the conversion information to use, and the parameter
- maxdata represents the maximum possible data value for the
+ <parameter class="function">maxdata</parameter> represents the maximum possible data value for the
  channel that the data was read.
 
  Conversion of endpoint sample values, that is, sample values
- equal to 0 or maxdata, is affected by the Comedilib out-of-range
- behavior.  If the out-of-range behavior is set to COMEDI_OOR_NAN,
- endpoint values are converted to NAN.  If the out-of-range
- behavior is set to COMEDI_OOR_NUMBER, the endpoint values are
+ equal to <literal>0</literal> or <parameter class="function">maxdata</parameter>,
+ is affected by the Comedilib out-of-range
+ behavior.  If the out-of-range behavior is set to
+ <constant>COMEDI_OOR_NAN</constant>,
+ endpoint values are converted to <constant>NAN</constant>.  If the out-of-range
+ behavior is set to <constant>COMEDI_OOR_NUMBER</constant>, the endpoint values are
  converted similarly to other values.
 
- If there is an error, NAN is returned.
+ If there is an error, <constant>NAN</constant> is returned.
 
 Function: comedi_trigger -- perform streaming input/output (deprecated)
 Retval: int
@@ -135,8 +159,9 @@ Param: comedi_t * device
 Param: comedi_trig * trig
 Status: deprecated
 Description:
- The function comedi_trigger() instructs Comedi to
- perform the command specified by the trigger structure trig.
+ The function <function>comedi_trigger</function> instructs Comedi to
+ perform the command specified by the trigger structure pointed to by
+ <parameter class="function">trig</parameter>.
  The return value depends on
- the particular trig being issued.  If there is an
- error, -1 is returned.
+ the particular trigger being issued.  If there is an
+ error, <literal>-1</literal> is returned.
