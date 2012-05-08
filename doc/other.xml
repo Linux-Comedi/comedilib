@@ -357,12 +357,12 @@ Because of the large flexibility of the instruction function, many
 types of instruction do not need to fill in all fields, or attach
 different meanings to the same field. But the current implementation
 of &comedi; requires the
-<link linkend="insn-data-structure-data">data</link> field to be at
-least one byte long.
+<structfield><link linkend="insn-data-structure-data">data</link></structfield>
+field to be at least one byte long.
 </para>
 
 <para>
-The <link linkend="insn-data-structure-insn">insn</link> flag of the
+The <structfield><link linkend="insn-data-structure-insn">insn</link></structfield> member of the
 <link linkend="insn-data-structure">instruction data structure</link>
 determines the type of acquisition executed in the corresponding
 instruction:
@@ -473,7 +473,8 @@ how they are used to <emphasis>configure</emphasis> a subdevice.
 There are various sorts of configurations, and the
 specific information for each different configuration possibility is
 to be specified via the
-<link linkend="insn-data-structure-data">data</link> buffer of the
+<structfield><link linkend="insn-data-structure-data">data</link></structfield>
+buffer of the
 <link linkend="insn-data-structure">instruction data structure</link>.
 (So, the pointer to a
 <type><link linkend="ref-type-lsampl-t">lsampl_t</link></type>
@@ -482,13 +483,15 @@ is misused as a pointer to an array with board-specific information.)
 
 <para>
 Using <constant>INSN_CONFIG</constant> as the
-<link linkend="insn-data-structure-insn">insn</link> flag in an
+<structfield><link linkend="insn-data-structure-insn">insn</link></structfield>
+member in an
 <link linkend="insn-data-structure">instruction data structure</link>
 indicates that the instruction will
 <emphasis>not perform acquisition</emphasis> on a
 channel, but will <emphasis>configure</emphasis> that channel.
 The
-<link linkend="ref-macro-CR-PACK">chanspec</link> field in the
+<structfield><link linkend="ref-macro-CR-PACK">chanspec</link></structfield>
+member in the
 <type><link linkend="insn-data-structure-chanspec">comedi_insn</link></type>
 data structure, contains the channel to be configured.
 The zeroth element of the data array
@@ -607,7 +610,8 @@ Instruction for internal triggering
 <para>
 This special instruction has
 <anchor id="insn-inttrig"/><constant>INSN_INTTRIG</constant> as the
-<link linkend="insn-data-structure-insn">insn</link> flag in its
+<structfield><link linkend="insn-data-structure-insn">insn</link></structfield>
+member in its
 <link linkend="insn-data-structure">instruction data structure</link>.
 Its execution causes an
 <link linkend="trig-int-start-src">internal triggering event</link>. This
@@ -617,7 +621,7 @@ depends on the card and its particular driver.
 </para>
 <para>
 The
-<link linkend="insn-data-structure-data">data</link>[0] field of the
+<structfield><link linkend="insn-data-structure-data">data</link></structfield>[0] element of the
 <constant>INSN_INTTRIG</constant> instruction is reserved for future use,
 and should be set to <literal>0</literal>.
 </para>
@@ -692,7 +696,7 @@ intervals of 1 millisecond apart.
 The command function is complementary to the
 <link linkend="instructionsconfiguration">configuration instruction</link>
 function: each channel in the command's
-<link linkend="command-data-struct-chanlist">chanlist</link>
+<structfield><link linkend="command-data-struct-chanlist">chanlist</link></structfield>
 should first be configured by an appropriate instruction.
 </para>
 
@@ -792,19 +796,19 @@ function can be useful in discovering the index of your desired subdevice.
 </para>
 
 <para>
-The <link linkend="command-data-struct-chanlist">chanlist</link>
+The <structfield><link linkend="command-data-struct-chanlist">chanlist</link></structfield>
 member of the
 <type><link linkend="ref-type-comedi-cmd">comedi_cmd</link></type> data
 structure should point to an array whose number of elements is
 specified by
-<link linkend="command-data-struct-chanlist-len">chanlist_len</link>
+<structfield><link linkend="command-data-struct-chanlist-len">chanlist_len</link></structfield>
 (this will generally be the same as the
-<link linkend="command-data-struct-scan-end-arg">scan_end_arg</link>).
+<structfield><link linkend="command-data-struct-scan-end-arg">scan_end_arg</link></structfield>).
 The
-<link linkend="command-data-struct-chanlist">chanlist</link>
+<structfield><link linkend="command-data-struct-chanlist">chanlist</link></structfield>
 specifies the sequence of channels and gains (and analog references)
 that should be stepped through for each scan.  The elements of the
-<link linkend="command-data-struct-chanlist">chanlist</link> array should be
+<structfield><link linkend="command-data-struct-chanlist">chanlist</link></structfield> array should be
 initialized by <quote>packing</quote> the channel, range and reference
 information together with the
 <function><link linkend="ref-macro-CR-PACK">CR_PACK</link></function>
@@ -812,8 +816,8 @@ macro.
 </para>
 
 <para>
-The <link linkend="command-data-struct-data">data</link> and
-<link linkend="command-data-struct-data-len">data_len</link>
+The <structfield><link linkend="command-data-struct-data">data</link></structfield> and
+<structfield><link linkend="command-data-struct-data-len">data_len</link></structfield>
 members can be safely ignored when issueing commands from a user-space
 program.  They only have meaning when a command is sent from a
 <emphasis role="strong">kernel</emphasis> module using the
@@ -824,10 +828,10 @@ the buffer where the driver should write/read its data to/from.
 <para>
 The final member of the
 <type><link linkend="command-data-struct">comedi_cmd</link></type> structure is the
-<link linkend="command-data-struct-flags">flags</link> field,
+<structfield><link linkend="command-data-struct-flags">flags</link></structfield> field,
 i.e., bits in a word that can be bitwise-or'd together. The meaning of
-these bits are explained in a
-<link linkend="source.flags.anchor">later section</link>.
+these bits are explained in
+<xref linkend="comedicmdflags"/>.
 </para>
 
 </section>
@@ -869,19 +873,17 @@ corresponding arguments (<parameter class="function">&hellip;_arg</parameter>).
 </para>
 <para>
 The start of an acquisition is controlled by the
-<link linkend="command-data-struct-start-src">start_src</link> events.
+<structfield><link linkend="command-data-struct-start-src">start_src</link></structfield> events.
 The available options are:
 <itemizedlist>
 
 <listitem>
 <para>
 <anchor id="trig-now-start-src"/>
-<constant>TRIG_NOW</constant>: the
-<link linkend="command-data-struct-start-src">start_src</link>
-event occurs
-<link linkend="command-data-struct-start-arg">start_arg</link>
+<constant>TRIG_NOW</constant>: the <quote>start</quote> event occurs
+<structfield><link linkend="command-data-struct-start-arg">start_arg</link></structfield>
 nanoseconds after the command is set up. Currently, only
-<link linkend="command-data-struct-start-arg">start_arg</link>=<literal>0</literal> is
+<structfield><link linkend="command-data-struct-start-arg">start_arg</link></structfield>=<literal>0</literal> is
 supported.
 </para>
 </listitem>
@@ -889,8 +891,7 @@ supported.
 <listitem>
 <para>
 <anchor id="trig-follow-start-src"/>
-<constant>TRIG_FOLLOW</constant>:  (For an output device.) The
-<link linkend="command-data-struct-start-src">start_src</link>
+<constant>TRIG_FOLLOW</constant>:  (For an output device.) The <quote>start</quote>
 event occurs when data is written to the buffer.
 </para>
 </listitem>
@@ -898,9 +899,9 @@ event occurs when data is written to the buffer.
 <listitem>
 <para>
 <anchor id="trig-ext-start-src"/>
-<constant>TRIG_EXT</constant>: the start event occurs when an
+<constant>TRIG_EXT</constant>: the <quote>start</quote> event occurs when an
 external trigger signal occurs; e.g., a rising edge of a digital line.
-<link linkend="command-data-struct-start-arg">start_arg</link>
+<structfield><link linkend="command-data-struct-start-arg">start_arg</link></structfield>
 chooses the particular digital line.
 </para>
 </listitem>
@@ -908,7 +909,7 @@ chooses the particular digital line.
 <listitem>
 <para>
 <anchor id="trig-int-start-src"/>
-<constant>TRIG_INT</constant>: the start event occurs on a &comedi;
+<constant>TRIG_INT</constant>: the <quote>start</quote> event occurs on a &comedi;
 internal signal, which is typically caused by an
 <constant><link linkend="insn-inttrig">INSN_INTTRIG</link></constant>
 instruction.
@@ -918,19 +919,17 @@ instruction.
 </itemizedlist>
 The start of the beginning of each
 <link linkend="scan">scan</link> is controlled by the
-<link linkend="command-data-struct-scan-begin-src">scan_begin</link> events.
+<structfield><link linkend="command-data-struct-scan-begin-src">scan_begin_src</link></structfield> events.
 The available options are:
 <itemizedlist>
 
 <listitem>
 <para>
 <anchor id="trig-timer-start-scan"/>
-<constant>TRIG_TIMER</constant>:
-<link linkend="command-data-struct-scan-begin-src">scan_begin</link>
-events occur periodically.  The time between
-<link linkend="command-data-struct-scan-begin-src">scan_begin</link>
+<constant>TRIG_TIMER</constant>: <quote>scan begin</quote>
+events occur periodically.  The time between <quote>scan begin</quote>
 events is
-<link linkend="command-data-struct-convert-arg">convert_arg</link>
+<structfield><link linkend="command-data-struct-scan-begin-arg">scan_begin_arg</link></structfield>
 nanoseconds.
 </para>
 </listitem>
@@ -938,10 +937,8 @@ nanoseconds.
 <listitem>
 <para>
 <anchor id="trig-follow-start-scan"/>
-<constant>TRIG_FOLLOW</constant>:  The
-<link linkend="command-data-struct-scan-begin-src">scan_begin</link>
-event occurs immediately after a
-<link linkend="command-data-struct-scan-end-src">scan_end</link>
+<constant>TRIG_FOLLOW</constant>:  The <quote>scan begin</quote>
+event occurs immediately after a <quote>scan end</quote>
 event occurs.
 </para>
 </listitem>
@@ -949,18 +946,17 @@ event occurs.
 <listitem>
 <para>
 <anchor id="trig-ext-start-scan"/>
-<constant>TRIG_EXT</constant>: the
-<link linkend="command-data-struct-scan-begin-src">scan_begin</link>
+<constant>TRIG_EXT</constant>: the <quote>scan begin</quote>
 event occurs when an external trigger signal
 occurs; e.g., a rising edge of a digital line.
-<link linkend="command-data-struct-scan-begin-arg">scan_begin_arg</link>
+<structfield><link linkend="command-data-struct-scan-begin-arg">scan_begin_arg</link></structfield>
 chooses the particular digital line.
 </para>
 </listitem>
 
 </itemizedlist>
 The
-<link linkend="command-data-struct-scan-begin-arg">scan_begin_arg</link>
+<structfield><link linkend="command-data-struct-scan-begin-arg">scan_begin_arg</link></structfield>
 used here may not be supported exactly by the device, but it
 will be adjusted to the nearest supported value by
 <function><link linkend="func-ref-comedi-command-test">comedi_command_test</link></function>.
@@ -968,8 +964,9 @@ will be adjusted to the nearest supported value by
 <para>
 The timing between each sample in a
 <link linkend="scan">scan</link> is controlled by the
-<link linkend="command-data-struct-convert-src">convert_&hellip;</link>
-fields:
+<structfield><link linkend="command-data-struct-convert-src">convert_src</link></structfield>
+events.
+The available options are:
 <itemizedlist>
 
 <listitem>
@@ -977,8 +974,8 @@ fields:
 <anchor id="convert-trig-timer"/>
 <anchor id="trig-timer"/>
 <constant>TRIG_TIMER</constant>: the conversion events occur periodically.
-The time between convert events is
-<link linkend="command-data-struct-convert-arg">convert_arg</link>
+The time between <quote>convert</quote> events is
+<structfield><link linkend="command-data-struct-convert-arg">convert_arg</link></structfield>
 nanoseconds.
 </para>
 </listitem>
@@ -989,7 +986,7 @@ nanoseconds.
 <anchor id="trig-ext"/>
 <constant>TRIG_EXT</constant>: the conversion events occur when an
 external trigger signal occurs, e.g., a rising edge of a digital line.
-<link linkend="command-data-struct-convert-arg">convert_arg</link>
+<structfield><link linkend="command-data-struct-convert-arg">convert_arg</link></structfield>
 chooses the particular digital line.
 </para>
 </listitem>
@@ -1005,10 +1002,12 @@ chooses the particular digital line.
 
 </itemizedlist>
 The <emphasis>end</emphasis> of each scan is almost always specified
-using
+by setting the
+<structfield><link linkend="command-data-struct-scan-end-src">scan_end_src</link></structfield>
+event to
 <constant><link linkend="trig-count">TRIG_COUNT</link></constant>,
 with the argument being the same as the number of channels in the
-<link linkend="command-data-struct-chanlist">chanlist</link>.  You
+<structfield><link linkend="command-data-struct-chanlist">chanlist</link></structfield>.  You
 could probably find a device that allows something else, but it would
 be strange.
 </para>
@@ -1016,8 +1015,8 @@ be strange.
 The end of an
 <link linkend="acquisitionterminology">acquisition</link> is
 controlled by
-<link linkend="command-data-struct-stop-src">stop_src</link>
-and <link linkend="command-data-struct-stop-arg">stop_arg</link>:
+<structfield><link linkend="command-data-struct-stop-src">stop_src</link></structfield> event.
+The available options are:
 <itemizedlist>
 
 <listitem>
@@ -1025,7 +1024,7 @@ and <link linkend="command-data-struct-stop-arg">stop_arg</link>:
 <anchor id="acquisition-end-trig-count"/>
 <anchor id="trig-count"/>
 <constant>TRIG_COUNT</constant>: stop the acquisition after
-<link linkend="command-data-struct-stop-arg">stop_arg</link>
+<structfield><link linkend="command-data-struct-stop-arg">stop_arg</link></structfield>
 scans.
 </para>
 </listitem>
@@ -1039,7 +1038,7 @@ until stopped using
 <function><link linkend="func-ref-comedi-cancel">comedi_cancel</link></function>.
 </para>
 <para>
-Its argument is reserved and should be set to <literal>0</literal>.
+Its <structfield>stop_arg</structfield> argument is reserved and should be set to <literal>0</literal>.
 (<quote>Reserved</quote>
 means that unspecified things could happen if it is set to something
 else but <literal>0</literal>.)
@@ -1100,7 +1099,8 @@ The command flags
 
 <para>
 The
-<link linkend="command-data-struct-flags">flags</link> field in the
+<structfield><link linkend="command-data-struct-flags">flags</link></structfield>
+field in the
 <link linkend="ref-type-comedi-cmd">command data structure</link>
 is used to specify some <quote>behaviour</quote> of the acquisitions in
 a command.
@@ -1485,12 +1485,13 @@ this yet).)</emphasis>
 </para>
 
 <para>
-The <link linkend="insn-data-structure-insn">insn</link> field of the
+The <structfield><link linkend="insn-data-structure-insn">insn</link></structfield>
+field of the
 <link linkend="insn-data-structure">instruction data structure</link>
 has not been assigned yet.
 </para>
 <para>
-The <link linkend="insn-data-structure-chanspec">chanspec</link> field
+The <structfield><link linkend="insn-data-structure-chanspec">chanspec</link></structfield> field
 of the <link linkend="insn-data-structure">instruction data
 structure</link> is ignored.
 </para>
@@ -1529,12 +1530,12 @@ Analog Output Waveform Generation
 this yet).)</emphasis>
 </para>
 <para>
-The <link linkend="insn-data-structure-insn">insn</link> field of the
+The <structfield><link linkend="insn-data-structure-insn">insn</link></structfield> field of the
 <link linkend="insn-data-structure">instruction data structure</link>
 has not been assigned yet.
 </para>
 <para>
-The <link linkend="insn-data-structure-chanspec">chanspec</link> field
+The <structfield><link linkend="insn-data-structure-chanspec">chanspec</link></structfield> field
 of the <link linkend="insn-data-structure">instruction data
 structure</link> is ignored.
 </para>
@@ -1561,12 +1562,12 @@ Extended Triggering
 </para>
 
 <para>
-The <link linkend="insn-data-structure-insn">insn</link> field of the
+The <structfield><link linkend="insn-data-structure-insn">insn</link></structfield> field of the
 <link linkend="insn-data-structure">instruction data structure</link>
 has not been assigned yet.
 </para>
 <para>
-The <link linkend="insn-data-structure-chanspec">chanspec</link> field
+The <structfield><link linkend="insn-data-structure-chanspec">chanspec</link></structfield> field
 of the <link linkend="insn-data-structure">instruction data
 structure</link> is ignored.
 </para>
@@ -1610,7 +1611,7 @@ only be allowed with a properly configured extended trigger.
 
 <para>
 Extended triggers must use
-<link linkend="insn-data-structure-data">data[1]</link> as flags.  The
+<structfield><link linkend="insn-data-structure-data">data</link></structfield>[1] as flags.  The
 upper 16 bits are reserved and used only for flags that are common to
 all extended triggers.  The lower 16 bits may be defined by the
 particular type of extended trigger.
@@ -1618,7 +1619,7 @@ particular type of extended trigger.
 
 <para>
 Various types of extended triggers must use
-<link linkend="insn-data-structure-data">data[1]</link> to know which
+<structfield><link linkend="insn-data-structure-data">data</link></structfield>[1] to know which
 event the extended trigger will be assigned to in the command
 structure.  The possible values are an OR'd mask of the following:
 </para>
@@ -1665,18 +1666,18 @@ implements this feature.)
 </para>
 
 <para>
-The <link linkend="insn-data-structure-insn">insn</link> field of the
+The <structfield><link linkend="insn-data-structure-insn">insn</link></structfield> field of the
 <link linkend="insn-data-structure">instruction data structure</link>
 has not been assigned yet.
 </para>
 <para>
-The <link linkend="insn-data-structure-chanspec">chanspec</link> field
+The <structfield><link linkend="insn-data-structure-chanspec">chanspec</link></structfield> field
 of the <link linkend="insn-data-structure">instruction data
 structure</link> is ignored.
 </para>
 
 <para>
-The <link linkend="insn-data-structure-data">data</link> field
+The <structfield><link linkend="insn-data-structure-data">data</link></structfield> field
 of the <link linkend="insn-data-structure">instruction data
 structure</link> is used as follows:
 <variablelist spacing="compact">
@@ -1746,18 +1747,18 @@ Bitfield Pattern Matching Extended Trigger
 </para>
 
 <para>
-The <link linkend="insn-data-structure-insn">insn</link> field of the
+The <structfield><link linkend="insn-data-structure-insn">insn</link></structfield> field of the
 <link linkend="insn-data-structure">instruction data structure</link>
 has not been assigned yet.
 </para>
 <para>
-The <link linkend="insn-data-structure-chanspec">chanspec</link> field
+The <structfield><link linkend="insn-data-structure-chanspec">chanspec</link></structfield> field
 of the <link linkend="insn-data-structure">instruction data
 structure</link> is ignored.
 </para>
 
 <para>
-The <link linkend="insn-data-structure-data">data</link> field
+The <structfield><link linkend="insn-data-structure-data">data</link></structfield> field
 of the <link linkend="insn-data-structure">instruction data
 structure</link> is used as follows:
 </para>
@@ -1812,19 +1813,19 @@ Counter configuration
 </para>
 
 <para>
-The <link linkend="insn-data-structure-insn">insn</link> field of the
+The <structfield><link linkend="insn-data-structure-insn">insn</link></structfield> field of the
 <link linkend="insn-data-structure">instruction data structure</link>
 has not been assigned yet.
 </para>
 <para>
-The <link linkend="insn-data-structure-chanspec">chanspec</link> field
+The <structfield><link linkend="insn-data-structure-chanspec">chanspec</link></structfield> field
 of the <link linkend="insn-data-structure">instruction data
 structure</link> is used to specify which counter to use. (I.e., the
 counter is a &comedi; channel.)
 </para>
 
 <para>
-The <link linkend="insn-data-structure-data">data</link> field
+The <structfield><link linkend="insn-data-structure-data">data</link></structfield> field
 of the <link linkend="insn-data-structure">instruction data
 structure</link> is used as follows:
 </para>
@@ -1870,10 +1871,10 @@ or asynchronous mode (using
 input subdevices.
 The input signal for both modes is the accumulator.
 Commands on counter subdevices are almost always specified using
-<link linkend="command-data-struct-scan-begin-src">scan_begin_src</link>
+<structfield><link linkend="command-data-struct-scan-begin-src">scan_begin_src</link></structfield>
 = <constant><link linkend="trigother-event">TRIG_OTHER</link></constant>,
 with the counter configuration also serving as the extended configuration for
-the scan begin source.
+the <quote>scan begin</quote> source.
 </para>
 
 <para>
@@ -1901,18 +1902,18 @@ One source plus auxiliary counter configuration
 </para>
 
 <para>
-The <link linkend="insn-data-structure-insn">insn</link> field of the
+The <structfield><link linkend="insn-data-structure-insn">insn</link></structfield> field of the
 <link linkend="insn-data-structure">instruction data structure</link>
 has not been assigned yet.
 </para>
 <para>
-The <link linkend="insn-data-structure-chanspec">chanspec</link> field
+The <structfield><link linkend="insn-data-structure-chanspec">chanspec</link></structfield> field
 of the <link linkend="insn-data-structure">instruction data
 structure</link> is used to &hellip;
 </para>
 
 <para>
-The <link linkend="insn-data-structure-data">data</link> field
+The <structfield><link linkend="insn-data-structure-data">data</link></structfield> field
 of the <link linkend="insn-data-structure">instruction data
 structure</link> is used as follows:
 </para>
@@ -1940,8 +1941,8 @@ transitions of the source signals.
   <term>data[4]</term>
   <listitem>
 determine the primary source for the counter, similar to the
-<link linkend="command-data-struct-scan-begin-src">&hellip;_src</link> and the
-<link linkend="command-data-struct-scan-begin-arg">&hellip;_arg</link> fields
+<structfield><link linkend="command-data-struct-scan-begin-src">&hellip;_src</link></structfield> and the
+<structfield><link linkend="command-data-struct-scan-begin-arg">&hellip;_arg</link></structfield> fields
 used in the
 <link linkend="command-data-struct">command data structure</link>.
   </listitem>
