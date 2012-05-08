@@ -87,8 +87,8 @@
     
     <para>
       The functions
-      <link linkend="func-ref-comedi-to-physical"><function>comedi_to_physical</function></link>, <link linkend="func-ref-comedi-to-phys"><function>comedi_to_phys</function></link>,
-      <link linkend="func-ref-comedi-from-physical"><function>comedi_from_physical</function></link> and <link linkend="func-ref-comedi-from-phys"><function>comedi_from_phys</function></link>
+      <function><link linkend="func-ref-comedi-to-physical">comedi_to_physical</link></function>, <function><link linkend="func-ref-comedi-to-phys">comedi_to_phys</link></function>,
+      <function><link linkend="func-ref-comedi-from-physical">comedi_from_physical</link></function> and <function><link linkend="func-ref-comedi-from-phys">comedi_from_phys</link></function>
       are used to convert between &comedi;'s integer data and floating point numbers corresponding
       to physical values (voltages, etc.).
     </para>
@@ -111,9 +111,10 @@
     </programlisting>
     <para>
       The source code file for the above program can be found in
-      the comedilib source at demo/tut2.c and if installed as a package usually
-      at /usr/share/doc/libcomedi-dev/demo/ with all the other tutorial/demo
-      files.
+      the Comedilib source at <filename>demo/tut2.c</filename> and if
+      installed as a package usually at
+      <filename>/usr/share/doc/libcomedi-dev/demo/</filename> with all the
+      other tutorial/demo files.
     </para>
   </section>
 
@@ -153,7 +154,7 @@
     with the command <command>comedi_board_info -v</command>.
     </para> 
     <para>
-      The program <command>tut3.c</command> demonstrates the
+      The program <filename>demo/tut3.c</filename> demonstrates the
       asynchronous acquisition. The general strategy is always
       the same: first, we tell &comedi; all sampling parameters such as
       the sampling rate,
@@ -173,11 +174,10 @@
     </para>
     <itemizedlist>		  
       <listitem>
-	Create a command structure of type <link linkend="ref-type-comedi-cmd">comedi_cmd</link>
+        Create a command structure of type <type><link linkend="ref-type-comedi-cmd">comedi_cmd</link></type>
       </listitem>  
       <listitem>
-	Call the
-	function <link linkend="func-ref-comedi-get-cmd-generic-timed"><function>comedi_get_cmd_generic_timed</function></link>
+        Call the function <function><link linkend="func-ref-comedi-get-cmd-generic-timed">comedi_get_cmd_generic_timed</link></function>
 	to fill the command structure with your comedi device,
 	subdevice, sampling rate and number of channels.
       </listitem>
@@ -186,13 +186,13 @@
 	tells comedi which channels should be sampled in the background.
       </listitem>
       <listitem>
-	Call <link linkend="func-ref-comedi-command-test"><function>comedi_command_test</function></link> with your command structure. Comedi might modify your requested sampling rate and channels.
+        Call <function><link linkend="func-ref-comedi-command-test">comedi_command_test</link></function> with your command structure. Comedi might modify your requested sampling rate and channels.
       </listitem>
       <listitem>
-	Call <link linkend="func-ref-comedi-command-test"><function>comedi_command_test</function></link> again which now should return zero for success.
+        Call <function><link linkend="func-ref-comedi-command-test">comedi_command_test</link></function> again which now should return zero for success.
       </listitem>
       <listitem>
-	Call <link linkend="func-ref-comedi-command"><function>comedi_command</function></link> to start the asynchronous acquisition. From now on the kernel ringbuffer will be filled at the specified sampling rate.
+        Call <function><link linkend="func-ref-comedi-command">comedi_command</link></function> to start the asynchronous acquisition. From now on the kernel ringbuffer will be filled at the specified sampling rate.
       </listitem>
       <listitem>
 	Call periodically the standard
@@ -201,7 +201,10 @@
 	is running.
       </listitem>
       <listitem>
-	Convert the received data either into <link linkend="ref-type-lsampl-t">lsampl_t</link> or <link linkend="ref-type-sampl-t">sampl_t</link> depending on the subdevice flag SDF_LSAMPL.
+        Convert the received data either into
+        <type><link linkend="ref-type-lsampl-t">lsampl_t</link></type> or
+        <type><link linkend="ref-type-sampl-t">sampl_t</link></type> depending
+        on the subdevice flag <constant>SDF_LSAMPL</constant>.
       </listitem>
       <listitem>
 	Poll for data with <function>read</function> as long as it returns
@@ -211,7 +214,7 @@
     
     <para>
       The program below is a stripped down version of the
-      program <command>cmd.c</command> in the demo directory. To
+      program <filename>cmd.c</filename> in the demo directory. To
       compile it run:
     </para>
     <screen>
@@ -232,7 +235,7 @@
     </programlisting>
     <para>
       For advanced programmers the
-      function <link linkend="func-ref-comedi-get-buffer-contents"><function>comedi_get_buffer_contents</function></link>
+      function <function><link linkend="func-ref-comedi-get-buffer-contents">comedi_get_buffer_contents</link></function>
       is useful to check if there is actually data in the ringbuffer
       so that a call of <function>read</function> can be avoided for example
       when the data readout is called by a timer call-back function.
@@ -242,9 +245,10 @@
   <section>
     <title>Further examples</title>
     <para>
-      See the demo subdirectory of Comedilib for more example programs.
-      The directory contains
-      a README file with descriptions of the various demo programs.
+      See the <filename>demo</filename> subdirectory of Comedilib
+      for more example programs.  The directory contains a
+      <filename>README</filename> file with descriptions of the various
+      demo programs.
     </para>
   </section>
   
