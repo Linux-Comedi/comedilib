@@ -7,4 +7,5 @@
 	<xsl:param name="generate.section.toc.level" select="4"/>
 	<xsl:param name="html.stylesheet">comedilib.css</xsl:param>
 	<xsl:param name="funcsynopsis.style">ansi</xsl:param>
+	<xsl:param name="function.parens" select="1"/>
 </xsl:stylesheet>
