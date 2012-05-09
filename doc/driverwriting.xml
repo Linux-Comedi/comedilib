@@ -11,13 +11,13 @@ Writing a &comedi; driver
 </title>
 
 <para>
-This Section explains the most important implementations aspects of
+This section explains the most important implementations aspects of
 the &comedi; device drivers. It tries to give the interested device
 driver writer an overview of the different steps required to write a
 new device driver.
 </para>
 <para>
-This Section does <emphasis>not</emphasis> explain all implementation
+This section does <emphasis>not</emphasis> explain all implementation
 details of the &comedi; software itself: &comedi; has once and for
 all solved lots of boring but indispensable infrastructural things,
 such as: timers, management of which drivers
@@ -36,8 +36,8 @@ know the answers to the following questions:
 <listitem>
 <para>
 How does the
-<link linkend="userkernelhow">communication</link> between user space
-and kernel space work?
+<link linkend="userkernelhow">communication</link> between user-space
+and kernel-space work?
 </para>
 </listitem>
 
@@ -74,13 +74,13 @@ manufacturers all use their own design and nomenclature.
 
 <section id="userkernelhow">
 <title>
-Communication user space-kernel space
+Communication user-space &mdash; kernel-space
 </title>
 
 <para>
-In user space, you interact with the functions implemented in the
-<filename role="directory">/usr/src/comedilib</filename> directory. Most
-of the device driver core of the Comedilib library is found in
+In user-space, you interact with the functions implemented in the
+Comedilib library.
+Most of the device driver core of the Comedilib library is found in
 <filename role="directory">lib</filename> subdirectory.
 </para>
 <para>
@@ -89,27 +89,27 @@ All user-space &comedi;
 <link linkend="commandsstreaming">commands</link>
 are transmitted to kernel space through a traditional
 <function>ioctl</function> system call.
-(See <filename>/usr/src/comedilib/lib/ioctl.c</filename>.)
-The user space information command is <emphasis>encoded</emphasis> as
+(See <filename>lib/ioctl.c</filename> in Comedilib.)
+The user-space information command is <emphasis>encoded</emphasis> as
 a number in the <function>ioctl</function> call, and decoded in the
-kernel space library.  There, they are executed by their kernel-space
+kernel-space library.  There, they are executed by their kernel-space
 counterparts.  This is done in the
-<filename>/usr/src/comedi/comedi/comedi_fops.c</filename> file: the
-<function>comedi_ioctl()</function> function processes the results of
+<filename>comedi_fops.c</filename> file in the Comedi sources: the
+<function>comedi_unlocked_ioctl</function> function processes the results of
 the <function>ioctl</function> system call, interprets its contents,
-and then calls the corresponding kernel space
+and then calls the corresponding kernel-space
 <function>do_&hellip;_ioctl</function> function(s).
 For example, a &comedi;
 <link linkend="instructions">instruction</link> is further processed
-by the <function>do_insn_ioctl()</function>function. (Which, in turn,
-uses <function>parse_insn()</function> for further detailed processing.)
+by the <function>do_insn_ioctl</function> function. (Which, in turn,
+uses <function>parse_insn</function> for further detailed processing.)
 </para>
 <para>
 The data corresponding to instructions and commands is transmitted
-with the <function>copy_from_user()</function> system call;
-acquisition data captured by the interface card passes the kernel-user
-space boundary with the help of a <function>copy_to_user()</function>
-system call.
+with the <function>copy_from_user</function> function;
+acquisition data captured by the interface card passes the
+kernel/user-space boundary with the help of a <function>copy_to_user</function>
+function.
 </para>
 
 </section>
@@ -144,7 +144,7 @@ RTLinux/Free, and spinlocks for atomic sections.
 <listitem>
 <para>
 <filename>include/linux/comedilib.h</filename>: the header file for
-the kernel library of &comedi;.
+the kernel library of &comedi; (<systemitem>kcomedilib</systemitem> module).
 </para>
 </listitem>
 
@@ -152,9 +152,7 @@ the kernel library of &comedi;.
 </para>
 <para>
 From all the relevant &comedi; device driver code that is found in the
-<filename role="directory">/usr/src/comedi/comedi</filename> directory
-(<emphasis>if</emphasis> the &comedi; source has been installed in its
-normal <filename role="directory">/usr/src/comedi</filename> location),
+<filename role="directory">comedi</filename> kernel module source directory,
 the <emphasis role="strong">generic</emphasis> functionality is
 contained in two parts:
  <itemizedlist>
@@ -180,11 +178,11 @@ interface accessible through the
 </para>
 <para>
 There are some differences in what is possible and/or needed
-in kernel space and in user space, so the functionalities offered in
+in kernel-space and in user-space, so the functionalities offered in
 <filename role="directory">kcomedilib</filename> are not an exact copy
 of the user-space library. For example, locking, interrupt handling,
 real-time execution, callback handling, etc., are only available in
-kernel space.
+kernel-space.
  </para>
  <para>
 Most drivers don't make use (yet) of these real-time functionalities.
@@ -211,11 +209,11 @@ typedef struct comedi_async_struct     <link linkend="comediasync">comedi_async<
 typedef struct comedi_driver_struct    <link linkend="comedidriver">comedi_driver</link>;
 </programlisting>
 They can be found in
-<filename>/usr/src/comedi/include/linux/comedidev.h</filename>.
+<filename>include/linux/comedidev.h</filename>.
 Most of the fields are filled in by the &comedi; infrastructure, but
 there are still quite a handful that your driver must provide or use.
 As for the user-level &comedi;, each of the hierarchical layers has
-its own data structures: channel (<function>comedi_lrange</function>),
+its own data structures: range (<type>comedi_lrange</type>),
 subdevice, and device.
 </para>
 <para>
@@ -227,9 +225,9 @@ different meaning: they encode the interaction with the
 <emphasis>hardware</emphasis>, not with the <emphasis>user</emphasis>.
 </para>
 <para>
-However, the <link linkend="ref-type-comedi-insn">comedi_insn</link>
-and <link linkend="ref-type-comedi-cmd">comedi_cmd</link>
-data structures are shared between user space and kernel space: this
+However, the <type><link linkend="ref-type-comedi-insn">comedi_insn</link></type>
+and <type><link linkend="ref-type-comedi-cmd">comedi_cmd</link></type>
+data structures are shared between user-space and kernel-space: this
 should come as no surprise, since these data structures contain all
 information that the user-space program must transfer to the
 kernel-space driver for each acquisition.
@@ -239,17 +237,17 @@ In addition to these data entities that are also known at the user
 level (device, sub-device, channel), the device driver level provides
 two more data structures which the application programmer doesn't get
 in touch with: the data structure
-<link linkend="comedidriver">comedi_driver</link>
+<type><link linkend="comedidriver">comedi_driver</link></type>
 that stores the device driver information that is relevant at the
 operating system level, and the data structure
-<link linkend="comediasync">comedi_async</link> that stores the
+<type><link linkend="comediasync">comedi_async</link></type> that stores the
 information about all <emphasis>asynchronous</emphasis> activities
 (interrupts, callbacks and events).
 </para>
 
 <section id="comedilrange">
 <title>
-<function>comedi_lrange</function>
+<type>comedi_lrange</type>
 </title>
 <para>
 The channel information is simple, since it contains only the signal
@@ -267,7 +265,7 @@ struct comedi_lrange_struct{
 
 <section id="comedisubdevice">
 <title>
-<function>comedi_subdevice</function>
+<type>comedi_subdevice</type>
 </title>
 <para>
 The subdevice is the smallest &comedi; entity that can be used for
@@ -317,8 +315,8 @@ struct comedi_subdevice_struct{
   unsigned int state;
 };
 </programlisting>
-The function pointers <function>(*insn_read)</function> &hellip;
-<function>(*cancel)</function> .
+The function pointers <structfield>insn_read</structfield> &hellip;
+<structfield>cancel</structfield> .
 offer (pointers to) the standardized
 <link linkend="functionreference">user-visible API</link>
 that every subdevice should offer; every device driver has to fill
@@ -327,12 +325,12 @@ in these functions with their board-specific implementations.
 definition, not show up in the device driver data structures.)
 </para>
 <para>
-The <function>buf_change()</function> and <function>munge()</function>
-functions offer functionality that is not visible to the user and for
+The <structfield>buf_change</structfield> and <structfield>munge</structfield>
+function pointers offer functionality that is not visible to the user and for
 which the device driver writer must provide a board-specific
 implementation:
-<function>buf_change()</function> is called when a change in the
-data buffer requires handling; <function>munge()</function> transforms
+<function>buf_change</function> is called when a change in the
+data buffer requires handling; <function>munge</function> transforms
 different bit-representations of DAQ values, for example from
 <emphasis>unsigned</emphasis> to <emphasis>2's complement</emphasis>.
 </para>
@@ -341,7 +339,7 @@ different bit-representations of DAQ values, for example from
 
 <section id="comedidevice">
 <title>
-<function>comedi_device</function>
+<type>comedi_device</type>
 </title>
 
 <para>
@@ -386,7 +384,7 @@ struct comedi_device_struct{
 
 <section id="comediasync">
 <title>
-<function>comedi_async</function>
+<type>comedi_async</type>
 </title>
 
 <para>
@@ -433,7 +431,7 @@ struct comedi_async_struct{
 
 <section id="comedidriver">
 <title>
-<function>comedi_driver</function>
+<type>comedi_driver</type>
 </title>
 
 <para>
@@ -512,7 +510,7 @@ Board-specific functionality
 </title>
 
 <para>
-The <filename role="directory">/usr/src/comedi/comedi/drivers</filename>
+The <filename role="directory">comedi/drivers</filename>
 subdirectory contains
 the <emphasis role="strong">board-specific</emphasis> device driver
 code. Each new card must get an entry in this directory.
@@ -558,7 +556,7 @@ all properties of a device and its subdevices are defined, and filled
 in in the generic &comedi; data structures. As part of this, pointers
 to the low level instructions being supported by the subdevice have to
 be set, which define the basic functionality. In somewhat more detail,
-the <function>mydriver_attach()</function> function must:
+the <function>mydriver_attach</function> function must:
 <itemizedlist>
 
 <listitem>
@@ -585,15 +583,15 @@ hardware FIFO, etc.).
 
 <listitem>
 <para>
-return 1, indicating success. If there were any errors along the way,
-you should return the appropriate error number.  If an error is
-returned, the <function>mydriver_detach()</function> function is
-called.  The <function>mydriver_detach()</function> function should
+return <literal>1</literal>, indicating success. If there were any errors along the way,
+you should return the appropriate (negative) error number.  If an error is
+returned, the <function>mydriver_detach</function> function is
+called.  The <function>mydriver_detach</function> function should
 check any resources that may have been allocated and release them as
 necessary.  The &comedi; core frees
-<function>dev->subdevices</function> and
-<function>dev->private</function>, so this does not need to be done in
-<function>detach</function>.
+<structfield>dev->subdevices</structfield> and
+<structfield>dev->private</structfield>, so this does not need to be done in
+<function>mydriver_detach</function>.
 </para>
 </listitem>
 
@@ -609,7 +607,7 @@ handling routines, and/or callback routines.
 Typically, you will be able to implement most of
 the above-mentioned functionality by
 <emphasis>cut-and-paste</emphasis> from already existing drivers. The
-<function>mydriver_attach()</function> function needs most of your
+<function>mydriver_attach</function> function needs most of your
 attention, because it must correctly define and allocate the (private
 and generic) data structures that are needed for this device. That is,
 each sub-device and each channel must get appropriate data fields, and
@@ -618,16 +616,17 @@ an appropriate initialization. The good news, of course, is that
 well with almost all DAQ functionalities found on interface cards.
 These can be found in the
 <link linkend="comedikernelgeneric">header files</link> of the
-<filename role="directory">/usr/src/comedi/include/linux/</filename>
+<filename role="directory">include/linux/</filename>
 directory.
 </para>
 <para>
-Drivers for digital IOs should implement the following functions:
+Drivers with digital I/O subdevices should implement the following functions,
+setting the function pointers in the <type>comedi_subdevice</type>:
 <itemizedlist>
 
 <listitem>
 <para>
-<function>insn_bits()</function>: drivers set this if they have a
+<function>insn_bits</function>: drivers set this if they have a
 function that supports reading and writing multiple bits in a digital
 I/O subdevice at the same time.  Most (if not all) of the drivers use
 this interface instead of insn_read and insn_write for DIO subdevices.
@@ -636,7 +635,7 @@ this interface instead of insn_read and insn_write for DIO subdevices.
 
 <listitem>
 <para>
-<function>insn_config()</function>: implements INSN_CONFIG
+<function>insn_config</function>: implements <constant>INSN_CONFIG</constant>
 instructions.  Currently used for configuring the direction of digital
 I/O lines, although will eventually be used for generic configuration
 of drivers that is outside the scope of the currently defined &comedi;
@@ -646,27 +645,28 @@ interface.
 
 </itemizedlist>
 Finally, the device driver writer must implement the
-<function>read</function> and <function>write</function> functions for
+<function>insn_read</function> and <function>insn_write</function> functions for
 the analog channels on the card:
 <itemizedlist>
 
 <listitem>
 <para>
-<function>insn_read()</function>: acquire the inputs on the board and
+<function>insn_read</function>: acquire the inputs on the board and
 transfer them to the software buffer of the driver.
 </para>
 </listitem>
 
 <listitem>
 <para>
-<function>insn_write()</function>: transfer data from the software
+<function>insn_write</function>: transfer data from the software
 buffer to the card, and execute the appropriate output conversions.
 </para>
 </listitem>
 
 </itemizedlist>
 In some drivers, you want to catch interrupts, and/or want to use the
-<link linkend="insn-inttrig">INSN_INTTRIG</link> instruction. In this
+<constant><link linkend="insn-inttrig">INSN_INTTRIG</link></constant>
+instruction. In this
 case, you must provide and register these
 <link linkend="drivercallbacks">callback</link> functions.
 </para>
@@ -722,7 +722,7 @@ hardware interrupt routine.
 <listitem>
 <para>
 Another driver-supplied callback function is executed when the user
-program launches an <link linkend="insn-inttrig">INSN_INTTRIG</link>
+program launches an <constant><link linkend="insn-inttrig">INSN_INTTRIG</link></constant>
 instruction. This event handling is executed
 <emphasis>synchronously</emphasis> with the execution of the
 triggering instruction.
@@ -741,14 +741,14 @@ statements such as this one:
    s->async->events |= COMEDI_CB_EOA | COMEDI_CB_ERROR
 </programlisting>
 It fills in the bits corresponding to particular events in the
-<link linkend="comediasync">comedi_async</link> data structure.
+<type><link linkend="comediasync">comedi_async</link></type> data structure.
 The possible event bits are:
 <itemizedlist>
 
 <listitem>
 <para>
 <anchor id="comedi-cb-eoa"/>
-<parameter>COMEDI_CB_EOA</parameter>: execute the callback at the
+<constant>COMEDI_CB_EOA</constant>: execute the callback at the
 <quote>End-Of-Acquisition</quote> (or <quote>End-Of-Output</quote>).
 </para>
 </listitem>
@@ -756,7 +756,7 @@ The possible event bits are:
 <listitem>
 <para>
 <anchor id="comedi-cb-eos"/>
-<parameter>COMEDI_CB_EOS</parameter>: execute the callback at the
+<constant>COMEDI_CB_EOS</constant>: execute the callback at the
 <quote>End-Of-Scan</quote>.
 </para>
 </listitem>
@@ -764,7 +764,7 @@ The possible event bits are:
 <listitem>
 <para>
 <anchor id="comedi-cb-overflow"/>
-<parameter>COMEDI_CB_OVERFLOW</parameter>: execute the callback when a
+<constant>COMEDI_CB_OVERFLOW</constant>: execute the callback when a
 buffer overflow or underflow has occurred.
 </para>
 </listitem>
@@ -772,7 +772,7 @@ buffer overflow or underflow has occurred.
 <listitem>
 <para>
 <anchor id="comedi-cb-error"/>
-<parameter>COMEDI_CB_ERROR</parameter>: execute the callback at the
+<constant>COMEDI_CB_ERROR</constant>: execute the callback at the
 occurrence of an (undetermined) error.
 </para>
 </listitem>
@@ -819,9 +819,10 @@ and has no interrupts available.
 <listitem>
 <para>
 Drivers are to have absolutely <emphasis role="strong">no</emphasis>
-global variables, mainly because the existence of global variables
+global variables (apart from read-only, constant data, or data structures
+shared by all devices), mainly because the existence of global variables
 immediately negates any possibility of using the driver for two
-devices. The pointer <function>dev->private</function> should be used
+devices. The pointer <structfield>dev->private</structfield> should be used
 to point to a structure containing any additional variables needed by
 a driver/device combination.
 </para>
@@ -830,9 +831,9 @@ a driver/device combination.
 <listitem>
 <para>
 Drivers should report errors and warnings via the
-<function>comedi_error()</function> function.
+<function>comedi_error</function> function.
 (This is <emphasis>not</emphasis> the same function as the user-space
-<link linkend="func-ref-comedi-perror">comedi_perror()</link> function.)
+<function><link linkend="func-ref-comedi-perror">comedi_perror</link></function> function.)
 
 </para>
 </listitem>
@@ -860,14 +861,14 @@ that you call it <quote>mydriver.c</quote>
 
 <listitem>
 <para>
-Put your new driver into <quote>comedi/drivers/mydriver.c</quote>.
+Put your new driver into <filename>comedi/drivers/mydriver.c</filename>.
 </para>
 </listitem>
 
 <listitem>
 <para>
-Edit <quote>comedi/drivers/Makefile.am</quote> and add <quote>mydriver.ko</quote>
-to the <quote>module_PROGRAMS</quote> list.  Also add a line
+Edit <filename>comedi/drivers/Makefile.am</filename> and add <literal>mydriver.ko</literal>
+to the <literal>module_PROGRAMS</literal> list.  Also add a line
 <programlisting>
 mydriver_ko_SOURCES = mydriver.c
 </programlisting>
@@ -877,10 +878,10 @@ in the alphabetically appropriate place.
 
 <listitem>
 <para>
-Run ./autogen.sh in the top-level comedi directory.  You will
+Run <command>./autogen.sh</command> in the top-level comedi directory.  You will
 need to have (a recent version of) autoconf and automake
-installed to successfully run autogen.sh.  Afterwards, your driver will
-be built along with the rest of the drivers when you 'make'.
+installed to successfully run <command>autogen.sh</command>.  Afterwards, your driver will
+be built along with the rest of the drivers when you run <command>make</command>.
 </para>
 </listitem>
 
@@ -888,10 +889,11 @@ be built along with the rest of the drivers when you 'make'.
 <para>
 If you want to have your driver included in the &comedi; distribution
 (you <emphasis>definitely</emphasis> want to :-) ) send it to
-David Schleef <address><email>ds@schleef.org</email></address> or
-Frank Hess <address><email>fmhess@users.sourceforge.net</email></address>
-for review and integration.  Note your work must be licensed under terms
-compatible with the GNU GPL to be distributed as a part of Comedi.
+the &comedi; mailing list
+for review and integration.  See the top-level <filename>README</filename>
+for details of the &comedi; mailing list.)
+Note your work must be licensed under terms
+compatible with the GNU GPL to be distributed as a part of &comedi;.
 </para>
 </listitem>
 </itemizedlist>
