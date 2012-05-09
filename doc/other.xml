@@ -1270,7 +1270,8 @@ Sometimes, your input channels change slowly enough that
 you are able to average many successive input values to get a
 more accurate measurement of the actual value.  In general,
 the more samples you average, the better your estimate
-gets, roughly by a factor of <function>sqrt</function>(number_of_samples).
+gets, roughly by a factor of
+<function>sqrt<parameter>number_of_samples</parameter></function>.
 Obviously, there are limitations to this:
 </para>
 
