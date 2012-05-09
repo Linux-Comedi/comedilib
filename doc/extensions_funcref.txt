@@ -7,44 +7,49 @@ Param: unsigned int source
 Status: alpha
 Description:
  This function arms a subdevice.  It may, for example, arm a counter
- to begin counting.  The <parameter>source</parameter> parameter specifies
+ to begin counting.  The <parameter class="function">source</parameter>
+ parameter specifies
  what source should trigger the subdevice to begin.  The possible
  sources are driver-dependant.  This function is only useable
- on subdevices that provide support for the INSN_CONFIG_ARM configuration
+ on subdevices that provide support for the
+ <constant>INSN_CONFIG_ARM</constant> configuration
  instruction.
 Returns:
- 0 on success, -1 on error.
+ <literal>0</literal> on success, <literal>-1</literal> on error.
 
 Function: comedi_get_clock_source -- get master clock for a subdevice
 Retval: int
 Param: comedi_t * device
 Param: unsigned int subdevice
 Param: unsigned int channel
-Param: unsigned int *clock
-Param: unsigned int *period_ns
+Param: unsigned int * clock
+Param: unsigned int * period_ns
 Status: alpha
 Description:
  This function queries the master clock for a subdevice, as
  set by
- <link linkend="func-ref-comedi-set-clock-source">comedi_set_clock_source()</link>.
+ <function><link linkend="func-ref-comedi-set-clock-source">comedi_set_clock_source</link></function>.
  The currently configured master clock
- will be written to *<parameter>clock</parameter>.
+ will be written to
+ <code language="C">*<parameter class="function">clock</parameter></code>.
  The possible values and their corresponding clocks are
  driver-dependant.
- The frequency of the clock in nanoseconds (or zero if it is unknown)
+ The period of the clock in nanoseconds (or zero if it is unknown)
  will be written to
- *<parameter>period_ns</parameter>.
+ <code language="C">*<parameter class="function">period_ns</parameter></code>.
  If the subdevice does not support configuring its master clocks
- on a per-channel basis, then the <parameter>channel</parameter>
+ on a per-channel basis, then the <parameter class="function">channel</parameter>
  parameter will be ignored.
 
- It is safe to pass NULL pointers as the <parameter>clock</parameter> or
- <parameter>period_ns</parameter>
+ It is safe to pass <constant>NULL</constant> pointers as the
+ <parameter class="function">clock</parameter> or
+ <parameter class="function">period_ns</parameter>
  parameters.  This function is only useable
- on subdevices that provide support for the INSN_CONFIG_GET_CLOCK_SOURCE
+ on subdevices that provide support for the
+ <constant>INSN_CONFIG_GET_CLOCK_SOURCE</constant>
  configuration instruction.
 Returns:
- 0 on success, -1 on error.
+ <literal>0</literal> on success, <literal>-1</literal> on error.
 
 Function: comedi_get_gate_source -- get gate for a subdevice
 Retval: int
@@ -52,24 +57,25 @@ Param: comedi_t * device
 Param: unsigned int subdevice
 Param: unsigned int channel
 Param: unsigned int gate_index
-Param: unsigned int *gate_source
+Param: unsigned int * gate_source
 Status: alpha
 Description:
- This function queries the gate for a subdevice, as
- set by
- <link linkend="func-ref-comedi-set-gate-source">comedi_set_gate_source()</link>.
+ This function queries the gate for a subdevice, as set by
+ <function><link linkend="func-ref-comedi-set-gate-source">comedi_set_gate_source</link></function>.
  The currently configured gate source
- will be written to *<parameter>gate_source</parameter>.
+ will be written to
+ <code language="C">*<parameter class="function">gate_source</parameter></code>.
  The possible values and their corresponding gates are
  driver-dependant.  If the subdevice does not
  support configuring its gates on a per-channel basis, then the
- <parameter>channel</parameter> parameter will be ignored.
+ <parameter class="function">channel</parameter> parameter will be ignored.
 
  This function is only useable
- on subdevices that provide support for the INSN_CONFIG_GET_GATE_SOURCE
+ on subdevices that provide support for the
+ <constant>INSN_CONFIG_GET_GATE_SOURCE</constant>
  configuration instruction.
 Returns:
- 0 on success, -1 on error.
+ <literal>0</literal> on success, <literal>-1</literal> on error.
 
 Function: comedi_get_hardware_buffer_size -- get size of subdevice's hardware buffer
 Retval: int
@@ -77,40 +83,44 @@ Param: comedi_t *device
 Param: unsigned int subdevice
 Param: <link linkend="ref-enum-comedi-io-direction">enum comedi_io_direction</link> direction
 Description:
-	This functions returns the number of bytes the subdevice can hold in it's hardware buffer.
-	The term "hardware buffer" refers to any fifos, etc. on the acquisition board itself which
-	are used during streaming commands.  This does not include the buffer maintained by
-	the comedi kernel module in host memory, whose size may be queried by
-	<link linkend="func-ref-comedi-get-buffer-size"><function>comedi_get_buffer_size</function></link>.
-	The <parameter>direction</parameter> parameter of type
-	<link linkend="ref-enum-comedi-io-direction">enum comedi_io_direction</link>
-	should be set to COMEDI_INPUT to query the input buffer size (e.g., the buffer of an analog
-	input subdevice), or COMEDI_OUTPUT to query the output buffer size (e.g., the buffer of
-	an analog output).
+ This function returns the number of bytes the subdevice can hold in it's hardware buffer.
+ The term <quote>hardware buffer</quote> refers to any FIFOs, etc. on the acquisition board itself which
+ are used during streaming commands.  This does not include the buffer maintained by
+ the comedi kernel module in host memory, whose size may be queried by
+ <function><link
+ linkend="func-ref-comedi-get-buffer-size">comedi_get_buffer_size</link></function>.
+ The <parameter class="function">direction</parameter> parameter of type
+ <type><link linkend="ref-enum-comedi-io-direction">enum
+ comedi_io_direction</link></type>
+ should be set to <constant>COMEDI_INPUT</constant> to query the input buffer size (e.g., the buffer of an analog
+ input subdevice), or <constant>COMEDI_OUTPUT</constant> to query the output buffer size (e.g., the buffer of
+ an analog output).
 Returns:
-	Number of bytes, or -1 on error.
+ Hardware buffer size in bytes, or <literal>-1</literal> on error.
 
 Function: comedi_get_routing -- get routing for an output
 Retval: int
 Param: comedi_t * device
 Param: unsigned int subdevice
 Param: unsigned int channel
-Param: unsigned int *routing
+Param: unsigned int * routing
 Status: alpha
 Description:
  This function queries the routing for an output, as
  set by
- <link linkend="func-ref-comedi-set-routing">comedi_set_routing()</link>.
+ <function><link linkend="func-ref-comedi-set-routing">comedi_set_routing</link></function>.
  The currently configured routing
- will be written to *<parameter>routing</parameter>.
+ will be written to
+ <code language="C">*<parameter class="function">routing</parameter></code>.
  The possible values and their corresponding routings are
  driver-dependant.
 
  This function is only useable
- on subdevices that provide support for the INSN_CONFIG_GET_ROUTING
+ on subdevices that provide support for the
+ <constant>INSN_CONFIG_GET_ROUTING</constant>
  configuration instruction.
 Returns:
- 0 on success, -1 on error.
+ <literal>0</literal> on success, <literal>-1</literal> on error.
 
 Function: comedi_reset -- reset a subdevice
 Retval: int
@@ -119,10 +129,11 @@ Param: unsigned int subdevice
 Status: alpha
 Description:
  This function resets a subdevice.  It is only useable
- on subdevices that provide support for the INSN_CONFIG_RESET configuration
+ on subdevices that provide support for the
+ <constant>INSN_CONFIG_RESET</constant> configuration
  instruction.
 Returns:
- 0 on success, -1 on error.
+ <literal>0</literal> on success, <literal>-1</literal> on error.
 
 Function: comedi_set_clock_source -- set master clock for a subdevice
 Retval: int
@@ -133,29 +144,31 @@ Param: unsigned int clock
 Param: unsigned int period_ns
 Status: alpha
 Description:
- This function selects a master clock for a subdevice.  The <parameter>clock</parameter>
+ This function selects a master clock for a subdevice.  The <parameter
+ class="function">clock</parameter>
  parameter selects the master clock, and is driver-dependant.  
  If the subdevice does not support configuring its master clocks on a
- per-channel basis, then the <parameter>channel</parameter> parameter
+ per-channel basis, then the <parameter class="function">channel</parameter> parameter
  will be ignored.
- The <parameter>period_ns</parameter>
+ The <parameter class="function">period_ns</parameter>
  parameter specifies the clock's period in nanoseconds.  It may left unspecified by using
  a value of zero.  Drivers will ignore the clock period if they already
- know what the clock period should be for the specified clock (i.e. for an
+ know what the clock period should be for the specified clock (e.g. for an
  on-board 20MHz oscillator).  Certain boards which use a phase-locked loop to
- synchronize to external clock sources must be told the frequency of the external
+ synchronize to external clock sources must be told the period of the external
  clock. Specifying a clock period for an external clock may also allow
- the driver to support TRIG_TIMER sources in commands while
+ the driver to support <constant>TRIG_TIMER</constant> sources in commands while
  using the external clock.
 
- The clock may be queried with the <link linkend="func-ref-comedi-get-clock-source">comedi_get_clock_source()</link>
+ The clock may be queried with the
+ <function><link linkend="func-ref-comedi-get-clock-source">comedi_get_clock_source</link></function>
  function.
 
  This function is only useable
- on subdevices that provide support for the INSN_CONFIG_SET_CLOCK_SOURCE
- configuration instruction.
+ on subdevices that provide support for the
+ <constant>INSN_CONFIG_SET_CLOCK_SOURCE</constant> configuration instruction.
 Returns:
- 0 on success, -1 on error.
+ <literal>0</literal> on success, <literal>-1</literal> on error.
 
 Function: comedi_set_counter_mode -- change mode of a counter subdevice
 Retval: int
@@ -166,17 +179,17 @@ Param: unsigned int mode
 Status: alpha
 Description:
  This function configures a counter subdevice.  The meaning of the
- <parameter>mode</parameter> parameter is driver-dependent.
+ <parameter class="function">mode</parameter> parameter is driver-dependent.
  If the subdevice does not
  support configuring its mode on a per-channel basis, then the
- <parameter>channel</parameter>
+ <parameter class="function">channel</parameter>
  parameter will be ignored.
 
  It is only useable
- on subdevices that provide support for the INSN_CONFIG_SET_COUNTER_MODE
- configuration instruction.
+ on subdevices that provide support for the
+ <constant>INSN_CONFIG_SET_COUNTER_MODE</constant> configuration instruction.
 Returns:
- 0 on success, -1 on error.
+ <literal>0</literal> on success, <literal>-1</literal> on error.
 
 Function: comedi_set_filter -- select a filter for a subdevice
 Retval: int
@@ -192,14 +205,14 @@ Description:
  noise from causing unwanted transitions on the digital inputs.  This function can
  tell the hardware which deglitching filter to use, or to use none at all.
 
- The <parameter>filter</parameter>
+ The <parameter class="function">filter</parameter>
  parameter selects which of the subdevice's filters to use, and is driver-dependant.
 
  This function is only useable
- on subdevices that provide support for the INSN_CONFIG_FILTER
- configuration instruction.
+ on subdevices that provide support for the
+ <constant>INSN_CONFIG_FILTER</constant> configuration instruction.
 Returns:
- 0 on success, -1 on error.
+ <literal>0</literal> on success, <literal>-1</literal> on error.
 
 Function: comedi_set_gate_source -- select gate source for a subdevice
 Retval: int
@@ -210,23 +223,26 @@ Param: unsigned int gate_index
 Param: unsigned int gate_source
 Status: alpha
 Description:
- This function selects a gate source for a subdevice.  The <parameter>gate_index</parameter>
+ This function selects a gate source for a subdevice.  The
+ <parameter class="function">gate_index</parameter>
  parameter selects which gate is being configured, should the subdevice have
  multiple gates.  It takes a value
  from 0 to N-1 for a subdevice with N different gates.
- The <parameter>gate_source</parameter> parameter selects which signal you wish to
+ The <parameter class="function">gate_source</parameter> parameter selects which signal you wish to
  use as
  the gate, and is also driver-dependent.  If the subdevice does not
  support configuring its gates on a per-channel basis, then the
- <parameter>channel</parameter> parameter will be ignored.
+ <parameter class="function">channel</parameter> parameter will be ignored.
 
- You may query the gate source with the <link linkend="func-ref-comedi-get-gate-source">comedi_get_gate_source()</link>
+ You may query the gate source with the
+ <function><link linkend="func-ref-comedi-get-gate-source">comedi_get_gate_source</link></function>
  function.
  This function is only useable
- on subdevices that provide support for the INSN_CONFIG_SET_GATE_SOURCE
+ on subdevices that provide support for the
+ <constant>INSN_CONFIG_SET_GATE_SOURCE</constant>
  configuration instruction.
 Returns:
- 0 on success, -1 on error.
+ <literal>0</literal> on success, <literal>-1</literal> on error.
 
 Function: comedi_set_other_source -- select source signal for something other than a gate or clock
 Retval: int
@@ -238,27 +254,33 @@ Param: unsigned int source
 Status: alpha
 Description:
  This function allows selection of a source signal for something on a subdevice
- other than a gate (which uses comedi_set_gate_source()) or a clock (which uses
- comedi_set_clock_source()).  The <parameter>other</parameter> parameter selects
- which "other" we are configuring, and is driver-dependent.  The
- <parameter>source</parameter> selects the source we which to use for the
- "other".  If the subdevice does not
- support configuring its "other" sources on a per-channel basis, then the
- <parameter>channel</parameter>
+ other than a gate (which uses
+ <function><link
+ linkend="func-ref-comedi-set-gate-source">comedi_set_gate_source</link></function>)
+ or a clock (which uses
+ <function><link
+ linkend="func-ref-comedi-set-clock-source">comedi_set_clock_source</link></function>).
+ The <parameter class="function">other</parameter> parameter selects
+ which <quote>other</quote> we are configuring, and is driver-dependent.  The
+ <parameter class="function">source</parameter> parameter selects the source
+ we which to use for the <quote>other</quote>.  If the subdevice does not
+ support configuring its <quote>other</quote> sources on a per-channel basis,
+ then the <parameter class="function">channel</parameter>
  parameter will be ignored.
 
  As an example, this function is used to select which PFI digital input channels
  should be used as the A/B/Z signals when running a counter on an NI M-Series board as
- a quadrature encoder.  The <parameter>other</parameter> parameter selects either the A, B,
- or Z signal, and the <parameter>source</parameter> parameter is used to specify
+ a quadrature encoder.  The <parameter class="function">other</parameter> parameter selects either the A, B,
+ or Z signal, and the <parameter class="function">source</parameter> parameter is used to specify
  which PFI digital input channel the external A, B, or Z signal is
  physically connected to.
 
  This function is only useable
- on subdevices that provide support for the INSN_CONFIG_SET_OTHER_SOURCE
+ on subdevices that provide support for the
+ <constant>INSN_CONFIG_SET_OTHER_SOURCE</constant>
  configuration instruction.
 Returns:
- 0 on success, -1 on error.
+ <literal>0</literal> on success, <literal>-1</literal> on error.
 
 Function: comedi_set_routing -- select a routing for an output
 Retval: int
@@ -270,14 +292,16 @@ Status: alpha
 Description:
  This function configures a mutiplexed output channel which can
  output a variety of different signals (such as NI's RTSI and PFI lines).
- The <parameter>routing</parameter>
+ The <parameter class="function">routing</parameter>
  parameter selects which signal should be routed to appear on the
  selected output channel, and is driver-dependant.
 
  The routing may be queried with the
- <link linkend="func-ref-comedi-get-routing">comedi_get_routing()</link> function.
+ <function><link linkend="func-ref-comedi-get-routing">comedi_get_routing</link></function>
+ function.
  This function is only useable
- on subdevices that provide support for the INSN_CONFIG_SET_ROUTING
+ on subdevices that provide support for the
+ <constant>INSN_CONFIG_SET_ROUTING</constant>
  configuration instruction.
 Returns:
- 0 on success, -1 on error.
+ <literal>0</literal> on success, <literal>-1</literal> on error.
