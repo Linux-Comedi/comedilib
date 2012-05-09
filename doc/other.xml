@@ -178,7 +178,32 @@ Single samples can be read from an analog channel using the function
 </funcprototype></funcsynopsis>
 
 This reads one such data value from a &comedi; channel, and puts it in
-the user-specified <parameter>data</parameter> buffer.
+the user-specified <parameter class="function">data</parameter> buffer.
+</para>
+
+<para>
+The <parameter class="function">range</parameter> parameter is the zero-based
+index of one of the gain ranges supported by the channel.  This is a number
+from 0 to N-1 where N is the number of ranges supported by the channel.
+Use the function
+<function><link linkend="func-ref-comedi-get-n-ranges">comedi_get_n_ranges</link></function>
+to get the number of ranges supported by the channel, the function
+<function><link linkend="func-ref-comedi-find-range">comedi_find_range</link></function>
+to search for a suitable range, or the function
+<function><link linkend="func-ref-comedi-get-range">comedi_get_range</link></function>
+to get the details of a supported range.
+</para>
+
+<para>
+The <parameter class="function">aref</parameter> parameter specifies an
+analog reference to use:
+<constant><link linkend="aref-ground">AREF_GROUND</link></constant>,
+<constant><link linkend="aref-common">AREF_COMMON</link></constant>,
+<constant><link linkend="aref-diff">AREF_DIFF</link></constant>, or
+<constant><link linkend="aref-other">AREF_OTHER</link></constant>.
+Use the function
+<function><link linkend="func-ref-comedi-get-subdevice-flags">comedi_get_subdevice_flags</link></function>
+to see which analog references are supported by the subdevice.
 </para>
 
 <para>
@@ -231,7 +256,7 @@ and <function><link linkend="func-ref-comedi-from-phys">comedi_from_phys</link><
 </para>
 
 <para>
-There are two data structures in these commands that are not fully
+There are some data structures in these commands that are not fully
 self-explanatory:
 <itemizedlist>
 
@@ -253,6 +278,33 @@ architectures, it's nothing more than a 32 bits value. Internally,
 &comedi; does some conversion from raw sample data to
 <quote>correct</quote> integers. This is called <quote>data
 munging</quote>.
+</para>
+</listitem>
+
+<listitem>
+<para>
+<type><link linkend="ref-type-comedi-range">comedi_range</link></type>:
+this holds the minimum and maximum physical values for a gain range supported
+by a channel of a subdevice, and specifies the units. This can be used in
+combination with the channel's <quote>maxdata</quote> value to convert between
+unsigned integer sample values (of type
+<type><link linkend="ref-type-lsampl-t">lsampl_t</link></type> or
+<type><link linkend="ref-type-sampl-t">sampl_t</link></type>) and physical
+units in a nominal (uncalibrated) way using the
+<function><link linkend="func-ref-comedi-to-phys">comedi_to_phys</link></function>
+and
+<function><link linkend="func-ref-comedi-from-phys">comedi_from_phys</link></function>
+functions. Use the
+<function><link linkend="func-ref-comedi-get-maxdata">comedi_get_maxdata</link></function>
+function to get the <quote>maxdata</quote> value for the channel.
+</para>
+<para>
+Most functions specify the range to be used for a channel by a zero-based
+index into the list of ranges supported by the channel. Depending on the
+device and subdevice, different channels on the subdevice may or may not
+share the same list of ranges, that is, ranges may or may not be
+channel-specific. (The <constant>SDF_RANGETYPE</constant> subdevice flag
+indicates whether ranges are channel-specific.)
 </para>
 </listitem>
 
