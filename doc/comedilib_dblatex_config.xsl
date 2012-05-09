@@ -4,4 +4,5 @@
 	version="1.0">
 	<xsl:param name="funcsynopsis.decoration" select="1"/>
 	<xsl:param name="funcsynopsis.style">ansi</xsl:param>
+	<xsl:param name="function.parens" select="1"/>
 </xsl:stylesheet>
