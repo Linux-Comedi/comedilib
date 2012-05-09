@@ -108,6 +108,80 @@ not supported, they are silently ignored.
 </para>
 </section>
 
+<section id="ref-macro-CR-PACK-FLAGS">
+<title>
+CR_PACK_FLAGS
+</title>
+
+<para>
+<function>CR_PACK_FLAGS<parameter>chan</parameter><parameter>range</parameter>
+ <parameter>aref</parameter><parameter>flags</parameter></function>
+is similar to
+<function><link linkend="ref-macro-CR-PACK">CR_PACK</link></function>
+but can be used to combine one or more flag bits (bitwise-ORed together in
+the <parameter class="function">flags</parameter> parameter) with the other
+parameters.
+<programlisting>
+<![CDATA[
+#define CR_PACK_FLAGS(chan, range, aref, flags) \
+        (CR_PACK(chan, range, aref) | ((flags) & CR_FLAGS_MASK))
+]]>
+</programlisting>
+Depending on context, the
+<parameter class="function">chan</parameter> parameter might not be a channel;
+it could be a trigger source, clock source, gate source etc.  (in which case,
+the <parameter class="function">range</parameter> and
+<parameter class="function">aref</parameter> parameters would probably be set
+to <literal>0</literal>), and the flags would modify the source in some
+device-dependant way.
+</para>
+
+<para>
+The following flag values are defined:
+<variablelist>
+  <varlistentry>
+    <term><constant>CR_ALT_FILTER</constant><anchor id="cr-alt-filter"/></term>
+    <term><constant>CR_DITHER</constant></term>
+    <term><constant>CR_DEGLITCH</constant></term>
+    <listitem>
+      <para>
+        (all the same) specify that some sort of filtering is to be done
+	on the channel, trigger source, etc.
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><constant>CR_ALT_SOURCE</constant><anchor id="cr-alt-source"/></term>
+    <listitem>
+      <para>
+        specifies that some alternate source is to be used for the channel
+	(usually a calibration source).
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><constant>CR_EDGE</constant><anchor id="cr-edge"/></term>
+    <listitem>
+      <para>
+        is usually combined with a trigger source number to specify that the
+	trigger source is edge-triggered if the hardware and driver supports
+	both edge-triggering and level-triggering.  If both are supported,
+	not asserting this flag specifies level-triggering.
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><constant>CR_INVERT</constant><anchor id="cr-invert"/></term>
+    <listitem>
+      <para>
+        specifies that the trigger source, gate source, etc. is to be inverted.
+      </para>
+    </listitem>
+  </varlistentry>
+</variablelist>
+</para>
+</section>
+
 <section id="ref-macro-RANGE-LENGTH">
 <title>
 RANGE_LENGTH (deprecated)
