@@ -446,7 +446,7 @@
 						For example, some A/D hardware must <emphasis>multiplex</emphasis>
 						the conversions from different input channels onto
 						one single A/D converter.  Thus the conversions are done serially
-						in time (as shown on the <link linkend="fig-acq-seq">Figure</link>).
+						in time (as shown in <xref linkend="fig-acq-seq"/>).
 						Other cards have the hardware to do two or more acquisitions in
 						parallel, and can perform all the conversions in a scan simultaneously.
 						The begin of each conversion is <quote>triggered</quote> by
