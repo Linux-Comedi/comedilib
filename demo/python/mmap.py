@@ -185,6 +185,8 @@ while flag:
 	map.seek(back%size)
 	for i in range(back,front,2):
 		DATA.fromstring(map.read(2))
+		if map.tell() == size:
+			map.seek(0)
 	DATA.tofile(of) # append data to log file
 ## 	time.sleep(.01)
 	ret = c.comedi_mark_buffer_read(dev, subdevice, front-back)
