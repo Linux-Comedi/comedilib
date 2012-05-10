@@ -8,4 +8,6 @@
 	<xsl:param name="html.stylesheet">comedilib.css</xsl:param>
 	<xsl:param name="funcsynopsis.style">ansi</xsl:param>
 	<xsl:param name="function.parens" select="1"/>
+	<xsl:param name="section.autolabel" select="1"/>
+	<xsl:param name="xref.with.number.and.title" select="0"/>
 </xsl:stylesheet>
