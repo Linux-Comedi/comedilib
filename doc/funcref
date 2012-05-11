@@ -671,8 +671,7 @@ Description:
  input <parameter class="function">data</parameter> is performed.  It is up to
  you to check for <parameter class="function">data</parameter> values of
  0 or maxdata if you want to detect possibly out-of-range readings.
-
- Returns:
+Returns:
  Physical value corresponding to the input sample value.
 
 Function: comedi_unlock -- subdevice reservation
