@@ -49,8 +49,7 @@ Description:
  which can be determined using the function
  <function><link linkend="func-ref-comedi-get-maxdata">comedi_get_maxdata</link></function>.
  Conversion of data values to physical units can be performed
- by the function
- <function><link linkend="func-ref-comedi-to-physical">comedi_to_physical</link></function>.
+ by the functions <function><link linkend="func-ref-comedi-to-phys">comedi_to_phys</link></function> (linear conversion) or <function><link linkend="func-ref-comedi-to-physical">comedi_to_physical</link></function> (non-linear polynomial conversion).
 Returns:
  On success, <function>comedi_data_read</function> returns <literal>1</literal> (the number of samples
  read).  If there is an error, <literal>-1</literal> is returned.
@@ -233,7 +232,27 @@ Returns:
  type, it returns its index.  If there is an error, the function
  returns <literal>-1</literal> and sets the appropriate error.
 
-Function: comedi_from_physical -- convert physical units to sample
+Function: comedi_from_phys -- convert physical units to sample
+Retval: lsampl_t
+Param: double data
+Param: comedi_range * range
+Param: lsampl_t maxdata
+Description:
+ Converts parameter <parameter class="function">data</parameter> given in
+ physical units (<type>double</type>) into sample values
+ (<type>lsampl_t</type>, between <literal>0</literal> and maxdata).
+ The parameter <parameter class="function">range</parameter>
+ represents the conversion information to use, and the parameter
+ <parameter class="function">maxdata</parameter> represents the maximum possible data value for the
+ channel that the data will be written to. The mapping between
+ physical units and raw data is linear and
+ assumes that the converter has ideal characteristics.
+
+ Conversion is not affected by out-of-range behavior.  Out-of-range
+ data parameters are silently truncated to the range <literal>0</literal>
+ to <parameter class="function">maxdata</parameter>.
+
+Function: comedi_from_physical -- convert physical units to sample using calibration data
 Retval: lsampl_t
 Param: double data
 Param: const comedi_polynomial_t * conversion_polynomial
@@ -245,17 +264,13 @@ Description:
  The <parameter class="function">conversion_polynomial</parameter>
  parameter is obtained from either
  <function><link linkend="func-ref-comedi-get-hardcal-converter">comedi_get_hardcal_converter</link></function> or
- <function><link linkend="func-ref-comedi-get-softcal-converter">comedi_get_softcal_converter</link></function>.
+ <function><link linkend="func-ref-comedi-get-softcal-converter">comedi_get_softcal_converter</link></function>. The allows non linear and board specific
+ correction.
  The result will be rounded
  using the C library's current rounding direction.
  No range checking of the input
  <parameter class="function">data</parameter> is performed.  It is up to you to ensure
  your data is within the limits of the output range you are using.
-
- This function is intended to supplant
- <function><link linkend="func-ref-comedi-from-phys">comedi_from_phys</link></function>,
- and was
- introduced in order to support software calibrations.
 Returns:
  Comedi sample value corresponding to input physical value.
 
@@ -593,7 +608,34 @@ Description:
  information, this function returns <literal>1</literal>.  Otherwise, this function
  returns <literal>0</literal>.  On error, this function returns <literal>-1</literal>.
 
-Function: comedi_to_physical -- convert sample to physical units
+Function: comedi_to_phys -- convert sample to physical units
+Retval: double
+Param: lsampl_t data
+Param: comedi_range * range
+Param: lsampl_t maxdata
+Description:
+ Converts parameter <parameter class="function">data</parameter> given in sample values
+ (<type>lsampl_t</type>, between <literal>0</literal> and
+ <parameter class="function">maxdata</parameter>) into physical units
+ (<type>double</type>). The parameter <parameter
+ class="function">range</parameter>
+ represents the conversion information to use, and the parameter
+ <parameter class="function">maxdata</parameter> represents the maximum possible data value for the
+ channel that the data was read. The mapping between physical units
+ is linear and assumes ideal converter characteristics.
+
+ Conversion of endpoint sample values, that is, sample values
+ equal to <literal>0</literal> or <parameter class="function">maxdata</parameter>,
+ is affected by the Comedilib out-of-range
+ behavior.  If the out-of-range behavior is set to
+ <constant>COMEDI_OOR_NAN</constant>,
+ endpoint values are converted to <constant>NAN</constant>.  If the out-of-range
+ behavior is set to <constant>COMEDI_OOR_NUMBER</constant>, the endpoint values are
+ converted similarly to other values.
+
+ If there is an error, <constant>NAN</constant> is returned.
+
+Function: comedi_to_physical -- convert sample to physical units using polynomials
 Retval: double
 Param: lsampl_t data
 Param: const comedi_polynomial_t * conversion_polynomial
@@ -610,10 +652,7 @@ Description:
  you to check for <parameter class="function">data</parameter> values of
  0 or maxdata if you want to detect possibly out-of-range readings.
 
- This function is intended to supplant
- <function><link linkend="func-ref-comedi-to-phys">comedi_to_phys</link></function>,
- and was introduced in order to support software calibrations.
-Returns:
+ Returns:
  Physical value corresponding to the input sample value.
 
 Function: comedi_unlock -- subdevice reservation

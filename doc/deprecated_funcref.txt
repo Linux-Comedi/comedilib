@@ -13,25 +13,6 @@ Description:
  with <parameter class="function">base_channel</parameter> set to
  <literal>0</literal>.
 
-Function: comedi_from_phys -- convert physical units to sample
-Retval: lsampl_t
-Param: double data
-Param: comedi_range * range
-Param: lsampl_t maxdata
-Status: deprecated
-Description:
- Converts parameter <parameter class="function">data</parameter> given in
- physical units (<type>double</type>) into sample values
- (<type>lsampl_t</type>, between <literal>0</literal> and maxdata).
- The parameter <parameter class="function">range</parameter>
- represents the conversion information to use, and the parameter
- <parameter class="function">maxdata</parameter> represents the maximum possible data value for the
- channel that the data will be written to.
-
- Conversion is not affected by out-of-range behavior.  Out-of-range
- data parameters are silently truncated to the range <literal>0</literal>
- to <parameter class="function">maxdata</parameter>.
-
 Function: comedi_get_timer -- timer information (deprecated)
 Retval: int
 Param: comedi_t * device
@@ -125,33 +106,6 @@ Param: double * data
 Status: deprecated
 Description:
  Not documented.
-
-Function: comedi_to_phys -- convert sample to physical units
-Retval: double
-Param: lsampl_t data
-Param: comedi_range * range
-Param: lsampl_t maxdata
-Status: deprecated
-Description:
- Converts parameter <parameter class="function">data</parameter> given in sample values
- (<type>lsampl_t</type>, between <literal>0</literal> and
- <parameter class="function">maxdata</parameter>) into physical units
- (<type>double</type>).  The parameter <parameter
- class="function">range</parameter>
- represents the conversion information to use, and the parameter
- <parameter class="function">maxdata</parameter> represents the maximum possible data value for the
- channel that the data was read.
-
- Conversion of endpoint sample values, that is, sample values
- equal to <literal>0</literal> or <parameter class="function">maxdata</parameter>,
- is affected by the Comedilib out-of-range
- behavior.  If the out-of-range behavior is set to
- <constant>COMEDI_OOR_NAN</constant>,
- endpoint values are converted to <constant>NAN</constant>.  If the out-of-range
- behavior is set to <constant>COMEDI_OOR_NUMBER</constant>, the endpoint values are
- converted similarly to other values.
-
- If there is an error, <constant>NAN</constant> is returned.
 
 Function: comedi_trigger -- perform streaming input/output (deprecated)
 Retval: int
