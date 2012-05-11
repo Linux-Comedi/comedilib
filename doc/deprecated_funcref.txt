@@ -31,23 +31,6 @@ Description:
  and every device has the timer type <constant>nanosec_timer</constant>, indicating
  that timer values are simply a time specified in nanoseconds.
 
-Function: comedi_set_global_oor_behavior -- out-of-range behavior
-Retval: int
-Param: enum comedi_oor_behavior behavior
-Status: deprecated
-Description:
- This function changes the Comedilib out-of-range behavior.
- This currently affects the behavior of <function>comedi_to_phys</function> when
- converting endpoint sample values, that is, sample values
- equal to <literal>0</literal> or <parameter
- class="function">maxdata</parameter>.  If the out-of-range behavior is set to
- <constant>COMEDI_OOR_NAN</constant>, endpoint values are converted to
- <constant>NAN</constant>.  If the
- out-of-range behavior is set to <constant>COMEDI_OOR_NUMBER</constant>, the endpoint
- values are converted similarly to other values.
-
- The previous out-of-range behavior is returned.
-
 Function: comedi_sv_init -- slowly-varying inputs
 Retval: int
 Param: comedi_sv_t * sv

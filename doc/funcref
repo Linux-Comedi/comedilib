@@ -608,6 +608,23 @@ Description:
  information, this function returns <literal>1</literal>.  Otherwise, this function
  returns <literal>0</literal>.  On error, this function returns <literal>-1</literal>.
 
+Function: comedi_set_global_oor_behavior -- out-of-range behavior
+Retval: enum comedi_oor_behavior
+Param: enum comedi_oor_behavior behavior
+Description:
+ This function changes the Comedilib out-of-range behavior.
+ This currently affects the behavior of
+ <function>comedi_to_phys</function> when
+ converting endpoint sample values, that is, sample values
+ equal to <literal>0</literal> or <parameter
+ class="function">maxdata</parameter>.  If the out-of-range behavior is set to
+ <constant>COMEDI_OOR_NAN</constant>, endpoint values are converted to
+ <constant>NAN</constant>.  If the
+ out-of-range behavior is set to <constant>COMEDI_OOR_NUMBER</constant>, the endpoint
+ values are converted similarly to other values.
+Returns:
+ The previous out-of-range behavior is returned.
+
 Function: comedi_to_phys -- convert sample to physical units
 Retval: double
 Param: lsampl_t data
