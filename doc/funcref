@@ -614,8 +614,8 @@ Param: enum comedi_oor_behavior behavior
 Description:
  This function changes the Comedilib out-of-range behavior.
  This currently affects the behavior of
- <function>comedi_to_phys</function> when
- converting endpoint sample values, that is, sample values
+ <function><link linkend="func-ref-comedi-to-phys">comedi_to_phys</link></function>
+ when converting endpoint sample values, that is, sample values
  equal to <literal>0</literal> or <parameter
  class="function">maxdata</parameter>.  If the out-of-range behavior is set to
  <constant>COMEDI_OOR_NAN</constant>, endpoint values are converted to
@@ -644,7 +644,10 @@ Description:
  Conversion of endpoint sample values, that is, sample values
  equal to <literal>0</literal> or <parameter class="function">maxdata</parameter>,
  is affected by the Comedilib out-of-range
- behavior.  If the out-of-range behavior is set to
+ behavior (see function <function><link
+ linkend="func-ref-comedi-set-global-oor-behavior"
+ >comedi_set_global_oor_behavior></link></function>).
+ If the out-of-range behavior is set to
  <constant>COMEDI_OOR_NAN</constant>,
  endpoint values are converted to <constant>NAN</constant>.  If the out-of-range
  behavior is set to <constant>COMEDI_OOR_NUMBER</constant>, the endpoint values are
