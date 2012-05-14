@@ -72,7 +72,6 @@ int main(int argc, char *argv[])
 	int ret;
 	int total=0;
 	int i;
-	struct timeval start,end;
 	int subdev_flags;
 	lsampl_t raw;
 
