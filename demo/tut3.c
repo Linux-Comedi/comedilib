@@ -77,6 +77,7 @@ int main(int argc, char *argv[])
 
 	struct parsed_options options;
 
+	memset(&options, 0, sizeof(options));
 	/* The following variables used in this demo
 	 * can be modified by command line
 	 * options.  When modifying this demo, you may want to
