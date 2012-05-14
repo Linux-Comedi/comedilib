@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 	else
 		period_ns = 0;
 	clock_selection = options.value;
-	printf("Selecting master clock %d for channel %d on subdevice.\n", clock_selection, options.channel, options.subdevice);
+	printf("Selecting master clock %d for channel %d on subdevice %d.\n", clock_selection, options.channel, options.subdevice);
 	if(period_ns)
 	{
 		printf("Clock period = %d nanoseconds.\n", period_ns);
