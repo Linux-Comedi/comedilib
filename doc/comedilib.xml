@@ -10,7 +10,7 @@
 		<title>Comedi</title>
 		<subtitle>
 			The <emphasis>Control and Measurement Device Interface</emphasis>
-			handbook
+			handbook for Comedilib &comedilib_version;
 		</subtitle>
 		<author>
 			<firstname>David</firstname>
