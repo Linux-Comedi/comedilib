@@ -24,7 +24,7 @@
 
 int main(int argc, char *argv[])
 {
-        int ret,i;
+        int ret;
 	comedi_insn insn;
 	lsampl_t d[5];
 	comedi_t *device;
