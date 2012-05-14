@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 
 	if(options.n_scan==2) {
 		printf("%d\n",comedi_get_maxdata(device,options.subdevice,0));
-		close(device);
+		comedi_close(device);
 		exit(0);
 	}       
 
