@@ -35,6 +35,11 @@ m4_define([scxi_lt_age], [9])
 #    changed (comedilib_major_base_current).
 #  * 'micro' is libtool 'revision'.
 
+# Gentle reminder: The comedilib manual mentions the version of comedilib
+# it applies to.  This is done by setting the 'comedilib_version' entity
+# in "doc/comedilib.ent".  That needs to be edited manually as it is not
+# updated automatically.
+
 # Manually set 'comedilib_major_base_current' to new 'comedilib_lt_current'
 # whenever 'comedilib_version_major' is incremented below.
 m4_define([comedilib_major_base_current], [0])
