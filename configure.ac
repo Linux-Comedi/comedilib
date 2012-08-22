@@ -21,24 +21,40 @@
 m4_define([comedilib_lt_current], [10])
 m4_define([comedilib_lt_revision], [1])
 m4_define([comedilib_lt_age], [10])
+# Set 'letter', normally empty.  See below for rules.
+m4_define([comedilib_version_letter], [])
 
 #libscxi c:r:a
 m4_define([scxi_lt_current], [9])
 m4_define([scxi_lt_revision], [0])
 m4_define([scxi_lt_age], [9])
 
-# comedilib version: major.minor.micro
+# comedilib library version: major.minor.micro
+# comedilib package version: major.minor.micro[letter]
 #
 # Currently:
 #  * 'major' may be incremented at the whim of the maintainers.
 #  * 'minor' is libtool 'current' minus the value of 'current' when major
 #    changed (comedilib_major_base_current).
 #  * 'micro' is libtool 'revision'.
+#  * 'letter' is normally absent and is removed if any of 'major', 'minor'
+#    or 'micro' are changed between releases.  Otherwise it is set if the
+#    only changes between releases are outside the library source code or
+#    language binding, for example the comedilib manual, "readme" files
+#    or sample configuration files.  When it needs to be set, it is set to
+#    'a' if previously absent, otherwise the next lower-case ASCII letter
+#    in the sequence.  (In the unlikely event that we we need to go beyond
+#    'z', append an extra letter.)
+#
+# Example package version sequence: 0.10.1, 0.10.1a, 0.10.1b, 0.10.2,
+# 0.10.2a, ..., 0.10.2z, 0.10.2za, 0,10.2.zb, 0.11.0.
 
 # Gentle reminder: The comedilib manual mentions the version of comedilib
 # it applies to.  This is done by setting the 'comedilib_version' entity
 # in "doc/comedilib.ent".  That needs to be edited manually as it is not
-# updated automatically.
+# updated automatically.  Policy: the version of the manual is usually only
+# updated if the contents have changed since the previous release.  In that
+# case, it is set to the comedilib package version.
 
 # Manually set 'comedilib_major_base_current' to new 'comedilib_lt_current'
 # whenever 'comedilib_version_major' is incremented below.
@@ -49,7 +65,11 @@ m4_define([comedilib_version_minor],
 	  [m4_eval(comedilib_lt_current - comedilib_major_base_current)])
 m4_define([comedilib_version_micro], [comedilib_lt_revision])
 m4_define([comedilib_pkg_version],
-	  [comedilib_version_major.comedilib_version_minor.comedilib_version_micro])
+	  [m4_join([],
+		   m4_join([.], comedilib_version_major,
+			   comedilib_version_minor,
+			   comedilib_version_micro),
+		   comedilib_version_letter)])
 
 AC_INIT([comedilib], [comedilib_pkg_version])
 AC_CANONICAL_TARGET([])
