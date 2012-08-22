@@ -77,8 +77,14 @@ comedi_t* _comedi_open(const char *fn)
 
 	return it;
 cleanup:
-	if(it)
+	if(it) {
+		/* As long as get_subdevices is the last action above,
+		   it->subdevices should not need any cleanup, since
+		   get_subdevices should have done the cleanup already */
+		if (it->fd >= 0)
+			close(it->fd);
 		free(it);
+	}
 
 	return NULL;
 }
