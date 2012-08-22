@@ -47,7 +47,7 @@ m4_define([scxi_lt_age], [9])
 #    'z', append an extra letter.)
 #
 # Example package version sequence: 0.10.1, 0.10.1a, 0.10.1b, 0.10.2,
-# 0.10.2a, ..., 0.10.2z, 0.10.2za, 0,10.2.zb, 0.11.0.
+# 0.10.2a, ..., 0.10.2z, 0.10.2za, 0,10.2zb, 0.11.0.
 
 # Gentle reminder: The comedilib manual mentions the version of comedilib
 # it applies to.  This is done by setting the 'comedilib_version' entity
