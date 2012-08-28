@@ -19,4 +19,4 @@ Optional:
   python
   ruby
   xmlto (for building documentation)
-
+  dblatex (for building PDF documentation)
