@@ -32,6 +32,9 @@ KERNEL=="comedi[0-9]*", MODE="0666"
 # device files restricted to the "comedi" group
 #KERNEL=="comedi[0-9]*", MODE="0660", GROUP="comedi"
 
+# device files restricted to the "iocard" group
+#KERNEL=="comedi[0-9]*", MODE="0660", GROUP="iocard"
+
 
 LABEL="comedi_add_end"
 
