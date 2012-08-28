@@ -111,8 +111,7 @@ drivers.xml: drivers.txt mkdr
 	$(srcdir)/mkdr $(srcdir)/drivers.txt >$(srcdir)/drivers.xml
 
 maintainer-clean-local:
-	$(RM) -r $(srcdir)/doc_html $(srcdir)/man
-	$(RM) $(srcdir)/comedilib.pdf
+	$(RM) -r $(srcdir)/doc_html $(srcdir)/man $(srcdir)/pdf
 
 locales = de
 
