@@ -40,6 +40,42 @@ Usually these devices belong to the group <systemitem class="groupname">iocard</
 		</para>
 
 		<para>
+		  There are a few PCI drivers that for one reason or another
+		  do not support auto-configuration, either because there is
+		  more than one variant of a board sharing the same PCI device
+		  ID (e.g. Advantech PCI-1710 and PCI-1710HG), or because
+		  some configuration options are needed (e.g. Amplicon PCI224
+		  and PCI234) or for some other reason.  It is also possible
+		  to disable auto-configuration when loading the
+		  <systemitem>comedi</systemitem> kernel module.  In these
+		  cases devices need to be configured manually as for ISA
+		  cards. Conversely, most &comedi; drivers supplied with the
+		  kernel sources that support auto-configuration may no longer
+		  support manual configuration.
+		</para>
+
+		<para>
+		  By default, the <systemitem>comedi</systemitem> kernel module
+		  does not reserve any devices for manual configuration so
+		  manual configuration will fail.  To allow devices to be
+		  configured manually, set the
+		  <parameter>comedi_num_legacy_minors</parameter> module
+		  parameter to the number of devices to reserve for manual
+		  configuration when loading the <systemitem>comedi</systemitem>
+		  kernel module.  If using <command>modprobe</command>, this
+		  can be set automatically by editing
+		  <filename>/etc/modprobe.conf</filename> or
+		  <filename>/etc/modprobe.d/comedi.conf</filename> (depending
+		  on the system) to include the line:
+		  <screen>
+		    options comedi comedi_num_legacy_minors=4
+		  </screen>
+		  The number <literal>4</literal> in the above line may be
+		  adjusted to increase or decrease the number of devices to be
+		  reserved for manual configuration.
+		</para>
+
+		<para>
 		  Old ISA based cards need to be manually configured which is
 		  explained here. You only need to read on here 
 		  if you have one of these old cards.
