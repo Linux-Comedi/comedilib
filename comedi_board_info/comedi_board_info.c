@@ -209,7 +209,7 @@ int main(int argc,char *argv[])
 	comedi_t *it;
 	char *filename = default_filename;
 	char c;
-	char strtmp[16];
+	char strtmp[32];
 	int n_chans_for_generic_timed = 1;
 	int freq_for_generic_timed = 1E9;
 
