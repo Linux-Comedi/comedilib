@@ -210,13 +210,14 @@ int main(int argc,char *argv[])
 	char *filename = default_filename;
 	char c;
 	char strtmp[32];
-	int n_chans_for_generic_timed = 1;
+	int def_n_chans_for_generic_timed = 1;
+	int n_chans_for_generic_timed;
 	int freq_for_generic_timed = 1E9;
 
 	while (-1 != (c = getopt(argc, argv, "hvn:F:"))) {
 		switch (c) {
 		case 'n':
-			n_chans_for_generic_timed = strtoul(optarg, NULL, 0);
+			def_n_chans_for_generic_timed = strtoul(optarg, NULL, 0);
 			break;
 		case 'F':
 			freq_for_generic_timed = strtoul(optarg, NULL, 0);
@@ -300,6 +301,7 @@ int main(int argc,char *argv[])
 			}
 		}
 		printf("  command:\n");
+		n_chans_for_generic_timed = def_n_chans_for_generic_timed;
 		if (n_chans_for_generic_timed>n_chans)
 			n_chans_for_generic_timed = n_chans;
 		if (n_chans_for_generic_timed<1)
