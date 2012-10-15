@@ -78,11 +78,15 @@ void explain_subdevice_flags(char* padding,unsigned int sf) {
 }
 
 void unit_to_desc(char *udesc,int unit) {
-	switch(unit) {
-	case UNIT_volt: strcpy(udesc," V"); break;
-	case UNIT_mA: strcpy(udesc," mA"); break;
-	case UNIT_none: strcpy(udesc,""); break; 
-	default: sprintf(udesc," (unknown unit %d)",
+	if ((unit & RF_EXTERNAL) != 0)
+		strcpy(udesc, "*EXT");
+	else
+		udesc[0] = '\0';
+	switch(RF_UNIT(unit)) {
+	case UNIT_volt: strcat(udesc," V"); break;
+	case UNIT_mA: strcat(udesc," mA"); break;
+	case UNIT_none: strcat(udesc,""); break; 
+	default: sprintf(udesc + strlen(udesc)," (unknown unit %d)",
 			 unit);
 	}
 }
