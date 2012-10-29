@@ -759,5 +759,6 @@ raw/physical conversion functions.
 			<xi:include href="extensions_funcref.xml"/>
 			<xi:include href="deprecated_funcref.xml"/>
 	</section>
+	<xi:include href="bindings.xml"/>
 	<xi:include href="drivers.xml"/>
 </section>

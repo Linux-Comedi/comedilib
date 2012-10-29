@@ -3,7 +3,7 @@ XML = calibration_funcref.xml command_funcref.xml dio_funcref.xml \
 	deprecated_funcref.xml error_funcref.xml extensions_funcref.xml \
 	drivers.xml funcref.xml glossary.xml \
 	install.xml intro.xml other.xml reference.xml tutorial.xml \
-	driverwriting.xml comedilib.xml comedilib.ent
+	driverwriting.xml comedilib.xml bindings.xml comedilib.ent
 
 EXTRA_DIST = $(XML) calibration_funcref.txt command_funcref.txt dio_funcref.txt \
 	deprecated_funcref.txt error_funcref.txt extensions_funcref.txt \
@@ -14,7 +14,7 @@ EXTRA_DIST = $(XML) calibration_funcref.txt command_funcref.txt dio_funcref.txt 
 
 BUILT_SOURCES = calibration_funcref.xml command_funcref.xml dio_funcref.xml \
 	deprecated_funcref.xml error_funcref.xml extensions_funcref.xml \
-	funcref.xml drivers.xml
+	funcref.xml drivers.xml bindings.xml
 
 if HAVE_XMLTO
 all_html = $(srcdir)/doc_html
