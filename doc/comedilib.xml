@@ -38,6 +38,11 @@
 			<surname>Abbott</surname>
 			<email>abbotti@mev.co.uk</email>
 		</author>
+		<author>
+			<firstname>Éric</firstname>
+			<surname>Piel</surname>
+			<email>piel@delmic.com</email>
+		</author>
 		<copyright>
 			<year>1998-2003</year>
 			<holder>David Schleef</holder>
@@ -57,6 +62,10 @@
 		<copyright>
 			<year>2012</year>
 			<holder>Ian Abbott</holder>
+		</copyright>
+		<copyright>
+			<year>2012</year>
+			<holder>Éric Piel</holder>
 		</copyright>
 
 		<abstract>
