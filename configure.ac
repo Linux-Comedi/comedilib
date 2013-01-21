@@ -87,11 +87,6 @@ AC_CONFIG_AUX_DIR([.])
 COMEDILIB_DEBUG="-Wall"
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
-# AS_LIBTOOL arguments are (prefix, current, revision, age)
-AS_LIBTOOL(COMEDILIB, comedilib_lt_current, comedilib_lt_revision, comedilib_lt_age)
-SCXI_SO_VERSION=scxi_lt_current:scxi_lt_revision:scxi_lt_age
-AC_SUBST(SCXI_SO_VERSION)
-
 AM_CONFIG_HEADER(config.h)
 
 ACLOCAL="$ACLOCAL -I m4"
@@ -110,6 +105,11 @@ AC_PROG_LIBTOOL
 AC_HEADER_STDC([])
 
 AX_TLS
+
+# AS_LIBTOOL arguments are (prefix, current, revision, age)
+AS_LIBTOOL(COMEDILIB, comedilib_lt_current, comedilib_lt_revision, comedilib_lt_age)
+SCXI_SO_VERSION=scxi_lt_current:scxi_lt_revision:scxi_lt_age
+AC_SUBST(SCXI_SO_VERSION)
 
 COMEDILIB_CFLAGS="$COMEDILIB_CFLAGS -I\$(top_srcdir)/include -I\$(top_builddir)/include $COMEDILIB_DEBUG"
 COMEDILIB_LIBS="$COMEDILIB_LIBS \$(top_builddir)/lib/libcomedi.la -lm"
