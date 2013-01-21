@@ -87,7 +87,7 @@ AC_CONFIG_AUX_DIR([.])
 COMEDILIB_DEBUG="-Wall"
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS([config.h])
 
 ACLOCAL="$ACLOCAL -I m4"
 
