@@ -31,6 +31,8 @@
 #include "libinternal.h"
 #include "calib_yacc.h"
 
+#define YY_NO_INPUT
+
 %}
 
 %x COMMENT
