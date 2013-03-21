@@ -28,12 +28,13 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
-#include "calib_yacc.h"
-#include "calib_lex.h"
 
 #define YYERROR_VERBOSE
 #define YYPARSE_PARAM parse_arg
 #define YYLEX_PARAM priv(YYPARSE_PARAM)->yyscanner
+
+#include "calib_yacc.h"
+#include "calib_lex.h"
 
 enum polynomial_direction
 {
@@ -347,6 +348,11 @@ extern comedi_calibration_t* _comedi_parse_calibration_file( const char *cal_fil
 	return priv.parsed_file;
 }
 
+static void yyerror(const char *s)
+{
+	fprintf(stderr, "%s\n", s);
+}
+
 %}
 
 %pure_parser
@@ -503,11 +509,6 @@ extern comedi_calibration_t* _comedi_parse_calibration_file( const char *cal_fil
 		;
 
 %%
-
-void calib_yyerror(char *s)
-{
-	fprintf(stderr, "%s\n", s);
-}
 
 
 
