@@ -318,36 +318,6 @@ static void fill_inverse_linear_polynomials(comedi_calibration_t *calibration)
 	}
 }
 
-EXPORT_ALIAS_DEFAULT(_comedi_parse_calibration_file,comedi_parse_calibration_file,0.7.20);
-extern comedi_calibration_t* _comedi_parse_calibration_file( const char *cal_file_path )
-{
-	calib_yyparse_private_t priv;
-	FILE *file;
-
-	if( cal_file_path == NULL ) return NULL;
-	memset(&priv, 0, sizeof(calib_yyparse_private_t));
-	priv.parsed_file = alloc_calib_parse();
-	if( priv.parsed_file == NULL ) return NULL;
-
-	file = fopen( cal_file_path, "r" );
-	if( file == NULL )
-	{
-		COMEDILIB_DEBUG( 3, "failed to open file\n" );
-		return NULL;
-	}
-	calib_yylex_init(&priv.yyscanner);
-	calib_yyrestart(file, priv.yyscanner);
-	if( calib_yyparse( &priv ) )
-	{
-		comedi_cleanup_calibration( priv.parsed_file );
-		priv.parsed_file = NULL;
-	}
-	calib_yylex_destroy(priv.yyscanner);
-	fclose( file );
-	fill_inverse_linear_polynomials(priv.parsed_file);
-	return priv.parsed_file;
-}
-
 static void yyerror(const char *s)
 {
 	fprintf(stderr, "%s\n", s);
@@ -510,5 +480,35 @@ static void yyerror(const char *s)
 
 %%
 
+
+EXPORT_ALIAS_DEFAULT(_comedi_parse_calibration_file,comedi_parse_calibration_file,0.7.20);
+extern comedi_calibration_t* _comedi_parse_calibration_file( const char *cal_file_path )
+{
+	calib_yyparse_private_t priv;
+	FILE *file;
+
+	if( cal_file_path == NULL ) return NULL;
+	memset(&priv, 0, sizeof(calib_yyparse_private_t));
+	priv.parsed_file = alloc_calib_parse();
+	if( priv.parsed_file == NULL ) return NULL;
+
+	file = fopen( cal_file_path, "r" );
+	if( file == NULL )
+	{
+		COMEDILIB_DEBUG( 3, "failed to open file\n" );
+		return NULL;
+	}
+	calib_yylex_init(&priv.yyscanner);
+	calib_yyrestart(file, priv.yyscanner);
+	if( calib_yyparse( &priv ) )
+	{
+		comedi_cleanup_calibration( priv.parsed_file );
+		priv.parsed_file = NULL;
+	}
+	calib_yylex_destroy(priv.yyscanner);
+	fclose( file );
+	fill_inverse_linear_polynomials(priv.parsed_file);
+	return priv.parsed_file;
+}
 
 
