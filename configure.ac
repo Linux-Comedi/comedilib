@@ -19,7 +19,7 @@
 #  else, `c:r:a' becomes `c:r+1:a'.
 #
 m4_define([comedilib_lt_current], [10])
-m4_define([comedilib_lt_revision], [1])
+m4_define([comedilib_lt_revision], [2])
 m4_define([comedilib_lt_age], [10])
 # Set 'letter', normally empty.  See below for rules.
 m4_define([comedilib_version_letter], [])
