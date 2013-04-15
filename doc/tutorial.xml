@@ -42,7 +42,7 @@
     </para>
     
     <screen>
-      cc tut1.c -lcomedi -o tut1
+      cc tut1.c -lcomedi -lm -o tut1
     </screen>
     <para>
       The
