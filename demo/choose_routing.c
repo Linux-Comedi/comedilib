@@ -32,7 +32,6 @@ comedi_t *device;
 
 int main(int argc, char *argv[])
 {
-	unsigned period_ns;
 	int retval;
 	lsampl_t routing;
 	struct parsed_options options;
@@ -46,10 +45,6 @@ int main(int argc, char *argv[])
 		comedi_perror(options.filename);
 		exit(-1);
 	}
-	if(options.freq > 0.)
-		period_ns = 1e9 / options.freq;
-	else
-		period_ns = 0;
 	routing = options.value;
 	printf("Selecting routing %d for channel %d on subdevice %d.\n", routing, options.channel, options.subdevice);
 
