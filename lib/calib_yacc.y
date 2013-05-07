@@ -114,6 +114,7 @@ static int add_calibration_setting( comedi_calibration_t *file_contents )
 		( file_contents->num_settings + 1 ) * sizeof( comedi_calibration_setting_t ) );
 	if( temp == NULL )
 	{
+		libc_error();
 		fprintf(stderr, "%s: realloc failed to allocate memory.\n", __FUNCTION__);
 		return -1;
 	}
@@ -148,6 +149,7 @@ static int add_channel( calib_yyparse_private_t *priv, int channel )
 	temp = realloc( setting->channels, ( setting->num_channels + 1 ) * sizeof(unsigned) );
 	if( temp == NULL )
 	{
+		libc_error();
 		fprintf(stderr, "%s: realloc failed to allocate memory.\n", __FUNCTION__);
 		return -1;
 	}
@@ -167,6 +169,7 @@ static int add_range( calib_yyparse_private_t *priv, int range )
 	temp = realloc( setting->ranges, ( setting->num_ranges + 1 ) * sizeof(unsigned) );
 	if( temp == NULL )
 	{
+		libc_error();
 		fprintf(stderr, "%s: realloc failed to allocate memory.\n", __FUNCTION__);
 		return -1;
 	}
@@ -202,6 +205,7 @@ static int add_caldac( calib_yyparse_private_t *priv,
 		sizeof( comedi_caldac_t ) );
 	if( temp == NULL )
 	{
+		libc_error();
 		fprintf(stderr, "%s: realloc failed to allocate memory.\n", __FUNCTION__);
 		return -1;
 	}
@@ -229,11 +233,21 @@ static int add_polynomial(calib_yyparse_private_t *priv, enum polynomial_directi
 	{
 		if(setting->soft_calibration.to_phys) return -1;
 		setting->soft_calibration.to_phys = malloc(sizeof(comedi_polynomial_t));
+		if(!setting->soft_calibration.to_phys){
+			libc_error();
+			fprintf(stderr, "%s: malloc failed to allocate memory.\n", __FUNCTION__);
+			return -1;
+		}
 		*setting->soft_calibration.to_phys = priv->polynomial;
 	}else
 	{
 		if(setting->soft_calibration.from_phys) return -1;
 		setting->soft_calibration.from_phys = malloc(sizeof(comedi_polynomial_t));
+		if(!setting->soft_calibration.from_phys){
+			libc_error();
+			fprintf(stderr, "%s: malloc failed to allocate memory.\n", __FUNCTION__);
+			return -1;
+		}
 		*setting->soft_calibration.from_phys = priv->polynomial;
 	}
 	return 0;
@@ -285,6 +299,10 @@ static comedi_polynomial_t* alloc_inverse_linear_polynomial(const comedi_polynom
 	comedi_polynomial_t *inverse;
 	if(polynomial->order != 1) return NULL;
 	inverse = malloc(sizeof(comedi_polynomial_t));
+	if(!inverse){
+		libc_error();
+		return NULL;
+	}
 	memset(inverse, 0, sizeof(comedi_polynomial_t));
 	inverse->order = 1;
 	inverse->expansion_origin = polynomial->coefficients[0];

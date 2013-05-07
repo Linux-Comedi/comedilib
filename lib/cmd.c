@@ -55,6 +55,10 @@ int _comedi_get_cmd_src_mask(comedi_t *it,unsigned int subd,comedi_cmd *cmd)
 		comedi_cmd *mask;
 
 		mask = malloc(sizeof(comedi_cmd));
+		if(!mask){
+			libc_error();
+			return -1;
+		}
 
 		memset(mask,0,sizeof(*cmd));
 
@@ -174,8 +178,13 @@ int _comedi_get_cmd_generic_timed_obsolete(comedi_t *it,unsigned int subd,comedi
 		return -1;
 	}
 
-	if(!s->cmd_timed)
+	if(!s->cmd_timed){
 		s->cmd_timed = malloc(sizeof(comedi_cmd));
+		if(!s->cmd_timed){
+			libc_error();
+			return -1;
+		}
+	}
 
 	ret = __generic_timed(it, subd, s->cmd_timed, 1, ns);
 	if(ret<0){
@@ -202,8 +211,13 @@ int _comedi_get_cmd_generic_timed(comedi_t *it, unsigned subd, comedi_cmd *cmd,
 		return -1;
 	}
 
-	if(!s->cmd_timed)
+	if(!s->cmd_timed){
 		s->cmd_timed = malloc(sizeof(comedi_cmd));
+		if(!s->cmd_timed){
+			libc_error();
+			return -1;
+		}
+	}
 
 	ret = __generic_timed(it, subd, s->cmd_timed, chanlist_len, scan_period_ns);
 	if(ret<0){

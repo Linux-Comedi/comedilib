@@ -93,6 +93,10 @@ int sv_measure_l(comedi_sv_t *it,double *data)
 	int n;
 
 	val=malloc(sizeof(*val)*it->n);
+	if(!val){
+		libc_error();
+		return -1;
+	}
 
 	chan=CR_PACK(it->chan,it->range,it->aref);
 
@@ -144,6 +148,10 @@ int sv_measure_s(comedi_sv_t *it,double *data)
 	int n;
 
 	val=malloc(sizeof(*val)*it->n);
+	if(!val){
+		libc_error();
+		return -1;
+	}
 
 	chan=CR_PACK(it->chan,it->range,it->aref);
 
