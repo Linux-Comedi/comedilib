@@ -39,12 +39,8 @@ EXPORT_ALIAS_DEFAULT(_comedi_data_write,comedi_data_write,0.7.18);
 int _comedi_data_write(comedi_t *it,unsigned int subdev,unsigned int chan,unsigned int range,
 		unsigned int aref,lsampl_t data)
 {
-	subdevice *s;
-
 	if(!valid_chan(it,subdev,chan))
 		return -1;
-
-	s=it->subdevices+subdev;
 
 	if(it->has_insnlist_ioctl){
 		comedi_insn insn;
@@ -193,15 +189,12 @@ int _comedi_data_read_delayed( comedi_t *it, unsigned int subdev,
 	unsigned int chan, unsigned int range, unsigned int aref,
 	lsampl_t *data, unsigned int nano_sec)
 {
-	subdevice *s;
 	comedi_insnlist ilist;
 	comedi_insn insn[3];
 	lsampl_t delay = nano_sec;
 
 	if( !valid_chan( it, subdev, chan ) )
 		return -1;
-
-	s = it->subdevices + subdev;
 
 	memset( insn, 0, sizeof(insn) );
 	memset( &ilist, 0, sizeof(ilist) );
