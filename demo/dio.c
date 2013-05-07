@@ -58,6 +58,10 @@ int main(int argc, char *argv[])
 		printf("for input.\n");
 		ret = comedi_dio_config(device, options.subdevice, options.channel, COMEDI_INPUT);
 	}
+	if(ret < 0){
+		comedi_perror("comedi_dio_config");
+		exit(-1);
+	}
 	return 0;
 }
 
