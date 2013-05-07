@@ -67,9 +67,17 @@ int main(int argc, char *argv[])
 
 	printf("configuring pin %d for output...\n", chan_dat);
 	ret = comedi_dio_config(device, options.subdevice, chan_dat, COMEDI_OUTPUT);
+	if(ret < 0){
+		comedi_perror("comedi_dio_config");
+		exit(-1);
+	}
 
 	printf("configuring pin %d for output...\n", chan_clk);
 	ret = comedi_dio_config(device, options.subdevice, chan_clk, COMEDI_OUTPUT);
+	if(ret < 0){
+		comedi_perror("comedi_dio_config");
+		exit(-1);
+	}
 
 	for(i = 0; i < 0x100; i++){
 		write_bits(options.subdevice, i);
@@ -144,8 +152,8 @@ void write_bits(int subdevice, int bits)
 		data[9] = (bits&bit)?(1<<chan_dat):0;
 
 		ret = comedi_do_insnlist(device,&il);
-
-//		printf("comedi_do_insnlist returned %d\n",ret);
+		if(ret < 0)
+			comedi_perror("comedi_do_insnlist");
 	}
 
 }
