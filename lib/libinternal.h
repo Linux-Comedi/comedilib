@@ -121,8 +121,6 @@ struct subdevice_struct{
 
 	int cmd_mask_errno;
 	comedi_cmd *cmd_mask;
-	int cmd_timed_errno;
-	comedi_cmd *cmd_timed;
 };
 
 #define comedi_ioctl _comedi_ioctl

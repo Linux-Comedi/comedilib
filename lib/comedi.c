@@ -119,7 +119,6 @@ int _comedi_close(comedi_t *it)
 			free(s->rangeinfo);
 		}
 		if(s->cmd_mask)free(s->cmd_mask);
-		if(s->cmd_timed)free(s->cmd_timed);
 	}
 	if(it->subdevices){
 		free(it->subdevices);

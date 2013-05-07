@@ -166,65 +166,15 @@ EXPORT_ALIAS_VER(_comedi_get_cmd_generic_timed_obsolete,comedi_get_cmd_generic_t
 int _comedi_get_cmd_generic_timed_obsolete(comedi_t *it,unsigned int subd,comedi_cmd *cmd,
 	unsigned int ns)
 {
-	subdevice *s;
-	int ret;
-
 	if(!valid_subd(it,subd))return -1;
-
-	s=it->subdevices+subd;
-
-	if(s->cmd_timed_errno){
-		errno = s->cmd_mask_errno;
-		return -1;
-	}
-
-	if(!s->cmd_timed){
-		s->cmd_timed = malloc(sizeof(comedi_cmd));
-		if(!s->cmd_timed){
-			libc_error();
-			return -1;
-		}
-	}
-
-	ret = __generic_timed(it, subd, s->cmd_timed, 1, ns);
-	if(ret<0){
-		s->cmd_mask_errno = errno;
-		return -1;
-	}
-	*cmd=*s->cmd_timed;
-	return 0;
+	return __generic_timed(it, subd, cmd, 1, ns);
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_get_cmd_generic_timed,comedi_get_cmd_generic_timed,0.9.0);
 int _comedi_get_cmd_generic_timed(comedi_t *it, unsigned subd, comedi_cmd *cmd,
 	unsigned chanlist_len, unsigned scan_period_ns)
 {
-	subdevice *s;
-	int ret;
-
 	if(!valid_subd(it,subd)) return -1;
-
-	s = it->subdevices + subd;
-
-	if(s->cmd_timed_errno){
-		errno = s->cmd_mask_errno;
-		return -1;
-	}
-
-	if(!s->cmd_timed){
-		s->cmd_timed = malloc(sizeof(comedi_cmd));
-		if(!s->cmd_timed){
-			libc_error();
-			return -1;
-		}
-	}
-
-	ret = __generic_timed(it, subd, s->cmd_timed, chanlist_len, scan_period_ns);
-	if(ret<0){
-		s->cmd_mask_errno = errno;
-		return -1;
-	}
-	*cmd=*s->cmd_timed;
-	return 0;
+	return __generic_timed(it, subd, cmd, chanlist_len, scan_period_ns);
 }
 
