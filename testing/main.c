@@ -180,19 +180,10 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-unsigned int capabilities;
-
 static void get_capabilities(unsigned int subd)
 {
-	int type;
-	int flags;
-
-	capabilities = 0;
-
-	type = comedi_get_subdevice_type(device,subd);
-
-	flags = comedi_get_subdevice_flags(device,subd);
-
+	comedi_get_subdevice_type(device,subd);
+	comedi_get_subdevice_flags(device,subd);
 }
 
 static void print_device_info(void)

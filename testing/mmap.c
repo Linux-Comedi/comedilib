@@ -31,7 +31,6 @@ void segv_handler(int num)
 
 int test_segfault(void *memptr)
 {
-	volatile char tmp;
 	int ret;
 	struct sigaction act;
 	struct sigaction oldact;
@@ -45,7 +44,7 @@ int test_segfault(void *memptr)
 		return 0;
 	}
 	ret=sigsetjmp(jump_env, 1);
-	if(!ret) tmp = *((char *)(memptr));
+	if(!ret) *((volatile char *)(memptr));
 	sigaction(SIGSEGV,&oldact,NULL);
 	return ret;
 }
