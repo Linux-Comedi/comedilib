@@ -878,6 +878,25 @@ in the alphabetically appropriate place.
 
 <listitem>
 <para>
+Edit <filename>comedi/drivers/Kbuild</filename> and a line according to
+the type of driver:
+<programlisting>
+obj-$(COMEDI_CONFIG_PCI_MODULES) += mydriver.o  # for a PCI driver
+</programlisting>
+<programlisting>
+obj-$(COMEDI_CONFIG_PCMCIA_MODULES) += mydriver.o  # for a PCMCIA driver
+</programlisting>
+<programlisting>
+obj-$(COMEDI_CONFIG_USB_MODULES) += mydriver.o  # for a USB driver
+</programlisting>
+<programlisting>
+obj-m += mydriver.o  # for other driver types
+</programlisting>
+</para>
+</listitem>
+
+<listitem>
+<para>
 Run <command>./autogen.sh</command> in the top-level comedi directory.  You will
 need to have (a recent version of) autoconf and automake
 installed to successfully run <command>autogen.sh</command>.  Afterwards, your driver will
