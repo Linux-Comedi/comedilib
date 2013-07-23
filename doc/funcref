@@ -646,7 +646,7 @@ Description:
  is affected by the Comedilib out-of-range
  behavior (see function <function><link
  linkend="func-ref-comedi-set-global-oor-behavior"
- >comedi_set_global_oor_behavior></link></function>).
+ >comedi_set_global_oor_behavior</link></function>).
  If the out-of-range behavior is set to
  <constant>COMEDI_OOR_NAN</constant>,
  endpoint values are converted to <constant>NAN</constant>.  If the out-of-range
@@ -663,7 +663,7 @@ Description:
  Converts <parameter class="function">data</parameter> given in Comedi's integer
  sample values (<type>lsampl_t</type>, between <literal>0</literal> and
  maxdata) into physical units (<type>double</type>).  The
- <parameter class="functioN">conversion_polynomial</parameter>
+ <parameter class="function">conversion_polynomial</parameter>
  parameter is obtained from either
  <function><link linkend="func-ref-comedi-get-hardcal-converter">comedi_get_hardcal_converter</link></function> or
  <function><link linkend="func-ref-comedi-get-softcal-converter">comedi_get_softcal_converter</link></function>.
