@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
 				comedi_perror("comedi_mark_buffer_written");
 				exit(1);
 			}
-			printf("marked %lui more samples as written\n", (unsigned long)bytes_unmarked / sizeof(sampl_t));
+			printf("marked %lu more samples as written\n", (unsigned long)bytes_unmarked / sizeof(sampl_t));
 		}else
 			usleep(10000);
 	}
