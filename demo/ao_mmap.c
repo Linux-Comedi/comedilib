@@ -137,11 +137,6 @@ int main(int argc, char *argv[])
 	}
 	num_samples = size / sizeof(sampl_t);
 	write_waveform(map, num_samples, amplitude, offset, maxdata);
-	if(msync(map, size, MS_SYNC) < 0)
-	{
-		perror("msync");
-		exit(1);
-	}
 	printf("marking %i samples as written\n", num_samples);
 	ret = comedi_mark_buffer_written(dev, options.subdevice, size);
 	if(ret < 0)
