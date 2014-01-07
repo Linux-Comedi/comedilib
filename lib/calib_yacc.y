@@ -53,11 +53,6 @@ struct calib_yyparse_private
 
 YY_DECL;
 
-static inline calib_yyparse_private_t* priv( calib_yyparse_private_t *parse_arg)
-{
-	return parse_arg;
-}
-
 static void free_calibration_setting( comedi_calibration_setting_t *setting )
 {
 	if( setting->channels );
@@ -369,7 +364,7 @@ static void yyerror(calib_yyparse_private_t *parse_arg, const char *s)
 	input: '{' hash '}'
 		| error
 			{
-				fprintf(stderr, "input error on line %i\n", calib_yyget_lineno(priv(parse_arg)->yyscanner));
+				fprintf(stderr, "input error on line %i\n", calib_yyget_lineno(parse_arg->yyscanner));
 // 				fprintf(stderr, "input error on line %i\n", @1.first_line );
 				YYABORT;
 			}
@@ -382,13 +377,13 @@ static void yyerror(calib_yyparse_private_t *parse_arg, const char *s)
 
 	hash_element: T_DRIVER_NAME T_ASSIGN T_STRING
 		{
-			if( priv(parse_arg)->parsed_file->driver_name != NULL ) YYABORT;
-			priv(parse_arg)->parsed_file->driver_name = strdup( $3 );
+			if( parse_arg->parsed_file->driver_name != NULL ) YYABORT;
+			parse_arg->parsed_file->driver_name = strdup( $3 );
 		}
 		| T_BOARD_NAME T_ASSIGN T_STRING
 		{
-			if( priv(parse_arg)->parsed_file->board_name != NULL ) YYABORT;
-			priv(parse_arg)->parsed_file->board_name = strdup( $3 );
+			if( parse_arg->parsed_file->board_name != NULL ) YYABORT;
+			parse_arg->parsed_file->board_name = strdup( $3 );
 		}
 		| T_CALIBRATIONS T_ASSIGN '[' calibrations_array ']'
 		;
@@ -398,8 +393,8 @@ static void yyerror(calib_yyparse_private_t *parse_arg, const char *s)
 		| '{' calibration_setting '}' ',' calibrations_array
 		;
 
-	calibration_setting: /* empty */ { priv(parse_arg)->cal_index++; }
-		| calibration_setting_element { priv(parse_arg)->cal_index++; }
+	calibration_setting: /* empty */ { parse_arg->cal_index++; }
+		| calibration_setting_element { parse_arg->cal_index++; }
 		| calibration_setting_element ',' calibration_setting
 		;
 
@@ -417,12 +412,12 @@ static void yyerror(calib_yyparse_private_t *parse_arg, const char *s)
 		| T_SOFTCAL_TO_PHYS T_ASSIGN '{' polynomial '}'
 		{
 			if(add_polynomial(parse_arg, POLYNOMIAL_TO_PHYS) < 0) YYERROR;
-			priv(parse_arg)->num_coefficients = 0;
+			parse_arg->num_coefficients = 0;
 		}
 		| T_SOFTCAL_FROM_PHYS T_ASSIGN '{' polynomial '}'
 		{
 			if(add_polynomial(parse_arg, POLYNOMIAL_FROM_PHYS) < 0) YYERROR;
-			priv(parse_arg)->num_coefficients = 0;
+			parse_arg->num_coefficients = 0;
 		}
 		;
 
@@ -455,14 +450,14 @@ static void yyerror(calib_yyparse_private_t *parse_arg, const char *s)
 		| '{' caldac '}' ',' caldacs_array
 		;
 
-	caldac: /* empty */ { if(add_caldac( parse_arg, priv(parse_arg)->caldac ) < 0) YYERROR; }
-		| caldac_element { if(add_caldac( parse_arg, priv(parse_arg)->caldac ) < 0) YYERROR; }
+	caldac: /* empty */ { if(add_caldac( parse_arg, parse_arg->caldac ) < 0) YYERROR; }
+		| caldac_element { if(add_caldac( parse_arg, parse_arg->caldac ) < 0) YYERROR; }
 		| caldac_element ',' caldac
 		;
 
-	caldac_element: T_SUBDEVICE T_ASSIGN T_NUMBER { priv(parse_arg)->caldac.subdevice = $3; }
-		| T_CHANNEL T_ASSIGN T_NUMBER { priv(parse_arg)->caldac.channel = $3; }
-		| T_VALUE T_ASSIGN T_NUMBER { priv(parse_arg)->caldac.value = $3; }
+	caldac_element: T_SUBDEVICE T_ASSIGN T_NUMBER { parse_arg->caldac.subdevice = $3; }
+		| T_CHANNEL T_ASSIGN T_NUMBER { parse_arg->caldac.channel = $3; }
+		| T_VALUE T_ASSIGN T_NUMBER { parse_arg->caldac.value = $3; }
 		;
 
 	polynomial: /* empty */
@@ -491,11 +486,11 @@ static void yyerror(calib_yyparse_private_t *parse_arg, const char *s)
 
 	expansion_origin: T_FLOAT
 		{
-			priv(parse_arg)->polynomial.expansion_origin = $1;
+			parse_arg->polynomial.expansion_origin = $1;
 		}
 		| T_NUMBER
 		{
-			priv(parse_arg)->polynomial.expansion_origin = $1;
+			parse_arg->polynomial.expansion_origin = $1;
 		}
 		;
 
