@@ -11,7 +11,7 @@ Requirements:
   autoconf >= 2.54
   libtool >= 1.5
   flex >= 2.4.1
-  bison
+  bison >= 1.875
 
 Optional:
 
