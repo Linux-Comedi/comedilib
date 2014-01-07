@@ -85,6 +85,8 @@ void internal_error(int error_number);
 typedef struct subdevice_struct subdevice;
 typedef struct device_struct device;
 
+typedef struct calib_yyparse_private calib_yyparse_private_t;
+
 struct comedi_t_struct{
 	int magic;
 

@@ -30,8 +30,7 @@
 #include <stdlib.h>
 
 #define YYERROR_VERBOSE
-#define YYPARSE_PARAM parse_arg
-#define YYLEX_PARAM priv(YYPARSE_PARAM)->yyscanner
+#define LEX_PARAM parse_arg->yyscanner
 
 #include "calib_yacc.h"
 #include "calib_lex.h"
@@ -42,7 +41,7 @@ enum polynomial_direction
 	POLYNOMIAL_FROM_PHYS
 };
 
-typedef struct
+struct calib_yyparse_private
 {
 	yyscan_t yyscanner;
 	comedi_calibration_t *parsed_file;
@@ -50,7 +49,7 @@ typedef struct
 	int cal_index;
 	unsigned num_coefficients;
 	comedi_polynomial_t polynomial;
-} calib_yyparse_private_t;
+};
 
 YY_DECL;
 
@@ -336,14 +335,18 @@ static void fill_inverse_linear_polynomials(comedi_calibration_t *calibration)
 	}
 }
 
-static void yyerror(const char *s)
+static void yyerror(calib_yyparse_private_t *parse_arg, const char *s)
 {
 	fprintf(stderr, "%s\n", s);
 }
 
 %}
 
-%pure_parser
+%pure-parser
+
+%parse-param {calib_yyparse_private_t *parse_arg}
+
+%lex-param {LEX_PARAM}
 
 %union
 {
