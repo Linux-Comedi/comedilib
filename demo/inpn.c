@@ -64,8 +64,8 @@ int main(int argc, char *argv[])
 
 		maxdata = comedi_get_maxdata(device, options.subdevice, chan);
 		for(range = 0; range < n_ranges; range++){
-			comedi_data_read(device, options.subdevice, chan, options.range, options.aref, &data);
-			voltage = comedi_to_phys(data, comedi_get_range(device, options.subdevice, chan, options.range), maxdata);
+			comedi_data_read(device, options.subdevice, chan, range, options.aref, &data);
+			voltage = comedi_to_phys(data, comedi_get_range(device, options.subdevice, chan, range), maxdata);
 			printf("%g ", voltage);
 		}
 		printf("\n");
