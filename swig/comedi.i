@@ -38,6 +38,11 @@
 %include "carrays.i"
 %include "typemaps.i"
 
+#ifdef SWIGPYTHON
+%rename("%(strip:[COMEDI_])s", regextarget=1) "COMEDI_.*";
+%rename("%(strip:[comedi_])s", regextarget=1) "comedi_.*";
+#endif
+
 %inline %{
 static unsigned int cr_pack(unsigned int chan, unsigned int rng, unsigned int aref){
 	return CR_PACK(chan,rng,aref);
@@ -69,3 +74,24 @@ static unsigned int cr_aref(unsigned int a){
 %array_class(sampl_t, sampl_array);
 %array_class(lsampl_t, lsampl_array);
 %array_class(comedi_insn, insn_array);
+
+%insert("python") %{
+# Trick to allow accessing functions and constants with their original C name
+import sys
+
+class __Wrapper(object):
+    def __init__(self, wrapped):
+        self.wrapped = wrapped
+
+    def __getattr__(self, name):
+        try:
+            return getattr(self.wrapped, name)
+        except AttributeError:
+            if name.startswith("comedi_") or name.startswith("COMEDI_"):
+                return getattr(self.wrapped, name[7:])
+            else:
+                raise
+
+sys.modules[__name__] = __Wrapper(sys.modules[__name__])
+%}
+
