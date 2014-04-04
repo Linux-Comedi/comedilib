@@ -15,6 +15,10 @@ ACLOCAL_AMFLAGS = -I m4
 ## ruby binding is excluded from distcheck because setup.rb doesn't support uninstall
 DISTCHECK_CONFIGURE_FLAGS = RUBY_PREFIX='$${prefix}' --disable-ruby-binding
 
+## create the calibrations directory during installation
+install-data-local:
+	$(MKDIR_P) "$(DESTDIR)/${localstatedir}/lib/comedi/calibrations"
+
 dist-hook:
 	@if test -d "$(srcdir)/.git"; \
 	then \
