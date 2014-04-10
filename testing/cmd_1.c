@@ -211,8 +211,10 @@ int test_cmd_write_fast_1chan(void)
 		if(ret<wc){
 			go = 0;
 		}
-
 		total += ret;
+		if(total >= num_bytes){
+			go = 0;
+		}
 		if(verbose)printf("write %d %d\n",ret,total);
 	}
 
