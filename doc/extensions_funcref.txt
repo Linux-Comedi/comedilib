@@ -46,7 +46,7 @@ Description:
  <parameter class="function">period_ns</parameter>
  parameters.  This function is only useable
  on subdevices that provide support for the
- <constant>INSN_CONFIG_GET_CLOCK_SOURCE</constant>
+ <constant>INSN_CONFIG_GET_CLOCK_SRC</constant>
  configuration instruction.
 Returns:
  <literal>0</literal> on success, <literal>-1</literal> on error.
@@ -72,7 +72,7 @@ Description:
 
  This function is only useable
  on subdevices that provide support for the
- <constant>INSN_CONFIG_GET_GATE_SOURCE</constant>
+ <constant>INSN_CONFIG_GET_GATE_SRC</constant>
  configuration instruction.
 Returns:
  <literal>0</literal> on success, <literal>-1</literal> on error.
@@ -166,7 +166,7 @@ Description:
 
  This function is only useable
  on subdevices that provide support for the
- <constant>INSN_CONFIG_SET_CLOCK_SOURCE</constant> configuration instruction.
+ <constant>INSN_CONFIG_SET_CLOCK_SRC</constant> configuration instruction.
 Returns:
  <literal>0</literal> on success, <literal>-1</literal> on error.
 
@@ -239,7 +239,7 @@ Description:
  function.
  This function is only useable
  on subdevices that provide support for the
- <constant>INSN_CONFIG_SET_GATE_SOURCE</constant>
+ <constant>INSN_CONFIG_SET_GATE_SRC</constant>
  configuration instruction.
 Returns:
  <literal>0</literal> on success, <literal>-1</literal> on error.
@@ -277,7 +277,7 @@ Description:
 
  This function is only useable
  on subdevices that provide support for the
- <constant>INSN_CONFIG_SET_OTHER_SOURCE</constant>
+ <constant>INSN_CONFIG_SET_OTHER_SRC</constant>
  configuration instruction.
 Returns:
  <literal>0</literal> on success, <literal>-1</literal> on error.
