@@ -2010,6 +2010,117 @@ should get latched?
 
 </section>
 
+<section id="GPCT">
+<title>
+National instruments General Purpose Counters/Timers (GPCT)
+</title>
+
+Counters/timers and pulse generators are fairly different in terms of
+functionality, but they correspond to similar devices seen either as input
+or output. When generalising, these devices are both referred to as
+"counters". The NI boards provide a couple of such counters, under the name of
+GPCT.
+A counter is made of the following basic elements:
+<variablelist spacing="compact">
+ <varlistentry>
+  <term>Input source</term>
+  <listitem>the signal measured or the clock of the pulse generation.</listitem>
+ </varlistentry>
+ <varlistentry>
+  <term>Gate</term>
+  <listitem>controls when the counting (or sampling) occurs.</listitem>
+ </varlistentry>
+ <varlistentry>
+  <term>Register</term>
+  <listitem>holds the current count.</listitem>
+ </varlistentry>
+ <varlistentry>
+  <term>Out</term>
+  <listitem>for the output counters (pulse generators), the output signal.</listitem>
+ </varlistentry>
+</variablelist>
+
+<para>
+There are many different ways to count, time or generate pulses. All the modes
+rely on the counter and some particular configuration. For example, in a typical
+buffered counting mode, the source is the (digital) signal that is measured, the
+counter is increased at every rising edge of the signal, the gate is the
+(digital) signal indicating when to save the counter to memory. It is preferable
+you get first familiarized with these various modes by reading your NI board
+documentation before reading the following description on the mapping to the
+comedi interface.
+</para>
+
+<para>
+Each counter of the board is represented in comedi as a subdevice of type
+<constant>COMEDI_SUBD_COUNTER</constant>. Each subdevice has a device file
+associated (eg, <filename>/dev/comedi0_subd11</filename>) in order to read or
+write buffered data from or to the counter.
+Note that the comedi subdevice has three "channels". In most case, only channel
+0 is to be used. Reading or writing on channel 0 corresponds to reading/writing
+the counter value. The GPCT also has two registers named A and B, they can be
+accessed respectively via channels 1 and 2.
+</para>
+
+<para>
+To configure the behaviour of the counter with comedi, the
+function <function>comedi_set_counter_mode</function> is used.
+The possible mode values are to be found in the <type>ni_gpct_mode_bits</type>
+enum constants. For instance, by default the counter is cumulative, even in
+buffered counting. To reinitialise it after each sampling (ie, after an edge on
+the gate signal), one can add the <constant>NI_GPCT_LOADING_ON_GATE_BIT</constant>
+to the mode. In that case, the counter will be reset to the value of the A
+register after each sampling.
+</para>
+
+<para>
+To configure the signal to be used as the "source", one uses the <function>
+comedi_set_clock_source</function> with one constant from the
+<type>ni_gpct_clock_source_bits</type> enum. When the period of the signal is
+fixed and known, it should be specified as the last parameter of the method, otherwise
+<literal>0</literal> should be passed. Note that in comedi this is called "clock"
+because in timer and pulse generator, this signal is used as the clock.
+</para>
+
+<para>
+To configure the signal to be used as the "gate", one uses the <function>
+comedi_set_gate_source</function> with one constant from the <type>
+ni_gpct_gate_select</type> enum. When the gate signal is not be used,
+<constant>NI_GPCT_DISABLED_GATE_SELECT</constant> should be specified. Some
+NI boards have two gates, but the behaviour associated with the second gate is
+usually unknown so it is recommended to disable it. Note that this is called
+"gate" because in some modes, this signal is used to block/unblock the counter.
+</para>
+
+<para>
+The function <function>comedi_reset</function> will stop and reset a counter.
+After being configured, to start a counter, it should be "armed", which can be
+done either with the <function>comedi_arm</function> function (for simple counting
+mode), or with the <structfield>start_src</structfield> member of the command
+(for buffered counting).
+</para>
+
+<para>
+One side thing to mention is the signal routing of the NI card, which is done
+via the PFIs (Programmable Function Inputs).
+NI's naming is confusing because they use the same name for the
+terminal (ie, physical input/output pins) and for the signal
+(ie, the logical information that controls/indicates a specific event).
+
+The routing allows to configure which signal goes to a PFI terminal.
+This is done via <function>comedi_set_routing</function>, with subdevice being
+the special DIO comedi subdevice (eg, 7 on M-series), the PFI terminal
+number as channel, the signal that should be routed to it encoded as source with
+one of the constants from the <type>ni_pfi_routing</type> enum.
+The direction of the pin must also be correctly configured (ie, whether it is
+used as input or output). This is done via <function>comedi_dio_config</function>
+with the same subdevice and channel, and either <constant>COMEDI_INPUT</constant>
+or <constant>COMEDI_OUTPUT</constant>.
+</para>
+
+</section>
+
+
 <section id="RTSI">
 <title>
 National instruments RTSI trigger bus
