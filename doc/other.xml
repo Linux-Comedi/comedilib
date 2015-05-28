@@ -2012,7 +2012,7 @@ should get latched?
 
 <section id="GPCT">
 <title>
-National instruments General Purpose Counters/Timers (GPCT)
+National Instruments General Purpose Counters/Timers (GPCT)
 </title>
 
 Counters/timers and pulse generators are fairly different in terms of
@@ -2123,7 +2123,7 @@ or <constant>COMEDI_OUTPUT</constant>.
 
 <section id="RTSI">
 <title>
-National instruments RTSI trigger bus
+National Instruments RTSI trigger bus
 </title>
 <para>
 A number of NI boards support the RTSI (Real Time System Integration) bus.
