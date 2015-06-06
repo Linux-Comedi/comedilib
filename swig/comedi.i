@@ -59,6 +59,9 @@ static unsigned int cr_range(unsigned int a){
 static unsigned int cr_aref(unsigned int a){
 	return CR_AREF(a);
 }
+
+/*Trick to force this enum value from being unsigned instead of signed (and wrong value) */
+#define NI_GPCT_INVERT_CLOCK_SRC_BIT 0x80000000U
 %}
 
 #ifdef SWIGRUBY
