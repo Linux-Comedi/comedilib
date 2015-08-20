@@ -523,7 +523,10 @@ extern comedi_calibration_t* _comedi_parse_calibration_file( const char *cal_fil
 	}
 	calib_yylex_destroy(priv.yyscanner);
 	fclose( file );
-	fill_inverse_linear_polynomials(priv.parsed_file);
+	if( priv.parsed_file )
+	{
+		fill_inverse_linear_polynomials(priv.parsed_file);
+	}
 	return priv.parsed_file;
 }
 
