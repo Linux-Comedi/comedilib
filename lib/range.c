@@ -70,7 +70,7 @@ double _comedi_to_phys(lsampl_t data,comedi_range *rng,lsampl_t maxdata)
 	if(!rng)return NAN;
 	if(!maxdata)return NAN;
 
-	if(comedi_oor_is_nan==COMEDI_OOR_NAN && (data==0 || data==maxdata))
+	if(comedi_oor_is_nan==COMEDI_OOR_NAN && (data==0 || data>=maxdata))
 		return NAN;
 
 	x=data;
@@ -154,7 +154,7 @@ int _comedi_sampl_to_phys(double *dest, int dst_stride, sampl_t *src,
 	mult = (rng->max-rng->min)/maxdata;
 	if(comedi_oor_is_nan==COMEDI_OOR_NAN){
 		for(i=0;i<n;i++){
-			if(*src==0 || *src==maxdata){
+			if(*src==0 || *src>=maxdata){
 				oor++;
 				*dest=NAN;
 			}else{
@@ -165,7 +165,7 @@ int _comedi_sampl_to_phys(double *dest, int dst_stride, sampl_t *src,
 		}
 	}else{
 		for(i=0;i<n;i++){
-			if(*src==0 || *src==maxdata){
+			if(*src==0 || *src>=maxdata){
 				oor++;
 			}
 			*dest = rng->min + mult*(*src);
