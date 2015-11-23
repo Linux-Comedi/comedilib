@@ -38,10 +38,15 @@ int main(int argc, char *argv[])
 {
 	comedi_t *dev;
 	comedi_cmd c,*cmd=&c;
-	int size;
-	int front, back;
+	unsigned int bufsize;
+	unsigned int front, back;
 	int ret;
-	int i;
+	unsigned int i;
+	unsigned int bufpos;
+	unsigned int subdev_flags;
+	unsigned int sample_size;
+	unsigned int nsamples;
+	unsigned int col;
 	struct parsed_options options;
 
 	init_parsed_options(&options);
@@ -53,10 +58,23 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	size = comedi_get_buffer_size(dev, options.subdevice);
-	fprintf(stderr,"buffer size is %d\n", size);
+	ret = comedi_get_buffer_size(dev, options.subdevice);
+	if(ret < 0){
+		comedi_perror("comedi_get_buffer_size");
+		exit(1);
+	}
+	bufsize = ret;
+	fprintf(stderr,"buffer size is %u\n", bufsize);
+	ret = comedi_get_subdevice_flags(dev, options.subdevice);
+	if(ret < 0){
+		comedi_perror("comedi_get_subdevice_flags");
+	}
+	subdev_flags = ret;
+	sample_size = (subdev_flags & SDF_LSAMPL)
+		? sizeof(lsampl_t) : sizeof(sampl_t);
+	fprintf(stderr,"sample size is %u\n", sample_size);
 
-	map = mmap(NULL,size,PROT_READ,MAP_SHARED, comedi_fileno(dev), 0);
+	map = mmap(NULL,bufsize,PROT_READ,MAP_SHARED, comedi_fileno(dev), 0);
 	fprintf(stderr, "map=%p\n", map);
 	if( map == MAP_FAILED ){
 		perror( "mmap" );
@@ -89,23 +107,39 @@ int main(int argc, char *argv[])
 
 	front = 0;
 	back = 0;
+	bufpos = 0;
+	col = 0;
 	while(1){
-		front += comedi_get_buffer_contents(dev, options.subdevice);
-		if(options.verbose) fprintf(stderr, "front = %d, back = %d\n", front, back);
-		if(front < back) break;
+		ret = comedi_get_buffer_contents(dev, options.subdevice);
+		if(ret < 0){
+			comedi_perror("comedi_get_buffer_contents");
+			break;
+		}
+		front += ret;
+		nsamples = (front - back) / sample_size;
+		front = back + nsamples * sample_size;
+		if(options.verbose) fprintf(stderr, "front = %u, back = %u, samples = %u\n", front, back, nsamples);
 		if(front == back){
 			//comedi_poll(dev, options.subdevice);
 			usleep(10000);
 			continue;
 		}
+		for(i = 0; i < nsamples; i++){
+			unsigned int sample;
 
-		for(i = back; i < front; i += sizeof(sampl_t)){
-			static int col = 0;
-			printf("%d ",*(sampl_t *)(map + (i % size)));
+			if(sample_size == sizeof(sampl_t))
+				sample = *(sampl_t *)((char *)map + bufpos);
+			else
+				sample = *(lsampl_t *)((char *)map + bufpos);
+			printf("%u ", sample);
 			col++;
 			if(col == options.n_chan){
 				printf("\n");
 				col = 0;
+			}
+			bufpos += sample_size;
+			if(bufpos >= bufsize){
+				bufpos = 0;
 			}
 		}
 
