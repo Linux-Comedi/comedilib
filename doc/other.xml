@@ -1090,10 +1090,15 @@ until stopped using
 <function><link linkend="func-ref-comedi-cancel">comedi_cancel</link></function>.
 </para>
 <para>
-Its <structfield>stop_arg</structfield> argument is reserved and should be set to <literal>0</literal>.
-(<quote>Reserved</quote>
-means that unspecified things could happen if it is set to something
-else but <literal>0</literal>.)
+<structfield>stop_arg</structfield> is used to denote how many samples should be
+used in the continuous acquisition.  If <structfield>stop_arg</structfield> is
+set to <literal>0</literal>, the entire output buffer may contribute to the
+output.  If <structfield>stop_arg</structfield> != <literal>0</literal>, only
+the memory for <structfield>stop_arg</structfield> samples will be used.  Many
+drivers do not yet support
+<structfield>stop_arg</structfield>!=<literal>0</literal> and should enforce
+<structfield>stop_arg</structfield>=<literal>0</literal> via
+comedi_command_test.
 </para>
 </listitem>
 
