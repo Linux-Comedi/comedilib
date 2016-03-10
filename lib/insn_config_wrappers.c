@@ -26,8 +26,8 @@
 
 #include "libinternal.h"
 
-EXPORT_ALIAS_DEFAULT(_comedi_reset,comedi_reset,0.9.0);
-int _comedi_reset(comedi_t *device, unsigned subdevice)
+EXPORT_ALIAS_DEFAULT(_comedi_reset_channel,comedi_reset_channel,0.11.0);
+int _comedi_reset_channel(comedi_t *device, unsigned subdevice, unsigned channel)
 {
 	comedi_insn insn;
 	lsampl_t data[1];
@@ -35,7 +35,7 @@ int _comedi_reset(comedi_t *device, unsigned subdevice)
 	memset(&insn, 0, sizeof(comedi_insn));
 	insn.insn = INSN_CONFIG;
 	insn.subdev = subdevice;
-	insn.chanspec = 0;
+	insn.chanspec = channel;
 	insn.data = data;
 	insn.n = sizeof(data) / sizeof(data[0]);
 	data[0] = INSN_CONFIG_RESET;
@@ -44,8 +44,14 @@ int _comedi_reset(comedi_t *device, unsigned subdevice)
 	else return -1;
 }
 
-EXPORT_ALIAS_DEFAULT(_comedi_arm,comedi_arm,0.9.0);
-int _comedi_arm(comedi_t *device, unsigned subdevice, unsigned target)
+EXPORT_ALIAS_DEFAULT(_comedi_reset,comedi_reset,0.9.0);
+int _comedi_reset(comedi_t *device, unsigned subdevice)
+{
+	return _comedi_reset_channel(device, subdevice, 0);
+}
+
+EXPORT_ALIAS_DEFAULT(_comedi_arm_channel,comedi_arm_channel,0.11.0);
+int _comedi_arm_channel(comedi_t *device, unsigned subdevice, unsigned channel, unsigned target)
 {
 	comedi_insn insn;
 	lsampl_t data[2];
@@ -53,7 +59,7 @@ int _comedi_arm(comedi_t *device, unsigned subdevice, unsigned target)
 	memset(&insn, 0, sizeof(comedi_insn));
 	insn.insn = INSN_CONFIG;
 	insn.subdev = subdevice;
-	insn.chanspec = 0;
+	insn.chanspec = channel;
 	insn.data = data;
 	insn.n = sizeof(data) / sizeof(data[0]);
 	data[0] = INSN_CONFIG_ARM;
@@ -63,8 +69,14 @@ int _comedi_arm(comedi_t *device, unsigned subdevice, unsigned target)
 	else return -1;
 }
 
-EXPORT_ALIAS_DEFAULT(_comedi_disarm,comedi_disarm,0.11.0);
-int _comedi_disarm(comedi_t *device, unsigned subdevice)
+EXPORT_ALIAS_DEFAULT(_comedi_arm,comedi_arm,0.9.0);
+int _comedi_arm(comedi_t *device, unsigned subdevice, unsigned target)
+{
+	return _comedi_arm_channel(device, subdevice, 0, target);
+}
+
+EXPORT_ALIAS_DEFAULT(_comedi_disarm_channel,comedi_disarm_channel,0.11.0);
+int _comedi_disarm_channel(comedi_t *device, unsigned subdevice, unsigned channel)
 {
 	comedi_insn insn;
 	lsampl_t data[1];
@@ -72,13 +84,19 @@ int _comedi_disarm(comedi_t *device, unsigned subdevice)
 	memset(&insn, 0, sizeof(comedi_insn));
 	insn.insn = INSN_CONFIG;
 	insn.subdev = subdevice;
-	insn.chanspec = 0;
+	insn.chanspec = channel;
 	insn.data = data;
 	insn.n = sizeof(data) / sizeof(data[0]);
 	data[0] = INSN_CONFIG_DISARM;
 
 	if(comedi_do_insn(device, &insn) >= 0) return 0;
 	else return -1;
+}
+
+EXPORT_ALIAS_DEFAULT(_comedi_disarm,comedi_disarm,0.11.0);
+int _comedi_disarm(comedi_t *device, unsigned subdevice)
+{
+	return _comedi_disarm_channel(device, subdevice, 0);
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_get_clock_source,comedi_get_clock_source,0.10.0);

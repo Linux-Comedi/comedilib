@@ -119,5 +119,8 @@ v0.10.0 {
 
 v0.11.0 {
 	global:
+		comedi_arm_channel;
 		comedi_disarm;
+		comedi_disarm_channel;
+		comedi_reset_channel;
 } v0.10.0;

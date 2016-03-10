@@ -6,14 +6,39 @@ Param: unsigned int subdevice
 Param: unsigned int source
 Status: alpha
 Description:
- This function arms a subdevice.  It may, for example, arm a counter
- to begin counting.  The <parameter class="function">source</parameter>
- parameter specifies
- what source should trigger the subdevice to begin.  The possible
- sources are driver-dependant.  This function is only useable
- on subdevices that provide support for the
- <constant>INSN_CONFIG_ARM</constant> configuration
- instruction.
+ This function arms a subdevice.  It may, for example, arm a counter to
+ begin counting.  The <parameter class="function">source</parameter>
+ parameter specifies what source should trigger the subdevice to begin.
+ The possible sources are driver-dependant.  This function is only
+ useable on subdevices that provide support for the
+ <constant>INSN_CONFIG_ARM</constant> configuration instruction.
+ Some subdevices treat this as an instruction to arm a specific channel.
+ For those subdevices, this function will arm channel
+ <literal>0</literal> and <function><link
+ linkend="func-ref-comedi-arm-channel">comedi_arm_channel</link></function>
+ should be called instead of this one to specify the channel.
+Returns:
+ <literal>0</literal> on success, <literal>-1</literal> on error.
+
+Function: comedi_arm_channel -- arm a subdevice channel
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int channel
+Param: unsigned int source
+Status: alpha
+Description:
+ This function arms a specified channel of a subdevice.  It may, for
+ example, arm a counter to begin counting.  The <parameter
+ class="function">source</parameter> parameter specifies what source
+ should trigger the subdevice to begin.  The possible sources are
+ driver-dependant.  This function is only useable on subdevices that
+ provide support for the <constant>INSN_CONFIG_ARM</constant>
+ configuration instruction.  Some subdevices treat this as an
+ instruction to arm the whole subdevice and ignore the specified
+ channel.  For such subdevices, <function><link
+ linkend="func-ref-comedi-arm">comedi_arm</link></function> is normally
+ called instead.
 Returns:
  <literal>0</literal> on success, <literal>-1</literal> on error.
 
@@ -26,7 +51,30 @@ Description:
  This function disarms a subdevice.  It may, for example, stop a counter
  counting.  This function is only useable on subdevices that provide
  support for the <constant>INSN_CONFIG_DISARM</constant> configuration
- instruction.
+ instruction.  Some subdevices treat this as an instruction to disarm a
+ specific channel.  For those subdevices, this function will disarm
+ channel <literal>0</literal> and <function><link
+ linkend="func-ref-comedi-disarm-channel">comedi_disarm_channel</link></function>
+ should be called instead of this one to specify the channel.
+Returns:
+ <literal>0</literal> on success, <literal>-1</literal> on error.
+
+Function: comedi_disarm_channel -- disarm a subdevice channel
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int channel
+Status: alpha
+Description:
+ This function disarms a specified channel of a subdevice.  It may, for
+ example, stop a counter counting.  This function is only useable on
+ subdevices that provide support for the
+ <constant>INSN_CONFIG_DISARM</constant> configuration instruction.
+ Some subdevices treat this as an instruction to disarm the whole
+ subdevice and ignore the specified channel.  For such subdevices,
+ <function><link
+ linkend="func-ref-comedi-disarm">comedi_disarm</link></function> is
+ normally called instead.
 Returns:
  <literal>0</literal> on success, <literal>-1</literal> on error.
 
@@ -141,10 +189,30 @@ Param: comedi_t * device
 Param: unsigned int subdevice
 Status: alpha
 Description:
- This function resets a subdevice.  It is only useable
- on subdevices that provide support for the
- <constant>INSN_CONFIG_RESET</constant> configuration
- instruction.
+ This function resets a subdevice.  It is only useable on subdevices
+ that provide support for the <constant>INSN_CONFIG_RESET</constant>
+ configuration instruction.  Some subdevices treat this as an
+ instruction to reset a specific channel.  For those subdevices, this
+ function will reset channel <literal>0</literal> and <function><link
+ linkend="func-ref-comedi-reset-channel">comedi_reset_channel</link></function>
+ should be called instead of this one to specify the channel.
+Returns:
+ <literal>0</literal> on success, <literal>-1</literal> on error.
+
+Function: comedi_reset_channel -- reset a subdevice channel
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int channel
+Status: alpha
+Description:
+ This function resets a specified channel of a subdevice.  It is only
+ useable on subdevices that provide support for the
+ <constant>INSN_CONFIG_RESET</constant> configuration instruction.  Some
+ subdevices treat this as an instruction to reset the whole subdevice
+ and ignore the specified channel.  For such subdevices, <function><link
+ linkend="func-ref-comedi-reset">comedi_reset</link></function> is
+ normally called instead.
 Returns:
  <literal>0</literal> on success, <literal>-1</literal> on error.
 
