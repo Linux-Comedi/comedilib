@@ -140,7 +140,7 @@ int comedi_sampl_to_phys(double *dest, int dst_stride, sampl_t *src,
 int comedi_sampl_from_phys(sampl_t *dest,int dst_stride,double *src,
 	int src_stride, comedi_range *rng, lsampl_t maxdata, int n);
 
-/* syncronous stuff */
+/* synchronous stuff */
 int comedi_data_read(comedi_t *it,unsigned int subd,unsigned int chan,
 	unsigned int range,unsigned int aref,lsampl_t *SWIG_OUTPUT(data));
 int comedi_data_read_n(comedi_t *it,unsigned int subd,unsigned int chan,
