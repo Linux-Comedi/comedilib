@@ -17,6 +17,19 @@ Description:
 Returns:
  <literal>0</literal> on success, <literal>-1</literal> on error.
 
+Function: comedi_disarm -- disarm a subdevice
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Status: alpha
+Description:
+ This function disarms a subdevice.  It may, for example, stop a counter
+ counting.  This function is only useable on subdevices that provide
+ support for the <constant>INSN_CONFIG_DISARM</constant> configuration
+ instruction.
+Returns:
+ <literal>0</literal> on success, <literal>-1</literal> on error.
+
 Function: comedi_get_clock_source -- get master clock for a subdevice
 Retval: int
 Param: comedi_t * device
