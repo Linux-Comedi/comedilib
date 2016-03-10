@@ -42,6 +42,116 @@ Description:
 Returns:
  <literal>0</literal> on success, <literal>-1</literal> on error.
 
+Function: comedi_digital_trigger_disable -- disable a digital trigger
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int trigger_id
+Status: alpha
+Description:
+ This function disables a digital trigger on a subdevice, returning it
+ to its default, inactive, unconfigured state.  If the subdevice
+ supports several digital triggers, the <code language="C"><parameter
+ class="function">trigger_id</parameter></code> selects one.
+
+ This function is only useable on subdevices that provide support for
+ the <constant>INSN_CONFIG_DIGITAL_TRIG</constant> configuration
+ instruction.
+Returns:
+ <literal>0</literal> on success, <literal>-1</literal> on error.
+
+Function: comedi_digital_trigger_enable_edges -- set digital trigger edge detection
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int trigger_id
+Param: unsigned int base_input
+Param: unsigned int rising_edge_inputs
+Param: unsigned int falling_edge_inputs
+Status: alpha
+Description:
+ This function enables edge detection for a digital trigger on a
+ subdevice.  If the subdevice supports several digital triggers, the
+ <code language="C"><parameter
+ class="function">trigger_id</parameter></code> selects one.  The <code
+ language="C"><parameter
+ class="function">rising_edge_inputs</parameter></code> and <code
+ language="C"><parameter
+ class="function">falling_edge_inputs</parameter></code> parameters are
+ bit fields that enable (1) or disable (0) rising and falling edge
+ detection on a set of (up to) 32 inputs.  The least-significant bit
+ corresponds to the input specified by the <code
+ language="C"><parameter>base_input</parameter></code> parameter, with
+ subsequent bits corresponding to subsequent inputs.
+
+ Successive calls to this function have an cumulative effect, which
+ allows digital triggers to be set up for more than 32 inputs.  There
+ may also be a cumulative effect with calls to <function><link
+ linkend="func-ref-comedi-digital-trigger-enable-levels">comedi_digital_trigger_enable_levels</link></function>
+ if the digital trigger supports a combination of edge and level
+ triggering.  Due to the cumulative effect, it may be necessary to call
+ <function><link
+ linkend="func-ref-comedi-digital-trigger-disable">comedi_digital_trigger_disable</link></function>
+ to clear the old settings before reconfiguring the digital trigger
+ inputs.
+
+ A digital trigger may support edge detection, level detection, both at
+ different times, or both at the same time.  If it supports both but not
+ at the same time, configuring edge triggers will disable any previous
+ level triggers, or vice versa.
+
+ This function is only useable on subdevices that provide support for
+ the <constant>INSN_CONFIG_DIGITAL_TRIG</constant> configuration
+ instruction, and only if the digital trigger supports edge detection.
+Returns:
+ <literal>0</literal> on success, <literal>-1</literal> on error.
+
+Function: comedi_digital_trigger_enable_levels -- set digital trigger level detection
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int trigger_id
+Param: unsigned int base_input
+Param: unsigned int high_level_inputs
+Param: unsigned int low_level_inputs
+Status: alpha
+Description:
+ This function enables level detection for a digital trigger on a
+ subdevice.  If the subdevice supports several digital triggers, the
+ <code language="C"><parameter
+ class="function">trigger_id</parameter></code> selects one.  The <code
+ language="C"><parameter
+ class="function">high_level_inputs</parameter></code> and <code
+ language="C"><parameter
+ class="function">low_level_inputs</parameter></code> parameters are
+ bit fields that enable (1) or disable (0) high and low level
+ detection on a set of (up to) 32 inputs.  The least-significant bit
+ corresponds to the input specified by the <code
+ language="C"><parameter>base_input</parameter></code> parameter, with
+ subsequent bits corresponding to subsequent inputs.
+
+ Successive calls to this function have an cumulative effect, which
+ allows digital triggers to be set up for more than 32 inputs.  There
+ may also be a cumulative effect with calls to <function><link
+ linkend="func-ref-comedi-digital-trigger-enable-edges">comedi_digital_trigger_enable_edges</link></function>
+ if the digital trigger supports a combination of edge and level
+ triggering.  Due to the cumulative effect, it may be necessary to call
+ <function><link
+ linkend="func-ref-comedi-digital-trigger-disable">comedi_digital_trigger_disable</link></function>
+ to clear the old settings before reconfiguring the digital trigger
+ inputs.
+
+ A digital trigger may support edge detection, level detection, both at
+ different times, or both at the same time.  If it supports both but not
+ at the same time, configuring level triggers will disable any previous
+ edge triggers, or vice versa.
+
+ This function is only useable on subdevices that provide support for
+ the <constant>INSN_CONFIG_DIGITAL_TRIG</constant> configuration
+ instruction, and only if the digital trigger supports level detection.
+Returns:
+ <literal>0</literal> on success, <literal>-1</literal> on error.
+
 Function: comedi_disarm -- disarm a subdevice
 Retval: int
 Param: comedi_t * device

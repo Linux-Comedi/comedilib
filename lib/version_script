@@ -123,4 +123,7 @@ v0.11.0 {
 		comedi_disarm;
 		comedi_disarm_channel;
 		comedi_reset_channel;
+		comedi_digital_trigger_disable;
+		comedi_digital_trigger_enable_edges;
+		comedi_digital_trigger_enable_levels;
 } v0.10.0;

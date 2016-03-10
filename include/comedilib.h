@@ -306,6 +306,14 @@ int comedi_set_other_source(comedi_t *device, unsigned subdevice, unsigned chann
 	unsigned other, unsigned source);
 int comedi_set_routing(comedi_t *device, unsigned subdevice, unsigned channel, unsigned routing);
 int comedi_get_hardware_buffer_size(comedi_t *device, unsigned subdevice, enum comedi_io_direction direction);
+int comedi_digital_trigger_disable(comedi_t *device, unsigned subdevice,
+	unsigned trigger_id);
+int comedi_digital_trigger_enable_edges(comedi_t *device, unsigned subdevice,
+	unsigned trigger_id, unsigned base_input,
+	unsigned rising_edge_inputs, unsigned falling_edge_inputs);
+int comedi_digital_trigger_enable_levels(comedi_t *device, unsigned subdevice,
+	unsigned trigger_id, unsigned base_input,
+	unsigned high_level_inputs, unsigned low_level_inputs);
 
 #endif
 

@@ -343,3 +343,56 @@ int _comedi_get_hardware_buffer_size(comedi_t *device, unsigned subdevice, enum 
 	if(comedi_do_insn(device, &insn) >= 0) return data[2];
 	else return -1;
 }
+
+static int digital_trigger_config(comedi_t *device, unsigned subdevice,
+	unsigned trigger_id, unsigned config_operation,
+	unsigned config_param1, unsigned config_param2, unsigned config_param3)
+{
+	comedi_insn insn;
+	lsampl_t data[6];
+
+	memset(&insn, 0, sizeof(comedi_insn));
+	insn.insn = INSN_CONFIG;
+	insn.subdev = subdevice;
+	insn.chanspec = 0;
+	insn.data = data;
+	insn.n = sizeof(data) / sizeof(data[0]);
+	data[0] = INSN_CONFIG_DIGITAL_TRIG;
+	data[1] = trigger_id;
+	data[2] = config_operation;
+	data[3] = config_param1;
+	data[4] = config_param2;
+	data[5] = config_param3;
+
+	if(comedi_do_insn(device, &insn) >= 0) return 0;
+	else return -1;
+}
+
+EXPORT_ALIAS_DEFAULT(_comedi_digital_trigger_disable,comedi_digital_trigger_disable,0.11.0);
+int _comedi_digital_trigger_disable(comedi_t *device, unsigned subdevice,
+	unsigned trigger_id)
+{
+	return digital_trigger_config(device, subdevice, trigger_id,
+		COMEDI_DIGITAL_TRIG_DISABLE, 0, 0, 0);
+}
+
+EXPORT_ALIAS_DEFAULT(_comedi_digital_trigger_enable_edges,comedi_digital_trigger_enable_edges,0.11.0);
+int _comedi_digital_trigger_enable_edges(comedi_t *device, unsigned subdevice,
+	unsigned trigger_id, unsigned base_input,
+	unsigned rising_edge_inputs, unsigned falling_edge_inputs)
+{
+	return digital_trigger_config(device, subdevice, trigger_id,
+		COMEDI_DIGITAL_TRIG_ENABLE_EDGES, base_input,
+		rising_edge_inputs, falling_edge_inputs);
+}
+
+EXPORT_ALIAS_DEFAULT(_comedi_digital_trigger_enable_levels,comedi_digital_trigger_enable_levels,0.11.0);
+int _comedi_digital_trigger_enable_levels(comedi_t *device, unsigned subdevice,
+	unsigned trigger_id, unsigned base_input,
+	unsigned high_level_inputs, unsigned low_level_inputs)
+{
+	return digital_trigger_config(device, subdevice, trigger_id,
+		COMEDI_DIGITAL_TRIG_ENABLE_LEVELS, base_input,
+		high_level_inputs, low_level_inputs);
+}
+
