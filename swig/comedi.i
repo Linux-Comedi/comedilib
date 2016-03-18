@@ -34,6 +34,7 @@
 #define SWIG_USE_OLD_TYPEMAPS
 %{
 #include "comedilib.h"
+#include "comedi.h"
 %}
 %include "carrays.i"
 %include "typemaps.i"
@@ -63,6 +64,32 @@ static unsigned int cr_aref(unsigned int a){
 /*Trick to force this enum value from being unsigned instead of signed (and wrong value) */
 #define NI_GPCT_INVERT_CLOCK_SRC_BIT 0x80000000U
 %}
+
+// Give swig prototype for each of these macros so they can be properly wrapped.
+unsigned int CR_PACK(unsigned int chan, unsigned int rng, unsigned int aref);
+unsigned int CR_PACK_FLAGS(unsigned int chan, unsigned int rng, unsigned int aref, unsigned int flags);
+unsigned int CR_CHAN(unsigned int chan);
+unsigned int CR_RANGE(unsigned int chan);
+unsigned int CR_AREF(unsigned int chan);
+unsigned int NI_USUAL_PFI_SELECT(unsigned int pfi_channel);
+unsigned int NI_USUAL_RTSI_SELECT(unsigned int rtsi_channel);
+unsigned int NI_GPCT_SOURCE_PIN_CLOCK_SRC_BITS(unsigned int n);
+unsigned int NI_GPCT_RTSI_CLOCK_SRC_BITS(unsigned int n);
+unsigned int NI_GPCT_PFI_CLOCK_SRC_BITS(unsigned int n);
+unsigned int NI_GPCT_GATE_PIN_GATE_SELECT(unsigned int n);
+unsigned int NI_GPCT_RTSI_GATE_SELECT(unsigned int n);
+unsigned int NI_GPCT_PFI_GATE_SELECT(unsigned int n);
+unsigned int NI_GPCT_UP_DOWN_PIN_GATE_SELECT(unsigned int n);
+unsigned int NI_GPCT_PFI_OTHER_SELECT(unsigned int n);
+unsigned int NI_MIO_PLL_RTSI_CLOCK(unsigned int rtsi_channel);
+unsigned int NI_RTSI_OUTPUT_RTSI_BRD(unsigned int n);
+unsigned int NI_PFI_OUTPUT_RTSI(unsigned int rtsi_channel);
+unsigned int NI_EXT_PFI(unsigned int pfi_channel);
+unsigned int NI_EXT_RTSI(unsigned int rtsi_channel);
+unsigned int NI_CDIO_SCAN_BEGIN_SRC_PFI(unsigned int pfi_channel);
+unsigned int NI_CDIO_SCAN_BEGIN_SRC_RTSI(unsigned int rtsi_channel);
+unsigned int NI_AO_SCAN_BEGIN_SRC_PFI(unsigned int pfi_channel);
+unsigned int NI_AO_SCAN_BEGIN_SRC_RTSI(unsigned int rtsi_channel);
 
 #ifdef SWIGRUBY
 %typemap(argout) comedi_cmd *INOUT(VALUE info) {
