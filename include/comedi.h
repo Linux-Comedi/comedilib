@@ -344,7 +344,6 @@ enum configuration_ids {
 	INSN_CONFIG_SET_CLOCK_SRC = 2003,
 	INSN_CONFIG_GET_CLOCK_SRC = 2004,
 	INSN_CONFIG_SET_OTHER_SRC = 2005,
-//      INSN_CONFIG_GET_OTHER_SRC = 2006,       // Get other source
 	INSN_CONFIG_GET_HARDWARE_BUFFER_SIZE = 2006,
 	INSN_CONFIG_SET_COUNTER_MODE = 4097,
 	INSN_CONFIG_8254_SET_MODE = INSN_CONFIG_SET_COUNTER_MODE,
@@ -931,16 +930,6 @@ struct comedi_bufinfo_struct {
 #define UNIT_none		2
 
 #define COMEDI_MIN_SPEED	0xffffffffu
-
-/* callback stuff */
-/* only relevant to kernel modules. */
-
-#define COMEDI_CB_EOS		1	/* end of scan */
-#define COMEDI_CB_EOA		2	/* end of acquisition/output */
-#define COMEDI_CB_BLOCK		4	/* new data has arrived: wakes up write()/read() */
-#define COMEDI_CB_EOBUF		8	/* DEPRECATED: end of buffer */
-#define COMEDI_CB_ERROR		16	/* card error during acquisition */
-#define COMEDI_CB_OVERFLOW	32	/* buffer overflow/underflow */
 
 /**********************************************************/
 /* everything after this line is ALPHA */
