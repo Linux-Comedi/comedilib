@@ -42,6 +42,15 @@
 #ifdef SWIGPYTHON
 %rename("%(strip:[COMEDI_])s", regextarget=1) "COMEDI_.*";
 %rename("%(strip:[comedi_])s", regextarget=1) "comedi_.*";
+
+// These need to be explicitly written as unsigned ints
+%rename(CR_FLAGS_MASK) _CR_FLAGS_MASK;
+%rename(TRIG_ANY) _TRIG_ANY;
+%rename(NI_GPCT_INVERT_CLOCK_SRC_BIT) _NI_GPCT_INVERT_CLOCK_SRC_BIT;
+%constant unsigned int _CR_FLAGS_MASK = CR_FLAGS_MASK;
+%constant unsigned int _CR_FLAGS_MASK = CR_FLAGS_MASK;
+%constant unsigned int _TRIG_ANY = TRIG_ANY;
+%constant unsigned int _NI_GPCT_INVERT_CLOCK_SRC_BIT = NI_GPCT_INVERT_CLOCK_SRC_BIT;
 #endif
 
 %inline %{
@@ -60,9 +69,6 @@ static unsigned int cr_range(unsigned int a){
 static unsigned int cr_aref(unsigned int a){
 	return CR_AREF(a);
 }
-
-/*Trick to force this enum value from being unsigned instead of signed (and wrong value) */
-#define NI_GPCT_INVERT_CLOCK_SRC_BIT 0x80000000U
 %}
 
 // Give swig prototype for each of these macros so they can be properly wrapped.

@@ -67,7 +67,7 @@ typedef unsigned short sampl_t;
 #define CR_RANGE(a)	(((a)>>16)&0xff)
 #define CR_AREF(a)	(((a)>>24)&0x03)
 
-#define CR_FLAGS_MASK	0xfc000000U
+#define CR_FLAGS_MASK	0xfc000000
 #define CR_ALT_FILTER	(1<<26)
 #define CR_DITHER		CR_ALT_FILTER
 #define CR_DEGLITCH		CR_ALT_FILTER
@@ -168,7 +168,7 @@ typedef unsigned short sampl_t;
 
 /* trigger sources */
 
-#define TRIG_ANY	0xffffffffU
+#define TRIG_ANY	0xffffffff
 #define TRIG_INVALID	0x00000000
 
 #define TRIG_NONE	0x00000001	/* never trigger */
