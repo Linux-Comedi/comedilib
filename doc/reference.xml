@@ -308,6 +308,8 @@ typedef struct comedi_insn_struct     <link linkend="ref-type-comedi-insn">comed
 typedef struct comedi_range_struct    <link linkend="ref-type-comedi-range">comedi_range</link>;
 typedef struct comedi_krange_struct   <link linkend="ref-type-comedi-krange">comedi_krange</link>;
 typedef struct comedi_insnlist_struct <link linkend="ref-type-comedi-insnlist">comedi_insnlist</link>;
+typedef                               <link linkend="ref-type-comedi-polynomial-t">comedi_polynomial_t</link>;
+typedef                               <link linkend="ref-type-comedi-route-pair">comedi_route_pair</link>;
 </programlisting>
 The data structures used in the implementation of the &comedi; drivers
 are described in <xref linkend="driverdatastructures"/>.
@@ -743,6 +745,33 @@ calibration functions and is passed to the
 <function><link linkend="func-ref-comedi-to-physical">comedi_to_physical</link></function>
 and <function><link linkend="func-ref-comedi-from-physical">comedi_from_physical</link></function>
 raw/physical conversion functions.
+</para>
+
+</section>
+
+<section id="ref-type-comedi-route-pair">
+<title>
+comedi_route_pair
+</title>
+
+<programlisting>
+typedef struct {
+  unsigned int source;
+  unsigned int destination;
+} comedi_route_pair;
+</programlisting>
+
+<para>
+An array of <type>comedi_route_pair</type> objects is used to gain a list of
+routes that are valid for a particular device via
+<function><link linkend="func-ref-comedi-get-routes">comedi_get_routes</link></function>.
+The values for <parameter>source</parameter> and
+<parameter>destination</parameter> are globally identifiable for the entire
+device as used by
+<function><link linkend="func-ref-comedi-test-route">comedi_test_route</link></function>,
+<function><link linkend="func-ref-comedi-connect-route">comedi_connect_route</link></function>,
+and
+<function><link linkend="func-ref-comedi-disconnect-route">comedi_disconnect_route</link></function>.
 </para>
 
 </section>

@@ -43,6 +43,11 @@
 			<surname>Piel</surname>
 			<email>piel@delmic.com</email>
 		</author>
+		<author>
+			<firstname>Spencer</firstname>
+			<surname>Olson</surname>
+			<email>olsonse@umich.edu</email>
+		</author>
 		<copyright>
 			<year>1998-2003</year>
 			<holder>David Schleef</holder>
@@ -66,6 +71,10 @@
 		<copyright>
 			<year>2012, 2015</year>
 			<holder>Éric Piel</holder>
+		</copyright>
+		<copyright>
+			<year>2016-2018</year>
+			<holder>Spencer Olson</holder>
 		</copyright>
 
 		<abstract>

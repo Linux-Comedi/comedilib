@@ -333,6 +333,90 @@ int comedi_digital_trigger_enable_levels(comedi_t *device, unsigned subdevice,
 	unsigned trigger_id, unsigned base_input,
 	unsigned high_level_inputs, unsigned low_level_inputs);
 
+/**
+ * Validate a globally-named route as connectible and test whether it is
+ * connected.
+ *
+ * Note that since comedi_(dis)connect_route effectively perform the same
+ * operations as comedi_{s,g}et_routing and comedi_dio_config, this operation
+ * will only report a route as connected _if_ both operations have been
+ * performed directly or effectively via comedi_connect_route.
+ *
+ * There are several routes that are not globally connectable via
+ * comedi_connect_route, such as (NI_PFI(i) --> NI_AO_SampleClock) as they must
+ * be connected via a trigger argument, such as comedi_cmd->start_arg for
+ * NI_AO_StartTrigger.  This function can still be used for such routes to test
+ * whether they are valid.
+ *
+ * @return -1 if not connectible
+ * @return 0 if connectible but not connected
+ * @return 1 if connectible and connected
+ */
+int comedi_test_route(comedi_t *device, unsigned source, unsigned destination);
+
+/**
+ * Connect a globally-named route.
+ *
+ * This operation is effectively the same as calling comedi_set_routing and
+ * comedi_dio_config on the respective subdevice.
+ *
+ * There are some routes that are not connectible globally.  For example, the
+ * route (NI_PFI(i) --> NI_AO_SampleClock) must actually be specified via the
+ * scan_begin_arg argument of a comedi_cmd structure.
+ *
+ * @return 0 on success
+ * @return -1 on error
+ *
+ * Errors:
+ *   EALREADY : The route is already connected.
+ *   EINVAL   : The specified route is not valid for this device.
+ *   EBUSY    : The destination selector is already busy.
+ */
+int comedi_connect_route(comedi_t *device, unsigned source, unsigned destination);
+
+/**
+ * Disconnect a globally-named route.
+ *
+ * This operation is effectively the same as calling comedi_set_routing and
+ * comedi_dio_config on the respective subdevice.
+ *
+ * There are some routes that are not dis-connectible globally.  For example,
+ * the route (NI_PFI(i) --> NI_AO_SampleClock) must actually be specified via
+ * the scan_begin_arg argument of a comedi_cmd structure.
+ */
+int comedi_disconnect_route(comedi_t *device, unsigned source, unsigned destination);
+
+/**
+ * Globally-named route pair to contain values returned by comedi_get_routes.
+ * @source:		Globally-identified source of route.
+ * @destination:	Globally-identified destination of route.
+ */
+typedef struct {
+	unsigned int source;
+	unsigned int destination;
+} comedi_route_pair;
+
+/**
+ * Obtain a list of all possible globally-named routes for the particular
+ * device.
+ *
+ * A globally-named route is a route where the source and destination values are
+ * globally recognized, regardless of the subdevice.
+ * @param device
+ *	Pointer to the device
+ * @param routelist
+ *	Array of comedi_route_pair structs that will be used to contain the
+ *	returned list.  If this parameter is NULL, comedi_get_routes will return
+ *	the number of routes that exist for the device.  Using this feature, one
+ *	can query and then allocate routelist appropriately.
+ * @param n
+ *	The number of elements allocated for in routelist.
+ * @return Number of routes available if routelist==NULL
+ * @return Number of routes copied if routelist!=NULL
+ * @return -1 if there was a problem with the system call
+ */
+int comedi_get_routes(comedi_t *device, comedi_route_pair * routelist, size_t n);
+
 #endif
 
 #ifdef __cplusplus

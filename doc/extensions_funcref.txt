@@ -42,6 +42,39 @@ Description:
 Returns:
  <literal>0</literal> on success, <literal>-1</literal> on error.
 
+Function: comedi_connect_route -- connect device-global route
+Retval: int
+Param: comedi_t * device
+Param: unsigned int source
+Param: unsigned int destination
+Status: alpha
+Description:
+ This function connects a globally-named route if such is connectible.
+ 
+ This operation is effectively the same as calling <function><link
+ linkend="func-ref-comedi-set-routing">comedi_set_routing</link></function> and
+ <function><link
+ linkend="func-ref-comedi-dio-config">comedi_dio_config</link></function> on the
+ appropriate subdevice.
+ 
+ There are several routes that are not globally connectable via <function><link
+ linkend="func-ref-comedi-connect-route">comedi_connect_route</link></function>,
+ such as (<code language="C">NI_PFI(i)</code> -->
+ <constant>NI_AO_SampleClock</constant>) as they must be connected via a trigger
+ argument, such as <code language="C">comedi_cmd->start_arg</code> for
+ <constant>NI_AO_StartTrigger</constant>.
+
+ The <parameter class="function">source</parameter> parameter specifies the
+ source of the signal route, whereas the <parameter
+ class="function">destination</parameter> parameter specifies the destination.
+ Possible values for source and destination are driver dependent but are
+ generally required to be values that are recognizable globally for a particular
+ device, independent of sub-device.
+Returns:
+ <literal>0</literal> on success, <literal>-1</literal> on error (and errno is
+ set appropriately--EALREADY: route is already connected; EINVAL: route invalid
+ for this device; EBUSY: destination selector used for another route).
+
 Function: comedi_digital_trigger_disable -- disable a digital trigger
 Retval: int
 Param: comedi_t * device
@@ -188,6 +221,38 @@ Description:
 Returns:
  <literal>0</literal> on success, <literal>-1</literal> on error.
 
+Function: comedi_disconnect_route -- disconnect device-global route
+Retval: int
+Param: comedi_t * device
+Param: unsigned int source
+Param: unsigned int destination
+Status: alpha
+Description:
+ This function disconnects a globally-named route if such is connected.
+ 
+ This operation is effectively the same as calling <function><link
+ linkend="func-ref-comedi-set-routing">comedi_set_routing</link></function> and
+ <function><link
+ linkend="func-ref-comedi-dio-config">comedi_dio_config</link></function> on the
+ appropriate subdevice.
+ 
+ There are several routes that are not globally dis-connectable via
+ <function><link
+ linkend="func-ref-comedi-connect-route">comedi_connect_route</link></function>,
+ such as (<code language="C">NI_PFI(i)</code> -->
+ <constant>NI_AO_SampleClock</constant>) as they must be connected via a trigger
+ argument, such as <code language="C">comedi_cmd->start_arg</code> for
+ <constant>NI_AO_StartTrigger</constant>.
+
+ The <parameter class="function">source</parameter> parameter specifies the
+ source of the signal route, whereas the <parameter
+ class="function">destination</parameter> parameter specifies the destination.
+ Possible values for source and destination are driver dependent but are
+ generally required to be values that are recognizable globally for a particular
+ device, independent of sub-device.
+Returns:
+ <literal>0</literal> on success, <literal>-1</literal> on error.
+
 Function: comedi_get_clock_source -- get master clock for a subdevice
 Retval: int
 Param: comedi_t * device
@@ -268,6 +333,49 @@ Description:
  an analog output).
 Returns:
  Hardware buffer size in bytes, or <literal>-1</literal> on error.
+
+Function: comedi_get_routes -- obtain list of all possible device-globally named routes
+Retval: int
+Param: comedi_t * device
+Param: comedi_route_pair * routelist
+Param: size_t n
+Status: alpha
+Description:
+ This function obtains a list of all possible globally-named routes for the
+ particular device.
+
+ A globally-named route is a route where the source and destination values are
+ globally recognized, regardless of the subdevice.
+ 
+ This function returns all possible signal routes that are either connectible
+ via <code language="C">comedi_cmd->start_arg</code> aruments or via the
+ device-global configuration interface of <function><link
+ linkend="func-ref-comedi-connect-route">comedi_connect_route</link></function>
+ and <function><link
+ linkend="func-ref-comedi-connect-route">comedi_disconnect_route</link></function>.
+
+ The <parameter class="function">routelist</parameter> parameter provides memory
+ into which the results may be copied.  The <code language="C">comedi_route_pair</code> is
+ (as specified in <emphasis>comedi.h</emphasis>):
+ <programlisting>
+    typedef struct {
+      unsigned int source;
+      unsigned int destination;
+    } comedi_route_pair;
+ </programlisting>
+
+ <parameter class="function">routelist</parameter> may be specified as
+ <constant>NULL</constant>, in which case only the number of routes will be
+ returned.
+
+ The <parameter class="function">n</parameter> parameter provides specifies the
+ number of slots available in the <parameter
+ class="function">routelist</parameter> array.
+Returns:
+ The number of routes available if <parameter
+ class="function">routelist</parameter> is <constant>NULL</constant>, the number
+ of routes copied if <parameter class="function">routelist</parameter> is not
+ <constant>NULL</constant>, or <literal>-1</literal> on error.
 
 Function: comedi_get_routing -- get routing for an output
 Retval: int
@@ -496,3 +604,45 @@ Description:
  configuration instruction.
 Returns:
  <literal>0</literal> on success, <literal>-1</literal> on error.
+
+Function: comedi_test_route -- validate and test device-global route
+Retval: int
+Param: comedi_t * device
+Param: unsigned int source
+Param: unsigned int destination
+Status: alpha
+Description:
+ This function validates a globally-named route as connectible and tests whether
+ the route is connected.
+ 
+ Note that since <function><link
+ linkend="func-ref-comedi-connect-route">comedi_connect_route</link></function>
+ and <function><link
+ linkend="func-ref-comedi-disconnect-route">comedi_disconnect_route</link></function>
+ effectively perform the same operations as <function><link
+ linkend="func-ref-comedi-set-routing">comedi_set_routing</link></function> /
+ <function><link
+ linkend="func-ref-comedi-get-routing">comedi_get_routing</link></function> and
+ <function><link
+ linkend="func-ref-comedi-dio-config">comedi_dio_config</link></function>, this
+ operation will only report a route as connected _if_ both operations have been
+ performed directly or effectively via comedi_connect_route.
+ 
+ There are several routes that are not globally connectable via <function><link
+ linkend="func-ref-comedi-connect-route">comedi_connect_route</link></function>,
+ such as (<code language="C">NI_PFI(i)</code> -->
+ <constant>NI_AO_SampleClock</constant>) as they must be connected via a trigger
+ argument, such as <code language="C">comedi_cmd->start_arg</code> for
+ <constant>NI_AO_StartTrigger</constant>.  This function can still be used for
+ such routes to test whether they are valid.
+
+ The <parameter class="function">source</parameter> parameter specifies the
+ source of the signal route, whereas the <parameter
+ class="function">destination</parameter> parameter specifies the destination.
+ Possible values for source and destination are driver dependent but are
+ generally required to be values that are recognizable globally for a particular
+ device, independent of sub-device.
+Returns:
+ <literal>-1</literal> if not connectible, <literal>0</literal> if connectible
+ but not connected, <literal>1</literal> if connectible <emphasis>and</emphasis>
+ connected.

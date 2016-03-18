@@ -396,3 +396,69 @@ int _comedi_digital_trigger_enable_levels(comedi_t *device, unsigned subdevice,
 		high_level_inputs, low_level_inputs);
 }
 
+static int _comedi_route_operation(comedi_t *device,
+				   unsigned source, unsigned destination,
+				   enum configuration_ids op,
+				   int return_data)
+{
+	comedi_insn insn;
+	lsampl_t data[3];
+
+	memset(&insn, 0, sizeof(comedi_insn));
+	insn.insn = INSN_DEVICE_CONFIG;
+	insn.data = data;
+	insn.n = sizeof(data) / sizeof(data[0]);
+	data[0] = op;
+	data[1] = source;
+	data[2] = destination;
+
+	if(comedi_do_insn(device, &insn) >= 0)
+		return return_data ? data[0] : 0;
+	else return -1;
+}
+
+EXPORT_ALIAS_DEFAULT(_comedi_test_route,comedi_test_route,0.12.0);
+int _comedi_test_route(comedi_t *device, unsigned source, unsigned destination)
+{
+	return _comedi_route_operation(device, source, destination,
+				       INSN_DEVICE_CONFIG_TEST_ROUTE, 1);
+}
+
+EXPORT_ALIAS_DEFAULT(_comedi_connect_route,comedi_connect_route,0.12.0);
+int _comedi_connect_route(comedi_t *device, unsigned source, unsigned destination)
+{
+	return _comedi_route_operation(device, source, destination,
+				       INSN_DEVICE_CONFIG_CONNECT_ROUTE, 0);
+}
+
+EXPORT_ALIAS_DEFAULT(_comedi_disconnect_route,comedi_disconnect_route,0.12.0);
+int _comedi_disconnect_route(comedi_t *device, unsigned source, unsigned destination)
+{
+	return _comedi_route_operation(device, source, destination,
+				       INSN_DEVICE_CONFIG_DISCONNECT_ROUTE, 0);
+}
+
+EXPORT_ALIAS_DEFAULT(_comedi_get_routes,comedi_get_routes,0.12.0);
+int _comedi_get_routes(comedi_t *device, comedi_route_pair * routelist, size_t n)
+{
+	comedi_insn insn;
+	int retval = -1;
+
+	memset(&insn, 0, sizeof(comedi_insn));
+	insn.insn = INSN_DEVICE_CONFIG;
+	insn.n = 2 + 2*(routelist == NULL ? 0 : n);
+	insn.data = (lsampl_t *)calloc(sizeof(lsampl_t), insn.n);
+	insn.data[0] = INSN_DEVICE_CONFIG_GET_ROUTES;
+	insn.data[1] = 0; /* number pairs copied to user. set on output */
+
+	if(comedi_do_insn(device, &insn) >= 0) {
+		retval = insn.data[1];
+		for (unsigned int i = 0; i < n && i < retval; ++i) {
+			routelist[i].source	 = insn.data[2 + 2*i];
+			routelist[i].destination = insn.data[2 + 2*i + 1];
+		}
+	}
+
+	free(insn.data);
+	return retval;
+}

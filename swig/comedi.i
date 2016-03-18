@@ -98,6 +98,18 @@ unsigned int NI_CDIO_SCAN_BEGIN_SRC_PFI(unsigned int pfi_channel);
 unsigned int NI_CDIO_SCAN_BEGIN_SRC_RTSI(unsigned int rtsi_channel);
 unsigned int NI_AO_SCAN_BEGIN_SRC_PFI(unsigned int pfi_channel);
 unsigned int NI_AO_SCAN_BEGIN_SRC_RTSI(unsigned int rtsi_channel);
+unsigned int NI_PFI(int channel);
+unsigned int TRIGGER_LINE(int channel);
+unsigned int NI_RTSI_BRD(int channel);
+unsigned int NI_CtrSource(int channel);
+unsigned int NI_CtrGate(int channel);
+unsigned int NI_CtrAux(int channel);
+unsigned int NI_CtrA(int channel);
+unsigned int NI_CtrB(int channel);
+unsigned int NI_CtrZ(int channel);
+unsigned int NI_CtrArmStartTrigger(int channel);
+unsigned int NI_CtrInternalOutput(int channel);
+unsigned int NI_CtrOut(int channel);
 
 #ifdef SWIGRUBY
 %typemap(argout) comedi_cmd *INOUT(VALUE info) {
