@@ -132,17 +132,6 @@ typedef unsigned short sampl_t;
 #define INSN_WAIT		(5 | INSN_MASK_WRITE | INSN_MASK_SPECIAL)
 #define INSN_INTTRIG		(6 | INSN_MASK_WRITE | INSN_MASK_SPECIAL)
 
-/* trigger flags */
-/* These flags are used in comedi_trig structures */
-
-//#define TRIG_BOGUS	0x0001	/* do the motions */
-#define TRIG_DITHER	0x0002	/* enable dithering */
-#define TRIG_DEGLITCH	0x0004	/* enable deglitching */
-//#define TRIG_RT       0x0008          /* perform op in real time */
-#define TRIG_CONFIG	0x0010	/* perform configuration, not triggering */
-//#define TRIG_WAKE_EOS	0x0020	/* wake up on end-of-scan events */
-//#define TRIG_WRITE    0x0040          /* write to bidirectional devices */
-
 /* command flags */
 /* These flags are used in comedi_cmd structures */
 
@@ -206,13 +195,8 @@ typedef unsigned short sampl_t;
 #define SDF_MAXDATA	0x0010	/* maxdata depends on channel */
 #define SDF_FLAGS	0x0020	/* flags depend on channel */
 #define SDF_RANGETYPE	0x0040	/* range type depends on channel */
-#define SDF_MODE0	0x0080	/* can do mode 0 */
-#define SDF_MODE1	0x0100	/* can do mode 1 */
-#define SDF_MODE2	0x0200	/* can do mode 2 */
-#define SDF_MODE3	0x0400	/* can do mode 3 */
-#define SDF_MODE4	0x0800	/* can do mode 4 */
-#define SDF_PWM_COUNTER SDF_MODE0	/* PWM can automatically switch off */
-#define SDF_PWM_HBRIDGE SDF_MODE1	/* PWM is signed (H-bridge) */
+#define SDF_PWM_COUNTER 0x0080	/* PWM can automatically switch off */
+#define SDF_PWM_HBRIDGE 0x0100	/* PWM is signed (H-bridge) */
 #define SDF_CMD		0x1000	/* can do commands (deprecated) */
 #define SDF_SOFT_CALIBRATED	0x2000 /* subdevice uses software calibration */
 #define SDF_CMD_WRITE		0x4000 /* can do output commands */
@@ -225,7 +209,6 @@ typedef unsigned short sampl_t;
 #define SDF_WRITEABLE	SDF_WRITABLE	/* spelling error in API */
 /* subdevice does not have externally visible lines */
 #define SDF_INTERNAL	0x00040000
-#define SDF_RT		0x00080000	/* DEPRECATED: subdevice is RT capable */
 #define SDF_GROUND	0x00100000	/* can do aref=ground */
 #define SDF_COMMON	0x00200000	/* can do aref=common */
 #define SDF_DIFF	0x00400000	/* can do aref=diff */
@@ -481,7 +464,7 @@ enum comedi_counter_status_flags {
 #define COMEDI_DEVINFO _IOR(CIO, 1, comedi_devinfo)
 #define COMEDI_SUBDINFO _IOR(CIO, 2, comedi_subdinfo)
 #define COMEDI_CHANINFO _IOR(CIO, 3, comedi_chaninfo)
-#define COMEDI_TRIG _IOWR(CIO,4,comedi_trig)
+/* _IOWR(CIO, 4, ...) is reserved */
 #define COMEDI_LOCK _IO(CIO, 5)
 #define COMEDI_UNLOCK _IO(CIO, 6)
 #define COMEDI_CANCEL _IO(CIO, 7)
@@ -498,7 +481,6 @@ enum comedi_counter_status_flags {
 
 /* structures */
 
-typedef struct comedi_trig_struct comedi_trig;
 typedef struct comedi_cmd_struct comedi_cmd;
 typedef struct comedi_insn_struct comedi_insn;
 typedef struct comedi_insnlist_struct comedi_insnlist;
@@ -524,21 +506,6 @@ typedef struct comedi_bufinfo_struct comedi_bufinfo;
  * This is used with the %COMEDI_INSN ioctl, and indirectly with the
  * %COMEDI_INSNLIST ioctl.
  */
-struct comedi_trig_struct {
-	unsigned int subdev;	/* subdevice */
-	unsigned int mode;	/* mode */
-	unsigned int flags;
-	unsigned int n_chan;	/* number of channels */
-	unsigned int *chanlist;	/* channel/range list */
-	sampl_t *data;	/* data list, size depends on subd flags */
-	unsigned int n;	/* number of scans */
-	unsigned int trigsrc;
-	unsigned int trigvar;
-	unsigned int trigvar1;
-	unsigned int data_len;
-	unsigned int unused[3];
-};
-
 struct comedi_insn_struct {
 	unsigned int insn;
 	unsigned int n;
@@ -1428,6 +1395,46 @@ enum ke_counter_clock_source {
 	KE_CLK_4MHZ,	/* internal 4MHz (option) */
 	KE_CLK_EXT	/* external clock on pin 21 of D-Sub */
 };
+
+/* *** BEGIN DEPRECATED SECTION *** */
+/*
+ * These items and their definitions have been removed from the kernel version
+ * of comedi.h.  These are gathered here to make comparison/matching with the
+ * kernel version easier, but kept to maintain compatibility.
+ */
+
+/* deprecated subdevice flags */
+#define SDF_MODE0 0x0080  /* can do mode 0 */
+#define SDF_MODE1 0x0100  /* can do mode 1 */
+#define SDF_MODE2 0x0200  /* can do mode 2 */
+#define SDF_MODE3 0x0400  /* can do mode 3 */
+#define SDF_MODE4 0x0800  /* can do mode 4 */
+#define SDF_RT    0x00080000  /* DEPRECATED: subdevice is RT capable */
+
+/* trigger flags */
+/* These flags are used in comedi_trig structures */
+#define COMEDI_TRIG _IOWR(CIO, 4, comedi_trig)
+#define TRIG_DITHER	0x0002	/* enable dithering */
+#define TRIG_DEGLITCH	0x0004	/* enable deglitching */
+#define TRIG_CONFIG	0x0010	/* perform configuration, not triggering */
+
+struct comedi_trig_struct {
+	unsigned int subdev;	/* subdevice */
+	unsigned int mode;	/* mode */
+	unsigned int flags;
+	unsigned int n_chan;	/* number of channels */
+	unsigned int *chanlist;	/* channel/range list */
+	sampl_t *data;	/* data list, size depends on subd flags */
+	unsigned int n;	/* number of scans */
+	unsigned int trigsrc;
+	unsigned int trigvar;
+	unsigned int trigvar1;
+	unsigned int data_len;
+	unsigned int unused[3];
+};
+
+typedef struct comedi_trig_struct comedi_trig;
+/* *** END DEPRECATED SECTION *** */
 
 #ifdef __cplusplus
 #if 0
