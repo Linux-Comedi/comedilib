@@ -40,8 +40,11 @@
 %include "typemaps.i"
 
 #ifdef SWIGPYTHON
-%rename("%(strip:[COMEDI_])s", regextarget=1) "COMEDI_.*";
-%rename("%(strip:[comedi_])s", regextarget=1) "comedi_.*";
+// Uncomment these two lines and remove the "%insert('python')" entry below to
+// finallize the removal of the comedi_/COMEDI_ prefix and break backwards
+// compatibility.
+// %rename("%(strip:[COMEDI_])s", regextarget=1) "COMEDI_.*";
+// %rename("%(strip:[comedi_])s", regextarget=1) "comedi_.*";
 
 // These need to be explicitly written as unsigned ints
 %rename(CR_FLAGS_MASK) _CR_FLAGS_MASK;
@@ -112,22 +115,13 @@ unsigned int NI_AO_SCAN_BEGIN_SRC_RTSI(unsigned int rtsi_channel);
 %array_class(comedi_insn, insn_array);
 
 %insert("python") %{
-# Trick to allow accessing functions and constants with their original C name
-import sys
-
-class __Wrapper(object):
-    def __init__(self, wrapped):
-        self.wrapped = wrapped
-
-    def __getattr__(self, name):
-        try:
-            return getattr(self.wrapped, name)
-        except AttributeError:
-            if name.startswith("comedi_") or name.startswith("COMEDI_"):
-                return getattr(self.wrapped, name[7:])
-            else:
-                raise
-
-sys.modules[__name__] = __Wrapper(sys.modules[__name__])
+# Add entries in module dictionary to strip comedi_/COMEDI_ prefix
+import re
+for k,v in globals().items():
+  if re.match('^comedi_', k, flags=re.IGNORECASE):
+    globals()[k[7:]] = v
+    # uncommenting following line removes compatibility with old code using
+    # comedi_ prefix:
+    # globals().pop(k)
+del re, k, v
 %}
-
