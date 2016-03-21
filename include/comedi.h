@@ -49,8 +49,12 @@ extern "C" {
  *
  * The following indexes in the config options were used by
  * comedi_config to pass firmware blobs from user space to the
- * comedi drivers. The request_firmware() hotplug interface is
- * now used by all comedi drivers instead.
+ * comedi drivers.
+ *
+ * Some of the standalone COMEDI kernel modules built from comedi.org sources
+ * still use this mechanism, but the COMEDI kernel modules included in
+ * the Linux kernel sources now use the request_firmware() hotplug interface
+ * instead.
  */
 
 /* length of nth chunk of firmware data -*/
