@@ -164,11 +164,12 @@ int _comedi_command(comedi_t *it,comedi_cmd *t)
 	int ret;
 	if(!valid_dev(it)) return -1;
 	ret = comedi_ioctl(it->fd, COMEDI_CMD, t);
-	__comedi_errno = errno;
-	switch(__comedi_errno){
-	case EIO:
-		__comedi_errno = ECMDNOTSUPP;
-		break;
+	if(ret<0){
+		switch(__comedi_errno){
+		case EIO:
+			__comedi_errno = ECMDNOTSUPP;
+			break;
+		}
 	}
 	return ret;
 }
@@ -179,11 +180,12 @@ int _comedi_command_test(comedi_t *it,comedi_cmd *t)
 	int ret;
 	if(!valid_dev(it)) return -1;
 	ret = comedi_ioctl(it->fd, COMEDI_CMDTEST, t);
-	__comedi_errno = errno;
-	switch(__comedi_errno){
-	case EIO:
-		__comedi_errno = ECMDNOTSUPP;
-		break;
+	if(ret<0){
+		switch(__comedi_errno){
+		case EIO:
+			__comedi_errno = ECMDNOTSUPP;
+			break;
+		}
 	}
 	return ret;
 }
@@ -191,11 +193,8 @@ int _comedi_command_test(comedi_t *it,comedi_cmd *t)
 EXPORT_ALIAS_DEFAULT(_comedi_do_insnlist,comedi_do_insnlist,0.7.18);
 int _comedi_do_insnlist(comedi_t *it,comedi_insnlist *il)
 {
-	int ret;
 	if(!valid_dev(it)) return -1;
-	ret = comedi_ioctl(it->fd, COMEDI_INSNLIST, il);
-	__comedi_errno = errno;
-	return ret;
+	return comedi_ioctl(it->fd, COMEDI_INSNLIST, il);
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_do_insn,comedi_do_insn,0.7.18);
