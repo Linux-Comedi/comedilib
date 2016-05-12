@@ -66,7 +66,7 @@ Description:
  <function><link
  linkend="func-ref-comedi-apply-parsed-calibration">comedi_apply_parsed_calibration</link></function>,
  and  <function><link
- linkend="func-ref-comedi-cleanup-calibration">comedi_cleanup_calibration_file</link></function>
+ linkend="func-ref-comedi-cleanup-calibration">comedi_cleanup_calibration</link></function>
  provide the same functionality at a slightly lower level.
 Returns:
  Returns <literal>0</literal> on success, <literal>-1</literal> on failure.
