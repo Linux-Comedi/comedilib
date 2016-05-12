@@ -168,8 +168,8 @@ private
 	    to_phys
 	    from_phys
 	    set_global_oor_behavior
-	    comedi_to_physical
-	    comedi_from_physical
+	    to_physical
+	    from_physical
 	}),
     ]
     
@@ -209,9 +209,29 @@ private
 	    set_max_buffer_size
 	    get_buffer_contents
 	    mark_buffer_read
+	    mark_buffer_written
 	    get_buffer_offset
 	    get_softcal_converter
 	    get_hardcal_converter
+	    internal_trigger
+	    arm
+	    arm_channel
+	    disarm
+	    disarm_channel
+	    reset
+	    reset_channel
+	    set_counter_mode
+	    set_clock_source
+	    set_filter
+	    set_gate_source
+	    set_other_source
+	    set_routing
+	    get_hardware_buffer_size
+	    digital_trigger_disable
+	    digital_trigger_enable_edges
+	    digital_trigger_enable_levels
+	    set_read_subdevice
+	    set_write_subdevice
 	}),
 
 	# SWIG::TYPE_p_comedi_t_struct methods that return status and a
@@ -221,10 +241,14 @@ private
 	    data_read
 	    data_read_delayed
 	    dio_read
+	    dio_bitfield
 	    dio_bitfield2
 	    get_cmd_src_mask
 	    get_cmd_generic_timed
+	    get_gate_source
+	    get_routing
 	}),
+	# TODO: add get_clock_source, but it returns status and two values.
 
 	# SWIG::TYPE_p_comedi_t_struct methods that return status and a
 	# value. Status is -1 on error. Status and value are both
@@ -280,7 +304,7 @@ private
 	# Comedi_calibration_t methods that do not indicate errors.
 
 	Method_group.new(Comedi_calibration_t, :none, nil, %w{
-	    cleanup_calibration_file
+	    cleanup_calibration
 	})
     ]
 
