@@ -126,4 +126,6 @@ v0.11.0 {
 		comedi_digital_trigger_disable;
 		comedi_digital_trigger_enable_edges;
 		comedi_digital_trigger_enable_levels;
+		comedi_set_read_subdevice;
+		comedi_set_write_subdevice;
 } v0.10.0;

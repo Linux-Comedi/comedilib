@@ -204,7 +204,7 @@ Param: comedi_t * device
 Description:
  The function <function>comedi_get_read_subdevice</function> returns the
  index of the subdevice
- whose streaming input buffer is accessible through the
+ whose streaming input buffer is currently accessible through the
  device <parameter class="function">device</parameter>.  If
  there is no such subdevice, <literal>-1</literal> is returned.
 
@@ -214,7 +214,7 @@ Param: comedi_t * device
 Description:
  The function <function>comedi_get_write_subdevice</function> returns the
  index of the subdevice
- whose streaming output buffer is accessible through the
+ whose streaming output buffer is currently accessible through the
  device <parameter class="device">device</parameter>.  If there is no such subdevice,
  <literal>-1</literal> is returned.
 
@@ -322,3 +322,35 @@ Description:
  size requires the user to have appropriate privileges.
 Returns:
  The new maximum buffer size is returned on success.  On error, <literal>-1</literal> is returned.
+
+Function: comedi_set_read_subdevice -- set streaming input subdevice
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Status: Works for Linux "in-tree" Comedi since kernel version 3.19.
+Description:
+ The function <function>comedi_set_read_subdevice</function> sets
+ <parameter class="function">subdevice</parameter> as the current streaming
+ input subdevice if the subdevice supports streaming input commands.
+
+ Changes are local to the <em>open file description</em> for this
+ <parameter class="function">device</parameter> and have no effect on other
+ open file descriptions for the underlying device node.
+Returns:
+ <literal>0</literal> on success, <literal>-1</literal> on error.
+
+Function: comedi_set_write_subdevice -- set streaming output subdevice
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Status: Works for Linux "in-tree" Comedi since kernel version 3.19.
+Description:
+ The function <function>comedi_set_write_subdevice</function> sets
+ <parameter class="function">subdevice</parameter> as the current streaming
+ output subdevice if the subdevice supports streaming output commands.
+
+ Changes are local to the <em>open file description</em> for this
+ <parameter class="function">device</parameter> and have no effect on other
+ open file descriptions for the underlying device node.
+Returns:
+ <literal>0</literal> on success, <literal>-1</literal> on error.

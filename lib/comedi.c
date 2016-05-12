@@ -231,3 +231,29 @@ int _comedi_unlock(comedi_t *it,unsigned int subdevice)
 	return comedi_ioctl(it->fd, COMEDI_UNLOCK, (void*)(unsigned long)subdevice);
 }
 
+EXPORT_ALIAS_DEFAULT(_comedi_set_read_subdevice,comedi_set_read_subdevice,0.11.0);
+int _comedi_set_read_subdevice(comedi_t *it,unsigned int subdevice)
+{
+	int ret;
+
+	if(!valid_dev(it)) return -1;
+	ret = comedi_ioctl(it->fd, COMEDI_SETRSUBD, (void*)(unsigned long)subdevice);
+	if(ret == 0){
+		it->devinfo.read_subdevice = subdevice;
+	}
+	return ret;
+}
+
+EXPORT_ALIAS_DEFAULT(_comedi_set_write_subdevice,comedi_set_write_subdevice,0.11.0);
+int _comedi_set_write_subdevice(comedi_t *it,unsigned int subdevice)
+{
+	int ret;
+
+	if(!valid_dev(it)) return -1;
+	ret = comedi_ioctl(it->fd, COMEDI_SETWSUBD, (void*)(unsigned long)subdevice);
+	if(ret == 0){
+		it->devinfo.write_subdevice = subdevice;
+	}
+	return ret;
+}
+

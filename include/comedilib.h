@@ -131,6 +131,16 @@ int comedi_do_insnlist(comedi_t *it,comedi_insnlist *il);
 int comedi_do_insn(comedi_t *it,comedi_insn *insn);
 int comedi_lock(comedi_t *it,unsigned int subdevice);
 int comedi_unlock(comedi_t *it,unsigned int subdevice);
+/*
+ * Changing read and write subdevice is supported for the version of comedi
+ * in the Linux kernel sources since Linux kernel version 3.19.
+ *
+ * The functions to set and get the read and write subdevice are unusual in
+ * that changes are local to the "open file description" for the Comedi
+ * device.
+ */
+int comedi_set_read_subdevice(comedi_t *it,unsigned int subdevice);
+int comedi_set_write_subdevice(comedi_t *it,unsigned int subdevice);
 
 /* physical units */
 double comedi_to_phys(lsampl_t data,comedi_range *rng,lsampl_t maxdata);
