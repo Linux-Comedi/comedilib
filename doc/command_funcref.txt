@@ -29,7 +29,8 @@ Description:
  with a return value of <literal>0</literal>, or
  <function>comedi_command</function> will fail.
  For input subdevices, sample values are read using the
- function <function>read</function> on the device file.  For output subdevices,
+ function <function>read</function> on the device file descriptor.
+ For output subdevices,
  sample values are written using the function <function>write</function>.
 Returns:
  If successful, <literal>0</literal> is returned, otherwise
@@ -227,7 +228,8 @@ Description:
  The function <function>comedi_mark_buffer_read</function> is used on a subdevice
  that has a Comedi input command in progress.  It should only be used
  if you are using a <function>mmap</function> mapping to read data from Comedi's buffer
- (as opposed to calling <function>read</function> on the device file),
+ (as opposed to calling <function>read</function> on the device file
+ descriptor),
  since Comedi will automatically keep track of how many bytes have been
  transferred via <function>read</function> calls.  This function is
  used to indicate that the next <parameter class="function">num_bytes</parameter>
@@ -254,7 +256,7 @@ Description:
  that has a Comedi output command in progress.  It should only be used
  if you are using a <function>mmap</function> mapping to write data to Comedi's buffer
  (as opposed to calling <function>write</function> on the device
- file), since Comedi
+ file descriptor), since Comedi
  will automatically keep track of how many bytes have been
  transferred via <function>write</function> calls.  This function is
  used to indicate that the next <parameter class="function">num_bytes</parameter>
