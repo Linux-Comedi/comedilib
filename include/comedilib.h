@@ -154,7 +154,7 @@ int comedi_sampl_from_phys(sampl_t *dest,int dst_stride,double *src,
 int comedi_data_read(comedi_t *it,unsigned int subd,unsigned int chan,
 	unsigned int range,unsigned int aref,lsampl_t *SWIG_OUTPUT(data));
 int comedi_data_read_n(comedi_t *it,unsigned int subd,unsigned int chan,
-	unsigned int range,unsigned int aref,lsampl_t *SWIG_OUTPUT(data), unsigned int n);
+	unsigned int range,unsigned int aref,lsampl_t *data, unsigned int n);
 int comedi_data_read_hint(comedi_t *it,unsigned int subd,unsigned int chan,
 	unsigned int range,unsigned int aref);
 int comedi_data_read_delayed(comedi_t *it,unsigned int subd,unsigned int chan,
