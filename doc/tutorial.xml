@@ -214,25 +214,24 @@
     
     <para>
       The program below is a stripped down version of the
-      program <filename>cmd.c</filename> in the demo directory. To
-      compile it run:
-    </para>
-    <screen>
-      gcc tut3.c -lcomedi -lm -o tut3
-    </screen>
-    <para>
+      program <filename>cmd.c</filename> in the demo directory.
       It requests data from two channels at 
       a sampling rate of 1kHz and a total of 10000 samples.
       which are then printed to stdout. You can pipe the data
       into a file and plot it with gnuplot. As mentioned above, central in this
       program is the loop using the standard C <function>read</function> command
-      which receives the buffer contents. Below is an
-      extract from <filename>tut3.c</filename> showing the
-      relevant commands:
+      which receives the buffer contents.
     </para>
     <programlisting>
-      <xi:include href="../demo/tut3_part.c" parse="text"/>
+      <xi:include href="../demo/tut3.c" parse="text"/>
     </programlisting>
+    <para>
+      The source code file for the above program can be found in Comedilib,
+      at <filename>demo/tut3.c</filename>.  You can compile the program using
+    </para>
+    <screen>
+      cc tut3.c -lcomedi -lm -o tut3
+    </screen>
     <para>
       For advanced programmers the
       function <function><link linkend="func-ref-comedi-get-buffer-contents">comedi_get_buffer_contents</link></function>
