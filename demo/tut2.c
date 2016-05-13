@@ -28,21 +28,20 @@ int main(int argc, char *argv[])
 	lsampl_t data;
 	double physical_value;
 	int retval;
-	comedi_range * range_info;
+	comedi_range *range_info;
 	lsampl_t maxdata;
 
 	device = comedi_open(filename);
-	if(device == NULL)
-	{
+	if (device == NULL) {
 		comedi_perror(filename);
-		return -1;
+		return 1;
 	}
 
-	retval = comedi_data_read(device, subdev, chan, range, aref, &data);
-	if(retval < 0)
-	{
+	retval = comedi_data_read(device, subdev, chan, range, aref,
+				  &data);
+	if (retval < 0) {
 		comedi_perror(filename);
-		return -1;
+		return 1;
 	}
 
 	comedi_set_global_oor_behavior(COMEDI_OOR_NAN);
@@ -51,7 +50,7 @@ int main(int argc, char *argv[])
 	printf("[0,%d] -> [%g,%g]\n", maxdata,
 	       range_info->min, range_info->max);
 	physical_value = comedi_to_phys(data, range_info, maxdata);
-	if(isnan(physical_value)) {
+	if (isnan(physical_value)) {
 		printf("Out of range [%g,%g]",
 		       range_info->min, range_info->max);
 	} else {

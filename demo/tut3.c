@@ -10,10 +10,6 @@
  * source code.
  */
 
-/*
- * The program is used to test the usbdux sigma board
- */
-
 #include <stdio.h>
 #include <comedilib.h>
 #include <fcntl.h>
@@ -25,8 +21,7 @@
 
 extern comedi_t *device;
 
-struct parsed_options
-{
+struct parsed_options {
 	char *filename;
 	double value;
 	int subdevice;
@@ -50,13 +45,15 @@ static comedi_range * range_info[N_CHANS];
 static lsampl_t maxdata[N_CHANS];
 
 
-int prepare_cmd_lib(comedi_t *dev, int subdevice, int n_scan, int n_chan, unsigned period_nanosec, comedi_cmd *cmd);
+int prepare_cmd_lib(comedi_t *dev, int subdevice, int n_scan,
+		    int n_chan, unsigned period_nanosec,
+		    comedi_cmd *cmd);
 
 void do_cmd(comedi_t *dev,comedi_cmd *cmd);
 
 void print_datum(lsampl_t raw, int channel_index);
 
-char *cmdtest_messages[]={
+char *cmdtest_messages[] = {
 	"success",
 	"invalid source",
 	"source conflict",
@@ -68,9 +65,10 @@ char *cmdtest_messages[]={
 int main(int argc, char *argv[])
 {
 	comedi_t *dev;
-	comedi_cmd c,*cmd=&c;
+	comedi_cmd c,*cmd = &c;
 	int ret;
-	int total=0;
+	int total = 0;
+	int col;
 	int i;
 	int subdev_flags;
 	lsampl_t raw;
@@ -78,10 +76,6 @@ int main(int argc, char *argv[])
 	struct parsed_options options;
 
 	memset(&options, 0, sizeof(options));
-	/* The following variables used in this demo
-	 * can be modified by command line
-	 * options.  When modifying this demo, you may want to
-	 * change them here. */
 	options.filename = "/dev/comedi0";
 	options.subdevice = 0;
 	options.channel = 0;
@@ -93,7 +87,7 @@ int main(int argc, char *argv[])
 
 	/* open the device */
 	dev = comedi_open(options.filename);
-	if(!dev){
+	if (!dev) {
 		comedi_perror(options.filename);
 		exit(1);
 	}
@@ -102,16 +96,23 @@ int main(int argc, char *argv[])
 	comedi_set_global_oor_behavior(COMEDI_OOR_NUMBER);
 
 	/* Set up channel list */
-	for(i = 0; i < options.n_chan; i++){
-		chanlist[i] = CR_PACK(options.channel + i, options.range, options.aref);
-		range_info[i] = comedi_get_range(dev, options.subdevice, options.channel, options.range);
-		maxdata[i] = comedi_get_maxdata(dev, options.subdevice, options.channel);
+	for (i = 0; i < options.n_chan; i++) {
+		chanlist[i] =
+			CR_PACK(options.channel + i, options.range,
+				options.aref);
+		range_info[i] =
+			comedi_get_range(dev, options.subdevice,
+					 options.channel, options.range);
+		maxdata[i] =
+			comedi_get_maxdata(dev, options.subdevice,
+					   options.channel);
 	}
 
 	/* prepare_cmd_lib() uses a Comedilib routine to find a
 	 * good command for the device.  prepare_cmd() explicitly
 	 * creates a command, which may not work for your device. */
-	prepare_cmd_lib(dev, options.subdevice, options.n_scan, options.n_chan, 1e9 / options.freq, cmd);
+	prepare_cmd_lib(dev, options.subdevice, options.n_scan,
+			options.n_chan, 1e9 / options.freq, cmd);
 
 	/* comedi_command_test() tests a command to see if the
 	 * trigger sources and arguments are valid for the subdevice.
@@ -124,21 +125,22 @@ int main(int argc, char *argv[])
 	 * if you can't get a valid command in two tests, the original
 	 * command wasn't specified very well. */
 	ret = comedi_command_test(dev, cmd);
-	if(ret < 0){
+	if (ret < 0) {
 		comedi_perror("comedi_command_test");
 		if(errno == EIO){
-			fprintf(stderr,"Ummm... this subdevice doesn't support commands\n");
+			fprintf(stderr,
+				"Ummm... this subdevice doesn't support commands\n");
 		}
 		exit(1);
 	}
 	ret = comedi_command_test(dev, cmd);
-	if(ret < 0){
+	if (ret < 0) {
 		comedi_perror("comedi_command_test");
 		exit(1);
 	}
 	fprintf(stderr,"second test returned %d (%s)\n", ret,
-			cmdtest_messages[ret]);
-	if(ret!=0){
+		cmdtest_messages[ret]);
+	if (ret != 0) {
 		fprintf(stderr, "Error preparing command\n");
 		exit(1);
 	}
@@ -162,38 +164,43 @@ int main(int argc, char *argv[])
 
 	/* start the command */
 	ret = comedi_command(dev, cmd);
-	if(ret < 0){
+	if (ret < 0) {
 		comedi_perror("comedi_command");
 		exit(1);
 	}
 	subdev_flags = comedi_get_subdevice_flags(dev, options.subdevice);
-	while(1){
+	col = 0;
+	while (1) {
 		ret = read(comedi_fileno(dev),buf,BUFSZ);
-		if(ret < 0){
+		if (ret < 0) {
 			/* some error occurred */
 			perror("read");
 			break;
-		}else if(ret == 0){
+		} else if (ret == 0) {
 			/* reached stop condition */
 			break;
-		}else{
-			static int col = 0;
+		} else {
 			int bytes_per_sample;
+
 			total += ret;
-			if(options.verbose)fprintf(stderr, "read %d %d\n", ret, total);
-			if(subdev_flags & SDF_LSAMPL)
+			if (options.verbose) {
+				fprintf(stderr, "read %d %d\n", ret,
+					total);
+			}
+			if (subdev_flags & SDF_LSAMPL) {
 				bytes_per_sample = sizeof(lsampl_t);
-			else
+			} else {
 				bytes_per_sample = sizeof(sampl_t);
-			for(i = 0; i < ret / bytes_per_sample; i++){
-				if(subdev_flags & SDF_LSAMPL) {
+			}
+			for (i = 0; i < ret / bytes_per_sample; i++) {
+				if (subdev_flags & SDF_LSAMPL) {
 					raw = ((lsampl_t *)buf)[i];
 				} else {
 					raw = ((sampl_t *)buf)[i];
 				}
 				print_datum(raw, col);
 				col++;
-				if(col == options.n_chan){
+				if (col == options.n_chan) {
 					printf("\n");
 					col=0;
 				}
@@ -207,8 +214,11 @@ int main(int argc, char *argv[])
 /*
  * This prepares a command in a pretty generic way.  We ask the
  * library to create a stock command that supports periodic
- * sampling of data, then modify the parts we want. */
-int prepare_cmd_lib(comedi_t *dev, int subdevice, int n_scan, int n_chan, unsigned scan_period_nanosec, comedi_cmd *cmd)
+ * sampling of data, then modify the parts we want.
+ */
+int prepare_cmd_lib(comedi_t *dev, int subdevice, int n_scan,
+		    int n_chan, unsigned scan_period_nanosec,
+		    comedi_cmd *cmd)
 {
 	int ret;
 
@@ -217,22 +227,29 @@ int prepare_cmd_lib(comedi_t *dev, int subdevice, int n_scan, int n_chan, unsign
 	/* This comedilib function will get us a generic timed
 	 * command for a particular board.  If it returns -1,
 	 * that's bad. */
-	ret = comedi_get_cmd_generic_timed(dev, subdevice, cmd, n_chan, scan_period_nanosec);
-	if(ret<0){
-		printf("comedi_get_cmd_generic_timed failed\n");
+	ret = comedi_get_cmd_generic_timed(dev, subdevice, cmd, n_chan,
+					   scan_period_nanosec);
+	if (ret < 0) {
+		fprintf(stderr,
+			"comedi_get_cmd_generic_timed failed\n");
 		return ret;
 	}
 
 	/* Modify parts of the command */
 	cmd->chanlist = chanlist;
 	cmd->chanlist_len = n_chan;
-	if(cmd->stop_src == TRIG_COUNT) cmd->stop_arg = n_scan;
+	if (cmd->stop_src == TRIG_COUNT) {
+		cmd->stop_arg = n_scan;
+	}
 
 	return 0;
 }
 
-void print_datum(lsampl_t raw, int channel_index) {
+void print_datum(lsampl_t raw, int channel_index)
+{
 	double physical_value;
-	physical_value = comedi_to_phys(raw, range_info[channel_index], maxdata[channel_index]);
-	printf("%#8.6g ",physical_value);
+
+	physical_value = comedi_to_phys(raw, range_info[channel_index],
+					maxdata[channel_index]);
+	printf("%#8.6g ", physical_value);
 }

@@ -25,17 +25,15 @@ int main(int argc,char *argv[])
 	int retval;
 
 	it = comedi_open("/dev/comedi0");
-	if(it == NULL)
-	{
+	if(it == NULL) {
 		comedi_perror("comedi_open");
-		return -1;
+		return 1;
 	}
 
 	retval = comedi_data_read(it, subdev, chan, range, aref, &data);
-	if(retval < 0)
-	{
+	if(retval < 0) {
 		comedi_perror("comedi_data_read");
-		return -1;
+		return 1;
 	}
 
 	printf("%d\n", data);
