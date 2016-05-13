@@ -123,7 +123,7 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 		}else if(ret==0){
 			/* hit timeout */
 			printf("timeout, polling...\n");
-			ret = comedi_poll(device,0);
+			ret = comedi_poll(device,cmd->subdev);
 			printf("poll returned %d\n",ret);
 		}else if(FD_ISSET(comedi_fileno(device),&rdset)){
 			/* comedi file descriptor became ready */
