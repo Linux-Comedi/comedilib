@@ -335,7 +335,7 @@ Description:
  <parameter class="function">subdevice</parameter> as the current streaming
  input subdevice if the subdevice supports streaming input commands.
 
- Changes are local to the <em>open file description</em> for this
+ Changes are local to the <emphasis>open file description</emphasis> for this
  <parameter class="function">device</parameter> and have no effect on other
  open file descriptions for the underlying device node.
 Returns:
@@ -351,7 +351,7 @@ Description:
  <parameter class="function">subdevice</parameter> as the current streaming
  output subdevice if the subdevice supports streaming output commands.
 
- Changes are local to the <em>open file description</em> for this
+ Changes are local to the <emphasis>open file description</emphasis> for this
  <parameter class="function">device</parameter> and have no effect on other
  open file descriptions for the underlying device node.
 Returns:
