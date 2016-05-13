@@ -74,6 +74,19 @@ int main(int argc, char *argv[])
 		? sizeof(lsampl_t) : sizeof(sampl_t);
 	fprintf(stderr,"sample size is %u\n", sample_size);
 
+	/*
+	 * Attempt to make options.subdevice the current 'read' subdevice,
+	 * as that is the one whose buffer will be mapped.
+	 */
+	comedi_set_read_subdevice(dev, options.subdevice);
+	ret = comedi_get_read_subdevice(dev);
+	if (ret < 0 || ret != options.subdevice) {
+		fprintf(stderr,
+			"failed to change 'read' subdevice from %d to %d\n",
+			ret, cmd->subdev);
+		exit(1);
+	}
+
 	map = mmap(NULL,bufsize,PROT_READ,MAP_SHARED, comedi_fileno(dev), 0);
 	fprintf(stderr, "map=%p\n", map);
 	if( map == MAP_FAILED ){

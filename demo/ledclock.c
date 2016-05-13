@@ -193,6 +193,15 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 
 	dump_cmd(stdout,cmd);
 
+	comedi_set_read_subdevice(dev, cmd->subdev);
+	ret = comedi_get_read_subdevice(dev);
+	if (ret < 0 || ret != cmd->subdev) {
+		fprintf(stderr,
+			"failed to change 'read' subdevice from %d to %d\n",
+			ret, cmd->subdev);
+		return;
+	}
+
 	ret=comedi_command(dev,cmd);
 
 	printf("ret=%d\n",ret);

@@ -122,6 +122,19 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
+	/*
+	 * The 'write' subdevice needs to be correct for 'mmap', below, to
+	 * map the correct buffer!
+	 */
+	comedi_set_write_subdevice(dev, cmd.subdev);
+	ret = comedi_get_write_subdevice(dev);
+	if (ret < 0 || ret != cmd.subdev) {
+		fprintf(stderr,
+			"failed to change 'write' subdevice from %d to %d\n",
+			ret, cmd.subdev);
+		exit(1);
+	}
+
 	if ((err = comedi_command(dev, &cmd)) < 0) {
 		comedi_perror("comedi_command");
 		exit(1);

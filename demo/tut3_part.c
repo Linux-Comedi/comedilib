@@ -5,7 +5,7 @@
 		exit(1);
 	}
 
-	// Print numbers for clipped inputs
+	/* Print numbers for clipped inputs */
 	comedi_set_global_oor_behavior(COMEDI_OOR_NUMBER);
 
 	/* Set up channel list */
@@ -54,6 +54,23 @@
 			cmdtest_messages[ret]);
 	if(ret!=0){
 		fprintf(stderr, "Error preparing command\n");
+		exit(1);
+	}
+
+	/* comedi_set_read_subdevice() attempts to change the current
+	 * 'read' subdevice to the specified subdevice if it is
+	 * different.  Changing the read or write subdevice might not be
+	 * supported by the version of Comedi you are using.  */
+	comedi_set_read_subdevice(dev, cmd->subdev);
+	/* comedi_get_read_subdevice() gets the current 'read'
+	 * subdevice. if any.  This is the subdevice whose buffer the
+	 * read() call will read from.  Check that it is the one we want
+	 * to use.  */
+	ret = comedi_get_read_subdevice(dev);
+	if (ret < 0 || ret != cmd->subdev) {
+		fprintf(stderr,
+			"failed to change 'read' subdevice from %d to %d\n",
+			ret, cmd->subdev);
 		exit(1);
 	}
 

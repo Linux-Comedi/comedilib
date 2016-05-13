@@ -38,7 +38,17 @@
 int check_subdevice(comedi_t *device, int *subdevice, const char *device_filepath)
 {
 	int subdevice_type;
-	int read_subdevice = comedi_get_read_subdevice(device);
+	int read_subdevice;
+
+	read_subdevice = comedi_get_read_subdevice(device);
+	if (*subdevice >= 0 && read_subdevice != *subdevice)
+	{
+		if (comedi_set_read_subdevice(device, *subdevice) == 0)
+		{
+			/* 'read' subdevice changed successfully */
+			read_subdevice = *subdevice;
+		}
+	}
 	if(read_subdevice < 0)
 	{
 		fprintf(stderr, "Device file \"%s\" cannot do streaming input.\n", device_filepath);

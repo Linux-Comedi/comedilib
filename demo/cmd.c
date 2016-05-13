@@ -138,6 +138,15 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
+	comedi_set_read_subdevice(dev, cmd->subdev);
+	ret = comedi_get_read_subdevice(dev);
+	if (ret < 0 || ret != cmd->subdev) {
+		fprintf(stderr,
+			"failed to change 'read' subdevice from %d to %d\n",
+			ret, cmd->subdev);
+		exit(1);
+	}
+
 	/* this is only for informational purposes */
 	gettimeofday(&start, NULL);
 	fprintf(stderr,"start time: %ld.%06ld\n", start.tv_sec, start.tv_usec);
