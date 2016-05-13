@@ -5,6 +5,9 @@ XML = calibration_funcref.xml command_funcref.xml dio_funcref.xml \
 	install.xml intro.xml other.xml reference.xml tutorial.xml \
 	driverwriting.xml comedilib.xml bindings.xml comedilib.ent
 
+TUTORIALS = $(srcdir)/../demo/tut1.c $(srcdir)/../demo/tut2.c \
+	    $(srcdir)/../demo/tut3.c
+
 EXTRA_DIST = $(XML) calibration_funcref.txt command_funcref.txt dio_funcref.txt \
 	deprecated_funcref.txt error_funcref.txt extensions_funcref.txt \
 	funcref mkref drivers.txt mkdr FAQ \
@@ -56,7 +59,7 @@ uninstall-local: $(uninstall_html) $(uninstall_man)
 
 #named this doc_html to avoid phony html target that is automatically generated
 #(at least by automake1.8)
-$(srcdir)/doc_html: $(XML) comedilib_html_config.xsl
+$(srcdir)/doc_html: $(XML) $(TUTORIALS) comedilib_html_config.xsl
 	{ $(XMLTO) -o $(srcdir)/doc_html -m $(srcdir)/comedilib_html_config.xsl --skip-validation html $(srcdir)/comedilib.xml && \
 		(cd $(srcdir)/doc_html && $(LN_S) -f ../comedilib.css . && $(LN_S) -f ../acq-seq.gif .) && \
 		touch $(srcdir)/doc_html;} || \
@@ -83,7 +86,7 @@ install_man:
 uninstall_man:
 	for each in `find $(srcdir)/man/ -name '*.3'`; do $(RM) $(DESTDIR)$(mandir)/man3/`basename $$each` ; done
 
-$(srcdir)/pdf/comedilib.pdf: $(XML) comedilib_dblatex_config.xsl
+$(srcdir)/pdf/comedilib.pdf: $(XML) $(TUTORIALS) comedilib_dblatex_config.xsl
 	$(XMLTO) -o $(srcdir)/pdf --skip-validation $(XMLTO_PDF_OPTS) pdf $(srcdir)/comedilib.xml
 
 funcref.xml: funcref mkref
