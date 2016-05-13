@@ -25,6 +25,8 @@ int test_cmd_start_inttrig(void)
 	unsigned int flags;
 
 	flags = comedi_get_subdevice_flags(device,subdevice);
+	/* attempt to make subdevice the current 'read' subdevice */
+	if(flags&SDF_CMD_READ) comedi_set_read_subdevice(device,subdevice);
 	if(!(flags&SDF_CMD) || (comedi_get_read_subdevice(device)!=subdevice)){
 		printf("not applicable\n");
 		return 0;

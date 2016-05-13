@@ -112,6 +112,8 @@ int test_cmd_read_fast_1chan(void)
 	int ret;
 	unsigned int flags = comedi_get_subdevice_flags(device,subdevice);
 
+	/* attempt to make subdevice the current 'read' subdevice */
+	if(flags&SDF_CMD_READ) comedi_set_read_subdevice(device,subdevice);
 	if(!(flags&SDF_CMD) || (comedi_get_read_subdevice(device)!=subdevice)){
 		printf("not applicable\n");
 		return 0;
@@ -172,6 +174,8 @@ int test_cmd_write_fast_1chan(void)
 	{
 		num_bytes = num_samples * sizeof(sampl_t);
 	}
+	/* attempt to make subdevice the current 'write' subdevice */
+	if(flags&SDF_CMD_WRITE) comedi_set_write_subdevice(device,subdevice);
 	if(!(flags&SDF_CMD) || (comedi_get_write_subdevice(device)!=subdevice)){
 		printf("not applicable\n");
 		return 0;
