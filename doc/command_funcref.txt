@@ -11,8 +11,8 @@ Description:
  on the subdevice indicated by the parameters <parameter class="function">device</parameter>
  and <parameter class="function">subdevice</parameter>.
 Returns:
- If successful, <literal>0</literal> is returned, otherwise
- <literal>-1</literal>.
+ On success, <literal>0</literal> is returned.
+ On failure, <literal>-1</literal> is returned.
 
 Function: comedi_command -- start streaming input/output
 Retval: int
@@ -33,8 +33,8 @@ Description:
  For output subdevices,
  sample values are written using the function <function>write</function>.
 Returns:
- If successful, <literal>0</literal> is returned, otherwise
- <literal>-1</literal>.
+ On success, <literal>0</literal> is returned.
+ On failure, <literal>-1</literal> is returned.
 
 Function: comedi_command_test -- test streaming input/output configuration
 Retval: int
@@ -48,7 +48,7 @@ Description:
  of the <type>comedi_cmd</type> structure are invalid, they may be modified.  Source
  elements are modified to remove invalid source triggers.  Argument
  elements are adjusted or rounded to the nearest valid value.
-
+Returns:
  The meanings of the return value are as follows:
 
  <itemizedlist>
@@ -101,7 +101,8 @@ Description:
  			use the same input range.
  		</para>
  	</listitem>
- 	</itemizedlist>
+ </itemizedlist>
+ On failure, <literal>-1</literal> is returned.
 
 Function: comedi_get_buffer_contents -- streaming buffer status
 Retval: int
@@ -109,9 +110,14 @@ Param: comedi_t * device
 Param: unsigned int subdevice
 Description:
  The function <function>comedi_get_buffer_contents</function> is used on a subdevice
- that has a Comedi command in progress.  The number of bytes that
- are available in the streaming buffer is returned.  If there is
- an error, <literal>-1</literal> is returned.
+ that has a Comedi command in progress to get the number of unread bytes.  For
+ a streaming input command, this is the number of bytes that can be read.  For
+ a streaming output command, subtracting this from the buffer size gives the
+ space available to be written.
+Returns:
+  On success, <function>comedi_get_buffer_contents</function> returns the
+  number of unread bytes in the buffer.
+  On failure, <literal>-1</literal> is returned.
 
 Function: comedi_get_buffer_offset -- streaming buffer status
 Retval: int
@@ -119,10 +125,14 @@ Param: comedi_t * device
 Param: unsigned int subdevice
 Description:
  The function <function>comedi_get_buffer_offset</function> is used on a subdevice
- that has a Comedi command in progress.  This function returns
- the offset in bytes of the read pointer in the streaming buffer.
+ that has a Comedi command in progress to get the current read position in the
+ streaming buffer as an offset in bytes from the start of the buffer.
+ The position will wrap around to 0 when it reaches the buffer size.
  This offset is only useful for memory mapped buffers.
- If there is an error, <literal>-1</literal> is returned.
+Returns:
+ On success, <function>comedi_get_buffer_offset</function> returns the current
+ read position as an offset in bytes from the start of the buffer.
+ On failure, <literal>-1</literal> is returned.
 
 Function: comedi_get_buffer_size -- streaming buffer size of subdevice
 Retval: int
@@ -133,7 +143,10 @@ Description:
  of the streaming buffer for the subdevice specified by
  <parameter class="function">device</parameter> and
  <parameter class="function">subdevice</parameter>.
- On error, <literal>-1</literal> is returned.
+Returns:
+ On success, <function>comedi_get_buffer_size</function> returns the size of
+ the buffer in bytes.
+ On failure, <literal>-1</literal> is returned.
 
 Function: comedi_get_cmd_generic_timed -- streaming input/output capabilities
 Retval: int
@@ -162,8 +175,8 @@ Description:
  The rate is adjusted to a rate that the device
  can handle.
 Returns:
- If successful, <literal>0</literal> is returned, otherwise
- <literal>-1</literal>.
+ On success, <literal>0</literal> is returned.
+ On failure, <literal>-1</literal> is returned.
 
 Function: comedi_get_cmd_src_mask -- streaming input/output capabilities
 Retval: int
@@ -180,8 +193,8 @@ Description:
  of the subdevice's supported trigger sources.  Other elements in the structure
  are undefined.
 Returns:
- If successful, <literal>0</literal> is returned, otherwise
- <literal>-1</literal>.
+ On success, <literal>0</literal> is returned.
+ On failure, <literal>-1</literal> is returned.
 
 Function: comedi_get_max_buffer_size -- maximum streaming buffer size
 Retval: int
@@ -197,7 +210,11 @@ Description:
  <function><link
  linkend="func-ref-comedi-set-max-buffer-size">comedi_set_max_buffer_size</link></function>
  or with the <command>comedi_config</command> program,
- and requires appropriate privileges.  On error, <literal>-1</literal> is returned.
+ and requires appropriate privileges.
+Returns:
+ On success, the maximum allowable size (in bytes) of the streaming buffer
+ is returned.
+ On failure, <literal>-1</literal> is returned.
 
 Function: comedi_get_read_subdevice -- find streaming input subdevice
 Retval: int
@@ -206,8 +223,12 @@ Description:
  The function <function>comedi_get_read_subdevice</function> returns the
  index of the subdevice
  whose streaming input buffer is currently accessible through the
- device <parameter class="function">device</parameter>.  If
- there is no such subdevice, <literal>-1</literal> is returned.
+ device <parameter class="function">device</parameter>, if there is one.
+Returns:
+ On success, <function>comedi_get_read_subdevice</function>returns the index
+ of the current <quote>read</quote> subdevice if there is one,
+ or <literal>-1</literal> if there is no <quote>read</quote> subdevice.
+ On failure, <literal>-1</literal> is returned.
 
 Function: comedi_get_write_subdevice -- find streaming output subdevice
 Retval: int
@@ -216,8 +237,12 @@ Description:
  The function <function>comedi_get_write_subdevice</function> returns the
  index of the subdevice
  whose streaming output buffer is currently accessible through the
- device <parameter class="device">device</parameter>.  If there is no such subdevice,
- <literal>-1</literal> is returned.
+ device <parameter class="device">device</parameter>, if there is one.
+Returns:
+ On success, <function>comedi_get_write_subdevice</function>returns the index
+ of the current <quote>write</quote> subdevice if there is one,
+ or <literal>-1</literal> if there is no <quote>write</quote> subdevice.
+ On failure, <literal>-1</literal> is returned.
 
 Function: comedi_mark_buffer_read -- streaming buffer control
 Retval: int
@@ -236,15 +261,10 @@ Description:
  bytes in the buffer
  are no longer needed and may be discarded.
 Returns:
- The function <function>comedi_mark_buffer_read</function> returns the
- number of bytes successfully marked as read,
- or <literal>-1</literal> on error.  The return value may be less than
- <parameter class="function">num_bytes</parameter> if you attempt to mark more
- bytes read than are currently available for reading, or
- if <parameter class="function">num_bytes</parameter> must be rounded down
- to be an exact multiple of the subdevice's
- sample size (either <code language="C">sizeof(sampl_t)</code> or
- <code language="C">sizeof(lsampl_t)</code>).
+ On success, <function>comedi_mark_buffer_read</function> returns the
+ number of bytes successfully marked as read.  The return value may be less than
+ the <parameter class="function">num_bytes</parameter>.
+ On failure, <literal>-1</literal> is returned.
 
 Function: comedi_mark_buffer_written -- streaming buffer control
 Retval: int
@@ -263,16 +283,10 @@ Description:
  bytes in the buffer
  are valid and may be sent to the device.
 Returns:
- The function <function>comedi_mark_buffer_written</function> returns
- number of bytes successfully marked as written,
- or <literal>-1</literal> on error.  The return value may be less than
- <parameter class="function">num_bytes</parameter> if you attempt to mark more
- bytes written than the amount of free space currently available
- in the output buffer, or
- if <parameter class="function">num_bytes</parameter> must be
- rounded down to be an exact multiple of the subdevice's
- sample size (either <code language="C">sizeof(sampl_t)</code>
- or <code language="C">sizeof(lsampl_t)</code>).
+ On success, <function>comedi_mark_buffer_written</function> returns the
+ number of bytes successfully marked as written.  The return value may be less than
+ the <parameter class="function">num_bytes</parameter>.
+ On failure, <literal>-1</literal> is returned.
 
 Function: comedi_poll -- force updating of streaming buffer
 Retval: int
@@ -283,8 +297,12 @@ Description:
  Comedi command in progress in order to update the streaming buffer.
  If supported by the driver, all available samples are copied to
  the streaming buffer.  These samples may be pending in DMA buffers
- or device FIFOs.  If successful, the number of additional bytes
- available is returned.  If there is an error, <literal>-1</literal> is returned.
+ or device FIFOs.
+ Only a few Comedi drivers support this operation.
+Returns:
+ On success, <function>comedi_poll</function> returns the number of additional
+ bytes available.
+ On failure, <literal>-1</literal> is returned.
 
 Function: comedi_set_buffer_size -- streaming buffer size of subdevice
 Retval: int
@@ -308,8 +326,9 @@ Description:
  linkend="func-ref-comedi-set-max-buffer-size">comedi_set_max_buffer_size</link></function>,
  or running the program <command>comedi_config</command>.
 Returns:
- The new buffer size in bytes is returned on success.  On error,
- <literal>-1</literal> is returned.
+ On success, <function>comedi_set_buffer_size</function> returns the new
+ buffer size in bytes.
+ On failure, <literal>-1</literal> is returned.
 
 Function: comedi_set_max_buffer_size -- streaming maximum buffer size of subdevice
 Retval: int
@@ -323,7 +342,9 @@ Description:
  <parameter class="function">subdevice</parameter>.  Changing the maximum buffer
  size requires the user to have appropriate privileges.
 Returns:
- The new maximum buffer size is returned on success.  On error, <literal>-1</literal> is returned.
+ On success, <function>comedi_set_max_buffer_size</function> returns the new
+ maximum buffer size in bytes.
+ On failure, <literal>-1</literal> is returned.
 
 Function: comedi_set_read_subdevice -- set streaming input subdevice
 Retval: int
@@ -339,7 +360,8 @@ Description:
  <parameter class="function">device</parameter> and have no effect on other
  open file descriptions for the underlying device node.
 Returns:
- <literal>0</literal> on success, <literal>-1</literal> on error.
+ On success, <literal>0</literal> is returned.
+ On failure, <literal>-1</literal> is returned.
 
 Function: comedi_set_write_subdevice -- set streaming output subdevice
 Retval: int
@@ -355,4 +377,5 @@ Description:
  <parameter class="function">device</parameter> and have no effect on other
  open file descriptions for the underlying device node.
 Returns:
- <literal>0</literal> on success, <literal>-1</literal> on error.
+ On success, <literal>0</literal> is returned.
+ On failure, <literal>-1</literal> is returned.
