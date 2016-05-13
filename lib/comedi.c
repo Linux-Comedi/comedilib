@@ -237,6 +237,11 @@ int _comedi_set_read_subdevice(comedi_t *it,unsigned int subdevice)
 	int ret;
 
 	if(!valid_dev(it)) return -1;
+	if(it->devinfo.read_subdevice >= 0 &&
+	   it->devinfo.read_subdevice == subdevice){
+		return 0;
+	}
+
 	ret = comedi_ioctl(it->fd, COMEDI_SETRSUBD, (void*)(unsigned long)subdevice);
 	if(ret == 0){
 		it->devinfo.read_subdevice = subdevice;
@@ -250,6 +255,10 @@ int _comedi_set_write_subdevice(comedi_t *it,unsigned int subdevice)
 	int ret;
 
 	if(!valid_dev(it)) return -1;
+	if(it->devinfo.write_subdevice >= 0 &&
+	   it->devinfo.write_subdevice == subdevice){
+		return 0;
+	}
 	ret = comedi_ioctl(it->fd, COMEDI_SETWSUBD, (void*)(unsigned long)subdevice);
 	if(ret == 0){
 		it->devinfo.write_subdevice = subdevice;

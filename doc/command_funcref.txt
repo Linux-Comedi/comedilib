@@ -403,8 +403,12 @@ Param: unsigned int subdevice
 Status: Works for Linux "in-tree" Comedi since kernel version 3.19.
 Description:
  The function <function>comedi_set_read_subdevice</function> sets
- <parameter class="function">subdevice</parameter> as the current streaming
- input subdevice if the subdevice supports streaming input commands.
+ <parameter class="function">subdevice</parameter> as the current
+ <quote>read</quote> subdevice if the subdevice supports streaming
+ input commands.
+
+ No action is performed if <parameter class="function">subdevice</parameter>
+ is already the current <quote>read</quote> subdevice.
 
  Changes are local to the <emphasis>open file description</emphasis> for this
  <parameter class="function">device</parameter> and have no effect on other
@@ -420,8 +424,12 @@ Param: unsigned int subdevice
 Status: Works for Linux "in-tree" Comedi since kernel version 3.19.
 Description:
  The function <function>comedi_set_write_subdevice</function> sets
- <parameter class="function">subdevice</parameter> as the current streaming
- output subdevice if the subdevice supports streaming output commands.
+ <parameter class="function">subdevice</parameter> as the current
+ <quote>write</quote> subdevice if the subdevice supports streaming
+ output commands.
+
+ No action is performed if <parameter class="function">subdevice</parameter>
+ is already the current <quote>write</quote> subdevice.
 
  Changes are local to the <emphasis>open file description</emphasis> for this
  <parameter class="function">device</parameter> and have no effect on other
