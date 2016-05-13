@@ -211,6 +211,8 @@ private
 	    mark_buffer_read
 	    mark_buffer_written
 	    get_buffer_offset
+	    get_buffer_read_offset
+	    get_buffer_write_offset
 	    get_softcal_converter
 	    get_hardcal_converter
 	    internal_trigger
@@ -247,6 +249,8 @@ private
 	    get_cmd_generic_timed
 	    get_gate_source
 	    get_routing
+	    get_buffer_read_count
+	    get_buffer_write_count
 	}),
 	# TODO: add get_clock_source, but it returns status and two values.
 

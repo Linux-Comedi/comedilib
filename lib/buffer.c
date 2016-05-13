@@ -124,8 +124,8 @@ int _comedi_mark_buffer_written(comedi_t *it, unsigned int subdev, unsigned int 
 	return bi.bytes_written;
 }
 
-EXPORT_ALIAS_DEFAULT(_comedi_get_buffer_offset,comedi_get_buffer_offset,0.7.18);
-int _comedi_get_buffer_offset(comedi_t *it, unsigned int subdev)
+EXPORT_ALIAS_DEFAULT(_comedi_get_buffer_read_offset,comedi_get_buffer_read_offset,0.11.0);
+int _comedi_get_buffer_read_offset(comedi_t *it, unsigned int subdev)
 {
 	int ret;
 	comedi_bufinfo bi;
@@ -138,8 +138,19 @@ int _comedi_get_buffer_offset(comedi_t *it, unsigned int subdev)
 	return bi.buf_read_ptr;
 }
 
-EXPORT_ALIAS_DEFAULT(_comedi_get_front_count,comedi_get_front_count,0.7.18);
-int _comedi_get_front_count(comedi_t *it, unsigned int subdev)
+/*
+ * Keep this for backwards compatibility as a synonym of
+ * comedi_get_buffer_read_offset().
+ * TODO: mark this as deprecated.
+ */
+EXPORT_ALIAS_DEFAULT(_comedi_get_buffer_offset,comedi_get_buffer_offset,0.7.18);
+int _comedi_get_buffer_offset(comedi_t *it, unsigned int subdev)
+{
+	return comedi_get_buffer_read_offset(it, subdev);
+}
+
+EXPORT_ALIAS_DEFAULT(_comedi_get_buffer_write_offset,comedi_get_buffer_write_offset,0.11.0);
+int _comedi_get_buffer_write_offset(comedi_t *it, unsigned int subdev)
 {
 	int ret;
 	comedi_bufinfo bi;
@@ -149,6 +160,52 @@ int _comedi_get_front_count(comedi_t *it, unsigned int subdev)
 	bi.subdevice = subdev;
 	ret = comedi_ioctl(it->fd, COMEDI_BUFINFO, &bi);
 	if(ret < 0) return ret;
-	return bi.buf_write_count;
+	return bi.buf_write_ptr;
 }
 
+EXPORT_ALIAS_DEFAULT(_comedi_get_buffer_read_count,comedi_get_buffer_read_count,0.11.0);
+int _comedi_get_buffer_read_count(comedi_t *it, unsigned int subdev, unsigned int *read_count)
+{
+	int ret;
+	comedi_bufinfo bi;
+
+	*read_count = 0;
+	if(!valid_subd(it,subdev)) return -1;
+	memset(&bi, 0, sizeof(bi));
+	bi.subdevice = subdev;
+	ret = comedi_ioctl(it->fd, COMEDI_BUFINFO, &bi);
+	if(ret < 0) return ret;
+	*read_count = bi.buf_read_count;
+	return 0;
+}
+
+EXPORT_ALIAS_DEFAULT(_comedi_get_buffer_write_count,comedi_get_buffer_write_count,0.11.0);
+int _comedi_get_buffer_write_count(comedi_t *it, unsigned int subdev, unsigned int *write_count)
+{
+	int ret;
+	comedi_bufinfo bi;
+
+	*write_count = 0;
+	if(!valid_subd(it,subdev)) return -1;
+	memset(&bi, 0, sizeof(bi));
+	bi.subdevice = subdev;
+	ret = comedi_ioctl(it->fd, COMEDI_BUFINFO, &bi);
+	if(ret < 0) return ret;
+	*write_count = bi.buf_write_count;
+	return 0;
+}
+
+/*
+ * Keep _comedi_get_front_count for backwards compatibility.
+ * It is not in "comedilib.h" and is not documented.
+ */
+EXPORT_ALIAS_DEFAULT(_comedi_get_front_count,comedi_get_front_count,0.7.18);
+int _comedi_get_front_count(comedi_t *it, unsigned int subdev)
+{
+	unsigned int write_count;
+	int ret;
+
+	ret = _comedi_get_buffer_write_count(it, subdev, &write_count);
+	if (ret < 0) return ret;
+	return write_count;
+}

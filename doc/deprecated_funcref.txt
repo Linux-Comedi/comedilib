@@ -13,6 +13,14 @@ Description:
  with <parameter class="function">base_channel</parameter> set to
  <literal>0</literal>.
 
+Function: comedi_get_buffer_offset -- streaming buffer status (deprecated)
+Status: deprecated
+Description:
+ This function is deprecated.  Use <function><link
+ linkend="func-ref-comedi-get-buffer-read-offset">comedi_get_buffer_read_offset</link></function>
+ instead.  It has the same functionality as
+ <function>comedi_get_buffer_read_offset</function>.
+
 Function: comedi_get_timer -- timer information (deprecated)
 Retval: int
 Param: comedi_t * device

@@ -119,19 +119,69 @@ Returns:
   number of unread bytes in the buffer.
   On failure, <literal>-1</literal> is returned.
 
-Function: comedi_get_buffer_offset -- streaming buffer status
+Function: comedi_get_buffer_read_offset -- streaming buffer read offset
 Retval: int
 Param: comedi_t * device
 Param: unsigned int subdevice
 Description:
- The function <function>comedi_get_buffer_offset</function> is used on a subdevice
- that has a Comedi command in progress to get the current read position in the
- streaming buffer as an offset in bytes from the start of the buffer.
- The position will wrap around to 0 when it reaches the buffer size.
- This offset is only useful for memory mapped buffers.
+ The function <function>comedi_get_buffer_read_offset</function> is used on
+ a subdevice that has a Comedi command in progress to get the current read
+ position in the streaming buffer as an offset in bytes from the start of
+ the buffer.  The position will wrap around to 0 when it reaches the buffer
+ size.  This offset is only useful for memory mapped buffers.
+
+ This function replaces <function><link
+ linkend="func-ref-comedi-get-buffer-offset">comedi_get_buffer_offset</link></function> and has the same functionality.
 Returns:
- On success, <function>comedi_get_buffer_offset</function> returns the current
+ On success, <function>comedi_get_buffer_read_offset</function> returns the current
  read position as an offset in bytes from the start of the buffer.
+ On failure, <literal>-1</literal> is returned.
+
+Function: comedi_get_buffer_write_offset -- streaming buffer write offset
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Description:
+ The function <function>comedi_get_buffer_write_offset</function> is used on
+ a subdevice that has a Comedi command in progress to get the current write
+ position in the streaming buffer as an offset in bytes from the start of
+ the buffer.  The position will wrap around to 0 when it reaches the buffer
+ size.  This offset is only useful for memory mapped buffers.
+Returns:
+ On success, <function>comedi_get_buffer_write_offset</function> returns the
+ current write position as an offset in bytes from the start of the buffer.
+ On failure, <literal>-1</literal> is returned.
+
+Function: comedi_get_buffer_read_count -- streaming buffer read count
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int * read_count
+Description:
+ The function <function>comedi_get_buffer_read_count</function> is used on
+ a subdevice that has a Comedi command in progress to get the number of bytes
+ that have been read from the buffer, modulo
+ <constant class="limit">UINT_MAX</constant> + <literal>1</literal>.  The
+ value is stored in
+ <code>*<parameter class="function">read_count</parameter></code>.
+Returns:
+ On success, <literal>0</literal> is returned.
+ On failure, <literal>-1</literal> is returned.
+
+Function: comedi_get_buffer_write_count -- streaming buffer write count
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int * write_count
+Description:
+ The function <function>comedi_get_buffer_write_count</function> is used on
+ a subdevice that has a Comedi command in progress to get the number of bytes
+ that have been written to the buffer, modulo
+ <constant class="limit">UINT_MAX</constant> + <literal>1</literal>.  The
+ value is stored in
+ <code>*<parameter class="function">write_count</parameter></code>.
+Returns:
+ On success, <literal>0</literal> is returned.
  On failure, <literal>-1</literal> is returned.
 
 Function: comedi_get_buffer_size -- streaming buffer size of subdevice

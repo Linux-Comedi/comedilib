@@ -201,6 +201,14 @@ int comedi_mark_buffer_read(comedi_t *it, unsigned int subdev,
 	unsigned int bytes);
 int comedi_mark_buffer_written(comedi_t *it, unsigned int subdev,
 	unsigned int bytes);
+int comedi_get_buffer_read_offset(comedi_t *it, unsigned int subdev);
+int comedi_get_buffer_write_offset(comedi_t *it, unsigned int subdev);
+int comedi_get_buffer_read_count(comedi_t *it, unsigned int subdev,
+	unsigned int *SWIG_OUTPUT(read_count));
+int comedi_get_buffer_write_count(comedi_t *it, unsigned int subdev,
+	unsigned int *SWIG_OUTPUT(write_count));
+
+/* Should be moved to _COMEDILIB_DEPRECATED - use comedi_get_buffer_read_offset instead. */
 int comedi_get_buffer_offset(comedi_t *it, unsigned int subdev);
 
 #ifdef _COMEDILIB_DEPRECATED

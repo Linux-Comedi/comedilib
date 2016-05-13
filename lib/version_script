@@ -128,4 +128,8 @@ v0.11.0 {
 		comedi_digital_trigger_enable_levels;
 		comedi_set_read_subdevice;
 		comedi_set_write_subdevice;
+		comedi_get_buffer_read_offset;
+		comedi_get_buffer_write_offset;
+		comedi_get_buffer_read_count;
+		comedi_get_buffer_write_count;
 } v0.10.0;
