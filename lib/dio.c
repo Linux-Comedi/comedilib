@@ -103,12 +103,10 @@ int _comedi_dio_get_config(comedi_t *it,unsigned int subdev, unsigned int chan, 
 		return -1;
 
 	s=it->subdevices+subdev;
-	if(s->type!=COMEDI_SUBD_DIO)
+	if(s->type!=COMEDI_SUBD_DIO){
+		internal_error(EINVAL_SUBD);
 		return -1;
-
-	if(it->has_insnlist_ioctl == 0)
-		return -1;
-
+	}
 	memset(&insn,0,sizeof(insn));
 	insn.insn = INSN_CONFIG;
 	insn.n = sizeof(data) / sizeof(data[0]);
@@ -137,8 +135,10 @@ int _comedi_dio_read(comedi_t *it,unsigned int subdev,unsigned int chan,
 	s = it->subdevices+subdev;
 	if(s->type!=COMEDI_SUBD_DIO &&
 	   s->type!=COMEDI_SUBD_DO &&
-	   s->type!=COMEDI_SUBD_DI)
+	   s->type!=COMEDI_SUBD_DI){
+		internal_error(EINVAL_SUBD);
 		return -1;
+	}
 
 	if(it->has_insnlist_ioctl){
 		comedi_insn insn;
@@ -186,8 +186,10 @@ int _comedi_dio_write(comedi_t *it,unsigned int subdev,unsigned int chan,
 
 	s = it->subdevices+subdev;
 	if(s->type!=COMEDI_SUBD_DIO &&
-	   s->type!=COMEDI_SUBD_DO)
+	   s->type!=COMEDI_SUBD_DO){
+		internal_error(EINVAL_SUBD);
 		return -1;
+	}
 
 	if(it->has_insnlist_ioctl){
 		comedi_insn insn;
@@ -234,8 +236,10 @@ int _comedi_dio_bitfield2(comedi_t *it, unsigned int subdev, unsigned int mask, 
 	s = it->subdevices + subdev;
 
 	if(s->type != COMEDI_SUBD_DIO && s->type != COMEDI_SUBD_DO &&
-		s->type != COMEDI_SUBD_DI)
+		s->type != COMEDI_SUBD_DI){
+		internal_error(EINVAL_SUBD);
 		return -1;
+	}
 
 	if(s->has_insn_bits)
 	{
