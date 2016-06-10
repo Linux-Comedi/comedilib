@@ -140,6 +140,17 @@ namespace comedi
 				throw std::runtime_error(message.str());
 			}
 		}
+		void do_insnlist(comedi_insnlist *insnlist) const
+		{
+			int retval = comedi_do_insnlist(comedi_handle(), insnlist);
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_do_insnlist() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_do_insnlist");
+				throw std::runtime_error(message.str());
+			}
+		}
 		std::string driver_name() const
 		{
 			const char *name = comedi_get_driver_name(comedi_handle());
@@ -153,7 +164,6 @@ namespace comedi
 			}
 			return name;
 		}
-		inline subdevice find_subdevice_by_type(int type, const subdevice *start_subdevice = 0) const;
 		int fileno() const
 		{
 			int fd = comedi_fileno(comedi_handle());
@@ -167,6 +177,9 @@ namespace comedi
 			}
 			return fd;
 		}
+		subdevice find_subdevice_by_type(int type, const subdevice *start_subdevice = 0) const;
+		subdevice get_read_subdevice() const;
+		subdevice get_write_subdevice() const;
 		unsigned n_subdevices() const
 		{
 			int retval = comedi_get_n_subdevices(comedi_handle());
@@ -275,6 +288,30 @@ namespace comedi
 		{
 			apply_hard_calibration(channel, range, aref, calibration(dev()));
 		}
+		void arm(unsigned source) const
+		{
+			int retval = comedi_arm(comedi_handle(), index(), source);
+			if (retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_arm() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_arm");
+				throw std::runtime_error(message.str());
+			}
+		}
+		void arm_channel(unsigned channel, unsigned source) const
+		{
+			int retval = comedi_arm_channel(comedi_handle(), index(), channel, source);
+			if (retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_arm_channel() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_arm_channel");
+				throw std::runtime_error(message.str());
+			}
+		}
 		unsigned buffer_size() const
 		{
 			int retval = comedi_get_buffer_size(comedi_handle(), index());
@@ -288,7 +325,7 @@ namespace comedi
 			}
 			return retval;
 		}
-		void cancel()
+		void cancel() const
 		{
 			int retval = comedi_cancel(comedi_handle(), index());
 			if(retval < 0)
@@ -328,6 +365,20 @@ namespace comedi
 			}
 			return values;
 		}
+		lsampl_t data_read_delayed(unsigned channel, unsigned range, unsigned aref, unsigned nano_sec) const
+		{
+			lsampl_t value;
+			int retval = comedi_data_read_delayed(comedi_handle(), index(), channel, range, aref, &value, nano_sec);
+			if(retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_data_read_delayed() failed, return value=" << retval << " .";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_data_read_delayed");
+				throw std::runtime_error(message.str());
+			}
+			return value;
+		}
 		void data_read_hint(unsigned channel, unsigned range, unsigned aref) const
 		{
 			int ret = comedi_data_read_hint(comedi_handle(), index(), channel, range, aref);
@@ -353,7 +404,47 @@ namespace comedi
 			}
 		}
 		device dev() const {return _device;}
-		void dio_bitfield2(unsigned write_mask, unsigned *bits, unsigned base_channel)
+		void digital_trigger_disable(unsigned trigger_id) const
+		{
+			int retval = comedi_digital_trigger_disable(comedi_handle(), index(), trigger_id);
+			if (retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_digital_trigger_disable() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_digital_trigger_disable");
+				throw std::runtime_error(message.str());
+			}
+		}
+		void digital_trigger_enable_edges(unsigned trigger_id, unsigned base_input, unsigned rising_edge_inputs, unsigned falling_edge_inputs) const
+		{
+			int retval = comedi_digital_trigger_enable_edges(comedi_handle(), index(), trigger_id, base_input, rising_edge_inputs, falling_edge_inputs);
+			if (retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_digital_trigger_enable_edges() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_digital_trigger_enable_edges");
+				throw std::runtime_error(message.str());
+			}
+		}
+		void digital_trigger_enable_levels(unsigned trigger_id, unsigned base_input, unsigned high_level_inputs, unsigned low_level_inputs) const
+		{
+			int retval = comedi_digital_trigger_enable_levels(comedi_handle(), index(), trigger_id, base_input, high_level_inputs, low_level_inputs);
+			if (retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_digital_trigger_enable_levels() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_digital_trigger_enable_levels");
+				throw std::runtime_error(message.str());
+			}
+		}
+		void dio_bitfield(unsigned write_mask, unsigned *bits) const
+		{
+			dio_bitfield2(write_mask, bits, 0);
+		}
+		void dio_bitfield2(unsigned write_mask, unsigned *bits, unsigned base_channel) const
 		{
 			int retval = comedi_dio_bitfield2(comedi_handle(), index(),
 				write_mask, bits, base_channel);
@@ -366,7 +457,7 @@ namespace comedi
 				throw std::runtime_error(message.str());
 			}
 		}
-		void dio_config(unsigned channel, enum comedi_io_direction direction)
+		void dio_config(unsigned channel, enum comedi_io_direction direction) const
 		{
 			int retval = comedi_dio_config(comedi_handle(), index(), channel, direction);
 			if(retval < 0)
@@ -378,7 +469,71 @@ namespace comedi
 				throw std::runtime_error(message.str());
 			}
 		}
-		unsigned find_range(unsigned channel, unsigned unit, double min, double max)
+		enum comedi_io_direction dio_get_config(unsigned channel) const
+		{
+			unsigned dir;
+			int retval = comedi_dio_get_config(comedi_handle(), index(), channel, &dir);
+			if (retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_dio_get_config() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_dio_get_config");
+				throw std::runtime_error(message.str());
+			}
+			return (enum comedi_io_direction)dir;
+		}
+		unsigned dio_read(unsigned channel) const
+		{
+			unsigned bit;
+			int retval = comedi_dio_read(comedi_handle(), index(), channel, &bit);
+			if (retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_dio_read() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_dio_read");
+				throw std::runtime_error(message.str());
+			}
+			return bit;
+		}
+		void dio_write(unsigned channel, unsigned bit) const
+		{
+			int retval = comedi_dio_write(comedi_handle(), index(), channel, bit);
+			if (retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_dio_read() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_dio_read");
+				throw std::runtime_error(message.str());
+			}
+		}
+		void disarm() const
+		{
+			int retval = comedi_disarm(comedi_handle(), index());
+			if (retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_disarm() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_disarm");
+				throw std::runtime_error(message.str());
+			}
+		}
+		void disarm_channel(unsigned channel) const
+		{
+			int retval = comedi_disarm_channel(comedi_handle(), index(), channel);
+			if (retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_disarm_channel() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_disarm_channel");
+				throw std::runtime_error(message.str());
+			}
+		}
+		unsigned find_range(unsigned channel, unsigned unit, double min, double max) const
 		{
 			int retval = comedi_find_range(comedi_handle(), index(), channel,
 				unit, min, max);
@@ -418,6 +573,60 @@ namespace comedi
 			}
 			return retval;
 		}
+		unsigned get_buffer_read_count() const
+		{
+			unsigned count;
+			int retval = comedi_get_buffer_read_count(comedi_handle(), index(), &count);
+			if (retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_get_buffer_read_count() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_get_buffer_read_count");
+				throw std::runtime_error(message.str());
+			}
+			return count;
+		}
+		unsigned get_buffer_read_offset() const
+		{
+			int offset = comedi_get_buffer_read_offset(comedi_handle(), index());
+			if (offset < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_get_buffer_read_offset() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_get_buffer_read_offset");
+				throw std::runtime_error(message.str());
+			}
+			return offset;
+		}
+		unsigned get_buffer_write_count() const
+		{
+			unsigned count;
+			int retval = comedi_get_buffer_write_count(comedi_handle(), index(), &count);
+			if (retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_get_buffer_write_count() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_get_buffer_write_count");
+				throw std::runtime_error(message.str());
+			}
+			return count;
+		}
+		unsigned get_buffer_write_offset() const
+		{
+			int offset = comedi_get_buffer_write_offset(comedi_handle(), index());
+			if (offset < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_get_buffer_write_offset() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_get_buffer_write_offset");
+				throw std::runtime_error(message.str());
+			}
+			return offset;
+		}
 		void get_clock_source(unsigned channel, unsigned *clock, unsigned *period_ns) const
 		{
 			int retval = comedi_get_clock_source(comedi_handle(), index(), channel, clock, period_ns);
@@ -430,7 +639,31 @@ namespace comedi
 				throw std::runtime_error(message.str());
 			}
 		}
-		void get_gate_source(unsigned channel, unsigned gate_index, unsigned *gate_source)
+		void get_cmd_generic_timed(comedi_cmd *cmd, unsigned chanlist_len, unsigned scan_period) const
+		{
+			int retval = comedi_get_cmd_generic_timed(comedi_handle(), index(), cmd, chanlist_len, scan_period);
+			if (retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_get_cmd_generic_timed() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_get_cmd_generic_timed");
+				throw std::runtime_error(message.str());
+			}
+		}
+		void get_cmd_src_mask(comedi_cmd *cmd) const
+		{
+			int retval = comedi_get_cmd_src_mask(comedi_handle(), index(), cmd);
+			if (retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_get_cmd_src_mask() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_get_cmd_src_mask");
+				throw std::runtime_error(message.str());
+			}
+		}
+		void get_gate_source(unsigned channel, unsigned gate_index, unsigned *gate_source) const
 		{
 			int retval = comedi_get_gate_source(comedi_handle(), index(), channel, gate_index, gate_source);
 			if (retval < 0)
@@ -495,6 +728,44 @@ namespace comedi
 				throw std::runtime_error(message.str());
 			}
 		}
+		void lock() const
+		{
+			int retval = comedi_lock(comedi_handle(), index());
+			if (retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_lock() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_lock");
+				throw std::runtime_error(message.str());
+			}
+		}
+		unsigned mark_buffer_read(unsigned bytes) const
+		{
+			int marked = comedi_mark_buffer_read(comedi_handle(), index(), bytes);
+			if (marked < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_mark_buffer_read() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_mark_buffer_read");
+				throw std::runtime_error(message.str());
+			}
+			return marked;
+		}
+		unsigned mark_buffer_written(unsigned bytes) const
+		{
+			int marked = comedi_mark_buffer_written(comedi_handle(), index(), bytes);
+			if (marked < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_mark_buffer_written() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_mark_buffer_written");
+				throw std::runtime_error(message.str());
+			}
+			return marked;
+		}
 		unsigned max_buffer_size() const
 		{
 			int retval = comedi_get_max_buffer_size(comedi_handle(), index());
@@ -507,6 +778,32 @@ namespace comedi
 				throw std::runtime_error(message.str());
 			}
 			return retval;
+		}
+		lsampl_t max_data(unsigned channel = 0) const
+		{
+			lsampl_t value = comedi_get_maxdata(comedi_handle(), index(), channel);
+			if(value == 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_get_maxdata() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_get_maxdata");
+				throw std::runtime_error(message.str());
+			}
+			return value;
+		}
+		bool max_data_is_chan_specific() const
+		{
+			int retval = comedi_maxdata_is_chan_specific(comedi_handle(), index());
+			if (retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_maxdata_is_chan_specific() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_maxdata_is_chan_specific");
+				throw std::runtime_error(message.str());
+			}
+			return retval != 0;
 		}
 		unsigned n_channels() const
 		{
@@ -534,18 +831,18 @@ namespace comedi
 			}
 			return retval;
 		}
-		lsampl_t max_data(unsigned channel = 0) const
+		unsigned poll() const
 		{
-			lsampl_t value = comedi_get_maxdata(comedi_handle(), index(), channel);
-			if(value == 0)
+			int amount = comedi_poll(comedi_handle(), index());
+			if (amount < 0)
 			{
 				std::ostringstream message;
-				message << __PRETTY_FUNCTION__ << ": comedi_get_maxdata() failed.";
+				message << __PRETTY_FUNCTION__ << ": comedi_poll() failed.";
 				std::cerr << message.str() << std::endl;
-				comedi_perror("comedi_get_maxdata");
+				comedi_perror("comedi_poll");
 				throw std::runtime_error(message.str());
 			}
-			return value;
+			return amount;
 		}
 		const comedi_range* range(unsigned channel, unsigned range_index) const
 		{
@@ -560,6 +857,19 @@ namespace comedi
 			}
 			return cRange;
 		}
+		bool range_is_chan_specific() const
+		{
+			int retval = comedi_range_is_chan_specific(comedi_handle(), index());
+			if (retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_range_is_chan_specific() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_range_is_chan_specific");
+				throw std::runtime_error(message.str());
+			}
+			return retval != 0;
+		}
 		void reset() const
 		{
 			int retval = comedi_reset(comedi_handle(), index());
@@ -569,6 +879,42 @@ namespace comedi
 				message << __PRETTY_FUNCTION__ << ": comedi_reset() failed.";
 				std::cerr << message.str() << std::endl;
 				comedi_perror("comedi_reset");
+				throw std::runtime_error(message.str());
+			}
+		}
+		void reset_channel(unsigned channel) const
+		{
+			int retval = comedi_reset_channel(comedi_handle(), index(), channel);
+			if(retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_reset_channel() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_reset_channel");
+				throw std::runtime_error(message.str());
+			}
+		}
+		void set_as_read_subdevice() const
+		{
+			int retval = comedi_set_read_subdevice(comedi_handle(), index());
+			if (retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_set_read_subdevice() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_set_read_subdevice");
+				throw std::runtime_error(message.str());
+			}
+		}
+		void set_as_write_subdevice() const
+		{
+			int retval = comedi_set_write_subdevice(comedi_handle(), index());
+			if (retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_set_write_subdevice() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_set_write_subdevice");
 				throw std::runtime_error(message.str());
 			}
 		}
@@ -584,7 +930,7 @@ namespace comedi
 				throw std::runtime_error(message.str());
 			}
 		}
-		void set_clock_source(unsigned channel, unsigned clock, unsigned period_ns)
+		void set_clock_source(unsigned channel, unsigned clock, unsigned period_ns) const
 		{
 			int retval = comedi_set_clock_source(comedi_handle(), index(), channel, clock, period_ns);
 			if(retval < 0)
@@ -596,7 +942,7 @@ namespace comedi
 				throw std::runtime_error(message.str());
 			}
 		}
-		void set_counter_mode(unsigned channel, unsigned mode_bits)
+		void set_counter_mode(unsigned channel, unsigned mode_bits) const
 		{
 			int retval = comedi_set_counter_mode(comedi_handle(), index(), channel, mode_bits);
 			if(retval < 0)
@@ -608,7 +954,19 @@ namespace comedi
 				throw std::runtime_error(message.str());
 			}
 		}
-		void set_gate_source(unsigned channel, unsigned gate_index, unsigned gate_source)
+		void set_filter(unsigned channel, unsigned filter) const
+		{
+			int retval = comedi_set_filter(comedi_handle(), index(), channel, filter);
+			if (retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_set_filter() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_set_filter");
+				throw std::runtime_error(message.str());
+			}
+		}
+		void set_gate_source(unsigned channel, unsigned gate_index, unsigned gate_source) const
 		{
 			int retval = comedi_set_gate_source(comedi_handle(), index(), channel, gate_index, gate_source);
 			if(retval < 0)
@@ -632,7 +990,19 @@ namespace comedi
 				throw std::runtime_error(message.str());
 			}
 		}
-		void set_routing(unsigned channel, unsigned routing)
+		void set_other_source(unsigned channel, unsigned other, unsigned source) const
+		{
+			int retval = comedi_set_other_source(comedi_handle(), index(), channel, other, source);
+			if (retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_set_other_source() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_set_other_source");
+				throw std::runtime_error(message.str());
+			}
+		}
+		void set_routing(unsigned channel, unsigned routing) const
 		{
 			int retval = comedi_set_routing(comedi_handle(), index(), channel, routing);
 			if(retval < 0)
@@ -671,6 +1041,18 @@ namespace comedi
 			}
 			return comedi_subdevice_type(retval);
 		}
+		void unlock() const
+		{
+			int retval = comedi_unlock(comedi_handle(), index());
+			if (retval < 0)
+			{
+				std::ostringstream message;
+				message << __PRETTY_FUNCTION__ << ": comedi_unlock() failed.";
+				std::cerr << message.str() << std::endl;
+				comedi_perror("comedi_unlock");
+				throw std::runtime_error(message.str());
+			}
+		}
 	private:
 		comedi_t* comedi_handle() const {return dev().comedi_handle();}
 
@@ -678,7 +1060,7 @@ namespace comedi
 		unsigned _index;
 	};
 
-	subdevice device::find_subdevice_by_type(int type, const subdevice *start_subdevice) const
+	inline subdevice device::find_subdevice_by_type(int type, const subdevice *start_subdevice) const
 	{
 		unsigned start_index;
 		if(start_subdevice) start_index = start_subdevice->index() + 1;
@@ -690,6 +1072,34 @@ namespace comedi
 			message << __PRETTY_FUNCTION__ << ": failed to find subdevice of type " << type << " .";
 			std::cerr << message.str() << std::endl;
 			comedi_perror("comedi_find_subdevice_by_type");
+			throw std::runtime_error(message.str());
+		}
+		return subdevice(*this, subdev);
+	}
+
+	inline subdevice device::get_read_subdevice() const
+	{
+		int subdev = comedi_get_read_subdevice(comedi_handle());
+		if (subdev < 0)
+		{
+			std::ostringstream message;
+			message << __PRETTY_FUNCTION__ << ": comedi_get_read_subdevice() failed.";
+			std::cerr << message.str() << std::endl;
+			comedi_perror("comedi_get_read_subdevice");
+			throw std::runtime_error(message.str());
+		}
+		return subdevice(*this, subdev);
+	}
+
+	inline subdevice device::get_write_subdevice() const
+	{
+		int subdev = comedi_get_write_subdevice(comedi_handle());
+		if (subdev < 0)
+		{
+			std::ostringstream message;
+			message << __PRETTY_FUNCTION__ << ": comedi_get_write_subdevice() failed.";
+			std::cerr << message.str() << std::endl;
+			comedi_perror("comedi_get_write_subdevice");
 			throw std::runtime_error(message.str());
 		}
 		return subdevice(*this, subdev);
