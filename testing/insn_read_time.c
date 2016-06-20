@@ -19,6 +19,7 @@ int test_insn_read_time(void)
 	comedi_insnlist il;
 	lsampl_t t1[2],t2[2];
 	lsampl_t data;
+	long diffus;
 	int save_errno;
 	int ret;
 
@@ -60,8 +61,18 @@ int test_insn_read_time(void)
 		printf("W: comedi_do_insn: returned %d (expected 3)\n",ret);
 	}
 
-	printf("read time: %ld us\n",
-		(long)(t2[0]-t1[0])*1000000+(t2[1]-t1[1]));
+	if (t2[0] >= t1[0]) {
+		diffus = (long)(t2[0] - t1[0]);
+	} else {
+		diffus = -(long)(t1[0] - t2[0]);
+	}
+	diffus *= 1000000;
+	if (t2[1] >= t1[1]) {
+		diffus += (long)(t2[1] - t1[1]);
+	} else {
+		diffus -= (long)(t1[1] - t2[1]);
+	}
+	printf("read time: %ld us\n", diffus);
 
 
 	return 0;
