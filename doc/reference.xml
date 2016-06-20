@@ -604,7 +604,7 @@ configure a subdevice
     <listitem>
       <para>
 read a timestamp, identical to <function>gettimeofday</function> except the seconds
-and microseconds values are of type <type><link linkend="ref-type-lsampl-t">lsampl_t</link></type>.
+and microseconds values are unsigned values of type <type><link linkend="ref-type-lsampl-t">lsampl_t</link></type>.
       </para>
     </listitem>
   </varlistentry>

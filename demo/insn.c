@@ -52,6 +52,7 @@ int main(int argc, char *argv[])
 	comedi_insnlist il;
 	lsampl_t t1[2], t2[2];
 	lsampl_t data[MAX_SAMPLES];
+	long diffus;
 	struct parsed_options options;
 
 	init_parsed_options(&options);
@@ -102,14 +103,24 @@ int main(int argc, char *argv[])
 		exit(-1);
 	}
 
-	printf("initial time: %d.%06d\n", t1[0], t1[1]);
+	printf("initial time: %u.%06u\n", t1[0], t1[1]);
 	for(i = 0; i < options.n_scan; i++){
 		printf("%d\n", data[i]);
 	}
-	printf("final time: %d.%06d\n", t2[0], t2[1]);
+	printf("final time: %u.%06u\n", t2[0], t2[1]);
 
-	printf("difference (us): %ld\n",(long)(t2[0]-t1[0]) * 1000000 +
-			(t2[1] - t1[1]));
+	if (t2[0] >= t1[0]) {
+		diffus = (long)(t2[0] - t1[0]);
+	} else {
+		diffus = -(long)(t1[0] - t2[0]);
+	}
+	diffus *= 1000000;
+	if (t2[1] >= t1[1]) {
+		diffus += (long)(t2[1] - t1[1]);
+	} else {
+		diffus -= (long)(t1[1] - t2[1]);
+	}
+	printf("difference (us): %ld\n", diffus);
 
 	return 0;
 }
