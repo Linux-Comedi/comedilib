@@ -698,7 +698,7 @@ struct comedi_rangeinfo_struct {
  * by 1e6, so a @max value of %1000000 (with %UNIT_volt) represents a maximal
  * value of 1 volt.
  *
- * The only defined flag value is %RF_external (%1 << %8), indicating that the
+ * The only defined flag value is %RF_EXTERNAL (%0x100), indicating that the
  * the range needs to be multiplied by an external reference.
  */
 struct comedi_krange_struct {
@@ -1134,12 +1134,15 @@ enum ni_gpct_other_select {
  */
 enum ni_gpct_arm_source {
 	NI_GPCT_ARM_IMMEDIATE = 0x0,
-	/* Start both the counter and the adjacent paired counter simultaneously */
+	/*
+	 * Start both the counter and the adjacent paired counter simultaneously
+	 */
 	NI_GPCT_ARM_PAIRED_IMMEDIATE = 0x1,
 	/*
-	 * If the NI_GPCT_HW_ARM bit is set, we will pass the least significant bits
-	 * (3 bits for 660x or 5 bits for m-series) through to the hardware. To select
-	 * a hardware trigger, pass the appropriate select bit, e.g.,
+	 * If the NI_GPCT_HW_ARM bit is set, we will pass the least significant
+	 * bits (3 bits for 660x or 5 bits for m-series) through to the
+	 * hardware. To select a hardware trigger, pass the appropriate select
+	 * bit, e.g.,
 	 * NI_GPCT_HW_ARM | NI_GPCT_AI_START1_GATE_SELECT or
 	 * NI_GPCT_HW_ARM | NI_GPCT_PFI_GATE_SELECT(pfi_number)
 	 */
