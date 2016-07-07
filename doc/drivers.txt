@@ -40,14 +40,27 @@ Devices: [Adlink] ACL-7225b (acl7225b), [ICP] P16R16DIO (p16r16dio)
 
 
 Driver: adl_pci6208
-Description: ADLink PCI-6208A
-Devices: [ADLink] PCI-6208A (adl_pci6208)
+Description: ADLink PCI-6216V
+Devices: [ADLink] PCI-6216V (adl_pci6208)
 Author: nsyeow <nsyeow@pd.jaring.my>
-Updated: Fri, 30 Jan 2004 14:44:27 +0800
+Updated: Tue, 10 Feb 2015 15:29:55 +0000
 Status: untested
 
 Configuration Options:
   none
+
+The driver should work for PCI-6208V, PCI-6208A and PCI-6216V, but all
+devices will be treated as a PCI-6216V.
+
+For PCI-6208V and PCI-6208A, only AO channels 0 to 7 are connected and
+AO channels 8 to 15 will behave as "phantom" outputs.
+
+The current output ranges for PCI-6208A are not supported.  Only Comedi
+sample values 0x8000 to 0xffff should be written to the AO channels on a
+PCI-6208A.  Its voltage to current daughter board (EXP-8A) only supports
+an input range of 0 to 10 volts and negative voltages may damage the
+board.  Comedi sample values 0x0000 to 0x7fff would produce negative
+voltages from -10 to 0 volts.
 
 References:
 	- ni_660x.c
@@ -62,6 +75,29 @@ Devices: [ADLink] PCI-7230 (adl_pci7230)
 Author: David Fernandez <dfcastelao@gmail.com>
 Status: experimental
 Updated: Mon, 14 Apr 2008 15:08:14 +0100
+
+Configuration Options:
+  [0] - PCI bus of device (optional)
+  [1] - PCI slot of device (optional)
+  If bus/slot is not specified, the first supported
+  PCI device found will be used.
+
+
+
+Driver: adl_pci7250
+Description: Driver for the Adlink PCI-7250 relay output & digital input card
+Devices: [ADLink] PCI-7250 (adl_pci7250) LPCI-7250 LPCIe-7250
+Author: Ian Abbott <abbotti@mev.co.uk>
+Status: works
+Updated: Wed, 17 Jun 2015 09:22:58 +0000
+
+The driver assumes that 3 PCI-7251 modules are fitted to the PCI-7250,
+giving 32 channels of relay outputs and 32 channels of isolated digital
+inputs.  That is also the case for the LPCI-7250 and LPCIe-7250 cards
+although they do not physically support the PCI-7251 modules.
+
+Not fitting the PCI-7251 modules shouldn't do any harm, but the extra
+inputs and relay outputs won't work!
 
 Configuration Options:
   [0] - PCI bus of device (optional)
@@ -128,6 +164,42 @@ Supports:
   - ao_insn read/write
   - di_insn read
   - do_insn read/write
+  - ai_do_cmd mode with the following sources:
+
+    - start_src 		TRIG_NOW
+    - scan_begin_src 		TRIG_FOLLOW	TRIG_TIMER	TRIG_EXT
+    - convert_src				TRIG_TIMER	TRIG_EXT
+    - scan_end_src		TRIG_COUNT
+    - stop_src			TRIG_COUNT	TRIG_NONE
+
+    The scanned channels must be consecutive and start from 0. They must
+    all have the same range and aref.
+
+Configuration options:
+
+    [0] - PCI bus number (optional)
+    [1] - PCI slot number (optional)
+
+    If bus/slot is not specified, the first available PCI
+    device will be used.
+
+
+
+
+Driver: adl_pci9112
+Description: Adlink PCI-9112
+Author: Pascal Berthou <berthou@laas.fr> Emmanuel Pacaud <emmanuel.pacaud@univ-poitiers.fr>
+Devices: [ADLink] PCI-9112 (adl_pci9112)
+Status: experimental
+
+Supports:
+
+  - ai_insn read
+  - ao_insn read/write
+  - di_insn read
+  - do_insn read/write
+
+  Following command mode are not tested
   - ai_do_cmd mode with the following sources:
 
     - start_src 		TRIG_NOW
@@ -376,16 +448,17 @@ Driver: amplc_dio200
 Description: Amplicon 200 Series Digital I/O
 Author: Ian Abbott <abbotti@mev.co.uk>
 Devices: [Amplicon] PC212E (pc212e), PC214E (pc214e), PC215E (pc215e),
-  PCI215 (pci215 or amplc_dio200), PC218E (pc218e), PC272E (pc272e),
-  PCI272 (pci272 or amplc_dio200)
-Updated: Wed, 22 Oct 2008 13:36:02 +0100
+  PCI215 (pci215 or amplc_dio200), PCIe215 (pcie215 or amplc_dio200),
+  PC218E (pc218e), PCIe236 (pcie236 or amplc_dio200), PC272E (pc272e),
+  PCI272 (pci272 or amplc_dio200), PCIe296 (pcie296 or amplc_dio200)
+Updated: Wed, 03 Oct 2012 17:54:05 +0100
 Status: works
 
 Configuration options - PC212E, PC214E, PC215E, PC218E, PC272E:
   [0] - I/O port base address
   [1] - IRQ (optional, but commands won't work without it)
 
-Configuration options - PCI215, PCI272:
+Configuration options - PCI215, PCIe215, PCIe236, PCI272, PCIe296:
   [0] - PCI bus of device (optional)
   [1] - PCI slot of device (optional)
   If bus/slot is not specified, the first available PCI device will
@@ -395,24 +468,39 @@ Passing a zero for an option is the same as leaving it unspecified.
 
 SUBDEVICES
 
-                    PC218E         PC212E      PC215E/PCI215
+                    PC212E         PC214E      PC215E/PCI215
                  -------------  -------------  -------------
-  Subdevices           7              6              5
-   0                 CTR-X1         PPI-X          PPI-X
-   1                 CTR-X2         CTR-Y1         PPI-Y
-   2                 CTR-Y1         CTR-Y2         CTR-Z1
-   3                 CTR-Y2         CTR-Z1         CTR-Z2
-   4                 CTR-Z1         CTR-Z2       INTERRUPT
-   5                 CTR-Z2       INTERRUPT
-   6               INTERRUPT
+  Subdevices           6              4              5
+   0                 PPI-X          PPI-X          PPI-X
+   1                 CTR-Y1         PPI-Y          PPI-Y
+   2                 CTR-Y2         CTR-Z1*        CTR-Z1
+   3                 CTR-Z1       INTERRUPT*       CTR-Z2
+   4                 CTR-Z2                      INTERRUPT
+   5               INTERRUPT
 
-                    PC214E      PC272E/PCI272
+                    PCIe215        PC218E         PCIe236
+                 -------------  -------------  -------------
+  Subdevices           8              7              8
+   0                 PPI-X          CTR-X1         PPI-X
+   1                 UNUSED         CTR-X2         UNUSED
+   2                 PPI-Y          CTR-Y1         UNUSED
+   3                 UNUSED         CTR-Y2         UNUSED
+   4                 CTR-Z1         CTR-Z1         CTR-Z1
+   5                 CTR-Z2         CTR-Z2         CTR-Z2
+   6                 TIMER        INTERRUPT        TIMER
+   7               INTERRUPT                     INTERRUPT
+
+                 PC272E/PCI272     PCIe296
                  -------------  -------------
-  Subdevices           4              4
-   0                 PPI-X          PPI-X
-   1                 PPI-Y          PPI-Y
-   2                 CTR-Z1*        PPI-Z
-   3               INTERRUPT*     INTERRUPT
+  Subdevices           4              8
+   0                 PPI-X          PPI-X1
+   1                 PPI-Y          PPI-X2
+   2                 PPI-Z          PPI-Y1
+   3               INTERRUPT        PPI-Y2
+   4                                CTR-Z1
+   5                                CTR-Z2
+   6                                TIMER
+   7                              INTERRUPT
 
 Each PPI is a 8255 chip providing 24 DIO channels.  The DIO channels
 are configurable as inputs or outputs in four groups:
@@ -492,6 +580,8 @@ Clock and gate interconnection notes:
   3.  The counter subdevices are connected in a ring, so the highest
   counter subdevice precedes the lowest.
 
+The 'TIMER' subdevice is a free-running 32-bit timer subdevice.
+
 The 'INTERRUPT' subdevice pretends to be a digital input subdevice.  The
 digital inputs come from the interrupt status register.  The number of
 channels matches the number of interrupt sources.  The PC214E does not
@@ -500,25 +590,35 @@ below.
 
 INTERRUPT SOURCES
 
-                    PC218E         PC212E      PC215E/PCI215
+                    PC212E         PC214E      PC215E/PCI215
+                 -------------  -------------  -------------
+  Sources              6              1              6
+   0               PPI-X-C0       JUMPER-J5      PPI-X-C0
+   1               PPI-X-C3                      PPI-X-C3
+   2              CTR-Y1-OUT1                    PPI-Y-C0
+   3              CTR-Y2-OUT1                    PPI-Y-C3
+   4              CTR-Z1-OUT1                   CTR-Z1-OUT1
+   5              CTR-Z2-OUT1                   CTR-Z2-OUT1
+
+                    PCIe215        PC218E         PCIe236
                  -------------  -------------  -------------
   Sources              6              6              6
-   0              CTR-X1-OUT      PPI-X-C0       PPI-X-C0
-   1              CTR-X2-OUT      PPI-X-C3       PPI-X-C3
-   2              CTR-Y1-OUT     CTR-Y1-OUT      PPI-Y-C0
-   3              CTR-Y2-OUT     CTR-Y2-OUT      PPI-Y-C3
-   4              CTR-Z1-OUT     CTR-Z1-OUT     CTR-Z1-OUT
-   5              CTR-Z2-OUT     CTR-Z2-OUT     CTR-Z2-OUT
+   0               PPI-X-C0      CTR-X1-OUT1     PPI-X-C0
+   1               PPI-X-C3      CTR-X2-OUT1     PPI-X-C3
+   2               PPI-Y-C0      CTR-Y1-OUT1      unused
+   3               PPI-Y-C3      CTR-Y2-OUT1      unused
+   4              CTR-Z1-OUT1    CTR-Z1-OUT1    CTR-Z1-OUT1
+   5              CTR-Z2-OUT1    CTR-Z2-OUT1    CTR-Z2-OUT1
 
-                    PC214E      PC272E/PCI272
+                 PC272E/PCI272     PCIe296
                  -------------  -------------
-  Sources              1              6
-   0               JUMPER-J5      PPI-X-C0
-   1                              PPI-X-C3
-   2                              PPI-Y-C0
-   3                              PPI-Y-C3
-   4                              PPI-Z-C0
-   5                              PPI-Z-C3
+  Sources              6              6
+   0               PPI-X-C0       PPI-X1-C0
+   1               PPI-X-C3       PPI-X1-C3
+   2               PPI-Y-C0       PPI-Y1-C0
+   3               PPI-Y-C3       PPI-Y1-C3
+   4               PPI-Z-C0      CTR-Z1-OUT1
+   5               PPI-Z-C3      CTR-Z2-OUT1
 
 When an interrupt source is enabled in the interrupt source enable
 register, a rising edge on the source signal latches the corresponding
@@ -872,36 +972,24 @@ Status: experimental
 
 
 
-Driver: cb_pcidas64
-Description: MeasurementComputing PCI-DAS64xx, 60XX, and 4020 series with the PLX 9080 PCI controller
-Author: Frank Mori Hess <fmhess@users.sourceforge.net>
+Driver: cb_pcidac
+Description: Measurement Computing PCI Migration series boards
+Devices: [ComputerBoards] PCI-DAC6702 (cb_pcidac), PCI-DAC6703
+Author: Oliver Gause
+Updated: Mon, 10 Jun 2013 11:56:44 +0100
 Status: works
-Updated: 2002-10-09
-Devices: [Measurement Computing] PCI-DAS6402/16 (cb_pcidas64),
-  PCI-DAS6402/12, PCI-DAS64/M1/16, PCI-DAS64/M2/16,
-  PCI-DAS64/M3/16, PCI-DAS6402/16/JR, PCI-DAS64/M1/16/JR,
-  PCI-DAS64/M2/16/JR, PCI-DAS64/M3/16/JR, PCI-DAS64/M1/14,
-  PCI-DAS64/M2/14, PCI-DAS64/M3/14, PCI-DAS6013, PCI-DAS6014,
-  PCI-DAS6023, PCI-DAS6025, PCI-DAS6030,
-  PCI-DAS6031, PCI-DAS6032, PCI-DAS6033, PCI-DAS6034,
-  PCI-DAS6035, PCI-DAS6036, PCI-DAS6040, PCI-DAS6052,
-  PCI-DAS6070, PCI-DAS6071, PCI-DAS4020/12
 
-Configuration options:
-   [0] - PCI bus of device (optional)
-   [1] - PCI slot of device (optional)
+Written to support the PCI-DAC6702. Trivially extended to support
+the PCI-DAC6703, it has just 16 ao channels instead of 8.
 
-These boards may be autocalibrated with the comedi_calibrate utility.
+Configuration Options:
+    [0] - PCI bus number
+    [1] - PCI slot number
 
-To select the bnc trigger input on the 4020 (instead of the dio input),
-specify a nonzero channel in the chanspec.  If you wish to use an external
-master clock on the 4020, you may do so by setting the scan_begin_src
-to TRIG_OTHER, and using an INSN_CONFIG_TIMER_1 configuration insn
-to configure the divisor to use for the external clock.
+Developed from cb_pcidas64, cb_pcimdas and skel. The register values are
+taken from the register map of Measurement Computing.
 
-Some devices are not identified because the PCI device IDs are not yet
-known. If you have such a board, please file a bug report at
-https://bugs.comedi.org.
+Supports DIO, AO in its present form.
 
 
 
@@ -942,6 +1030,40 @@ AI Triggering:
      start_arg == CR_EDGE             => Rising edge
      start_arg == CR_EDGE | CR_INVERT => Falling edge
    For the other boards the trigger will be done on rising edge
+
+
+
+Driver: cb_pcidas64
+Description: MeasurementComputing PCI-DAS64xx, 60XX, and 4020 series with the PLX 9080 PCI controller
+Author: Frank Mori Hess <fmhess@users.sourceforge.net>
+Status: works
+Updated: 2002-10-09
+Devices: [Measurement Computing] PCI-DAS6402/16 (cb_pcidas64),
+  PCI-DAS6402/12, PCI-DAS64/M1/16, PCI-DAS64/M2/16,
+  PCI-DAS64/M3/16, PCI-DAS6402/16/JR, PCI-DAS64/M1/16/JR,
+  PCI-DAS64/M2/16/JR, PCI-DAS64/M3/16/JR, PCI-DAS64/M1/14,
+  PCI-DAS64/M2/14, PCI-DAS64/M3/14, PCI-DAS6013, PCI-DAS6014,
+  PCI-DAS6023, PCI-DAS6025, PCI-DAS6030,
+  PCI-DAS6031, PCI-DAS6032, PCI-DAS6033, PCI-DAS6034,
+  PCI-DAS6035, PCI-DAS6036, PCI-DAS6040, PCI-DAS6052,
+  PCI-DAS6070, PCI-DAS6071, PCI-DAS4020/12
+
+Configuration options:
+   [0] - PCI bus of device (optional)
+   [1] - PCI slot of device (optional)
+
+These boards may be autocalibrated with the comedi_calibrate utility.
+
+To select the bnc trigger input on the 4020 (instead of the dio input),
+specify a nonzero channel in the chanspec.  If you wish to use an external
+master clock on the 4020, you may do so by setting the scan_begin_src
+to TRIG_OTHER, and using an INSN_CONFIG_TIMER_1 configuration insn
+to configure the divisor to use for the external clock.
+
+Some devices are not identified because the PCI device IDs are not yet
+known. If you have such a board, please file a bug report at
+https://bugs.comedi.org.
+
 
 
 
@@ -988,12 +1110,12 @@ Passing a zero for an option is the same as leaving it unspecified.
 
 Driver: cb_pcimdas
 Description: Measurement Computing PCI Migration series boards
-Devices: [ComputerBoards] PCIM-DAS1602/16 (cb_pcimdas)
+Devices: [ComputerBoards] PCIM-DAS1602/16 (cb_pcimdas), PCIe-DAS1602/16
 Author: Richard Bytheway
-Updated: Wed, 13 Nov 2002 12:34:56 +0000
+Updated: Mon, 13 Oct 2014 11:17:08 +0000
 Status: experimental
 
-Written to support the PCIM-DAS1602/16 on a 2.4 series kernel.
+Written to support the PCIM-DAS1602/16 and PCIe-DAS1602/16.
 
 Configuration Options:
     [0] - PCI bus number
@@ -1001,8 +1123,11 @@ Configuration Options:
 
 Developed from cb_pcidas and skel by Richard Bytheway (mocelet@sucs.org).
 Only supports DIO, AO and simple AI in it's present form.
-No interrupts, multi channel or FIFO AI, although the card looks like it could support this.
-See http://www.measurementcomputing.com/PDFManuals/pcim-das1602_16.pdf for more details.
+No interrupts, multi channel or FIFO AI, although the card looks like it could
+support this.
+
+http://www.mccdaq.com/PDFs/Manuals/pcim-das1602-16.pdf
+http://www.mccdaq.com/PDFs/Manuals/pcie-das1602-16.pdf
 
 
 
@@ -1455,7 +1580,7 @@ Configuration options:
   [0] - I/O port base address
   [1] - IRQ, although this is currently unused
   [2] - A/D reference
-          0 = signle-ended
+          0 = single-ended
           1 = differential
 	  2 = pseudo-differential (common reference)
   [3] - A/D range
@@ -1896,13 +2021,13 @@ Driver: ni_660x
 Description: National Instruments 660x counter/timer boards
 Devices:
 [National Instruments] PCI-6601 (ni_660x), PCI-6602, PXI-6602,
-	PXI-6608
+	PXI-6608, PXI-6624
 Author: J.P. Mellor <jpmellor@rose-hulman.edu>,
 	Herman.Bruyninckx@mech.kuleuven.ac.be,
 	Wim.Meeussen@mech.kuleuven.ac.be,
 	Klaas.Gadeyne@mech.kuleuven.ac.be,
 	Frank Mori Hess <fmhess@users.sourceforge.net>
-Updated: Thu Oct 18 12:56:06 EDT 2007
+Updated: Thu, 14 Mar 2013 10:57:02 +0000
 Status: experimental
 
 Encoders work.  PulseGeneration (both single pulse and pulse train)
@@ -1958,14 +2083,6 @@ Configuration options:
 
 
 
-Driver: ni_atmio16d
-Description: National Instruments AT-MIO-16D
-Author: Chris R. Baugher <baugher@enteract.com>
-Status: unknown
-Devices: [National Instruments] AT-MIO-16 (atmio16), AT-MIO-16D (atmio16d)
-
-
-
 Driver: ni_atmio
 Description: National Instruments AT-MIO-E series
 Author: ds
@@ -2005,6 +2122,14 @@ External triggering is supported for some events.  The channel index
 
 Some of the more esoteric triggering possibilities of these boards
 are not supported.
+
+
+
+Driver: ni_atmio16d
+Description: National Instruments AT-MIO-16D
+Author: Chris R. Baugher <baugher@enteract.com>
+Status: unknown
+Devices: [National Instruments] AT-MIO-16 (atmio16), AT-MIO-16D (atmio16d)
 
 
 
@@ -2168,7 +2293,7 @@ Devices: [National Instruments] PCI-MIO-16XE-50 (ni_pcimio),
   PCI-6024E, PCI-6025E, PXI-6025E, PCI-6034E, PCI-6035E, PCI-6052E,
   PCI-6110, PCI-6111, PCI-6220, PCI-6221, PCI-6224, PXI-6224,
   PCI-6225, PXI-6225, PCI-6229, PCI-6250,
-  PCI-6251, PXI-6251, PCIe-6251, PXIe-6251,
+  PCI-6251, PCIe-6251, PXI-6251, PXIe-6251,
   PCI-6254, PCI-6259, PCIe-6259,
   PCI-6280, PCI-6281, PXI-6281, PCI-6284, PCI-6289,
   PCI-6711, PXI-6711, PCI-6713, PXI-6713,
