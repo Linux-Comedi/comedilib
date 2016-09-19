@@ -58,10 +58,17 @@ can be found in the Git repository.  Instructions for access to the
 Comedi and Comedilib repositories can be found at
 <http://www.comedi.org/download.html>.  Git snapshots for Comedilib
 can be created automatically at
-<http://comedi.org/git?p=comedi/comedilib.git;a=tree>.  The Git
+<https://github.com/Linux-Comedi/comedilib/tarball/master>.  The Git
 repository can be cloned locally using:
 
-  git clone git://comedi.org/git/comedilib.git
+  git clone https://github.com/Linux-Comedi/comedilib.git
+
+The Git repository was previously hosted at comedi.org.  A previously
+cloned repository may need its URL updating to the current repository
+on github.com as follows:
+
+  cd /path/to/comedilib
+  git remote set-url origin https://github.com/Linux-Comedi/comedilib.git
 
 Comedilib may be freely distibuted and modified in accordance with
 the GNU Lesser General Public License.  Portions of the Comedilib
