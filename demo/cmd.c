@@ -64,6 +64,9 @@ int main(int argc, char *argv[])
 	init_parsed_options(&options);
 	options.subdevice = -1;
 	parse_options(&options, argc, argv);
+	if(options.n_chan > N_CHANS){
+		options.n_chan = N_CHANS;
+	}
 
 	/* The following variables used in this demo
 	 * can be modified by command line
