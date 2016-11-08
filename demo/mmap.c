@@ -50,12 +50,24 @@ int main(int argc, char *argv[])
 	struct parsed_options options;
 
 	init_parsed_options(&options);
+	options.subdevice = -1;
 	parse_options(&options, argc, argv);
 
 	dev = comedi_open(options.filename);
 	if(!dev){
 		comedi_perror(options.filename);
 		exit(1);
+	}
+
+	if(options.subdevice < 0) {
+		/* Subdevice not set on command line. */
+		/* Default to the 'read' subdevice (if any). */
+		options.subdevice = comedi_get_read_subdevice(dev);
+		if(options.subdevice < 0) {
+			/* No 'read' subdevice, so default to 0 instead. */
+			options.subdevice = 0;
+		}
+		fprintf(stderr, "defaulted to subdevice %d\n", options.subdevice);
 	}
 
 	ret = comedi_get_buffer_size(dev, options.subdevice);
