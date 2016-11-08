@@ -109,8 +109,11 @@ int main(int argc, char *argv[])
 	/* prepare_cmd_lib() uses a Comedilib routine to find a
 	 * good command for the device.  prepare_cmd() explicitly
 	 * creates a command, which may not work for your device. */
-	prepare_cmd_lib(dev, options.subdevice, options.n_scan, options.n_chan, 1e9 / options.freq, cmd);
-	//prepare_cmd(dev, options.subdevice, options.n_scan, options.n_chan, 1e9 / options.freq, cmd);
+	ret = prepare_cmd_lib(dev, options.subdevice, options.n_scan, options.n_chan, 1e9 / options.freq, cmd);
+	//ret = prepare_cmd(dev, options.subdevice, options.n_scan, options.n_chan, 1e9 / options.freq, cmd);
+	if(ret < 0){
+		exit(1);
+	}
 
 	fprintf(stderr, "command before testing:\n");
 	dump_cmd(stderr, cmd);
@@ -234,7 +237,7 @@ int prepare_cmd_lib(comedi_t *dev, int subdevice, int n_scan, int n_chan, unsign
 	 * that's bad. */
 	ret = comedi_get_cmd_generic_timed(dev, subdevice, cmd, n_chan, scan_period_nanosec);
 	if(ret<0){
-		printf("comedi_get_cmd_generic_timed failed\n");
+		fprintf(stderr,"comedi_get_cmd_generic_timed failed\n");
 		return ret;
 	}
 
