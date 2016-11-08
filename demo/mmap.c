@@ -26,7 +26,8 @@
 #include <string.h>
 #include "examples.h"
 
-unsigned int chanlist[256];
+#define N_CHANS 256
+unsigned int chanlist[N_CHANS];
 
 void *map;
 
@@ -52,6 +53,9 @@ int main(int argc, char *argv[])
 	init_parsed_options(&options);
 	options.subdevice = -1;
 	parse_options(&options, argc, argv);
+	if(options.n_chan > N_CHANS){
+		options.n_chan = N_CHANS;
+	}
 
 	dev = comedi_open(options.filename);
 	if(!dev){
