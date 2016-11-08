@@ -96,6 +96,20 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "defaulted to subdevice %d\n", options.subdevice);
 	}
 
+	/* Check subdevice exists. */
+	ret = comedi_get_n_subdevices(dev);
+	if(ret <= options.subdevice){
+		fprintf(stderr, "subdevice %d does not exist\n", options.subdevice);
+		exit(1);
+	}
+
+	/* Check subdevice supports 'read' commands. */
+	ret = comedi_get_subdevice_flags(dev, options.subdevice);
+	if(ret < 0 || !(ret & SDF_CMD_READ)) {
+		fprintf(stderr, "subdevice %d does not support 'read' commands\n", options.subdevice);
+		exit(1);
+	}
+
 	// Print numbers for clipped inputs
 	comedi_set_global_oor_behavior(COMEDI_OOR_NUMBER);
 
