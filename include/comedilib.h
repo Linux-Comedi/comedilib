@@ -1,3 +1,4 @@
+/* vim: set ts=8 sw=8 noet tw=80 nowrap: */
 /*
     include/comedilib.h
     header file for the comedi library routines
@@ -332,6 +333,48 @@ int comedi_digital_trigger_enable_edges(comedi_t *device, unsigned subdevice,
 int comedi_digital_trigger_enable_levels(comedi_t *device, unsigned subdevice,
 	unsigned trigger_id, unsigned base_input,
 	unsigned high_level_inputs, unsigned low_level_inputs);
+
+/**
+ * Get the hardware timing constraints for a streaming subdevice.
+ *
+ * The values returned by this function may indicate the range of valid inputs
+ * for scan_begin_arg and convert_arg, for instance when *_src==TRIG_TIMER.  For
+ * *_src==TRIG_EXT (or other modes?), these returned values are mostly
+ * informational and may be used in conjunction with other triggering hardware.
+ *
+ * If it is possible for the hardware constraints to depend on whether
+ * *_src==TRIG_TIMER or *_src==TRIG_EXT, the values returned by this function
+ * will depend on these inputs.  Alternatively, one can specify something like
+ * *_src==TRIG_TIMER|TRIG_EXT and retrieve the value that is the smallest that
+ * satisfies both trigger sources.
+ *
+ * @param device
+ *	Pointer to the device
+ * @param subdevice
+ *	Index of the streaming/async subdevice to query
+ * @param scan_begin_src
+ *	Bitwise or of all trigger modes (TRIG_INT, TRIG_EXT, ...) that should be
+ *	considered.
+ * @param scan_begin_min
+ *	If not NULL, this pointer is to return the value of minimum scan_begin
+ *	speed that meets the requirements of the slowest trigger specified in
+ *	scan_begin_src.
+ * @param convert_src
+ *	Bitwise or of all trigger modes (TRIG_INT, TRIG_EXT, ...) that should be
+ *	considered.
+ * @param convert_min
+ *	If not NULL, this pointer is to return the value of minimum convert
+ *	speed that meets the requirements of the slowest trigger specified in
+ *	convert_src.
+ * @return 0 if successful or -1 otherwise
+ */
+int comedi_get_cmd_timing_constraints(comedi_t *device, unsigned int subdevice,
+				      unsigned int scan_begin_src,
+				      unsigned int *scan_begin_min,
+				      unsigned int convert_src,
+				      unsigned int *convert_min,
+				      unsigned int *chanlist,
+				      unsigned int chanlist_len);
 
 /**
  * Validate a globally-named route as connectible and test whether it is

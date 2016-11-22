@@ -287,6 +287,48 @@ Description:
 Returns:
  <literal>0</literal> on success, <literal>-1</literal> on error.
 
+Function: comedi_get_cmd_timing_constraints -- Get the hardware timing constraints for a streaming subdevice
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int scan_begin_src
+Param: unsigned int * scan_begin_min
+Param: unsigned int convert_src
+Param: unsigned int * convert_min
+Param: unsigned int * chanlist
+Param: unsigned int chanlist_len
+Status: alpha
+Description:
+ This function queries the hardware timing constraints of a streaming subdevice.
+
+ The values returned by this function may indicate the range of valid inputs
+ for
+ <code language="C">comedi_cmd->scan_begin_arg</code> and
+ <code language="C">comedi_cmd->convert_arg</code>, for instance when
+ <code language="C">comedi_cmd->scan_begin_src==TRIG_TIMER</code> or
+ <code language="C">comedi_cmd->convert_src==TRIG_TIMER</code>.  For
+ <code language="C">TRIG_EXT</code> (or other modes?), these returned values are
+ mostly informational and may be used in conjunction with other triggering
+ hardware.
+
+ If it is possible for the hardware constraints to depend on whether
+ <code language="C">[*]_src==TRIG_TIMER</code> or
+ <code language="C">[*]_src==TRIG_EXT</code>, the values returned by this
+ function will depend on these inputs.  Alternatively, one can specify something
+ like <code language="C">[*]_src==TRIG_TIMER|TRIG_EXT</code> and retrieve the
+ value that is the smallest that satisfies both trigger sources.
+
+ <parameter class="function">scan_begin_min</parameter> may be given as
+ <code language="C">NULL</code>, such that nothing will be returned for minimum
+ scan speed.
+
+ <parameter class="function">convert_min</parameter> may be given as
+ <code language="C">NULL</code>, such that nothing will be returned for minimum
+ scan speed.
+
+Returns:
+ <literal>0</literal> on success, <literal>-1</literal> on error.
+
 Function: comedi_get_gate_source -- get gate for a subdevice
 Retval: int
 Param: comedi_t * device
