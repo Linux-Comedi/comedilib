@@ -133,3 +133,12 @@ v0.11.0 {
 		comedi_get_buffer_read_count;
 		comedi_get_buffer_write_count;
 } v0.10.0;
+
+v0.12.0 {
+	global:
+		comedi_test_route;
+		comedi_connect_route;
+		comedi_disconnect_route;
+		comedi_get_routes;
+		comedi_get_cmd_timing_constraints;
+} v0.11.0;
