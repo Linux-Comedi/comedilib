@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 """
 A test-application to demonstrate using the Comedilib API
-and streaming acquisition in particular, from Python.
+for input, output, and commands.
 
 Original author bryan.cole@teraview.co.uk
-Tested and updated by Joseph T. Foley <foley at RU dot IS>
+Updated by Joseph T. Foley <foley at RU dot IS>
 
 Source in https://github.com/Linux-Comedi/comedilib
 at swig/python/test_comedi.py
@@ -28,6 +28,7 @@ compatibility on by editing comedilib/swig/comedi.i and commenting out
 import sys
 import os
 import string
+import time
 import argparse
 
 # set the paths so python can find the comedi module
@@ -40,7 +41,7 @@ import comedi as c
 
 
 class COMEDILIBtest(object):
-    'Test comedilib command functionality'
+    'Test comedilib functionality'
 
     def __init__(self, devpath='/dev/comedi0'):
         # open a comedi device
@@ -50,7 +51,6 @@ class COMEDILIBtest(object):
         self.dev = dev
         # get a file-descriptor for use later
         self.cfd = c.fileno(dev)
-        self.cmd = None
 
     def scancommand(self, nscans=1000, chans=None, gains=None, aref=None):
         """Setup a scan
@@ -59,7 +59,14 @@ class COMEDILIBtest(object):
         gains: which gain adjustments (list)
         aref: analog references (list)
         The lists must all have the same length!
+
+        [sic] I think this will work but it's completely untested!
+        --bryan
+
+        I was not able to get this to work with my Vellemen P8061-2
+        board -- foley
         """
+
         if not chans:
             raise RuntimeError("No Channels given in 'chans'")
         if not gains:
@@ -110,28 +117,52 @@ class COMEDILIBtest(object):
         print("second test returns ", ret)
         ret = c.comedi_command_test(dev, cmd)
         if not ret:
-            raise "Error testing comedi command"
-        self.cmd = cmd
+            raise RuntimeError("Error testing comedi command")
 
-        ret = c.comedi_command(self.dev, self.cmd)
-        return ret
+        ret = c.comedi_command(self.dev, cmd)
 
-    def readcommand(self):
-        """Read some data from a running command
-        [sic] I think this will work but it's completely untested! --bryan
-        """
+        chunk = 8
+        # chunk: how many bytes to read at a time
         datalist = []
-        data = os.read(self.cfd)
+        data = os.read(self.cfd, chunk)
         while len(data) > 0:
             datalist.append(data)
-            data = os.read(self.cfd)
+            data = os.read(self.cfd, chunk)
 
         datastr = string.join(datalist, '')
-
+        print("Data from command:")
         print(datastr)  # Here's your data, as a single string!
         # if you've got Numeric installed you can convert data
         # into a flat Numpy array with:
         # dataarray = Numeric.fromstring(data, Int16)
+        return ret
+
+    def read_analog(
+            self, subdev, chan, iorange, aref=c.AREF_GROUND):
+        """Setup a scan
+        subdev: which subdevice (int)
+        chan: which channel (int)
+        iorange: gain adjustments (int)
+        aref: analog references (int)
+        """
+
+        retcode, data = c.data_read(self.dev, subdev, chan, iorange, aref)
+        if retcode != 1:
+            raise IOError("data_read returned %s" % retcode)
+        return data
+
+    def write_digital(self, subdev, chan, bit):
+        """Write a value to a digital channel"""
+        retcode = c.dio_write(self.dev, subdev, chan, bit)
+        if retcode != 1:
+            raise IOError("data_read returned %s" % retcode)
+
+    def read_digital(self, subdev, chan):
+        """Read a value from a digital channel"""
+        retcode, data = c.dio_read(self.dev, subdev, chan)
+        if retcode != 1:
+            raise IOError("data_read returned %s" % retcode)
+        return data
 
     def close(self):
         'close and cleanup'
@@ -152,10 +183,21 @@ if __name__ == "__main__":
 
     ARGS = PARSER.parse_args()
     CET = COMEDILIBtest(ARGS.input)
-    NSCANS = 1000
-    CHANS = [0, 2, 3]
-    GAINS = [c.AREF_GROUND, c.AREF_GROUND, c.AREF_GROUND]
-    CET.prepscan(NSCANS, CHANS, GAINS)
-    CET.execute()
-    CET.read()
+
+    # NSCANS = 100
+    # CHANS = [0, 1, 3]
+    # GAINS = [1, 1, 1]
+    # AREF = [c.AREF_GROUND, c.AREF_GROUND, c.AREF_GROUND]
+    # CET.scancommand(NSCANS, CHANS, GAINS, AREF)
+
+    for _ in range(10):
+        print("Setting chan 3 to value 1")
+        CET.write_digital(3, 0, 1)
+        print("Channel 2 is %s" % CET.read_digital(2, 0))
+        time.sleep(0.5)
+        print("Setting chan 3 to value 0")
+        CET.write_digital(3, 0, 0)
+        print("Channel 2 is %s" % CET.read_digital(2, 0))
+        time.sleep(0.5)
+
     CET.close()
