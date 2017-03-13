@@ -39,13 +39,11 @@
 %include "carrays.i"
 %include "typemaps.i"
 
-#ifdef SWIGPYTHON
-// Uncomment these two lines and remove the "%insert('python')" entry below to
-// finallize the removal of the comedi_/COMEDI_ prefix and break backwards
+// Uncomment to finalize the removal of the comedi_/COMEDI_ prefix and break backwards
 // compatibility.
-// %rename("%(strip:[COMEDI_])s", regextarget=1) "COMEDI_.*";
-// %rename("%(strip:[comedi_])s", regextarget=1) "comedi_.*";
+//#define SWIGPYTHONONLYSHORT
 
+#ifdef SWIGPYTHON
 // These need to be explicitly written as unsigned ints
 %rename(CR_FLAGS_MASK) _CR_FLAGS_MASK;
 %rename(CR_INVERT) _CR_INVERT;
@@ -115,14 +113,24 @@ unsigned int NI_AO_SCAN_BEGIN_SRC_RTSI(unsigned int rtsi_channel);
 %array_class(lsampl_t, lsampl_array);
 %array_class(comedi_insn, insn_array);
 
+#ifdef SWIGPYTHONONLYSHORT
 %insert("python") %{
-# Add entries in module dictionary to strip comedi_/COMEDI_ prefix
+  delete_comedi_prefix = True
+  %}
+#else
+%insert("python") %{
+  delete_comedi_prefix = False
+  %}
+#endif
+
+%insert("python") %{
+# Add entries in module dictionary without comedi_/COMEDI_ prefix
 import re
-for k,v in globals().items():
+for k,v in globals().copy().items():
   if re.match('^comedi_', k, flags=re.IGNORECASE):
     globals()[k[7:]] = v
-    # uncommenting following line removes compatibility with old code using
-    # comedi_ prefix:
-    # globals().pop(k)
-del re, k, v
+    if delete_comedi_prefix:
+        globals().pop(k) # Break backwards compatibility
+del re, k, v, delete_comedi_prefix
 %}
+
