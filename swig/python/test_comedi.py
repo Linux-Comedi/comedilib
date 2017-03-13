@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function  # Python3 compatibility
 """
 A test-application to demonstrate using the Comedilib API
 for input, output, and commands.
@@ -8,10 +9,12 @@ Updated by Joseph T. Foley <foley at RU dot IS>
 
 Source in https://github.com/Linux-Comedi/comedilib
 at swig/python/test_comedi.py
+Documentation in doc/bindings.xml and
+http://www.comedi.org/doc/languagebindings.html
 
-DEBIAN:
-sudo apt-get install comedilib-dev python3-comedilib python-comedilib
-sudo usermod -a -G iocard <USER>
+Debian/Ubuntu Install from packages:
+sudo apt install comedilib-dev python-comedilib python3-comedilib
+sudo usermod -a -G iocard <USER>  # Local user access
 
 As of 2017-03-12, the debian packages have broken backwards
 compatibility, which means you should use open() instead of comedi_open().
@@ -22,6 +25,7 @@ compatibility on by editing comedilib/swig/comedi.i and commenting out
 
 #define SWIGPYTHONONLYSHORT
 
+This code has been tested on a Velleman 2006 P8061-2.
 
 """
 
@@ -30,7 +34,6 @@ import os
 import string
 import time
 import argparse
-
 # set the paths so python can find the comedi module
 # Only needed if the C library can't be found, which seems to happen on pytnon3
 if (sys.version_info > (3, 0)):  # python3
@@ -92,8 +95,7 @@ class COMEDILIBtest(object):
                 chans[index], gains[index], aref[index])
 
         # construct a comedi command manually
-        # TODO: make helper methods
-        cmd = c.comedi_cmd_struct()
+        cmd = c.cmd_struct()
         cmd.subdev = 0
         cmd.flags = 0
         cmd.start_src = c.TRIG_NOW
@@ -111,15 +113,15 @@ class COMEDILIBtest(object):
 
         dev = self.dev
         # test our comedi command a few times.
-        ret = c.comedi_command_test(dev, cmd)
+        ret = c.command_test(dev, cmd)
         print("first cmd test returns ", ret)
-        ret = c.comedi_command_test(dev, cmd)
+        ret = c.command_test(dev, cmd)
         print("second test returns ", ret)
-        ret = c.comedi_command_test(dev, cmd)
+        ret = c.command_test(dev, cmd)
         if not ret:
             raise RuntimeError("Error testing comedi command")
 
-        ret = c.comedi_command(self.dev, cmd)
+        ret = c.command(self.dev, cmd)
 
         chunk = 8
         # chunk: how many bytes to read at a time
@@ -138,7 +140,7 @@ class COMEDILIBtest(object):
         return ret
 
     def read_analog(
-            self, subdev, chan, iorange, aref=c.AREF_GROUND):
+            self, subdev, chan, iorange=1, aref=c.AREF_GROUND):
         """Setup a scan
         subdev: which subdevice (int)
         chan: which channel (int)
@@ -151,53 +153,93 @@ class COMEDILIBtest(object):
             raise IOError("data_read returned %s" % retcode)
         return data
 
+    def write_analog(
+            self, subdev, chan, value, iorange=1, aref=c.AREF_GROUND):
+        """Setup a scan
+        subdev: which subdevice (int)
+        chan: which channel (int)
+        iorange: gain adjustments (int)
+        aref: analog references (int)
+        """
+
+        retcode = c.data_write(self.dev, subdev, chan, iorange, aref, value)
+        return retcode
+
     def write_digital(self, subdev, chan, bit):
         """Write a value to a digital channel"""
         retcode = c.dio_write(self.dev, subdev, chan, bit)
-        if retcode != 1:
-            raise IOError("data_read returned %s" % retcode)
+        return retcode
 
     def read_digital(self, subdev, chan):
         """Read a value from a digital channel"""
         retcode, data = c.dio_read(self.dev, subdev, chan)
         if retcode != 1:
-            raise IOError("data_read returned %s" % retcode)
+            raise IOError("dio_read returned %s" % retcode)
         return data
 
     def close(self):
         'close and cleanup'
-        ret = c.comedi_close(self.dev)
+        ret = c.close(self.dev)
         return ret
 
 if __name__ == "__main__":
-    BASEDIR = os.path.abspath(os.path.dirname(sys.argv[0]))
+    # pylint: disable=invalid-name
+    # disable pylint because it thinks all top level variables
+    # are constants.
+    basedir = os.path.abspath(os.path.dirname(sys.argv[0]))
 
-    PARSER = argparse.ArgumentParser(
-        description='comedilib python SWIG command test',
+    parser = argparse.ArgumentParser(
+        description='comedilib python SWIG tests',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     # puts the defaults in the help automatically!
-    PARSER.add_argument('-d', '--debug', action='store_true',
+    parser.add_argument('-d', '--debug', action='store_true',
                         help='Set debug flags')
-    PARSER.add_argument('-i', '--input', default='/dev/comedi0',
-                        help='comedi device, default /dev/comedi0')
+    parser.add_argument('-i', '--input', default='/dev/comedi0',
+                        help='comedi device')
 
-    ARGS = PARSER.parse_args()
-    CET = COMEDILIBtest(ARGS.input)
+    args = parser.parse_args()
+    cet = COMEDILIBtest(args.input)
 
     # NSCANS = 100
     # CHANS = [0, 1, 3]
     # GAINS = [1, 1, 1]
     # AREF = [c.AREF_GROUND, c.AREF_GROUND, c.AREF_GROUND]
-    # CET.scancommand(NSCANS, CHANS, GAINS, AREF)
+    # cet.scancommand(NSCANS, CHANS, GAINS, AREF)
 
-    for _ in range(10):
-        print("Setting chan 3 to value 1")
-        CET.write_digital(3, 0, 1)
-        print("Channel 2 is %s" % CET.read_digital(2, 0))
-        time.sleep(0.5)
-        print("Setting chan 3 to value 0")
-        CET.write_digital(3, 0, 0)
-        print("Channel 2 is %s" % CET.read_digital(2, 0))
-        time.sleep(0.5)
+    # Quick digital test on a Velleman P8061
+    # Connect Digital in pin 1 to Digital out pin 1.
+    # Connect Analog in pin 1 to Analog out pin 1.
+    # Of note, on the Velleman P8061, the digital lights will
+    # alternate because the outputs are open-collector (short to
+    # ground on enable)
+    AIN = 0
+    AOUT = 1
+    DIN = 2
+    DOUT = 3
+    COUNTER = 4
+    PWM = 5
 
-    CET.close()
+    print("Testing digital inputs and outputs.")
+    for _ in range(3):
+        print("Setting chan %d to value 1" % DOUT)
+        cet.write_digital(DOUT, 0, 1)
+        print("Channel %d is %s" % (DIN, cet.read_digital(2, 0)))
+        time.sleep(0.1)
+        print("Setting chan %d to value 0" % DOUT)
+        cet.write_digital(DOUT, 0, 0)
+        print("Channel %d is %s" % (DIN, cet.read_digital(DIN, 0)))
+        time.sleep(0.1)
+
+    print("Testing analog inputs and outputs.")
+    ahigh = 200
+    for _ in range(3):
+        print("Setting chan %d to value %d" % (AOUT, ahigh))
+        cet.write_analog(AOUT, 0, ahigh)
+        print("Channel %d is %s" % (AIN, cet.read_analog(AIN, 0)))
+        time.sleep(0.1)
+        print("Setting chan %d to value 0" % AOUT)
+        cet.write_analog(AOUT, 0, 0)
+        print("Channel %d is %s" % (AIN, cet.read_analog(AIN, 0)))
+        time.sleep(0.1)
+
+    cet.close()
