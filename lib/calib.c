@@ -27,7 +27,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/sysmacros.h>
+#include <unistd.h>
+
 #include "libinternal.h"
 
 static int set_calibration( comedi_t *dev, const comedi_calibration_t *parsed_file,
