@@ -14,7 +14,7 @@ _comedi_la_LDFLAGS = -module -avoid-version $(COMEDILIB_LIBS)
 
 pyexec_SCRIPTS = comedi.py
 
-EXTRA_DIST = README.txt comedi_python.i setup.py test_comedi.py
+EXTRA_DIST = README.txt comedi_python.i setup.py
 
 comedi_python_wrap.c comedi.py: $(srcdir)/comedi_python.i $(srcdir)/../comedi.i
 	$(SWIG) -python -o comedi_python_wrap.c -I$(top_srcdir)/include -I$(srcdir)/.. $(srcdir)/comedi_python.i
