@@ -1,12 +1,15 @@
 .TH comedi 7 ""
 .SH NAME
-\fBcomedi\fR - the Linux Control and Measurement Device Interface
+comedi \- the Linux Control and Measurement Device Interface
 .SH SYNOPSIS
 \fB#include <comedi.h>\fR
 .br
+\fB#include <comedilib.h>\fR
+.br
 .SH DESCRIPTION
-The \fBcomedi\fR package is a collection of hardware drivers and
-library routines that can be used to communicate with a variety of
+The \fBcomedi\fR package is a collection of hardware drivers, and
+the \fBcomedilib\fR package is a collection of library routines
+that can be used to communicate with a variety of
 data acquisition boards, including A/D converters, D/A converters,
 digital I/O and timers.
 
@@ -14,12 +17,15 @@ digital I/O and timers.
 .SH OTHER DOCUMENTATION
 
 Hardware and driver configuration, and device-specific information,
-can be found in the \fBcomedi\fR souce, in the file
-Documentation/comedi/drivers.txt.
+can be found in the \fBcomedi\fR source, in the file
+\fBDocumentation/comedi/drivers.txt\fR, or in the \fBcomedilib\fR source,
+in the file \fBdoc/drivers.txt\fR.
 
 .br
-Programming documentation for comedilib can be found in
-/usr/share/doc/comedilib, or also at http://www.comedi.org/comedi.
+Programming documentation for \fBcomedilib\fR can be found in the
+.UR http://www.comedi.org/doc/index.html
+\fBComedilib\fR manual
+.UE .
 
 .SH SEE ALSO
 
@@ -32,5 +38,7 @@ Programming documentation for comedilib can be found in
 
 .SH AUTHOR
 
-David Schleef, <ds@schleef.org>
+.MT ds@schleef.org
+David Schleef
+.ME
 
