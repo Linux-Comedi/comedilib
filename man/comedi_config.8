@@ -49,16 +49,25 @@ the file \fBdrivers.txt\fR.
 \fB-r, --remove\fR	remove previously configured driver.
 
 .TP
-.BI "--read-buffer " "num"
+.BI "--read-buffer " "size"
 set read buffer size to
-.I num
+.I size
 kilobytes.  The default size is 64k.
 
 .TP
-.BI "--write-buffer " "num"
+.BI "--write-buffer " "size"
 set write buffer size to
-.I num
+.I size
 kilobytes.  The default size is 64k.
+
+.TP
+.BI "--subdevice-buffer " "num,size[,num,size...]"
+set subdevice
+.I num
+buffer size to
+.I size
+kilobytes.  More than one \fInum\fR,\fIsize\fR pair may be
+specified, and the option may be used several times.
 
 .TP
 .BI "-i, --init-data, --init-data0 " "file"

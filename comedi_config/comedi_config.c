@@ -48,10 +48,6 @@
 
 int quiet=0,verbose=0;
 
-int read_buf_size=0;
-int write_buf_size=0;
-
-int init_fd;
 #define MAX_NUM_INIT_FILES 4
 char *init_file[MAX_NUM_INIT_FILES] = {NULL,NULL,NULL,NULL};
 
@@ -59,6 +55,7 @@ enum option_ids
 {
 	READ_BUFFER_OPT_ID = 0x1000,
 	WRITE_BUFFER_OPT_ID,
+	SUBDEVICE_BUFFER_OPT_ID,
 	INIT_DATA1_OPT_ID,
 	INIT_DATA2_OPT_ID,
 	INIT_DATA3_OPT_ID
@@ -73,6 +70,7 @@ struct option options[] = {
 	{ "remove", 0, NULL, 'r' },
 	{ "read-buffer", 1, NULL, READ_BUFFER_OPT_ID},
 	{ "write-buffer", 1, NULL, WRITE_BUFFER_OPT_ID},
+	{ "subdevice-buffer", 1, NULL, SUBDEVICE_BUFFER_OPT_ID},
 	{ "init-data1", 1, NULL, INIT_DATA1_OPT_ID },
 	{ "init-data2", 1, NULL, INIT_DATA2_OPT_ID },
 	{ "init-data3", 1, NULL, INIT_DATA3_OPT_ID },
@@ -87,11 +85,11 @@ _("usage:  comedi_config [OPTIONS] <device file> [<driver> <opt1>,<opt2>,...]\n"
 "\n"
 "OPTIONS:\n"
 "  -v, --verbose\n"
-"      verbose output\n"
+"      Verbose output.\n"
 "  -q, --quiet\n"
-"      quiet output\n"
+"      Quiet output.\n"
 "  -V, --version\n"
-"      print program version\n"
+"      Print program version.\n"
 "  -i, --init-data, --init-data0 <filename>\n"
 "      Use file for driver initialization data, typically firmware code.\n"
 "  --init-data1 <filename>\n"
@@ -100,11 +98,14 @@ _("usage:  comedi_config [OPTIONS] <device file> [<driver> <opt1>,<opt2>,...]\n"
 "      Some drivers require multiple files of initialization data.  Use these\n"
 "      options to specify them.  See the driver-specific documentation for further details.\n"
 "  -r, --remove\n"
-"      remove previously configured driver\n"
+"      Remove previously configured driver.\n"
 "  --read-buffer <size>\n"
-"      set buffer size in kilobytes used for reading\n"
+"      Set buffer size in kilobytes used for reading.\n"
 "  --write-buffer <size>\n"
-"      set buffer size in kilobytes used for writing\n"
+"      Set buffer size in kilobytes used for writing.\n"
+"  --subdevice-buffer <subd>,<size>[,<subd>,<size>]...\n"
+"      Set buffer size in kilobytes for subdevice <subd>.\n"
+"      Option may be repeated.\n"
 "\n"
 "  <optN> are integers whose interpretation is driver dependent.\n"
 "  In general, for PCI boards, <opt1> and <opt2> refer to the bus/slot\n"
@@ -199,6 +200,10 @@ int main(int argc,char *argv[])
 	int ret;
 	int remove=0;
 	int index;
+	int read_buf_size=0;
+	int write_buf_size=0;
+	int *sub_buf_list=NULL;
+	int sub_buf_len=0;
 
 #ifdef I18N
 	setlocale(LC_ALL, "");
@@ -254,13 +259,67 @@ int main(int argc,char *argv[])
 				exit(-1);
 			}
 			break;
+		case SUBDEVICE_BUFFER_OPT_ID:
+			{
+				char *s, *e;
+				int subd, size;
+
+				s = optarg;
+				do
+				{
+					subd = strtol(s, &e, 0);
+					if(s == e || subd < 0)
+					{
+						fprintf(stderr, _("invalid subdevice\n"));
+						exit(-1);
+					}
+					if(*e && *e != ',')
+					{
+						fprintf(stderr, _("invalid separator\n"));
+						exit(-1);
+					}
+					if(*e)
+					{
+						e++;
+					}
+					s = e;
+					size = strtol(s, &e, 0);
+					if(s == e || size < 0)
+					{
+						fprintf(stderr, _("invalid buffer size\n"));
+						exit(-1);
+					}
+					if(*e && *e != ',')
+					{
+						fprintf(stderr, _("invalid separator\n"));
+						exit(-1);
+					}
+					if(*e)
+					{
+						e++;
+					}
+					s = e;
+					sub_buf_list =
+					realloc(sub_buf_list,
+						sizeof(*sub_buf_list) *
+						(sub_buf_len + 2));
+					if(!sub_buf_list)
+					{
+						perror(_("allocating subdevice buffer list\n"));
+						exit(-1);
+					}
+					sub_buf_list[sub_buf_len++] = subd;
+					sub_buf_list[sub_buf_len++] = size;
+				} while(*s);
+			}
+			break;
 		default:
 			do_help(1);
 		}
 	}
 
 	if((argc-optind) < 1 || (argc-optind) > 3 ||
-		((argc-optind) == 1 && read_buf_size == 0 && write_buf_size == 0 && remove == 0)){
+		((argc-optind) == 1 && read_buf_size == 0 && write_buf_size == 0 && remove == 0 && sub_buf_len == 0)){
 		do_help(1);
 	}
 
@@ -370,7 +429,7 @@ int main(int argc,char *argv[])
 	// dont do buffer resize if we have removed device
 	if(remove == 0)
 	{
-		if(read_buf_size || write_buf_size){
+		if(read_buf_size || write_buf_size || sub_buf_len){
 			ret = ioctl(fd,COMEDI_DEVINFO,&devinfo);
 			if(ret<0){
 				perror("devinfo");
@@ -423,6 +482,23 @@ int main(int argc,char *argv[])
 					printf(_("%s write buffer resized to %i kilobytes\n"),
 						fn, bc.size / 1024);
 				}
+			}
+		}
+		for(index=0; index + 1 < sub_buf_len; index += 2)
+		{
+			memset(&bc, 0, sizeof(bc));
+			bc.subdevice = sub_buf_list[index + 0];
+			bc.maximum_size = sub_buf_list[index + 1] * 1024;
+			bc.size = bc.maximum_size;
+			if(ioctl(fd, COMEDI_BUFCONFIG, &bc) < 0)
+			{
+				perror(_("buffer resize error"));
+				exit(1);
+			}
+			if(verbose)
+			{
+				printf(_("%s subdevice %u buffer resized to %u kilobytes\n"),
+					fn, bc.subdevice, bc.size / 1024);
 			}
 		}
 	}
