@@ -83,11 +83,11 @@ int ni_gpct_start_pulse_generator(comedi_t *device, unsigned subdevice, unsigned
 	if(retval < 0) return retval;
 	/* set "load a" register to the number of clock ticks the counter output should remain low
 	by writing to channel 1. */
-	comedi_data_write(device, subdevice, 1, 0, 0, down_ticks);
+	retval = comedi_data_write(device, subdevice, 1, 0, 0, down_ticks);
 	if(retval < 0) return retval;
 	/* set "load b" register to the number of clock ticks the counter output should remain high
 	by writing to channel 2 */
-	comedi_data_write(device, subdevice, 2, 0, 0, up_ticks);
+	retval = comedi_data_write(device, subdevice, 2, 0, 0, up_ticks);
 	if(retval < 0) return retval;
 
 	retval = comedi_arm(device, subdevice, NI_GPCT_ARM_IMMEDIATE);
