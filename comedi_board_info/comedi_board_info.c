@@ -232,11 +232,12 @@ int main(int argc,char *argv[])
 		case 'h':
 		default:
 			fprintf(stderr,
-				"usage: comedi_board_info [OPTIONS] COMEDI_DEVICE\n"
+				"usage: comedi_board_info [OPTIONS] [COMEDI_DEVICE]\n"
 				"   -n    number of channels for async command (default 1)\n"
-				"   -F    probing sampling rate for async command (default 1Ghz)\n"
+				"   -F    probing sampling rate for async command (default 1 GHz)\n"
 				"   -v    verbose output\n"
-				"   -h    this help screen\n");
+				"   -h    this help screen\n"
+				"COMEDI_DEVICE defaults to /dev/comedi0 if unspecified\n");
 			exit(1);
 		}
 	}
