@@ -1,15 +1,14 @@
-Summary: Data Acquisition library for the Comedi DAQ driver.
 Name: comedilib
+Summary: Data Acquisition library for the Comedi DAQ driver.
 Version: @VERSION@
-Release: 1
+Release: 1%{?dist}
 License: LGPL
 Group: System Environment/Kernel
 URL: http://www.comedi.org/
 Source: http://www.comedi.org/comedi/download/comedilib-@VERSION@.tar.gz
 BuildRoot: /var/tmp/%{name}-buildroot
-Prereq: /sbin/ldconfig
-BuildRequires: python
-provides: comedilib
+BuildRequires: python-devel swig
+Provides: comedilib
 
 %description
 Comedilib is the library for the Comedi data acquisition driver
@@ -19,6 +18,7 @@ supported DAQ cards, such as those from National Instruments.
 %package devel
 Summary: Libraries/include files for Comedi
 Group: Development/Libraries
+Requires:       %{name} = %{version}-%{release}
 
 %description devel
 Comedilib is a library for using Comedi, a driver interface for data
@@ -28,30 +28,18 @@ acquisition hardware.
 %setup -q
 
 %build
-#called when the rpm is built
-CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS ; \
-./configure \
-  --prefix=%{_prefix} \
-  --mandir=%{_mandir} \
-  --datadir=%{_datadir} \
-  --sysconfdir=%{_sysconfdir} \
-  --disable-dependency-tracking
-
-make
-
+%configure
+make %{?_smp_mflags}
 
 %install
 [ -n "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf $RPM_BUILD_ROOT
-
 %makeinstall
 
-# Clean out files that should not be part of the rpm. 
-# This is the recommended way of dealing with it for RH8
-#rm -f $RPM_BUILD_ROOT%{_libdir}/*.a
-rm -f $RPM_BUILD_ROOT%{_libdir}/*.la
-
 # Move files
-mv $RPM_BUILD_ROOT%{_datadir}/comedilib $RPM_BUILD_ROOT%{_datadir}/comedilib-devel
+mv $RPM_BUILD_ROOT%{_datadir}/doc/comedilib $RPM_BUILD_ROOT%{_datadir}/doc/comedilib-devel
+
+rm -rf $RPM_BUILD_ROOT%{_sysconfdir}/pcmcia
+rm -rf $RPM_BUILD_ROOT%{_libdir}/libcomedi.la
 
 %post
 /sbin/ldconfig
@@ -64,27 +52,33 @@ mv $RPM_BUILD_ROOT%{_datadir}/comedilib $RPM_BUILD_ROOT%{_datadir}/comedilib-dev
 
 %files
 %defattr(-,root,root,-)
-%doc AUTHORS COPYING README TODO ChangeLog NEWS
+%doc AUTHORS COPYING README ChangeLog NEWS
 %{_libdir}/libcomedi.so
 %{_libdir}/libcomedi.so.*
-%{_libdir}/python2.2/site-packages/*.so
-%{_libdir}/python2.2/site-packages/comedi.py
 %{_sbindir}/comedi_*
 %{_bindir}/comedi_*
+%{_mandir}/man1/*
 %{_mandir}/man7/*
 %{_mandir}/man8/*
 
 %files devel
 %defattr(-,root,root,-)
 %{_libdir}/libcomedi.a
+%{_libdir}/pkgconfig/comedilib.pc
+
 %{_includedir}/comedi*.h
+%{_includedir}/comedi*.hpp
 %{_mandir}/man3/*
-%{_datadir}/comedilib-devel/html/*
+%{_datadir}/doc/comedilib-devel/*
 
 %changelog
-* Tue Jun 03 2002 David Schleef <ds@schleef.org>
+
+* Wed Mar 28 2018 Steffen Vogel <post@steffenvogel.de>
+- fixed spec file for Fedora 27
+
+* Mon Jun 03 2002 David Schleef <ds@schleef.org>
 - update for new build system
 
-* Wed Feb 21 2002 Tim Ousley <tim.ousley@ni.com>
+* Thu Feb 21 2002 Tim Ousley <tim.ousley@ni.com>
 - initial build of comedilib RPM
 
