@@ -395,15 +395,15 @@ TODO:
 Driver: adv_pci_dio
 Description: Advantech PCI-1730, PCI-1733, PCI-1734, PCI-1735U,
              PCI-1736UP, PCI-1750, PCI-1751, PCI-1752, PCI-1753/E,
-             PCI-1754, PCI-1756, PCI-1762
+             PCI-1754, PCI-1756, PCI-1761, PCI-1762
 Author: Michal Dobes <dobes@tesnet.cz>
 Devices: [Advantech] PCI-1730 (adv_pci_dio), PCI-1733,
   PCI-1734, PCI-1735U, PCI-1736UP, PCI-1739U, PCI-1750,
   PCI-1751, PCI-1752, PCI-1753,
   PCI-1753+PCI-1753E, PCI-1754, PCI-1756,
-  PCI-1760, PCI-1762
+  PCI-1760, PCI-1761, PCI-1762
 Status: untested
-Updated: Tue, 04 May 2010 13:00:00 +0000
+Updated: Thu, 05 Oct 2017 10:47:10 +0000
 
 This driver supports now only insn interface for DI/DO/DIO.
 
@@ -2036,13 +2036,13 @@ Driver: ni_660x
 Description: National Instruments 660x counter/timer boards
 Devices:
 [National Instruments] PCI-6601 (ni_660x), PCI-6602, PXI-6602,
-	PXI-6608, PCI-6624, PXI-6624
+	PCI-6608, PXI-6608, PCI-6624, PXI-6624
 Author: J.P. Mellor <jpmellor@rose-hulman.edu>,
 	Herman.Bruyninckx@mech.kuleuven.ac.be,
 	Wim.Meeussen@mech.kuleuven.ac.be,
 	Klaas.Gadeyne@mech.kuleuven.ac.be,
 	Frank Mori Hess <fmhess@users.sourceforge.net>
-Updated: Mon, 16 Jan 2017 15:28:52 +0000
+Updated: Thu, 04 Oct 2018 10:39:37 +0000
 Status: experimental
 
 Encoders work.  PulseGeneration (both single pulse and pulse train)
