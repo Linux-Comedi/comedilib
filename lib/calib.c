@@ -227,24 +227,22 @@ EXPORT_ALIAS_DEFAULT(_comedi_apply_calibration,comedi_apply_calibration,0.7.20);
 int _comedi_apply_calibration( comedi_t *dev, unsigned int subdev, unsigned int channel,
 	unsigned int range, unsigned int aref, const char *cal_file_path )
 {
-	char file_path[ 1024 ];
 	int retval;
 	comedi_calibration_t *parsed_file;
 
 	if( cal_file_path )
 	{
-		strncpy( file_path, cal_file_path, sizeof( file_path ) );
+		parsed_file = comedi_parse_calibration_file( cal_file_path );
 	}else
 	{
-		char *temp;
+		char *file_path;
 
-		temp = comedi_get_default_calibration_path( dev );
-		if( temp == NULL ) return -1;
-		strncpy( file_path, temp, sizeof( file_path ) );
-		free( temp );
+		file_path = comedi_get_default_calibration_path( dev );
+		if( file_path == NULL ) return -1;
+		parsed_file = comedi_parse_calibration_file( file_path );
+		free( file_path );
 	}
 
-	parsed_file = comedi_parse_calibration_file( file_path );
 	if( parsed_file == NULL )
 	{
 		COMEDILIB_DEBUG( 3, "failed to parse calibration file\n" );
