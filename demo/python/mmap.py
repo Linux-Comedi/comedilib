@@ -28,11 +28,11 @@ import comedi as c
 
 #open a comedi device
 dev=c.comedi_open('/dev/comedi0')
-if not dev: raise "Error openning Comedi device"
+if not dev: raise Exception("Error opening Comedi device")
 
 #get a file-descriptor for use later
 fd = c.comedi_fileno(dev)
-if fd<=0: raise "Error obtaining Comedi device file descriptor"
+if fd<=0: raise Exception("Error obtaining Comedi device file descriptor")
 
 #BUFSZ = 10000
 freq=1000 # as defined in demo/common.c
@@ -65,25 +65,25 @@ for index in range(nchans):
 	mylist[index]=c.cr_pack(chans[index], gains[index], aref[index])
 
 size = c.comedi_get_buffer_size(dev, subdevice)
-print "buffer size is ", size
+print("buffer size is ", size)
 map = mmap.mmap(fd, size, mmap.MAP_SHARED, mmap.PROT_READ)
-print "map = ", map
+print("map = ", map)
 
 def dump_cmd(cmd):
-	print "---------------------------"
-	print "command structure contains:"
-	print "cmd.subdev : ", cmd.subdev
-	print "cmd.flags : ", cmd.flags
-	print "cmd.start :\t", cmd.start_src, "\t", cmd.start_arg
-	print "cmd.scan_beg :\t", cmd.scan_begin_src, "\t", cmd.scan_begin_arg
-	print "cmd.convert :\t", cmd.convert_src, "\t", cmd.convert_arg
-	print "cmd.scan_end :\t", cmd.scan_end_src, "\t", cmd.scan_end_arg
-	print "cmd.stop :\t", cmd.stop_src, "\t", cmd.stop_arg
-	print "cmd.chanlist : ", cmd.chanlist
-	print "cmd.chanlist_len : ", cmd.chanlist_len
-	print "cmd.data : ", cmd.data
-	print "cmd.data_len : ", cmd.data_len
-	print "---------------------------"
+	print("---------------------------")
+	print("command structure contains:")
+	print("cmd.subdev : ", cmd.subdev)
+	print("cmd.flags : ", cmd.flags)
+	print("cmd.start :\t", cmd.start_src, "\t", cmd.start_arg)
+	print("cmd.scan_beg :\t", cmd.scan_begin_src, "\t", cmd.scan_begin_arg)
+	print("cmd.convert :\t", cmd.convert_src, "\t", cmd.convert_arg)
+	print("cmd.scan_end :\t", cmd.scan_end_src, "\t", cmd.scan_end_arg)
+	print("cmd.stop :\t", cmd.stop_src, "\t", cmd.stop_arg)
+	print("cmd.chanlist : ", cmd.chanlist)
+	print("cmd.chanlist_len : ", cmd.chanlist_len)
+	print("cmd.data : ", cmd.data)
+	print("cmd.data_len : ", cmd.data_len)
+	print("---------------------------")
 
 def prepare_cmd(dev, subdev, C):
     #global cmd
@@ -107,14 +107,14 @@ def prepare_cmd(dev, subdev, C):
 
 ## ret = c.comedi_get_buffer_size(dev, subdevice)
 ## if ret==-1:
-## 	raise "Error fetching comedi buffer size"
+## 	raise Exception("Error fetching comedi buffer size")
 ## else:
-## 	print "buffer size = ", ret
+## 	print("buffer size = ", ret)
 ## ret = c.comedi_get_max_buffer_size(dev, subdevice)
 ## if ret==-1:
-## 	raise "Error fetching comedi max buff size"
+## 	raise Exception("Error fetching comedi max buff size")
 ## else:
-## 	print "max buff size = ", ret
+## 	print("max buff size = ", ret)
 #construct a comedi command
 cmd = c.comedi_cmd_struct()
 
@@ -126,28 +126,28 @@ cmd.scan_end_arg = nchans
 
 prepare_cmd(dev,subdevice,cmd)
 
-print "command before testing"
+print("command before testing")
 dump_cmd(cmd)
 
 #test our comedi command a few times. 
 ret = c.comedi_command_test(dev,cmd)
 print "first cmd test returns ", ret, cmdtest_messages[ret]
 if ret<0:
-	raise "comedi_command_test failed"
+	raise Exception("comedi_command_test failed")
 dump_cmd(cmd)
 
 ret = c.comedi_command_test(dev,cmd)
-print "second test returns ", ret, cmdtest_messages[ret]
+print("second test returns ", ret, cmdtest_messages[ret])
 if ret<0:
-	raise "comedi_command_test failed"
+	raise Exception("comedi_command_test failed")
 if ret !=0:
 	dump_cmd(cmd)
-	raise "ERROR preparing command"
+	raise Exception("ERROR preparing command")
 dump_cmd(cmd)
 
 ret = c.comedi_command(dev,cmd)
 if ret<0:
-    raise "error executing comedi_command"
+    raise Exception("error executing comedi_command")
 
 front = 0
 back = 0
@@ -163,13 +163,13 @@ t0 = time.time()
 
 while flag:
 	front += c.comedi_get_buffer_contents(dev,subdevice)
-## 	print "front = ", front
+## 	print("front = ", front)
 	if front > time_limit:
 		flag = 0
 		t1 = time.time() # reached "secs" seconds
 	if (front<back):
-		print "front<back"
-		print "ERROR comedi_get_buffer_contents"
+		print("front<back")
+		print("ERROR comedi_get_buffer_contents")
 		break
 	if (front==back):
 		time.sleep(.01)
@@ -191,15 +191,15 @@ while flag:
 ## 	time.sleep(.01)
 	ret = c.comedi_mark_buffer_read(dev, subdevice, front-back)
 	if ret<0:
-		raise "error comedi_mark_buffer_read"
+		raise Exception("error comedi_mark_buffer_read")
 	back = front
-print "bytes read = ", front
+print("bytes read = ", front)
 c.comedi_close(dev)
 if ret<0:
-	raise "ERROR executing comedi_close"
+	raise Exception("ERROR executing comedi_close")
 of.flush()
 of.close()
 
-print "Elapsed time = %d seconds" % (t1-t0)
+print("Elapsed time = %d seconds" % (t1-t0))
 
 

@@ -34,23 +34,23 @@ subdevice_types = {c.COMEDI_SUBD_UNUSED:"unused",
 		   c.COMEDI_SUBD_PROC:"processor"}
 #open a comedi device
 dev=c.comedi_open('/dev/comedi0')
-if not dev: raise "Error openning Comedi device"
+if not dev: raise Exception("Error opening Comedi device")
 
 version_code = c.comedi_get_version_code(dev)
-if not version_code: raise "Error reading version_code"
-print "version code is: ", version_code
+if not version_code: raise Exception("Error reading version_code")
+print("version code is: ", version_code)
 
 driver_name = c.comedi_get_driver_name(dev)
-if not driver_name: raise "Error reading driver_name"
-print "driver name is: ", driver_name
+if not driver_name: raise Exception("Error reading driver_name")
+print("driver name is: ", driver_name)
 
 board_name = c.comedi_get_board_name(dev)
-if not board_name: raise "Error reading board_name"
-print "board name is: ", board_name
+if not board_name: raise Exception("Error reading board_name")
+print("board name is: ", board_name)
 
 n_subdevices = c.comedi_get_n_subdevices(dev)
-if not n_subdevices: raise "Error reading n_subdevices"
-print "number of subdevices is: ", n_subdevices
+if not n_subdevices: raise Exception("Error reading n_subdevices")
+print("number of subdevices is: ", n_subdevices)
 
 def comedi_get_cmd_fast_1chan(dev,s,cmd):
 	ret = c.comedi_get_cmd_src_mask(dev,s,cmd)
@@ -66,7 +66,7 @@ def comedi_get_cmd_fast_1chan(dev,s,cmd):
 			cmd.convert_src=c.TRIG_TIMER
 			cmd.scan_begin=c.TRIG_TIMER
 	else:
-		print "can't do timed!?!"
+		print("can't do timed!?!")
 		return -1
 	if (cmd.stop_src & c.TRIG_COUNT):
 		cmd.stop_src=c.TRIG_COUNT
@@ -75,7 +75,7 @@ def comedi_get_cmd_fast_1chan(dev,s,cmd):
 		cmd.stop_src=c.TRING_NONE
 		cmd.stop_arg=0
 	else:
-		print "can't find a good stop_src"
+		print("can't find a good stop_src")
 		return -1
 	ret = c.comedi_command_test(dev,cmd)
 	if (ret==3):
@@ -87,15 +87,15 @@ def comedi_get_cmd_fast_1chan(dev,s,cmd):
 def probe_max_1chan(dev,s):
 	buf=""
 	cmd=c.comedi_cmd_struct()
-	print "\tcommand fast 1chan:"
+	print("\tcommand fast 1chan:")
 	if(c.comedi_get_cmd_generic_timed(dev,s,cmd,1,1)<0):
-		print "\t\tnot supported"
+		print("\t\tnot supported")
 	else:
-		print "\tstart: %s %d" % (cmd_src(cmd.start_src,buf),cmd.start_arg)
-		print "\tscan_begin: %s %d" % (cmd_src(cmd.scan_begin_src,buf),cmd.scan_begin_arg)
-		print "\tconvert begin: %s %d" % (cmd_src(cmd.convert_src,buf),cmd.convert_arg)
-		print "\tscan_end: %s %d" % (cmd_src(cmd.scan_end_src,buf),cmd.scan_end_arg)
-		print "\tstop: %s %d" % (cmd_src(cmd.stop_src,buf),cmd.stop_arg)
+		print("\tstart: %s %d" % (cmd_src(cmd.start_src,buf),cmd.start_arg))
+		print("\tscan_begin: %s %d" % (cmd_src(cmd.scan_begin_src,buf),cmd.scan_begin_arg))
+		print("\tconvert begin: %s %d" % (cmd_src(cmd.convert_src,buf),cmd.convert_arg))
+		print("\tscan_end: %s %d" % (cmd_src(cmd.scan_end_src,buf),cmd.scan_end_arg))
+		print("\tstop: %s %d" % (cmd_src(cmd.stop_src,buf),cmd.stop_arg))
 
 def cmd_src(src,buf):
 	buf=""
@@ -108,7 +108,7 @@ def cmd_src(src,buf):
 	if(src & c.TRIG_EXT): buf=buf+"ext|"
 	if(src & c.TRIG_INT): buf=buf+"int|"
 	if len(buf)==0:
-		print "unknown"
+		print("unknown")
 	else:
 		buf = buf[:-1] # trim trailing "|"
 		return buf
@@ -117,45 +117,45 @@ def get_command_stuff(dev,s):
 	buf = ""
 	cmd = c.comedi_cmd_struct()
 	if (c.comedi_get_cmd_src_mask(dev,s,cmd)<0):
-		print "\tnot supported"
+		print("\tnot supported")
 	else:
-		print "\tstart: %s" % (cmd_src(cmd.start_src,buf))
-		print "\tscan_begin: %s" % (cmd_src(cmd.scan_begin_src,buf))
-		print "\tconvert begin: %s" % (cmd_src(cmd.convert_src,buf))
-		print "\tscan_end: %s" % (cmd_src(cmd.scan_end_src,buf))
-		print "\tstop: %s" % (cmd_src(cmd.stop_src,buf))
+		print("\tstart: %s" % (cmd_src(cmd.start_src,buf)))
+		print("\tscan_begin: %s" % (cmd_src(cmd.scan_begin_src,buf)))
+		print("\tconvert begin: %s" % (cmd_src(cmd.convert_src,buf)))
+		print("\tscan_end: %s" % (cmd_src(cmd.scan_end_src,buf)))
+		print("\tstop: %s" % (cmd_src(cmd.stop_src,buf)))
 		probe_max_1chan(dev,s)
 
-print "-----subdevice characteristics-----"
+print("-----subdevice characteristics-----")
 for i in range(n_subdevices):
-	print "subdevice %d:" % (i)
+	print("subdevice %d:" % (i))
 	type = c.comedi_get_subdevice_type(dev,i)
-	print "\ttype: %d (%s)" % (type,subdevice_types[type])
+	print("\ttype: %d (%s)" % (type,subdevice_types[type]))
 	if (type == c.COMEDI_SUBD_UNUSED):
 		continue
 	n_chans = c.comedi_get_n_channels(dev,i)
-	print "\tnumber of channels: %d" % ( n_chans)
+	print("\tnumber of channels: %d" % ( n_chans))
 	if not(c.comedi_maxdata_is_chan_specific(dev,i)):
-	    print "\tmax data value: %d" % (c.comedi_get_maxdata(dev,i,0))
+	    print("\tmax data value: %d" % (c.comedi_get_maxdata(dev,i,0)))
 	else:
-		print "max data value is channel specific"
+		print("max data value is channel specific")
 		for j in range(n_chans):
-			print "\tchan: %d: %d" % (j,c.comedi_get_maxdata(dev,i,j))
-	print "\tranges: "
+			print("\tchan: %d: %d" % (j,c.comedi_get_maxdata(dev,i,j)))
+	print("\tranges: ")
 	if not(c.comedi_range_is_chan_specific(dev,i)):
 		n_ranges = c.comedi_get_n_ranges(dev,i,0)
-		print "\t\tall chans:"
+		print("\t\tall chans:")
 		for j in range(n_ranges):
 			rng = c.comedi_get_range(dev,i,0,j)
-			print "\t\t[%g,%g]" % (rng.min, rng.max)
+			print("\t\t[%g,%g]" % (rng.min, rng.max))
 	else:
 		for chan in range(n_chans):
 			n_ranges = c.comedi_get_n_ranges(dev,i,chan)
-			print "\t\tchan: %d" % (chan)
+			print("\t\tchan: %d" % (chan))
 			for j in range(n_ranges):
 				rng = c.comedi_get_range(dev,i,chan,j)
-				print "\t\t[%g,%g]" % (rng.min, rng.max)
-	print "\tcommand:"
+				print("\t\t[%g,%g]" % (rng.min, rng.max))
+	print("\tcommand:")
 	get_command_stuff(dev,i)
 		
 
