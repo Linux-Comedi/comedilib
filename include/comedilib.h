@@ -1,3 +1,4 @@
+/* vim: set ts=8 sw=8 noet tw=80 nowrap: */
 /*
     include/comedilib.h
     header file for the comedi library routines
@@ -332,6 +333,132 @@ int comedi_digital_trigger_enable_edges(comedi_t *device, unsigned subdevice,
 int comedi_digital_trigger_enable_levels(comedi_t *device, unsigned subdevice,
 	unsigned trigger_id, unsigned base_input,
 	unsigned high_level_inputs, unsigned low_level_inputs);
+
+/**
+ * Get the hardware timing constraints for a streaming subdevice.
+ *
+ * The values returned by this function may indicate the range of valid inputs
+ * for scan_begin_arg and convert_arg, for instance when *_src==TRIG_TIMER.  For
+ * *_src==TRIG_EXT (or other modes?), these returned values are mostly
+ * informational and may be used in conjunction with other triggering hardware.
+ *
+ * If it is possible for the hardware constraints to depend on whether
+ * *_src==TRIG_TIMER or *_src==TRIG_EXT, the values returned by this function
+ * will depend on these inputs.  Alternatively, one can specify something like
+ * *_src==TRIG_TIMER|TRIG_EXT and retrieve the value that is the smallest that
+ * satisfies both trigger sources.
+ *
+ * @param device
+ *	Pointer to the device
+ * @param subdevice
+ *	Index of the streaming/async subdevice to query
+ * @param scan_begin_src
+ *	Bitwise or of all trigger modes (TRIG_INT, TRIG_EXT, ...) that should be
+ *	considered.
+ * @param scan_begin_min
+ *	If not NULL, this pointer is to return the value of minimum scan_begin
+ *	speed that meets the requirements of the slowest trigger specified in
+ *	scan_begin_src.
+ * @param convert_src
+ *	Bitwise or of all trigger modes (TRIG_INT, TRIG_EXT, ...) that should be
+ *	considered.
+ * @param convert_min
+ *	If not NULL, this pointer is to return the value of minimum convert
+ *	speed that meets the requirements of the slowest trigger specified in
+ *	convert_src.
+ * @return 0 if successful or -1 otherwise
+ */
+int comedi_get_cmd_timing_constraints(comedi_t *device, unsigned int subdevice,
+				      unsigned int scan_begin_src,
+				      unsigned int *scan_begin_min,
+				      unsigned int convert_src,
+				      unsigned int *convert_min,
+				      unsigned int *chanlist,
+				      unsigned int chanlist_len);
+
+/**
+ * Validate a globally-named route as connectible and test whether it is
+ * connected.
+ *
+ * Note that since comedi_(dis)connect_route effectively perform the same
+ * operations as comedi_{s,g}et_routing and comedi_dio_config, this operation
+ * will only report a route as connected _if_ both operations have been
+ * performed directly or effectively via comedi_connect_route.
+ *
+ * There are several routes that are not globally connectable via
+ * comedi_connect_route, such as (NI_PFI(i) --> NI_AO_SampleClock) as they must
+ * be connected via a trigger argument, such as comedi_cmd->start_arg for
+ * NI_AO_StartTrigger.  This function can still be used for such routes to test
+ * whether they are valid.
+ *
+ * @return -1 if not connectible
+ * @return 0 if connectible but not connected
+ * @return 1 if connectible and connected
+ */
+int comedi_test_route(comedi_t *device, unsigned source, unsigned destination);
+
+/**
+ * Connect a globally-named route.
+ *
+ * This operation is effectively the same as calling comedi_set_routing and
+ * comedi_dio_config on the respective subdevice.
+ *
+ * There are some routes that are not connectible globally.  For example, the
+ * route (NI_PFI(i) --> NI_AO_SampleClock) must actually be specified via the
+ * scan_begin_arg argument of a comedi_cmd structure.
+ *
+ * @return 0 on success
+ * @return -1 on error
+ *
+ * Errors:
+ *   EALREADY : The route is already connected.
+ *   EINVAL   : The specified route is not valid for this device.
+ *   EBUSY    : The destination selector is already busy.
+ */
+int comedi_connect_route(comedi_t *device, unsigned source, unsigned destination);
+
+/**
+ * Disconnect a globally-named route.
+ *
+ * This operation is effectively the same as calling comedi_set_routing and
+ * comedi_dio_config on the respective subdevice.
+ *
+ * There are some routes that are not dis-connectible globally.  For example,
+ * the route (NI_PFI(i) --> NI_AO_SampleClock) must actually be specified via
+ * the scan_begin_arg argument of a comedi_cmd structure.
+ */
+int comedi_disconnect_route(comedi_t *device, unsigned source, unsigned destination);
+
+/**
+ * Globally-named route pair to contain values returned by comedi_get_routes.
+ * @source:		Globally-identified source of route.
+ * @destination:	Globally-identified destination of route.
+ */
+typedef struct {
+	unsigned int source;
+	unsigned int destination;
+} comedi_route_pair;
+
+/**
+ * Obtain a list of all possible globally-named routes for the particular
+ * device.
+ *
+ * A globally-named route is a route where the source and destination values are
+ * globally recognized, regardless of the subdevice.
+ * @param device
+ *	Pointer to the device
+ * @param routelist
+ *	Array of comedi_route_pair structs that will be used to contain the
+ *	returned list.  If this parameter is NULL, comedi_get_routes will return
+ *	the number of routes that exist for the device.  Using this feature, one
+ *	can query and then allocate routelist appropriately.
+ * @param n
+ *	The number of elements allocated for in routelist.
+ * @return Number of routes available if routelist==NULL
+ * @return Number of routes copied if routelist!=NULL
+ * @return -1 if there was a problem with the system call
+ */
+int comedi_get_routes(comedi_t *device, comedi_route_pair * routelist, size_t n);
 
 #endif
 
