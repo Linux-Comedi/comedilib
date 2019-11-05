@@ -108,10 +108,11 @@ Configuration Options:
 
 
 Driver: adl_pci7296
-Description: Driver for the ADLINK PCI-7296 96 ch. digital io board
-Devices: [ADLINK] PCI-7296 (adl_pci7296)
+Description: Driver for the ADLINK PCI-7296/7248/7224 digital I/O boards
+Devices: [ADLINK] PCI-7296 (adl_pci7296 or pci7296),
+  PCI-7248 (adl_pci7296 or pci7248), PCI-7224 (adl_pci7296 or pci7224)
 Author: Jon Grierson <jd@renko.co.uk>
-Updated: Mon, 14 Apr 2008 15:05:56 +0100
+Updated: Tue, 26 Mar 2019 13:26:02 +0000
 Status: testing
 
 Configuration Options:
@@ -389,6 +390,39 @@ TODO:
 2. Read the initial ranges and values of the AO subdevice at start-up instead
    of reinitializing them.
 3. Implement calibration.
+
+
+
+Driver: adv_pci1724
+Description: Advantech PCI-1724U
+Devices: [Advantech] PCI-1724U (adv_pci1724)
+Author: Frank Mori Hess <fmh6jj@gmail.com>
+Updated: 2013-02-09
+Status: works
+
+Configuration Options:
+  [0] - PCI bus of device (optional)
+  [1] - PCI slot of device (optional)
+
+  If bus/slot is not specified, the first supported
+  PCI device found will be used.
+
+
+Subdevice 0 is the analog output.
+Subdevice 1 is the offset calibration for the analog output.
+Subdevice 2 is the gain calibration for the analog output.
+
+The calibration offset and gains have quite a large effect on the
+analog output, so it is possible to adjust the analog output to
+have an output range significantly different from the board's
+nominal output ranges. For a calibrated +/-10V range, the analog
+output's offset will be set somewhere near mid-range (0x2000) and
+its gain will be near maximum (0x3fff).
+
+There is really no difference between the board's documented 0-20mA
+versus 4-20mA output ranges. To pick one or the other is simply a
+matter of adjusting the offset and gain calibration until the board
+outputs in the desired range.
 
 
 
@@ -1093,9 +1127,10 @@ Please report success/failure with other different cards to
 
 Driver: cb_pcidio
 Description: ComputerBoards' DIO boards with PCI interface
-Devices: [Measurement Computing] PCI-DIO24 (cb_pcidio), PCI-DIO24H, PCI-DIO48H
+Devices: [Measurement Computing] PCI-DIO24 (cb_pcidio), PCI-DIO24H, PCI-DIO48H,
+  PCI-DIO96H
 Author: Yoshiya Matsuzaka
-Updated: Mon, 29 Oct 2007 15:40:47 +0000
+Updated: Tue, 26 Mar 2019 10:21:18 +0000
 Status: experimental
 
 This driver has been modified from skel.c of comedi-0.7.70.
@@ -1544,9 +1579,9 @@ Notes:
 
 Driver: dmm32at
 Description: Diamond Systems mm32at driver.
-Devices:
+Devices: [Diamond Systems] Diamond-MM-32-AT (dmm32at)
 Author: Perry J. Piplani <perry.j.piplani@nasa.gov>
-Updated: Fri Jun  4 09:13:24 CDT 2004
+Updated: Mon, 18 Feb 2019 18:23:12 +0000
 Status: experimental
 
 This driver is for the Diamond Systems MM-32-AT board
@@ -1555,7 +1590,12 @@ on serveral projects inside NASA, without problems so far. For analog
 input commands, TRIG_EXT is not yet supported at all..
 
 Configuration Options:
-  comedi_config /dev/comedi0 dmm32at baseaddr,irq
+  [0] - I/O port base address
+  [1] - IRQ (optional, required for timed conversions)
+  [2] - Autocalibration control for MM-32X-AT and MM-32DX-AT
+        0 - no change
+	1 - disable autocalibration (ACHOLD)
+	2 - enable temperature-triggered autocalibration (ACREL)
 
 
 
