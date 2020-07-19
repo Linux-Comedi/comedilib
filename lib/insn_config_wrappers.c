@@ -262,7 +262,7 @@ int _comedi_set_gate_source(comedi_t *device, unsigned subdevice, unsigned chann
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_internal_trigger,comedi_internal_trigger,0.9.0);
-int comedi_internal_trigger(comedi_t *dev, unsigned subd, unsigned trignum)
+int _comedi_internal_trigger(comedi_t *dev, unsigned subd, unsigned trignum)
 {
 	comedi_insn insn;
 	lsampl_t data[1];
