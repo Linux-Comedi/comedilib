@@ -125,7 +125,7 @@ while (1):
 	#print("len(data) = ", len(data))
 	if len(data)==0:
 		break
-	n = len(data)/2 # 2 bytes per 'H'
+	n = len(data)//2 # 2 bytes per 'H'
 	format = repr(n)+'H'
 	#print("format = ", format)
 	#bytes = struct.calcsize(format)
