@@ -14,6 +14,7 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
+from __future__ import print_function
 
 #set the paths so python can find the comedi module
 import sys, os, string, struct, time
@@ -141,10 +142,10 @@ print("time : ", t1 - t0, " seconds")
 
 count = 0
 while count < len(datastr):
-	for i in range(4):
-		print("%d\t" % datastr[count+i])
-	print("\n")
-	count = count + 4
+	for i in range(nchans):
+		print(datastr[count+i], '\t', end='')
+	print()
+	count = count + nchans
 	
 ret = c.comedi_close(dev)
 if ret !=0: raise Exception("comedi_close failed...")
