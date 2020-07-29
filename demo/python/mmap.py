@@ -131,7 +131,7 @@ dump_cmd(cmd)
 
 #test our comedi command a few times. 
 ret = c.comedi_command_test(dev,cmd)
-print "first cmd test returns ", ret, cmdtest_messages[ret]
+print("first cmd test returns ", ret, cmdtest_messages[ret])
 if ret<0:
 	raise Exception("comedi_command_test failed")
 dump_cmd(cmd)
