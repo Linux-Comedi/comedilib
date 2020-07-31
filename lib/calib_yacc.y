@@ -337,7 +337,7 @@ static void yyerror(calib_yyparse_private_t *parse_arg, const char *s)
 
 %}
 
-%pure-parser
+%define api.pure
 
 %parse-param {calib_yyparse_private_t *parse_arg}
 
