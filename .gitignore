@@ -67,6 +67,8 @@ Makefile.in
 /doc/funcref.xml
 # note that /doc/drivers.xml is generated from /doc/drivers.txt
 /doc/drivers.xml
+# note that /doc/drivers-linux.xml is generated from /doc/drivers-linux.txt
+/doc/drivers-linux.xml
 # documentation output
 /doc/doc_html/
 /doc/man/

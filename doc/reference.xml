@@ -780,14 +780,62 @@ and
 
 	<section id="functionreference">
 		<title>Functions</title>
-			<xi:include href="funcref.xml"/>
-			<xi:include href="command_funcref.xml"/>
-			<xi:include href="calibration_funcref.xml"/>
-			<xi:include href="dio_funcref.xml"/>
-			<xi:include href="error_funcref.xml"/>
-			<xi:include href="extensions_funcref.xml"/>
-			<xi:include href="deprecated_funcref.xml"/>
+		<xi:include href="funcref.xml"/>
+		<xi:include href="command_funcref.xml"/>
+		<xi:include href="calibration_funcref.xml"/>
+		<xi:include href="dio_funcref.xml"/>
+		<xi:include href="error_funcref.xml"/>
+		<xi:include href="extensions_funcref.xml"/>
+		<xi:include href="deprecated_funcref.xml"/>
 	</section>
 	<xi:include href="bindings.xml"/>
-	<xi:include href="drivers.xml"/>
+	<section id="lowleveldrivers">
+		<title>Kernel drivers</title>
+		<para>
+		  There are two main forks of the low-level &comedi; driver
+		  modules:
+		  <itemizedlist>
+		    <listitem>
+		      The &comedi; modules built from the Linux kernel sources.
+		    </listitem>
+		    <listitem>
+		      The original &comedi; modules from comedi.org.
+		    </listitem>
+		  </itemizedlist>
+		</para>
+		<para>
+		  By preference, the modules from the Linux kernel sources
+		  should be used, especially if the Linux distribution includes
+		  them in a pre-built, binary package. The
+		  <command>comedi_config</command> parameters for these are
+		  described in the <link linkend="ll-drivers-linux">Drivers
+		  from Linux kernel sources</link> section, last updated from
+		  the Linux kernel version &linux_version; sources.
+		</para>
+		<para>
+		  The original &comedi; modules from comedi.org are available
+		  as a fallback in case the modules built from the Linux kernel
+		  sources cannot be used for some reason (for example, if the
+		  Linux distribution does not package them as pre-built
+		  modules). They need to be rebuilt and reinstalled whenever
+		  the kernel is updated. The <command>comedi_config</command>
+		  parameters for these are described in the <link
+		  linkend="ll-drivers-comedi">Drivers from comedi.org</link>
+		  section, last updated from the &comedi; driver sources on
+		  &comedi_date;.
+		</para>
+		<para>
+		  The modules from each source should not be loaded into the
+		  running kernel at the same time (if that is possible)
+		  because their internal APIs are incompatible, and doing so
+		  is likely to result in a kernel crash.
+		</para>
+		<para>
+		  The name of the low-level driver for a particular board and
+		  any <command>comedi_config</command> parameters for the board
+		  may differ between the two sets of sources.
+		</para>
+		<xi:include href="drivers-linux.xml"/>
+		<xi:include href="drivers.xml"/>
+	</section>
 </section>

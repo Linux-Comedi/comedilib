@@ -1,2 +1,4 @@
 <!ENTITY comedi '<ulink url="http://www.comedi.org"><acronym>Comedi</acronym></ulink>'>
 <!ENTITY comedilib_version '0.12.0'>
+<!ENTITY linux_version '5.7'>
+<!ENTITY comedi_date '2020-07-31'>
