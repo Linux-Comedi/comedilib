@@ -111,7 +111,7 @@ extensions_funcref.xml: extensions_funcref.txt mkref
 	$(srcdir)/mkref $(srcdir)/extensions_funcref.txt >$(srcdir)/extensions_funcref.xml
 
 drivers.xml: drivers.txt mkdr
-	$(srcdir)/mkdr $(srcdir)/drivers.txt >$(srcdir)/drivers.xml
+	$(srcdir)/mkdr "lowleveldrivers" "Kernel drivers" $(srcdir)/drivers.txt >$(srcdir)/drivers.xml
 
 maintainer-clean-local:
 	$(RM) -r $(srcdir)/doc_html $(srcdir)/man $(srcdir)/pdf
