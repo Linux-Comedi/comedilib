@@ -124,7 +124,7 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 
 	fprintf(stderr, "\ncmd-test ret=%d ", ret);
 	if(ret < 0){
-		fprintf(stderr, "\nerrno=%d", errno);
+		fprintf(stderr, "\nerrno=%d ", errno);
 		comedi_perror("comedi_command_test()");
 		return;
 	}
@@ -135,7 +135,7 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 
 	fprintf(stderr, "\ncmd-test ret=%d ", ret);
 	if(ret < 0){
-		fprintf(stderr, "\nerrno=%d", errno);
+		fprintf(stderr, "\nerrno=%d ", errno);
 		comedi_perror("comedi_command_test()");
 		return;
 	}
@@ -157,7 +157,7 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 	fprintf(stderr, "\nret=%d", ret);
 	if(ret < 0)
 	{
-		fprintf(stderr, "\nerrno=%d", errno);
+		fprintf(stderr, "\nerrno=%d ", errno);
 		comedi_perror("comedi_command");
 		return;
 	}
