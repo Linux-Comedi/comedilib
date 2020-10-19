@@ -19,19 +19,19 @@
  *      Advantech PCI 1730  with adequate driver, too.
  *
  * The program sets up a comedi command to wait for an external trigger.
- * In a loop waits for the input subdevice in select() with
+ * In a loop, waits for the input subdevice in select() with
  * a long timeout. If select returns with the file descrptor
  * ready for read, the available input data is read from the
  * file descrptor and getimeofday() is called. The absolute
  * and the delta time since te last trigger event is printed as
  * well as the first two 16 bit samples possibly in the read-buffer.
  *
- * 2 instances per card can run at the same time if the you have
+ * 2 instances per card can run at the same time if you have
  * Adlink PCI 7230 card(s) installed.
- * 4 instances per card can run at the same time if the you have
+ * 4 instances per card can run at the same time if you have
  * Advantech PCI 1730 card(s) installed.
- * 1 instances per parport can run at the same time if the you have
- * parallel ports istalled.
+ * 1 instances per parport can run at the same time if you have
+ * parallel ports installed.
  *
  * 5 parallel instances have successfully been used in a constellation
  * with 1 PCIe parport, 1 LPCIe 7230 and 1 PCI 1730 card.
