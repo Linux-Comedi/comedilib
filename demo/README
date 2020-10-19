@@ -90,6 +90,10 @@ eeprom_dump:
 	Dumps the EEPROM of a card, if it has one.  Useful for debugging
 	devices/drivers.
 
+ext_trig:
+	An example of using Comedi commands with an external trigger for
+	the scan begin source (scan_begin_src = EXT_TRIG).
+
 gpct_pulse_generator:
 	Configures a NI general-purpose counter subdevice to produce a
 	continuous train of pulses on its output.  The -F option specifies
