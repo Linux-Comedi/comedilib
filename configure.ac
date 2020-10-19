@@ -22,7 +22,7 @@ m4_define([comedilib_lt_current], [12])
 m4_define([comedilib_lt_revision], [0])
 m4_define([comedilib_lt_age], [12])
 # Set 'letter', normally empty.  See below for rules.
-m4_define([comedilib_version_letter], [])
+m4_define([comedilib_version_letter], [a])
 
 #libscxi c:r:a
 m4_define([scxi_lt_current], [9])
@@ -40,11 +40,11 @@ m4_define([scxi_lt_age], [9])
 #  * 'letter' is normally absent and is removed if any of 'major', 'minor'
 #    or 'micro' are changed between releases.  Otherwise it is set if the
 #    only changes between releases are outside the library source code or
-#    language binding, for example the comedilib manual, "readme" files
-#    or sample configuration files.  When it needs to be set, it is set to
-#    'a' if previously absent, otherwise the next lower-case ASCII letter
-#    in the sequence.  (In the unlikely event that we we need to go beyond
-#    'z', append an extra letter.)
+#    language binding, for example the comedilib manual, "readme" files,
+#    demo code, or sample configuration files.  When it needs to be set,
+#    it is set to 'a' if previously absent, otherwise the next lower-case
+#    ASCII letter in the sequence.  (In the unlikely event that we we need
+#    to go beyond 'z', append an extra letter.)
 #
 # Example package version sequence: 0.10.1, 0.10.1a, 0.10.1b, 0.10.2,
 # 0.10.2a, ..., 0.10.2z, 0.10.2za, 0,10.2zb, 0.11.0.
