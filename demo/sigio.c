@@ -195,7 +195,7 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 	}
 }
 
-unsigned int chanlist[0];
+unsigned int chanlist[1];
 /*
  * This part of the demo measures channels 1, 2, 3, 4 at a rate of
  * 10 khz, with the inter-sample time at 10 us (100 khz).  The number
