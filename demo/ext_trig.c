@@ -13,29 +13,29 @@
 /*
  * Requirements:
  *    - A board with a subdevice that
- *      can trigger on an external digital line. 
+ *      can trigger on an external digital line.
  *      A parallel port satisfies these requirements.
  *      Adlink PCI 7230 with adequate driver, too.
  *      Advantech PCI 1730  with adequate driver, too.
  *
  * The program sets up a comedi command to wait for an external trigger.
- * In a loop waits for the input subdevice in select() with 
- * a long timeout. If select returns with the file descrptor 
- * ready for read, the available input data is read from the 
- * file descrptor and getimeofday() is called. The absolute 
- * and the delta time since te last trigger event is printed as 
+ * In a loop waits for the input subdevice in select() with
+ * a long timeout. If select returns with the file descrptor
+ * ready for read, the available input data is read from the
+ * file descrptor and getimeofday() is called. The absolute
+ * and the delta time since te last trigger event is printed as
  * well as the first two 16 bit samples possibly in the read-buffer.
- * 
- * 2 instances per card can run at the same time if the you have 
+ *
+ * 2 instances per card can run at the same time if the you have
  * Adlink PCI 7230 card(s) installed.
- * 4 instances per card can run at the same time if the you have 
+ * 4 instances per card can run at the same time if the you have
  * Advantech PCI 1730 card(s) installed.
- * 1 instances per parport can run at the same time if the you have 
+ * 1 instances per parport can run at the same time if the you have
  * parallel ports istalled.
  *
- * 5 parallel instances have successfully been used in a constellation 
- * with 1 PCIe parport, 1 LPCIe 7230 and 1 PCI 1730 card. 
- * 
+ * 5 parallel instances have successfully been used in a constellation
+ * with 1 PCIe parport, 1 LPCIe 7230 and 1 PCI 1730 card.
+ *
  */
 
 #define _GNU_SOURCE
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
 	init_parsed_options(&options);
 	parse_options(&options, argc, argv);
 
-  fprintf(stderr, "\n now comedi_open(%s ) ... ", options.filename);
+	fprintf(stderr, "\n now comedi_open(%s ) ... ", options.filename);
 	device = comedi_open(options.filename);
 	if(!device){
 		perror(options.filename);
@@ -100,10 +100,10 @@ int main(int argc, char *argv[])
 	}
 #endif
 
-  fprintf(stderr, "\n now prepare_cmd(sd = %d ) ... ", options.subdevice);
+	fprintf(stderr, "\n now prepare_cmd(sd = %d ) ... ", options.subdevice);
 	prepare_cmd(device, &cmd, options.subdevice);
 
-  fprintf(stderr, "\n now do_cmd(dev, &cmd ) ... ");
+	fprintf(stderr, "\n now do_cmd(dev, &cmd ) ... ");
 	do_cmd(device, &cmd);
 
 	return 0;
@@ -151,7 +151,7 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 		return;
 	}
 
-  fprintf(stderr, "\n now comedi_command(dev, &cmd ) ... ");
+	fprintf(stderr, "\n now comedi_command(dev, &cmd ) ... ");
 	ret=comedi_command(dev, cmd);
 
 	fprintf(stderr, "\nret=%d", ret);
@@ -170,8 +170,8 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 		FD_SET(comedi_fileno(dev), &rdset);
 		timeout.tv_sec = 16;
 		timeout.tv_usec = 50000;
-  fprintf(stderr, "\n now select(comedi_fileno(dev) + 1, &rdset, NULL, NULL, &(%02ld.%06ld)) ... ", 
-    timeout.tv_sec, timeout.tv_usec);
+		fprintf(stderr, "\n now select(comedi_fileno(dev) + 1, &rdset, NULL, NULL, &(%02ld.%06ld)) ... ",
+		timeout.tv_sec, timeout.tv_usec);
 		ret = select(comedi_fileno(dev) + 1, &rdset, NULL, NULL, &timeout);
 		if(ret < 0)
 		{
@@ -179,7 +179,7 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 		}else if(ret == 0)
 		{
 			/* timeout */
-  fprintf(stderr, "TiO ");
+			fprintf(stderr, "TiO ");
 		}
 		else if(FD_ISSET(comedi_fileno(dev), &rdset))
 		{
@@ -196,7 +196,7 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 			}else{
 				//int i;
 
-  //fprintf(stderr, "\n now gettimeofday() ... ");
+				//fprintf(stderr, "\n now gettimeofday() ... ");
 				ret = gettimeofday(&tvs_now, NULL);
 
 				total += ret;
@@ -207,16 +207,16 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 				tvs_delta.tv_sec = tvs_now.tv_sec - tvs_last.tv_sec;
 				if(tvs_delta.tv_usec < 0)
 				{
-				  tvs_delta.tv_usec += 1000000;
-				  tvs_delta.tv_sec -= 1;
+					tvs_delta.tv_usec += 1000000;
+					tvs_delta.tv_sec -= 1;
 				}
 				//endif(tvs_delta.tv_usec < 0)
 				tvs_last = tvs_now;
 				
-  fprintf(stderr, "\n t=%12ld.%06ld s dt=%4ld.%06ld s  buf=%04hX %04hX ", 
-    tvs_now.tv_sec, tvs_now.tv_usec, 
-    tvs_delta.tv_sec, tvs_delta.tv_usec,
-    buf[0], buf[1]);
+				fprintf(stderr, "\n t=%12ld.%06ld s dt=%4ld.%06ld s  buf=%04hX %04hX ",
+					tvs_now.tv_sec, tvs_now.tv_usec,
+					tvs_delta.tv_sec, tvs_delta.tv_usec,
+					buf[0], buf[1]);
 
 			}
 			//endif(read_ret == 0)
@@ -226,7 +226,7 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 //endproc do_cmd()
 
 /*
- * prepare a comedi command to configure a subdevice for 
+ * prepare a comedi command to configure a subdevice for
  * external triggering.
  */
 void prepare_cmd(comedi_t *dev, comedi_cmd *cmd, int subdevice)
