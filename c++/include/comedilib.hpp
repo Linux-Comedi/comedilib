@@ -846,7 +846,7 @@ namespace comedi
 		}
 		const comedi_range* range(unsigned channel, unsigned range_index) const
 		{
-			comedi_range *cRange = comedi_get_range(comedi_handle(), index(), channel, range_index);
+			const comedi_range *cRange = comedi_get_range(comedi_handle(), index(), channel, range_index);
 			if(cRange == 0)
 			{
 				std::ostringstream message;
