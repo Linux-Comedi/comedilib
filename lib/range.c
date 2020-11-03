@@ -63,7 +63,7 @@ enum comedi_oor_behavior _comedi_set_global_oor_behavior(
 
 
 EXPORT_ALIAS_DEFAULT(_comedi_to_phys,comedi_to_phys,0.7.18);
-double _comedi_to_phys(lsampl_t data,comedi_range *rng,lsampl_t maxdata)
+double _comedi_to_phys(lsampl_t data,const comedi_range *rng,lsampl_t maxdata)
 {
 	double x;
 
@@ -82,7 +82,7 @@ double _comedi_to_phys(lsampl_t data,comedi_range *rng,lsampl_t maxdata)
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_from_phys,comedi_from_phys,0.7.18);
-lsampl_t _comedi_from_phys(double data,comedi_range *rng,lsampl_t maxdata)
+lsampl_t _comedi_from_phys(double data,const comedi_range *rng,lsampl_t maxdata)
 {
 	double s;
 
@@ -101,7 +101,7 @@ int _comedi_find_range(comedi_t *it,unsigned int subd,unsigned int chan,unsigned
 {
 	unsigned int range_type;
 	int best;
-	comedi_range *range_ptr,*best_ptr;
+	const comedi_range *range_ptr,*best_ptr;
 	int i;
 	
 	if(!valid_chan(it,subd,chan))return -1;
@@ -142,7 +142,7 @@ int _comedi_range_is_chan_specific(comedi_t *it,unsigned int subd)
 
 EXPORT_ALIAS_DEFAULT(_comedi_sampl_to_phys,comedi_sampl_to_phys,0.7.18);
 int _comedi_sampl_to_phys(double *dest, int dst_stride, sampl_t *src,
-	int src_stride, comedi_range *rng, lsampl_t maxdata, int n)
+	int src_stride, const comedi_range *rng, lsampl_t maxdata, int n)
 {
 	int oor = 0;
 	int i;
@@ -179,7 +179,7 @@ int _comedi_sampl_to_phys(double *dest, int dst_stride, sampl_t *src,
 
 EXPORT_ALIAS_DEFAULT(_comedi_sampl_from_phys,comedi_sampl_from_phys,0.7.18);
 int _comedi_sampl_from_phys(sampl_t *dest,int dst_stride,double *src,
-	int src_stride, comedi_range *rng, lsampl_t maxdata, int n)
+	int src_stride, const comedi_range *rng, lsampl_t maxdata, int n)
 {
 	int oor = 0;
 	double mult;

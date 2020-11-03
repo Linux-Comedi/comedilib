@@ -262,7 +262,7 @@ int _comedi_get_hardcal_converter(
 	enum comedi_conversion_direction direction,
 	comedi_polynomial_t* polynomial)
 {
-	comedi_range *range_ptr = comedi_get_range(dev, subdevice, channel, range);
+	const comedi_range *range_ptr = comedi_get_range(dev, subdevice, channel, range);
 	lsampl_t maxdata;
 
 	if(range_ptr == NULL)

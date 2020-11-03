@@ -235,7 +235,7 @@ Returns:
 Function: comedi_from_phys -- convert physical units to sample
 Retval: lsampl_t
 Param: double data
-Param: comedi_range * range
+Param: const comedi_range * range
 Param: lsampl_t maxdata
 Description:
  Converts parameter <parameter class="function">data</parameter> given in
@@ -353,7 +353,9 @@ Description:
  <parameter class="function">channel</parameter>,
  and <parameter class="function">range</parameter> parameters.
  The pointer is valid until the Comedi device
- <parameter class="function">device</parameter> is closed.
+ <parameter class="function">device</parameter> is closed.  The
+ <type><link linkend="ref-type-comedi-range">comedi_range</link></type>
+ pointed to by the return value should not be modified.
  If there is an error, <constant>NULL</constant> is returned.
 
 Function: comedi_get_subdevice_flags -- properties of subdevice
@@ -628,7 +630,7 @@ Returns:
 Function: comedi_to_phys -- convert sample to physical units
 Retval: double
 Param: lsampl_t data
-Param: comedi_range * range
+Param: const comedi_range * range
 Param: lsampl_t maxdata
 Description:
  Converts parameter <parameter class="function">data</parameter> given in sample values

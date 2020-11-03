@@ -44,7 +44,7 @@ int _comedi_timed_1chan(comedi_t *dev,unsigned int subd,unsigned int chan,unsign
 	comedi_trig t;
 	double act_freq;
 	sampl_t *buffer;
-	comedi_range *the_range;
+	const comedi_range *the_range;
 	unsigned int maxdata;
 	int i,n,m;
 	

@@ -87,7 +87,7 @@ int sv_measure_l(comedi_sv_t *it,double *data)
 	int ret=0;
 	lsampl_t *val;
 	unsigned int chan;
-	comedi_range *rng;
+	const comedi_range *rng;
 	double sum;
 	int i;
 	int n;
@@ -142,7 +142,7 @@ int sv_measure_s(comedi_sv_t *it,double *data)
 	int ret=0;
 	sampl_t *val;
 	unsigned int chan;
-	comedi_range *rng;
+	const comedi_range *rng;
 	double sum;
 	int i;
 	int n;
