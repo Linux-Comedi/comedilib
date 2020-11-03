@@ -160,8 +160,8 @@ int _comedi_sampl_to_phys(double *dest, int dst_stride, const sampl_t *src,
 			}else{
 				*dest = rng->min + mult*(*src);
 			}
-			dest = ((void *)dest) + dst_stride;
-			src = ((void *)src) + src_stride;
+			dest = (double *)((char *)dest + dst_stride);
+			src = (const sampl_t *)((const char *)src + src_stride);
 		}
 	}else{
 		for(i=0;i<n;i++){
@@ -169,8 +169,8 @@ int _comedi_sampl_to_phys(double *dest, int dst_stride, const sampl_t *src,
 				oor++;
 			}
 			*dest = rng->min + mult*(*src);
-			dest = ((void *)dest) + dst_stride;
-			src = ((void *)src) + src_stride;
+			dest = (double *)((char *)dest + dst_stride);
+			src = (const sampl_t *)((const char *)src + src_stride);
 		}
 	}
 
@@ -199,8 +199,8 @@ int _comedi_sampl_from_phys(sampl_t *dest,int dst_stride,const double *src,
 			*dest=maxdata;
 			oor++;
 		}
-		dest = ((void *)dest) + dst_stride;
-		src = ((void *)src) + src_stride;
+		dest = (sampl_t *)((char *)dest + dst_stride);
+		src = (const double *)((const char *)src + src_stride);
 	}
 
 	return oor;
