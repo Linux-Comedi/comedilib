@@ -199,6 +199,7 @@ int _comedi_get_buffer_write_count(comedi_t *it, unsigned int subdev, unsigned i
  * Keep _comedi_get_front_count for backwards compatibility.
  * It is not in "comedilib.h" and is not documented.
  */
+int comedi_get_front_count(comedi_t *it, unsigned int subdev);
 EXPORT_ALIAS_DEFAULT(_comedi_get_front_count,comedi_get_front_count,0.7.18);
 int _comedi_get_front_count(comedi_t *it, unsigned int subdev)
 {

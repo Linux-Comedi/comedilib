@@ -62,7 +62,9 @@
 
 #define EXPORT_SYMBOL(a,b) __asm__(".symver " #a "," #a "@v" #b )
 #define EXPORT_ALIAS_VER(a,b,c) __asm__(".symver " #a "," #b "@v" #c )
-#define EXPORT_ALIAS_DEFAULT(a,b,c) __asm__(".symver " #a "," #b "@@v" #c )
+#define EXPORT_ALIAS_DEFAULT(a,b,c) \
+	typeof(b) a; \
+	__asm__(".symver " #a "," #b "@@v" #c )
 
 
 extern int __comedi_init;
