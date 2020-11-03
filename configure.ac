@@ -9,8 +9,8 @@
 # If any interfaces have been added since the last public release, then
 # increment age.
 #
-# If any interfaces have been removed since the last public release, then set
-# age to 0.
+# If any interfaces have been removed or changed since the last public release,
+# then set age to 0.
 #
 # In summary:
 #
@@ -19,10 +19,10 @@
 #  else, `c:r:a' becomes `c:r+1:a'.
 #
 m4_define([comedilib_lt_current], [12])
-m4_define([comedilib_lt_revision], [0])
+m4_define([comedilib_lt_revision], [1])
 m4_define([comedilib_lt_age], [12])
 # Set 'letter', normally empty.  See below for rules.
-m4_define([comedilib_version_letter], [a])
+m4_define([comedilib_version_letter], [])
 
 #libscxi c:r:a
 m4_define([scxi_lt_current], [9])
