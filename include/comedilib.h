@@ -146,9 +146,9 @@ int comedi_set_write_subdevice(comedi_t *it,unsigned int subdevice);
 /* physical units */
 double comedi_to_phys(lsampl_t data,const comedi_range *rng,lsampl_t maxdata);
 lsampl_t comedi_from_phys(double data,const comedi_range *rng,lsampl_t maxdata);
-int comedi_sampl_to_phys(double *dest, int dst_stride, sampl_t *src,
+int comedi_sampl_to_phys(double *dest, int dst_stride, const sampl_t *src,
 	int src_stride, const comedi_range *rng, lsampl_t maxdata, int n);
-int comedi_sampl_from_phys(sampl_t *dest,int dst_stride,double *src,
+int comedi_sampl_from_phys(sampl_t *dest,int dst_stride,const double *src,
 	int src_stride, const comedi_range *rng, lsampl_t maxdata, int n);
 
 /* synchronous stuff */
