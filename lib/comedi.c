@@ -61,7 +61,7 @@ comedi_t* _comedi_open(const char *fn)
 	memset(it,0,sizeof(comedi_t));
 
 	if((it->fd=open(fn,O_RDWR))<0){
-		libc_error();
+		_comedi_libc_error();
 		goto cleanup;
 	}
 
@@ -70,7 +70,7 @@ comedi_t* _comedi_open(const char *fn)
 
 	it->n_subdevices=it->devinfo.n_subdevs;
 
-	if(get_subdevices(it) < 0)
+	if(_comedi_get_subdevices(it) < 0)
 		goto cleanup;
 
 	it->magic=COMEDILIB_MAGIC;
@@ -78,9 +78,10 @@ comedi_t* _comedi_open(const char *fn)
 	return it;
 cleanup:
 	if(it) {
-		/* As long as get_subdevices is the last action above,
+		/* As long as _comedi_get_subdevices is the last action above,
 		   it->subdevices should not need any cleanup, since
-		   get_subdevices should have done the cleanup already */
+		   _comedi_get_subdevices should have done the cleanup already
+		 */
 		if (it->fd >= 0)
 			close(it->fd);
 		free(it);
@@ -95,7 +96,7 @@ int _comedi_close(comedi_t *it)
 	subdevice *s;
 	int i,j;
 
-	if(!valid_dev(it))
+	if(!_comedi_valid_dev(it))
 		return -1;
 	it->magic=0;
 
@@ -131,28 +132,28 @@ int _comedi_close(comedi_t *it)
 EXPORT_ALIAS_DEFAULT(_comedi_cancel,comedi_cancel,0.7.18);
 int _comedi_cancel(comedi_t *it,unsigned int subdevice)
 {
-	if(!valid_dev(it)) return -1;
+	if(!_comedi_valid_dev(it)) return -1;
 	return comedi_ioctl(it->fd, COMEDI_CANCEL, (void*)(unsigned long)subdevice);
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_poll,comedi_poll,0.7.18);
 int _comedi_poll(comedi_t *it,unsigned int subdevice)
 {
-	if(!valid_dev(it)) return -1;
+	if(!_comedi_valid_dev(it)) return -1;
 	return comedi_ioctl(it->fd, COMEDI_POLL, (void*)(unsigned long)subdevice);
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_fileno,comedi_fileno,0.7.18);
 int _comedi_fileno(comedi_t *it)
 {
-	if(!valid_dev(it)) return -1;
+	if(!_comedi_valid_dev(it)) return -1;
 	return it->fd;
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_trigger,comedi_trigger,0.7.18);
 int _comedi_trigger(comedi_t *it,comedi_trig *t)
 {
-	if(!valid_dev(it) || !t)
+	if(!_comedi_valid_dev(it) || !t)
 		return -1;
 
 	return comedi_ioctl(it->fd, COMEDI_TRIG, t);
@@ -162,7 +163,7 @@ EXPORT_ALIAS_DEFAULT(_comedi_command,comedi_command,0.7.18);
 int _comedi_command(comedi_t *it,comedi_cmd *t)
 {
 	int ret;
-	if(!valid_dev(it)) return -1;
+	if(!_comedi_valid_dev(it)) return -1;
 	ret = comedi_ioctl(it->fd, COMEDI_CMD, t);
 	if(ret<0){
 		switch(__comedi_errno){
@@ -178,7 +179,7 @@ EXPORT_ALIAS_DEFAULT(_comedi_command_test,comedi_command_test,0.7.18);
 int _comedi_command_test(comedi_t *it,comedi_cmd *t)
 {
 	int ret;
-	if(!valid_dev(it)) return -1;
+	if(!_comedi_valid_dev(it)) return -1;
 	ret = comedi_ioctl(it->fd, COMEDI_CMDTEST, t);
 	if(ret<0){
 		switch(__comedi_errno){
@@ -193,14 +194,14 @@ int _comedi_command_test(comedi_t *it,comedi_cmd *t)
 EXPORT_ALIAS_DEFAULT(_comedi_do_insnlist,comedi_do_insnlist,0.7.18);
 int _comedi_do_insnlist(comedi_t *it,comedi_insnlist *il)
 {
-	if(!valid_dev(it)) return -1;
+	if(!_comedi_valid_dev(it)) return -1;
 	return comedi_ioctl(it->fd, COMEDI_INSNLIST, il);
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_do_insn,comedi_do_insn,0.7.18);
 int _comedi_do_insn(comedi_t *it,comedi_insn *insn)
 {
-	if(!valid_dev(it)) return -1;
+	if(!_comedi_valid_dev(it)) return -1;
 	if(it->has_insn_ioctl){
 		return comedi_ioctl(it->fd, COMEDI_INSN, insn);
 	}else{
@@ -220,14 +221,14 @@ int _comedi_do_insn(comedi_t *it,comedi_insn *insn)
 EXPORT_ALIAS_DEFAULT(_comedi_lock,comedi_lock,0.7.18);
 int _comedi_lock(comedi_t *it,unsigned int subdevice)
 {
-	if(!valid_dev(it)) return -1;
+	if(!_comedi_valid_dev(it)) return -1;
 	return comedi_ioctl(it->fd, COMEDI_LOCK, (void*)(unsigned long)subdevice);
 }
 
 EXPORT_ALIAS_DEFAULT(_comedi_unlock,comedi_unlock,0.7.18);
 int _comedi_unlock(comedi_t *it,unsigned int subdevice)
 {
-	if(!valid_dev(it)) return -1;
+	if(!_comedi_valid_dev(it)) return -1;
 	return comedi_ioctl(it->fd, COMEDI_UNLOCK, (void*)(unsigned long)subdevice);
 }
 
@@ -236,7 +237,7 @@ int _comedi_set_read_subdevice(comedi_t *it,unsigned int subdevice)
 {
 	int ret;
 
-	if(!valid_dev(it)) return -1;
+	if(!_comedi_valid_dev(it)) return -1;
 	if(it->devinfo.read_subdevice >= 0 &&
 	   it->devinfo.read_subdevice == subdevice){
 		return 0;
@@ -254,7 +255,7 @@ int _comedi_set_write_subdevice(comedi_t *it,unsigned int subdevice)
 {
 	int ret;
 
-	if(!valid_dev(it)) return -1;
+	if(!_comedi_valid_dev(it)) return -1;
 	if(it->devinfo.write_subdevice >= 0 &&
 	   it->devinfo.write_subdevice == subdevice){
 		return 0;

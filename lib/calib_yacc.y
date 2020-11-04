@@ -108,7 +108,7 @@ static int add_calibration_setting( comedi_calibration_t *file_contents )
 		( file_contents->num_settings + 1 ) * sizeof( comedi_calibration_setting_t ) );
 	if( temp == NULL )
 	{
-		libc_error();
+		_comedi_libc_error();
 		fprintf(stderr, "%s: realloc failed to allocate memory.\n", __FUNCTION__);
 		return -1;
 	}
@@ -143,7 +143,7 @@ static int add_channel( calib_yyparse_private_t *priv, int channel )
 	temp = realloc( setting->channels, ( setting->num_channels + 1 ) * sizeof(unsigned) );
 	if( temp == NULL )
 	{
-		libc_error();
+		_comedi_libc_error();
 		fprintf(stderr, "%s: realloc failed to allocate memory.\n", __FUNCTION__);
 		return -1;
 	}
@@ -163,7 +163,7 @@ static int add_range( calib_yyparse_private_t *priv, int range )
 	temp = realloc( setting->ranges, ( setting->num_ranges + 1 ) * sizeof(unsigned) );
 	if( temp == NULL )
 	{
-		libc_error();
+		_comedi_libc_error();
 		fprintf(stderr, "%s: realloc failed to allocate memory.\n", __FUNCTION__);
 		return -1;
 	}
@@ -199,7 +199,7 @@ static int add_caldac( calib_yyparse_private_t *priv,
 		sizeof( comedi_caldac_t ) );
 	if( temp == NULL )
 	{
-		libc_error();
+		_comedi_libc_error();
 		fprintf(stderr, "%s: realloc failed to allocate memory.\n", __FUNCTION__);
 		return -1;
 	}
@@ -228,7 +228,7 @@ static int add_polynomial(calib_yyparse_private_t *priv, enum polynomial_directi
 		if(setting->soft_calibration.to_phys) return -1;
 		setting->soft_calibration.to_phys = malloc(sizeof(comedi_polynomial_t));
 		if(!setting->soft_calibration.to_phys){
-			libc_error();
+			_comedi_libc_error();
 			fprintf(stderr, "%s: malloc failed to allocate memory.\n", __FUNCTION__);
 			return -1;
 		}
@@ -238,7 +238,7 @@ static int add_polynomial(calib_yyparse_private_t *priv, enum polynomial_directi
 		if(setting->soft_calibration.from_phys) return -1;
 		setting->soft_calibration.from_phys = malloc(sizeof(comedi_polynomial_t));
 		if(!setting->soft_calibration.from_phys){
-			libc_error();
+			_comedi_libc_error();
 			fprintf(stderr, "%s: malloc failed to allocate memory.\n", __FUNCTION__);
 			return -1;
 		}
@@ -294,7 +294,7 @@ static comedi_polynomial_t* alloc_inverse_linear_polynomial(const comedi_polynom
 	if(polynomial->order != 1) return NULL;
 	inverse = malloc(sizeof(comedi_polynomial_t));
 	if(!inverse){
-		libc_error();
+		_comedi_libc_error();
 		return NULL;
 	}
 	memset(inverse, 0, sizeof(comedi_polynomial_t));
@@ -364,7 +364,7 @@ static void yyerror(calib_yyparse_private_t *parse_arg, const char *s)
 	input: '{' hash '}'
 		| error
 			{
-				fprintf(stderr, "input error on line %i\n", calib_yyget_lineno(parse_arg->yyscanner));
+				fprintf(stderr, "input error on line %i\n", _comedi_calib_yyget_lineno(parse_arg->yyscanner));
 // 				fprintf(stderr, "input error on line %i\n", @1.first_line );
 				YYABORT;
 			}
@@ -514,14 +514,14 @@ extern comedi_calibration_t* _comedi_parse_calibration_file( const char *cal_fil
 		COMEDILIB_DEBUG( 3, "failed to open file\n" );
 		return NULL;
 	}
-	calib_yylex_init(&priv.yyscanner);
-	calib_yyrestart(file, priv.yyscanner);
-	if( calib_yyparse( &priv ) )
+	_comedi_calib_yylex_init(&priv.yyscanner);
+	_comedi_calib_yyrestart(file, priv.yyscanner);
+	if( _comedi_calib_yyparse( &priv ) )
 	{
 		comedi_cleanup_calibration( priv.parsed_file );
 		priv.parsed_file = NULL;
 	}
-	calib_yylex_destroy(priv.yyscanner);
+	_comedi_calib_yylex_destroy(priv.yyscanner);
 	fclose( file );
 	if( priv.parsed_file )
 	{

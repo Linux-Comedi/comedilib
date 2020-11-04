@@ -48,7 +48,7 @@ int _comedi_timed_1chan(comedi_t *dev,unsigned int subd,unsigned int chan,unsign
 	unsigned int maxdata;
 	int i,n,m;
 	
-	if(!valid_chan(dev,subd,chan))return -1;
+	if(!_comedi_valid_chan(dev,subd,chan))return -1;
 	if(!data)return -1;
 	
 	memset(&t,0,sizeof(t));

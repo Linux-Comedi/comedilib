@@ -42,7 +42,7 @@ int _comedi_get_cmd_src_mask(comedi_t *it,unsigned int subd,comedi_cmd *cmd)
 	subdevice *s;
 	int ret;
 
-	if(!valid_subd(it,subd))return -1;
+	if(!_comedi_valid_subd(it,subd))return -1;
 
 	s=it->subdevices+subd;
 
@@ -56,7 +56,7 @@ int _comedi_get_cmd_src_mask(comedi_t *it,unsigned int subd,comedi_cmd *cmd)
 
 		mask = malloc(sizeof(comedi_cmd));
 		if(!mask){
-			libc_error();
+			_comedi_libc_error();
 			return -1;
 		}
 
@@ -166,7 +166,7 @@ EXPORT_ALIAS_VER(_comedi_get_cmd_generic_timed_obsolete,comedi_get_cmd_generic_t
 int _comedi_get_cmd_generic_timed_obsolete(comedi_t *it,unsigned int subd,comedi_cmd *cmd,
 	unsigned int ns)
 {
-	if(!valid_subd(it,subd))return -1;
+	if(!_comedi_valid_subd(it,subd))return -1;
 	return __generic_timed(it, subd, cmd, 1, ns);
 }
 
@@ -174,7 +174,7 @@ EXPORT_ALIAS_DEFAULT(_comedi_get_cmd_generic_timed,comedi_get_cmd_generic_timed,
 int _comedi_get_cmd_generic_timed(comedi_t *it, unsigned subd, comedi_cmd *cmd,
 	unsigned chanlist_len, unsigned scan_period_ns)
 {
-	if(!valid_subd(it,subd)) return -1;
+	if(!_comedi_valid_subd(it,subd)) return -1;
 	return __generic_timed(it, subd, cmd, chanlist_len, scan_period_ns);
 }
 

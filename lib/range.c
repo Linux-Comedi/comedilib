@@ -104,7 +104,7 @@ int _comedi_find_range(comedi_t *it,unsigned int subd,unsigned int chan,unsigned
 	const comedi_range *range_ptr,*best_ptr;
 	int i;
 	
-	if(!valid_chan(it,subd,chan))return -1;
+	if(!_comedi_valid_chan(it,subd,chan))return -1;
 
 	range_type=comedi_get_rangetype(it,subd,chan);
 	best=-1;
@@ -127,7 +127,7 @@ int _comedi_get_n_ranges(comedi_t *it,unsigned int subd,unsigned int chan)
 {
 	unsigned int range_type;
 
-	if(!valid_chan(it,subd,chan))return -1;
+	if(!_comedi_valid_chan(it,subd,chan))return -1;
 
 	range_type=comedi_get_rangetype(it,subd,chan);
 	return RANGE_LENGTH(range_type);
@@ -136,7 +136,7 @@ int _comedi_get_n_ranges(comedi_t *it,unsigned int subd,unsigned int chan)
 EXPORT_ALIAS_DEFAULT(_comedi_range_is_chan_specific,comedi_range_is_chan_specific,0.7.18);
 int _comedi_range_is_chan_specific(comedi_t *it,unsigned int subd)
 {
-	if(!valid_subd(it,subd)) return -1;
+	if(!_comedi_valid_subd(it,subd)) return -1;
 	return (it->subdevices[subd].subd_flags&SDF_RANGETYPE)?1:0;
 }
 

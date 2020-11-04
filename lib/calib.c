@@ -161,7 +161,7 @@ int _comedi_apply_parsed_calibration( comedi_t *dev, unsigned int subdev, unsign
 {
 	int retval;
 
-	if(!valid_dev(dev)) return -1;
+	if(!_comedi_valid_dev(dev)) return -1;
 	retval = check_cal_file( dev, calibration );
 	if( retval < 0 ) return retval;
 
@@ -192,7 +192,7 @@ char* _comedi_get_default_calibration_path( comedi_t *dev )
 	const char *driver_name;
 	int err;
 
-	if(!valid_dev(dev)) return NULL;
+	if(!_comedi_valid_dev(dev)) return NULL;
 	if( fstat( comedi_fileno( dev ), &file_stats ) < 0 )
 	{
 		COMEDILIB_DEBUG( 3, "failed to get file stats of comedi device file\n" );

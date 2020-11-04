@@ -40,12 +40,12 @@ int _comedi_dio_config(comedi_t *it, unsigned int subdev, unsigned int chan, uns
 	subdevice *s;
 	enum configuration_ids config_id;
 
-	if(!valid_chan(it,subdev,chan))
+	if(!_comedi_valid_chan(it,subdev,chan))
 		return -1;
 
 	s=it->subdevices+subdev;
 	if(s->type!=COMEDI_SUBD_DIO){
-		internal_error(EINVAL_SUBD);
+		_comedi_internal_error(EINVAL_SUBD);
 		return -1;
 	}
 	switch(io)
@@ -57,7 +57,7 @@ int _comedi_dio_config(comedi_t *it, unsigned int subdev, unsigned int chan, uns
 		config_id = INSN_CONFIG_DIO_OUTPUT;
 		break;
 	default:
-		internal_error(EINVAL);
+		_comedi_internal_error(EINVAL);
 		return -1;
 	}
 	if(it->has_insnlist_ioctl){
@@ -99,12 +99,12 @@ int _comedi_dio_get_config(comedi_t *it,unsigned int subdev, unsigned int chan, 
 	lsampl_t data[2];
 	int retval;
 
-	if(!valid_chan(it,subdev,chan))
+	if(!_comedi_valid_chan(it,subdev,chan))
 		return -1;
 
 	s=it->subdevices+subdev;
 	if(s->type!=COMEDI_SUBD_DIO){
-		internal_error(EINVAL_SUBD);
+		_comedi_internal_error(EINVAL_SUBD);
 		return -1;
 	}
 	memset(&insn,0,sizeof(insn));
@@ -129,14 +129,14 @@ int _comedi_dio_read(comedi_t *it,unsigned int subdev,unsigned int chan,
 	subdevice *s;
 	int ret;
 
-	if(!valid_chan(it,subdev,chan))
+	if(!_comedi_valid_chan(it,subdev,chan))
 		return -1;
 
 	s = it->subdevices+subdev;
 	if(s->type!=COMEDI_SUBD_DIO &&
 	   s->type!=COMEDI_SUBD_DO &&
 	   s->type!=COMEDI_SUBD_DI){
-		internal_error(EINVAL_SUBD);
+		_comedi_internal_error(EINVAL_SUBD);
 		return -1;
 	}
 
@@ -181,13 +181,13 @@ int _comedi_dio_write(comedi_t *it,unsigned int subdev,unsigned int chan,
 {
 	subdevice *s;
 
-	if(!valid_chan(it,subdev,chan))
+	if(!_comedi_valid_chan(it,subdev,chan))
 		return -1;
 
 	s = it->subdevices+subdev;
 	if(s->type!=COMEDI_SUBD_DIO &&
 	   s->type!=COMEDI_SUBD_DO){
-		internal_error(EINVAL_SUBD);
+		_comedi_internal_error(EINVAL_SUBD);
 		return -1;
 	}
 
@@ -230,14 +230,14 @@ int _comedi_dio_bitfield2(comedi_t *it, unsigned int subdev, unsigned int mask, 
 	unsigned int m,bit;
 	subdevice *s;
 
-	if(!valid_subd(it, subdev))
+	if(!_comedi_valid_subd(it, subdev))
 		return -1;
 
 	s = it->subdevices + subdev;
 
 	if(s->type != COMEDI_SUBD_DIO && s->type != COMEDI_SUBD_DO &&
 		s->type != COMEDI_SUBD_DI){
-		internal_error(EINVAL_SUBD);
+		_comedi_internal_error(EINVAL_SUBD);
 		return -1;
 	}
 

@@ -24,7 +24,7 @@ libcomedi_la_LDFLAGS = -soname libcomedi \
 libcomedi_la_LIBADD = -lm
 
 $(srcdir)/calib_yacc.c $(srcdir)/calib_yacc.h: $(srcdir)/calib_yacc.y
-	$(YACC) -d -p calib_yy -o $(srcdir)/calib_yacc.c $<
+	$(YACC) -d -p _comedi_calib_yy -o $(srcdir)/calib_yacc.c $<
 
 $(srcdir)/calib_lex.c $(srcdir)/calib_lex.h: $(srcdir)/calib_lex.l
-	$(LEX) --header-file=$(srcdir)/calib_lex.h -Pcalib_yy -o$(srcdir)/calib_lex.c $<
+	$(LEX) --header-file=$(srcdir)/calib_lex.h -P_comedi_calib_yy -o$(srcdir)/calib_lex.c $<

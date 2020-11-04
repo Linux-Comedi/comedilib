@@ -42,7 +42,7 @@ int sv_measure_s(comedi_sv_t *it,double *data);
 EXPORT_ALIAS_DEFAULT(_comedi_sv_init,comedi_sv_init,0.7.18);
 int _comedi_sv_init(comedi_sv_t *it,comedi_t *dev,unsigned int subd,unsigned int chan)
 {
-	if(!valid_chan(dev,subd,chan))return -1;
+	if(!_comedi_valid_chan(dev,subd,chan))return -1;
 	if(!it)return -1;
 
 	memset(it,0,sizeof(*it));
@@ -59,7 +59,7 @@ EXPORT_ALIAS_DEFAULT(_comedi_sv_update,comedi_sv_update,0.7.18);
 int _comedi_sv_update(comedi_sv_t *it)
 {
 	if(!it)return -1;
-	if(!valid_chan(it->dev,it->subdevice,it->chan))return -1;
+	if(!_comedi_valid_chan(it->dev,it->subdevice,it->chan))return -1;
 
 	it->maxdata=comedi_get_maxdata(it->dev,it->subdevice,it->chan);
 
@@ -73,7 +73,7 @@ EXPORT_ALIAS_DEFAULT(_comedi_sv_measure,comedi_sv_measure,0.7.18);
 int _comedi_sv_measure(comedi_sv_t *it,double *data)
 {
 	if(!it)return -1;
-	if(!valid_subd(it->dev,it->subdevice))return -1;
+	if(!_comedi_valid_subd(it->dev,it->subdevice))return -1;
 	if(it->dev->subdevices[it->subdevice].subd_flags & SDF_LSAMPL){
 		return sv_measure_l(it,data);
 	}else{
@@ -94,7 +94,7 @@ int sv_measure_l(comedi_sv_t *it,double *data)
 
 	val=malloc(sizeof(*val)*it->n);
 	if(!val){
-		libc_error();
+		_comedi_libc_error();
 		return -1;
 	}
 
@@ -149,7 +149,7 @@ int sv_measure_s(comedi_sv_t *it,double *data)
 
 	val=malloc(sizeof(*val)*it->n);
 	if(!val){
-		libc_error();
+		_comedi_libc_error();
 		return -1;
 	}
 

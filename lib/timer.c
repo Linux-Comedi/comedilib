@@ -147,7 +147,7 @@ int _comedi_get_timer(comedi_t *it,unsigned int subdev,double freq,
 {
 	int timer_type;
 	
-	if(!valid_subd(it,subdev) || !trigvar || !actual_freq)
+	if(!_comedi_valid_subd(it,subdev) || !trigvar || !actual_freq)
 		return -1;
 
 	timer_type=it->subdevices[subdev].timer_type;

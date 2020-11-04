@@ -38,7 +38,7 @@
 EXPORT_ALIAS_DEFAULT(_comedi_get_n_subdevices,comedi_get_n_subdevices,0.7.18);
 int _comedi_get_n_subdevices(comedi_t *it)
 {
-	if(!valid_dev(it))
+	if(!_comedi_valid_dev(it))
 		return -1;
 
 	return it->n_subdevices;
@@ -47,7 +47,7 @@ int _comedi_get_n_subdevices(comedi_t *it)
 EXPORT_ALIAS_DEFAULT(_comedi_get_version_code,comedi_get_version_code,0.7.18);
 int _comedi_get_version_code(comedi_t *it)
 {
-	if(!valid_dev(it))
+	if(!_comedi_valid_dev(it))
 		return -1;
 
 	return it->devinfo.version_code;
@@ -56,7 +56,7 @@ int _comedi_get_version_code(comedi_t *it)
 EXPORT_ALIAS_DEFAULT(_comedi_get_driver_name,comedi_get_driver_name,0.7.18);
 const char* _comedi_get_driver_name(comedi_t *it)
 {
-	if(!valid_dev(it))
+	if(!_comedi_valid_dev(it))
 		return NULL;
 
 	return it->devinfo.driver_name;
@@ -65,7 +65,7 @@ const char* _comedi_get_driver_name(comedi_t *it)
 EXPORT_ALIAS_DEFAULT(_comedi_get_board_name,comedi_get_board_name,0.7.18);
 const char* _comedi_get_board_name(comedi_t *it)
 {
-	if(!valid_dev(it))
+	if(!_comedi_valid_dev(it))
 		return NULL;
 
 	return it->devinfo.board_name;
@@ -74,7 +74,7 @@ const char* _comedi_get_board_name(comedi_t *it)
 EXPORT_ALIAS_VER(_comedi_get_subdevice_flags_old, comedi_get_subdevice_flags,0.7.18);
 int _comedi_get_subdevice_flags_old(comedi_t *it,unsigned int subd)
 {
-	if(!valid_subd(it,subd))
+	if(!_comedi_valid_subd(it,subd))
 		return 0;
 	return it->subdevices[subd].subd_flags;
 }
@@ -85,12 +85,12 @@ int _comedi_get_subdevice_flags(comedi_t *it,unsigned int subd)
 	comedi_subdinfo *s;
 	int flags;
 	int ret;
-	if(!valid_subd(it,subd))
+	if(!_comedi_valid_subd(it,subd))
 		return -1;
 	s = calloc(it->n_subdevices, sizeof(comedi_subdinfo));
 	if(s == NULL)
 	{
-		libc_error();
+		_comedi_libc_error();
 		return -1;
 	}
 	ret = comedi_ioctl(it->fd, COMEDI_SUBDINFO, s);
@@ -107,7 +107,7 @@ int _comedi_get_subdevice_flags(comedi_t *it,unsigned int subd)
 EXPORT_ALIAS_DEFAULT(_comedi_get_subdevice_type,comedi_get_subdevice_type,0.7.18);
 int _comedi_get_subdevice_type(comedi_t *it,unsigned int subd)
 {
-	if(!valid_subd(it,subd))
+	if(!_comedi_valid_subd(it,subd))
 		return -1;
 
 	return it->subdevices[subd].type;
@@ -116,7 +116,7 @@ int _comedi_get_subdevice_type(comedi_t *it,unsigned int subd)
 EXPORT_ALIAS_DEFAULT(_comedi_find_subdevice_by_type,comedi_find_subdevice_by_type,0.7.18);
 int _comedi_find_subdevice_by_type(comedi_t *it,int type,unsigned int subd)
 {
-	if(!valid_subd(it,subd))
+	if(!_comedi_valid_subd(it,subd))
 		return -1;
 
 	for(;subd<it->n_subdevices;subd++){
@@ -129,7 +129,7 @@ int _comedi_find_subdevice_by_type(comedi_t *it,int type,unsigned int subd)
 EXPORT_ALIAS_DEFAULT(_comedi_get_read_subdevice,comedi_get_read_subdevice,0.7.19);
 int _comedi_get_read_subdevice(comedi_t *dev)
 {
-	if(!valid_dev(dev))
+	if(!_comedi_valid_dev(dev))
 		return -1;
 
 	return dev->devinfo.read_subdevice;
@@ -138,7 +138,7 @@ int _comedi_get_read_subdevice(comedi_t *dev)
 EXPORT_ALIAS_DEFAULT(_comedi_get_write_subdevice,comedi_get_write_subdevice,0.7.19);
 int _comedi_get_write_subdevice(comedi_t *dev)
 {
-	if(!valid_dev(dev))
+	if(!_comedi_valid_dev(dev))
 		return -1;
 
 	return dev->devinfo.write_subdevice;
@@ -147,7 +147,7 @@ int _comedi_get_write_subdevice(comedi_t *dev)
 EXPORT_ALIAS_DEFAULT(_comedi_get_n_channels,comedi_get_n_channels,0.7.18);
 int _comedi_get_n_channels(comedi_t *it,unsigned int subd)
 {
-	if(!valid_subd(it,subd))
+	if(!_comedi_valid_subd(it,subd))
 		return -1;
 
 	return it->subdevices[subd].n_chan;
@@ -159,7 +159,7 @@ int _comedi_get_n_channels(comedi_t *it,unsigned int subd)
 EXPORT_ALIAS_DEFAULT(_comedi_get_maxdata,comedi_get_maxdata,0.7.18);
 lsampl_t _comedi_get_maxdata(comedi_t *it,unsigned int subdevice,unsigned int chan)
 {
-	if(!valid_chan(it,subdevice,chan))
+	if(!_comedi_valid_chan(it,subdevice,chan))
 		return 0;
 
 	if(it->subdevices[subdevice].maxdata_list)
@@ -171,7 +171,7 @@ lsampl_t _comedi_get_maxdata(comedi_t *it,unsigned int subdevice,unsigned int ch
 EXPORT_ALIAS_DEFAULT(_comedi_maxdata_is_chan_specific,comedi_maxdata_is_chan_specific,0.7.18);
 int _comedi_maxdata_is_chan_specific(comedi_t *it,unsigned int subdevice)
 {
-	if(!valid_subd(it,subdevice))
+	if(!_comedi_valid_subd(it,subdevice))
 		return -1;
 	if(it->subdevices[subdevice].maxdata_list)
 		return 1;
@@ -181,7 +181,7 @@ int _comedi_maxdata_is_chan_specific(comedi_t *it,unsigned int subdevice)
 EXPORT_ALIAS_DEFAULT(_comedi_get_rangetype,comedi_get_rangetype,0.7.18);
 int _comedi_get_rangetype(comedi_t *it,unsigned int subdevice,unsigned int chan)
 {
-	if(!valid_chan(it,subdevice,chan))
+	if(!_comedi_valid_chan(it,subdevice,chan))
 		return -1;
 
 	if(it->subdevices[subdevice].range_type_list)
@@ -196,7 +196,7 @@ comedi_range * _comedi_get_range(comedi_t *it,unsigned int subdevice,unsigned in
 {
 	int range_type;
 
-	if(!valid_chan(it,subdevice,chan))
+	if(!_comedi_valid_chan(it,subdevice,chan))
 		return NULL;
 
 	range_type=comedi_get_rangetype(it,subdevice,chan);

@@ -73,13 +73,13 @@ extern TLS int __comedi_errno;
 
 #if 0
 
-#define libc_error()		(__comedi_errno=errno)
-#define internal_error(a)	(__comedi_errno=(a))
+#define _comedi_libc_error()		(__comedi_errno=errno)
+#define _comedi_internal_error(a)	(__comedi_errno=(a))
 
 #else
 
-void libc_error(void);
-void internal_error(int error_number);
+void _comedi_libc_error(void);
+void _comedi_internal_error(int error_number);
 
 #endif
 
@@ -135,19 +135,19 @@ int _comedi_ioctl_debug(int, int, void*);
 
 /* filler routines */
 
-int get_subdevices(comedi_t *it);
-comedi_range *get_rangeinfo(int fd,unsigned int range_type);
+int _comedi_get_subdevices(comedi_t *it);
+comedi_range *_comedi_get_rangeinfo(int fd,unsigned int range_type);
 
 /* validators */
 
-int valid_dev(comedi_t *it);
-int valid_subd(comedi_t *it,unsigned int subdevice);
-int valid_chan(comedi_t *it,unsigned int subdevice,unsigned int chan);
+int _comedi_valid_dev(comedi_t *it);
+int _comedi_valid_subd(comedi_t *it,unsigned int subdevice);
+int _comedi_valid_chan(comedi_t *it,unsigned int subdevice,unsigned int chan);
 
 /* used by range.c, was in comedilib.h but apparently deprecated so I put it here - fmhess */
 int comedi_get_rangetype(comedi_t *it,unsigned int subdevice,unsigned int chan);
 
-#define YY_DECL int calib_yylex(YYSTYPE *calib_lvalp, yyscan_t yyscanner)
+#define YY_DECL int _comedi_calib_yylex(YYSTYPE *calib_lvalp, yyscan_t yyscanner)
 
 #endif
 

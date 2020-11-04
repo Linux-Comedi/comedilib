@@ -43,7 +43,7 @@ int _comedi_ioctl(int fd, int request, void *arg)
 
 	ret = ioctl(fd, request, arg);
 	if(ret < 0)
-		libc_error();
+		_comedi_libc_error();
 	return ret;
 }
 
