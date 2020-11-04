@@ -582,6 +582,96 @@ Returns:
  If successful, <literal>0</literal> is returned.  If there is an error,
  <literal>-1</literal> is returned.
 
+Function: comedi_lsampl_from_phys -- convert physical units to 32-bit samples
+Retval: int
+Param: lsampl_t * dest
+Param: int dest_stride
+Param: const double * src
+Param: int src_stride
+Param: const comedi_range * range
+Param: lsampl_t maxdata
+Param: int n
+Description:
+ Converts <parameter class="function">n</parameter> physical unit values
+ (<type>double</type>) separated by
+ <parameter class="function">src_stride</parameter> bytes from the buffer
+ pointed to by <parameter class="function">src</parameter> to 32-bit sample
+ values (<type>lsampl_t</type>, between <literal>0</literal> and
+ <parameter class="function">maxdata</parameter>) separated by
+ <parameter class="function">dest_stride</parameter> bytes into the buffer
+ pointed to by <parameter class="function">dest</parameter>.  The parameter
+ <parameter class="function">range</parameter> represents the conversion
+ information to use, and the parameter
+ <parameter class="function">maxdata</parameter> represents the maximum
+ possible data value for the channel that the data will be written to.  The
+ mapping between physical units and raw data values is linear and assumes that
+ the converter has ideal characteristics.
+
+ Conversion is not affected by out-of-range behavior.  Out-of-range
+ physical unit values are silently truncated to the range <literal>0</literal>
+ to <parameter class="function">maxdata</parameter>.
+
+ Note that the stride values are in bytes, so the parameters
+ <parameter class="function">dest_stride</parameter> and
+ <parameter class="function">src_stride</parameter> should be multiples of
+ the element sizes of their respective
+ <parameter class="function">dest</parameter> and
+ <parameter class="function">src</parameter> buffers
+ (<code language="C">sizeof(double)</code> and
+ <code language="C">sizeof(lsampl_t)</code> respectively).
+
+Returns:
+ The function returns the number of out-of-range values encountered during the
+ conversion.
+
+Function: comedi_lsampl_to_phys -- Convert 32-bit samples to physical units
+Retval: int
+Param: double * dest
+Param: int dest_stride
+Param: const lsampl_t * src
+Param: int src_stride
+Param: const comedi_range * range
+Param: lsampl_t maxdata
+Param: int n
+Description:
+ Converts <parameter class="function">n</parameter> 32-bit sample values
+ (<type>lsampl_t</type>, between <literal>0</literal> and
+ <parameter class="function">maxdata</parameter>) separated by
+ <parameter class="function">src_stride</parameter> bytes from the buffer
+ pointed to by <parameter class="function">src</parameter> to physical unit
+ values (<type>double</type>) separated by
+ <parameter class="function">dest_stride</parameter> bytes into the buffer
+ pointed to by <parameter class="function">dest</parameter>.  The parameter
+ <parameter class="function">range</parameter> represents the conversion
+ information to use, and the parameter
+ <parameter class="function">maxdata</parameter> represents the maximum
+ possible data value for the channel that was read.  The mapping between
+ raw data values and physical units is linear and assumes that the converter
+ has ideal characteristics.
+
+ Conversion of endpoint sample values, that is, sample values equal to
+ <literal>0</literal> or <parameter class="function">maxdata</parameter>,
+ is affected by the Comedilib out-of-range behavior (see function
+ <function><link linkend="func-ref-comedi-set-global-oor-behavior"
+ >comedi_set_global_oor_behavior</link></function>).  If the out-of-range
+ behavior is set to <constant>COMEDI_OOR_NAN</constant>, endpoint values are
+ converted to <constant>NAN</constant>.  If the out-of-range behavior is set
+ to <constant>COMEDI_OOR_NUMBER</constant>, the endpoint values are
+ converted similarly to other values.
+
+ Note that the stride values are in bytes, so the parameters
+ <parameter class="function">dest_stride</parameter> and
+ <parameter class="function">src_stride</parameter> should be multiples of
+ the element sizes of their respective
+ <parameter class="function">dest</parameter> and
+ <parameter class="function">src</parameter> buffers
+ (<code language="C">sizeof(lsampl_t)</code> and
+ <code language="C">sizeof(double)</code> respectively).
+
+Returns:
+ The function returns the number of endpoint or out-of-range sample values
+ encountered during the conversion.
+
 Function: comedi_maxdata_is_chan_specific -- maximum sample depends on channel
 Retval: int
 Param: comedi_t * device

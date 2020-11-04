@@ -150,6 +150,10 @@ int comedi_sampl_to_phys(double *dest, int dst_stride, const sampl_t *src,
 	int src_stride, const comedi_range *rng, lsampl_t maxdata, int n);
 int comedi_sampl_from_phys(sampl_t *dest,int dst_stride,const double *src,
 	int src_stride, const comedi_range *rng, lsampl_t maxdata, int n);
+int comedi_lsampl_to_phys(double *dest, int dst_stride, const lsampl_t *src,
+	int src_stride, const comedi_range *rng, lsampl_t maxdata, int n);
+int comedi_lsampl_from_phys(lsampl_t *dest,int dst_stride,const double *src,
+	int src_stride, const comedi_range *rng, lsampl_t maxdata, int n);
 
 /* synchronous stuff */
 int comedi_data_read(comedi_t *it,unsigned int subd,unsigned int chan,

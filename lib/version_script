@@ -142,3 +142,9 @@ v0.12.0 {
 		comedi_get_routes;
 		comedi_get_cmd_timing_constraints;
 } v0.11.0;
+
+v0.13.0 {
+	global:
+		comedi_lsampl_from_phys;
+		comedi_lsampl_to_phys;
+} v0.12.0;

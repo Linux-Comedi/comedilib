@@ -206,3 +206,70 @@ int _comedi_sampl_from_phys(sampl_t *dest,int dst_stride,const double *src,
 	return oor;
 }
 
+
+EXPORT_ALIAS_DEFAULT(_comedi_lsampl_to_phys,comedi_lsampl_to_phys,0.13.0);
+int _comedi_lsampl_to_phys(double *dest, int dst_stride, const lsampl_t *src,
+	int src_stride, const comedi_range *rng, lsampl_t maxdata, int n)
+{
+	int oor = 0;
+	int i;
+	double mult;
+
+	if(!rng)return -1;
+	if(!maxdata)return -1;
+
+	mult = (rng->max-rng->min)/maxdata;
+	if(comedi_oor_is_nan==COMEDI_OOR_NAN){
+		for(i=0;i<n;i++){
+			if(*src==0 || *src>=maxdata){
+				oor++;
+				*dest=NAN;
+			}else{
+				*dest = rng->min + mult*(*src);
+			}
+			dest = (double *)((char *)dest + dst_stride);
+			src = (const lsampl_t *)((const char *)src + src_stride);
+		}
+	}else{
+		for(i=0;i<n;i++){
+			if(*src==0 || *src>=maxdata){
+				oor++;
+			}
+			*dest = rng->min + mult*(*src);
+			dest = (double *)((char *)dest + dst_stride);
+			src = (const lsampl_t *)((const char *)src + src_stride);
+		}
+	}
+
+	return oor;
+}
+
+EXPORT_ALIAS_DEFAULT(_comedi_lsampl_from_phys,comedi_lsampl_from_phys,0.13.0);
+int _comedi_lsampl_from_phys(lsampl_t *dest,int dst_stride,const double *src,
+	int src_stride, const comedi_range *rng, lsampl_t maxdata, int n)
+{
+	int oor = 0;
+	double mult;
+	int i;
+
+	if(!rng)return -1;
+	if(!maxdata)return -1;
+
+	mult = (maxdata+1)/(rng->max-rng->min);
+	for(i=0;i<n;i++){
+		*dest=mult*(*src-rng->min);
+		if(*src<rng->min){
+			*dest=0;
+			oor++;
+		}
+		if(*src>rng->min){
+			*dest=maxdata;
+			oor++;
+		}
+		dest = (lsampl_t *)((char *)dest + dst_stride);
+		src = (const double *)((const char *)src + src_stride);
+	}
+
+	return oor;
+}
+
