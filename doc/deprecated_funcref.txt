@@ -21,6 +21,23 @@ Description:
  instead.  It has the same functionality as
  <function>comedi_get_buffer_read_offset</function>.
 
+Function: comedi_get_rangetype -- range type information of channel
+Retval: int
+Param: comedi_t * device
+Param: unsigned int subdevice
+Param: unsigned int channel
+Status: deprecated
+ This function is deprecated (but is used internally by the library).  Use
+ <function><link linkend="func-ref-comedi-get-n-ranges"
+ >comedi_get_n_ranges</link></function> to get the number of ranges, and
+ <function><link linkend="func-ref-comedi-get-range"
+ >comedi_get_range</link></function> to get the details of a range for a
+ channel.
+Returns:
+ The function returns a range type value on success, <literal>-1</literal>
+ on error.  A range type value encodes a subdevice index (bits 27-24), a
+ channel index (bits 23-16) and a range table length (bits 15-0).
+
 Function: comedi_get_timer -- timer information (deprecated)
 Retval: int
 Param: comedi_t * device
