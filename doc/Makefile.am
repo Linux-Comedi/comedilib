@@ -10,7 +10,7 @@ TUTORIALS = $(srcdir)/../demo/tut1.c $(srcdir)/../demo/tut2.c \
 
 EXTRA_DIST = $(XML) calibration_funcref.txt command_funcref.txt dio_funcref.txt \
 	deprecated_funcref.txt error_funcref.txt extensions_funcref.txt \
-	funcref mkref drivers.txt drivers-linux.txt mkdr FAQ \
+	funcref.txt mkref drivers.txt drivers-linux.txt mkdr FAQ \
 	acq-seq.gif doc_html man comedilib_html_config.xsl \
 	comedilib_dblatex_config.xsl \
 	comedilib.css
@@ -89,8 +89,8 @@ uninstall_man:
 $(srcdir)/pdf/comedilib.pdf: $(XML) $(TUTORIALS) comedilib_dblatex_config.xsl
 	$(XMLTO) -o $(srcdir)/pdf --skip-validation $(XMLTO_PDF_OPTS) pdf $(srcdir)/comedilib.xml
 
-funcref.xml: funcref mkref
-	$(srcdir)/mkref $(srcdir)/funcref >$(srcdir)/funcref.xml
+funcref.xml: funcref.txt mkref
+	$(srcdir)/mkref $(srcdir)/funcref.txt >$(srcdir)/funcref.xml
 
 calibration_funcref.xml: calibration_funcref.txt mkref
 	$(srcdir)/mkref $(srcdir)/calibration_funcref.txt >$(srcdir)/calibration_funcref.xml
