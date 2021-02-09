@@ -54,12 +54,13 @@ int test_bufconfig_with_cmd(void)
 	int ret;
 	int len;
 	int maxlen;
+	int oldlen;
 
-	ret = comedi_get_buffer_size(device,subdevice);
-	if(ret<0){
+	oldlen = comedi_get_buffer_size(device,subdevice);
+	if(oldlen<0){
 		printf("E: comedi_get_buffer_size: %s\n",strerror(errno));
 	}else{
-		printf("buffer size %d\n",ret);
+		printf("buffer size %d\n",oldlen);
 	}
 
 	maxlen = comedi_get_max_buffer_size(device,subdevice);
@@ -89,33 +90,66 @@ int test_bufconfig_with_cmd(void)
 		}
 	}
 
-	len=maxlen+4096;
-	printf("setting buffer size past limit, %d\n",len);
-	ret = comedi_set_buffer_size(device,subdevice,len);
-	if(ret<0){
-		if(errno==EPERM){
-			printf("got EPERM, good\n");
+	if (maxlen>=0){
+		len=maxlen+4096;
+		printf("setting buffer size past limit, %d\n",len);
+		ret = comedi_set_buffer_size(device,subdevice,len);
+		if(ret<0){
+			if(errno==EPERM){
+				printf("got EPERM, good\n");
+			}else{
+				printf("E: wrong error comedi_set_buffer_size: %s",
+					strerror(errno));
+			}
 		}else{
-			printf("E: wrong error comedi_set_buffer_size: %s",
-				strerror(errno));
-		}
-	}else{
-		printf("E: comedi_set_buffer_size: didn't get error\n");
-	}
-
-	len=maxlen;
-	printf("setting buffer size to max, %d\n",len);
-	ret = comedi_set_buffer_size(device,subdevice,len);
-	if(ret<0){
-		printf("E: comedi_set_buffer_size: %s\n",strerror(errno));
-	}else{
-		printf("buffer size now at %d\n",ret);
-		if(ret != len){
-			printf("E: buffer size didn't get set: %d (expected %d)\n",
-				ret,len);
+			printf("E: comedi_set_buffer_size: didn't get error\n");
 		}
 	}
 
+	if(maxlen>0){
+		len=maxlen;
+		printf("setting buffer size to max, %d\n",len);
+		ret = comedi_set_buffer_size(device,subdevice,len);
+		if(ret<0){
+			printf("E: comedi_set_buffer_size: %s\n",strerror(errno));
+		}else{
+			printf("buffer size now at %d\n",ret);
+			if(ret != len){
+				printf("E: buffer size didn't get set: %d (expected %d)\n",
+					ret,len);
+			}
+		}
+	}
+
+	/*
+	 * Don't want to leave buffer set to maximum size unless it was
+	 * originally set to the maximum size.
+	 */
+	len=0;
+	if(oldlen>0){
+		if(oldlen<maxlen){
+			/* Reverting back to old size. */
+			len=oldlen;
+		}
+	}else if(maxlen>4096*10){
+		/*
+		 * Setting to 10% of maximum size, rounding up to multiple
+		 * of 4096 bytes.
+		 */
+		len=4096-1+maxlen/10;
+		len-=len%4096;
+	}
+	if(len){
+		printf("setting buffer size to %d\n",len);
+		ret = comedi_set_buffer_size(device,subdevice,len);
+		if(ret<0){
+			printf("E: comedi_set_buffer_size: %s\n",strerror(errno));
+		}else{
+			printf("buffer size set to %d\n",ret);
+		}
+	}else{
+		printf("not setting buffer size\n");
+	}
 
 	return 0;
 }
