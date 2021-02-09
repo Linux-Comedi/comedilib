@@ -131,7 +131,7 @@ int test_bufconfig_with_cmd(void)
 			/* Reverting back to old size. */
 			len=oldlen;
 		}
-	}else if(maxlen>4096*10){
+	}else if(maxlen>4096){
 		/*
 		 * Setting to 10% of maximum size, rounding up to multiple
 		 * of 4096 bytes.
