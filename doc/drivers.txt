@@ -3323,3 +3323,21 @@ Configuration options:
 
 
 
+Driver: vmk80xx
+Description: Velleman K8055/VM110, K8061/VM140 USB boards
+Devices: [Velleman] K8055 (K8055/VM110), K8061 (K8061/VM140),
+  VM110 (K8055/VM110), VM140 (K8061/VM140)
+Author: Manuel Gebele <forensixs@gmx.de>
+Updated: Thu, 13 May 2021 17:46:07 +0100
+Status: works
+
+Supports:
+ - analog input
+ - analog output
+ - digital input
+ - digital output
+ - counter
+ - pwm
+
+
+
