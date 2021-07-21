@@ -8,7 +8,7 @@ pkgconfig_DATA = comedilib.pc
 ## with automake 1.8, putting the m4 directory in EXTRA_DIST is not needed, and
 ## causes 'make distcheck' to fail, by way of 'make distdir' failing when builddir != srcdir 
 ## and srcdir is read-only.
-EXTRA_DIST = README.md comedilib.spec autogen.sh perl
+EXTRA_DIST = README.md INSTALL.md comedilib.spec autogen.sh perl
 
 ACLOCAL_AMFLAGS = -I m4
 

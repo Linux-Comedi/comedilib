@@ -24,7 +24,7 @@ found in the *comedi-nonfree-firmware* tarball.
 
 ## Installation
 
-Installation instructions are found in [INSTALL](INSTALL).
+Installation instructions are found in [INSTALL.md](INSTALL.md).
 
 ## Mailing List
 
