@@ -1,10 +1,10 @@
 
-    COMEDILIB
-    The Linux Control and Measurement Device Interface Library
-    David Schleef <ds@schleef.org>
+#   COMEDILIB
+### The Linux Control and Measurement Device Interface Library
+##  David Schleef <ds@schleef.org>
+---
 
-
-* About Comedi:
+## About Comedi
 
 Comedi is a collection of drivers for data acquisition hardware.
 These drivers work with Linux, and also with Linux combined with
@@ -17,16 +17,16 @@ incomplete list can be found in the Comedi source.
 
 This distribution contains only the user-space library.  You will
 almost certainly also want to download the Comedi kernel modules
-found in the "comedi" tarball.  Also, the calibration programs
+found in the *comedi* tarball.  Also, the calibration programs
 comedi_calibrate and comedi_soft_calibrate can be found in the
-"comedi_calibrate" tarball.  A few boards also need firmware
-found in the "comedi-nonfree-firmware" tarball.
+*comedi_calibrate* tarball.  A few boards also need firmware
+found in the *comedi-nonfree-firmware* tarball.
 
-* Installation:
+## Installation
 
-Installation instructions are found in INSTALL.
+Installation instructions are found in [INSTALL](INSTALL).
 
-* Mailing List:
+## Mailing List
 
 Questions about Comedi and Comedilib should be sent to the Comedi
 mailing list, <comedi_list@googlegroups.com>.  It is necessary to
@@ -48,7 +48,7 @@ Traffic on the list is light, and mainly questions/answers about
 comedi installation, bugs, and programming.  General questions
 about data acquisition are also welcome.
 
-* More Information:
+## More Information
 
 Comedi also has a web page at <http://www.comedi.org/> from where
 updated versions may be downloaded.
@@ -61,14 +61,14 @@ can be created automatically at
 <https://github.com/Linux-Comedi/comedilib/tarball/master>.  The Git
 repository can be cloned locally using:
 
-  git clone https://github.com/Linux-Comedi/comedilib.git
+    git clone https://github.com/Linux-Comedi/comedilib.git
 
 The Git repository was previously hosted at comedi.org.  A previously
 cloned repository may need its URL updating to the current repository
 on github.com as follows:
 
-  cd /path/to/comedilib
-  git remote set-url origin https://github.com/Linux-Comedi/comedilib.git
+    cd /path/to/comedilib
+    git remote set-url origin https://github.com/Linux-Comedi/comedilib.git
 
 Comedilib may be freely distibuted and modified in accordance with
 the GNU Lesser General Public License.  Portions of the Comedilib
