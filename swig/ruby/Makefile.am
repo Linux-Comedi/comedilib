@@ -13,17 +13,17 @@ all-local:
 install-data-local:
 endif
 
-ext/Makefile config.save: $(srcdir)/ext/comedi_ruby_wrap.c
+ext/Makefile .config: $(srcdir)/ext/comedi_ruby_wrap.c
 	$(RUBY) $(srcdir)/setup.rb config $(RUBY_CONFIG_OPTIONS) -- --with-comedilib-dir=$(abs_top_srcdir)
 
-ext/comedi.so ext/comedi_ruby_wrap.o: ext/Makefile config.save
+ext/comedi.so ext/comedi_ruby_wrap.o: ext/Makefile .config
 	$(RUBY) $(srcdir)/setup.rb setup
 
 if HAVE_RUBY
 clean-local:
 	$(RUBY) $(srcdir)/setup.rb clean
 	$(RM) $(srcdir)/ext/comedi_ruby_wrap.c
-	$(RM) ext/Makefile config.save
+	$(RM) ext/Makefile .config
 distclean-local:
 	$(RUBY) $(srcdir)/setup.rb distclean
 else
