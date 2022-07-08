@@ -2,7 +2,7 @@
 
 require 'comedi'
 require 'getoptlong'
-require 'common'
+require './common'
 
 include Comedi
 
