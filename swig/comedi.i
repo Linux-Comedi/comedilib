@@ -125,6 +125,7 @@ unsigned int NI_CtrOut(int channel);
 %array_class(lsampl_t, lsampl_array);
 %array_class(comedi_insn, insn_array);
 
+#ifdef SWIGPYTHON
 #ifdef SWIGPYTHONONLYSHORT
 %insert("python") %{
   delete_comedi_prefix = True
@@ -145,4 +146,5 @@ for k,v in globals().copy().items():
         globals().pop(k) # Break backwards compatibility
 del re, k, v, delete_comedi_prefix
 %}
+#endif
 
