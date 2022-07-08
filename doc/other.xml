@@ -1173,8 +1173,8 @@ This will reduce latency in handling interrupts from your data
 aquisition
 hardware.  It can be useful if you are sampling at high frequency, or
 if your hardware has a small onboard data buffer.  You must have a
-real-time kernel (<ulink url="http://www.rtai.org">RTAI</ulink> or
-<ulink url="http://www.rtlinux-gpl.org/">RTLinux/GPL</ulink>)
+real-time kernel (<ulink url="https://www.rtai.org">RTAI</ulink> or
+<ulink url="https://www.rtlinux-gpl.org/">RTLinux/GPL</ulink>)
 and must compile &comedi; with real-time support, or this flag will do
 nothing.
 </para>

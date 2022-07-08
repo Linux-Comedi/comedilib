@@ -48,8 +48,8 @@
 			</listitem>
 		</itemizedlist>
 		&comedi; works with standard Linux kernels, but also with its
-		real-time extensions <ulink url="http://www.rtai.org">RTAI</ulink> and
-		<ulink url="http://www.rtlinux-gpl.org/">RTLinux/GPL</ulink>.
+		real-time extensions <ulink url="https://www.rtai.org">RTAI</ulink> and
+		<ulink url="https://www.rtlinux-gpl.org/">RTLinux/GPL</ulink>.
 	</para>
 	<para>
 		This section gives a high-level introduction to which functionality
@@ -267,15 +267,15 @@
 					<emphasis role="strong">Real-time vs. non real-time.</emphasis>
 					If the device is to be used in a
 					<ulink
-					url="http://www.rtlinux-gpl.org/">RTLinux/GPL
+					url="https://www.rtlinux-gpl.org/">RTLinux/GPL
 					</ulink>
-					or <ulink url="http://www.rtai.org">RTAI</ulink> application,
+					or <ulink url="https://www.rtai.org">RTAI</ulink> application,
 					there are a few extra requirements, because not all system calls are
 					available in the kernel of the real-time operating systems
 					<ulink
-					url="http://www.rtlinux-gpl.org/">RTLinux/GPL
+					url="https://www.rtlinux-gpl.org/">RTLinux/GPL
 					</ulink>
-					or <ulink url="http://www.rtai.org">RTAI</ulink>.
+					or <ulink url="https://www.rtai.org">RTAI</ulink>.
 					The APIs of RTAI and RTLinux/Free differ in
 					different ways, so the &comedi; developers have spent a lot of efforts
 					to make generic wrappers to the required RTOS primitives: timers,
