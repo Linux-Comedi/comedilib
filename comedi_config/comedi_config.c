@@ -121,11 +121,15 @@ void read_init_files(char* file_names[], int num_files, int *options)
 {
 	int i;
 	int offset;
-	FILE* files[num_files];
-	int sizes[num_files];
+	FILE* files[MAX_NUM_INIT_FILES];
+	int sizes[MAX_NUM_INIT_FILES] = {0};
 	uintptr_t data_address;
 	int data_length = 0;
 	void *data = NULL;
+	if (num_files > MAX_NUM_INIT_FILES)
+	{
+		num_files = MAX_NUM_INIT_FILES;
+	}
 	for(i = 0; i < num_files; ++i)
 	{
 		struct stat buf;
