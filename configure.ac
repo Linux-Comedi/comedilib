@@ -140,7 +140,7 @@ fi
 
 #swig
 AC_PATH_PROG(SWIG, swig, "no")
-if test "$SWIG" == "no" ; then
+if test "$SWIG" = "no" ; then
 	AC_MSG_WARN([swig not found, will not be able to build swig based bindings])
 fi
 
@@ -149,13 +149,13 @@ AC_ARG_ENABLE([python-binding],
 	[AS_HELP_STRING([--disable-python-binding],
 		[Disable building of Python binding])],
 	[ENABLE_PYTHON=$enableval],[ENABLE_PYTHON="yes"])
-if test "$ENABLE_PYTHON" == "yes" && test "$SWIG" != "no"; then
+if test "$ENABLE_PYTHON" = "yes" && test "$SWIG" != "no"; then
 	AM_PATH_PYTHON
 	AM_CHECK_PYTHON_HEADERS(HAVE_PYTHON=yes,[HAVE_PYTHON=no;AC_MSG_WARN([python headers not found, disabling python binding])])
 else
 	HAVE_PYTHON="no"
 fi
-AM_CONDITIONAL(HAVE_PYTHON, [test "$HAVE_PYTHON" == "yes" && test "$ENABLE_PYTHON" == "yes"])
+AM_CONDITIONAL(HAVE_PYTHON, [test "$HAVE_PYTHON" = "yes" && test "$ENABLE_PYTHON" = "yes"])
 
 AS_COMPILER_FLAG([-fno-strict-aliasing],[PYTHON_QUIET="$PYTHON_QUIET -fno-strict-aliasing"], true )
 AS_COMPILER_FLAG([-Wno-unused-function],[PYTHON_QUIET="$PYTHON_QUIET -Wno-unused-function"], true )
@@ -166,7 +166,7 @@ AC_ARG_ENABLE([ruby-binding],
 	[AS_HELP_STRING([--enable-ruby-binding],
 		[Enable building of Ruby binding])],
 	[ENABLE_RUBY=$enableval], [ENABLE_RUBY="no"])
-if test "$ENABLE_RUBY" == "yes" && test "$SWIG" != "no"; then
+if test "$ENABLE_RUBY" = "yes" && test "$SWIG" != "no"; then
 	AC_PATH_PROG(RUBY, ruby, no)
 	if test "$RUBY" != "no" ; then
 		RUBY_INC_DIR=`$RUBY -e "require 'rbconfig'; c = ::Config::CONFIG; print c[['archdir']];"`
@@ -179,7 +179,7 @@ else
 	ENABLE_RUBY="no"
 fi
 
-AM_CONDITIONAL(HAVE_RUBY, [test "$ENABLE_RUBY" == "yes"])
+AM_CONDITIONAL(HAVE_RUBY, [test "$ENABLE_RUBY" = "yes"])
 
 AC_ARG_VAR(RUBY_PREFIX,[path prefix for Ruby binding])
 AC_ARG_VAR(RUBY_SO_DIR,[path for Ruby extensions])
@@ -195,14 +195,14 @@ AC_SUBST(RUBY_CONFIG_OPTIONS)
 AC_ARG_ENABLE([scxi],
 	[AS_HELP_STRING([--enable-scxi], [Enable SCXI convenience library])],
 	[ENABLE_SCXI=$enableval], [ENABLE_SCXI="no"])
-AM_CONDITIONAL(BUILD_SCXI, [test "$ENABLE_SCXI" == "yes"])
+AM_CONDITIONAL(BUILD_SCXI, [test "$ENABLE_SCXI" = "yes"])
 
 # docbook
 AC_ARG_ENABLE([docbook],
 	[AS_HELP_STRING([--disable-docbook], [Disable docbook])],
 	[ENABLE_DOCBOOK=$enableval],[ENABLE_DOCBOOK="yes"])
 
-if test "$ENABLE_DOCBOOK" == "yes"; then
+if test "$ENABLE_DOCBOOK" = "yes"; then
 	AC_PATH_PROG(XMLTO, xmlto, no)
 	if test "$XMLTO" = "no" ; then
   		AC_MSG_WARN([xmlto not found, will not be able to rebuild documentation])
@@ -277,7 +277,7 @@ AC_ARG_WITH([udev-hotplug],
 	[ENABLE_UDEVHOTPLUG=$withval], [ENABLE_UDEVHOTPLUG="no"])
 AM_CONDITIONAL(INSTALL_UDEVHOTPLUG, [test "$ENABLE_UDEVHOTPLUG" != "no"])
 if test "$ENABLE_UDEVHOTPLUG" != "no"; then
-	if  test "$ENABLE_UDEVHOTPLUG" == "yes"; then
+	if  test "$ENABLE_UDEVHOTPLUG" = "yes"; then
 		AC_MSG_ERROR([udev-hotplug needs a path as an argument (usually: --enable-udev-hotplug=/lib).])
 	fi
 	if test "$ENABLE_UDEVHOTPLUG" != "/lib"; then
@@ -287,7 +287,7 @@ if test "$ENABLE_UDEVHOTPLUG" != "no"; then
 	udevscriptsdir="$ENABLE_UDEVHOTPLUG/udev"
 	AC_SUBST(udevrulesdir)
 	AC_SUBST(udevscriptsdir)
-	if test "$ENABLE_FIRMWARE" == "yes"; then
+	if test "$ENABLE_FIRMWARE" = "yes"; then
 	udevfirmwaredir="$ENABLE_UDEVHOTPLUG/firmware"
 	AC_SUBST(udevfirmwaredir)
 	fi
