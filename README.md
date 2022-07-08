@@ -38,7 +38,7 @@ the mailing list is preferred.
 
 To subscribe to and unsubscribe from the mailing list, or to read or
 post messages via the web interface, go to
-<http://groups.google.com/group/comedi_list>.  Alternatively, you
+<https://groups.google.com/group/comedi_list>.  Alternatively, you
 can send a blank email to <comedi_list+subscribe@googlegroups.com>
 to subscribe, or to <comedi_list+unsubscribe@googlegroups.com> to
 unsubscribe (making sure the "From:" email address matches the
@@ -50,13 +50,13 @@ about data acquisition are also welcome.
 
 ## More Information
 
-Comedi also has a web page at <http://www.comedi.org/> from where
+Comedi also has a web page at <https://www.comedi.org/> from where
 updated versions may be downloaded.
 
 Often bugfixes and new features that are not in the current release
 can be found in the Git repository.  Instructions for access to the
 Comedi and Comedilib repositories can be found at
-<http://www.comedi.org/download.html>.  Git snapshots for Comedilib
+<https://www.comedi.org/download.html>.  Git snapshots for Comedilib
 can be created automatically at
 <https://github.com/Linux-Comedi/comedilib/tarball/master>.  The Git
 repository can be cloned locally using:
