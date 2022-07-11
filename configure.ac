@@ -71,6 +71,7 @@ m4_define([comedilib_pkg_version],
 			   comedilib_version_micro),
 		   comedilib_version_letter)])
 
+AC_PREREQ([2.69])
 AC_INIT([comedilib], [comedilib_pkg_version])
 AC_CANONICAL_TARGET([])
 
@@ -85,7 +86,7 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([.])
 #COMEDILIB_DEBUG="-Wall -Werror"
 COMEDILIB_DEBUG="-Wall"
-AM_INIT_AUTOMAKE([-Wall -Werror foreign])
+AM_INIT_AUTOMAKE([-Wall -Werror foreign] [1.15])
 
 AC_CONFIG_HEADERS([config.h])
 
