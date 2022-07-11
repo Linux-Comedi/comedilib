@@ -140,17 +140,27 @@ if test "$pdfdir" = ""; then
 fi
 
 #swig
-AC_PATH_PROG(SWIG, swig, "no")
-if test "$SWIG" = "no" ; then
-	AC_MSG_WARN([swig not found, will not be able to build swig based bindings])
+AC_ARG_ENABLE(swig,
+	[AS_HELP_STRING([--disable-swig],
+		[Disable swig-generated language bindings])],
+	[ENABLE_SWIG=$enableval],[ENABLE_SWIG="yes"])
+if test "x$ENABLE_SWIG" != "xyes"; then
+	SWIG=
+	USE_SWIG="no (disabled)"
+else
+	AX_PKG_SWIG(2.0.0, [], [USE_SWIG="no (not available)"])
 fi
+if test "x$SWIG" != "x" ; then
+	USE_SWIG="yes"
+fi
+AM_CONDITIONAL(HAVE_SWIG, [test "$USE_SWIG" = "yes"])
 
 #python
 AC_ARG_ENABLE([python-binding],
 	[AS_HELP_STRING([--disable-python-binding],
 		[Disable building of Python binding])],
 	[ENABLE_PYTHON=$enableval],[ENABLE_PYTHON="yes"])
-if test "$ENABLE_PYTHON" = "yes" && test "$SWIG" != "no"; then
+if test "$ENABLE_PYTHON" = "yes" && test "$USE_SWIG" = "yes"; then
 	AM_PATH_PYTHON
 	AM_CHECK_PYTHON_HEADERS(HAVE_PYTHON=yes,[HAVE_PYTHON=no;AC_MSG_WARN([python headers not found, disabling python binding])])
 else
@@ -167,7 +177,7 @@ AC_ARG_ENABLE([ruby-binding],
 	[AS_HELP_STRING([--enable-ruby-binding],
 		[Enable building of Ruby binding])],
 	[ENABLE_RUBY=$enableval], [ENABLE_RUBY="no"])
-if test "$ENABLE_RUBY" = "yes" && test "$SWIG" != "no"; then
+if test "$ENABLE_RUBY" = "yes" && test "$USE_SWIG" = "yes"; then
 	AX_RUBY_EXT
 	if test "x$RUBY" = "x"; then
 		AC_MSG_WARN([ruby not found, disabling ruby binding])
