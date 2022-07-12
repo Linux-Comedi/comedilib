@@ -103,6 +103,7 @@ AM_PROG_LEX
 AC_PROG_YACC
 AC_PROG_LIBTOOL
 AC_PROG_MKDIR_P
+AC_PROG_EGREP
 
 AC_HEADER_STDC([])
 
@@ -123,15 +124,13 @@ AC_ARG_ENABLE(swig,
 	[AS_HELP_STRING([--disable-swig],
 		[Disable swig-generated language bindings])],
 	[ENABLE_SWIG=$enableval],[ENABLE_SWIG="yes"])
-if test "x$ENABLE_SWIG" != "xyes"; then
+AS_IF([test "x$ENABLE_SWIG" != "xyes"],
+	[
 	SWIG=
 	USE_SWIG="no (disabled)"
-else
-	AX_PKG_SWIG(2.0.0, [], [USE_SWIG="no (not available)"])
-fi
-if test "x$SWIG" != "x" ; then
-	USE_SWIG="yes"
-fi
+	],
+	[AX_PKG_SWIG(2.0.0, [], [USE_SWIG="no (not available)"])])
+AS_IF([test "x$SWIG"] != "x"], [USE_SWIG="yes"])
 AM_CONDITIONAL(HAVE_SWIG, [test "$USE_SWIG" = "yes"])
 
 #python
@@ -139,13 +138,22 @@ AC_ARG_ENABLE([python-binding],
 	[AS_HELP_STRING([--disable-python-binding],
 		[Disable building of Python binding])],
 	[ENABLE_PYTHON=$enableval],[ENABLE_PYTHON="yes"])
-if test "$ENABLE_PYTHON" = "yes" && test "$USE_SWIG" = "yes"; then
+AS_IF([test "x$ENABLE_PYTHON" != "xyes"],
+	[USE_PYTHON="no (disabled)"],
+	[test "x$USE_SWIG" != "xyes"],
+	[USE_PYTHON="no (swig disabled)"],
+	[test `$SWIG -help 2>&1 | $EGREP -c '\-python *- Generate'` = 0],
+	[USE_PYTHON="no (swig does not support -python option)"],
+	[
 	AM_PATH_PYTHON
-	AM_CHECK_PYTHON_HEADERS(HAVE_PYTHON=yes,[HAVE_PYTHON=no;AC_MSG_WARN([python headers not found, disabling python binding])])
-else
-	HAVE_PYTHON="no"
-fi
-AM_CONDITIONAL(HAVE_PYTHON, [test "$HAVE_PYTHON" = "yes" && test "$ENABLE_PYTHON" = "yes"])
+	AM_CHECK_PYTHON_HEADERS(
+		[USE_PYTHON="yes"],
+		[
+		USE_PYTHON="no (python headers not found)"
+		AC_MSG_WARN([python headers not found, disabling python binding])
+		])
+	])
+AM_CONDITIONAL(HAVE_PYTHON, [test "$USE_PYTHON" = "yes"])
 
 AS_COMPILER_FLAG([-fno-strict-aliasing],[PYTHON_QUIET="$PYTHON_QUIET -fno-strict-aliasing"], true )
 AS_COMPILER_FLAG([-Wno-unused-function],[PYTHON_QUIET="$PYTHON_QUIET -Wno-unused-function"], true )
@@ -156,26 +164,30 @@ AC_ARG_ENABLE([ruby-binding],
 	[AS_HELP_STRING([--enable-ruby-binding],
 		[Enable building of Ruby binding])],
 	[ENABLE_RUBY=$enableval], [ENABLE_RUBY="no"])
-if test "$ENABLE_RUBY" = "yes" && test "$USE_SWIG" = "yes"; then
+AS_IF([test "x$ENABLE_RUBY" != "xyes"],
+	[USE_RUBY="no (disabled)"],
+	[test "x$USE_SWIG" != "xyes"],
+	[USE_RUBY="no (swig disabled)"],
+	[test `$SWIG -help 2>&1 | $EGREP -c '\-ruby *- Generate'` = 0],
+	[USE_RUBY="no (swig does not support -ruby option)"],
+	[
 	AX_RUBY_EXT
-	if test "x$RUBY" = "x"; then
+	AS_IF([test "x$RUBY" = "x"],
+		[
+		USE_RUBY="no"
 		AC_MSG_WARN([ruby not found, disabling ruby binding])
-		ENABLE_RUBY="no"
-	fi
-else
-	ENABLE_RUBY="no"
-fi
+		],
+		[USE_RUBY="yes"])
+	])
 
-AM_CONDITIONAL(HAVE_RUBY, [test "$ENABLE_RUBY" = "yes"])
+AM_CONDITIONAL(HAVE_RUBY, [test "$USE_RUBY" = "yes"])
 
 AC_ARG_VAR(RUBY_PREFIX,[path prefix for Ruby binding])
 AC_ARG_VAR(RUBY_SO_DIR,[path for Ruby extensions])
-if test "$RUBY_PREFIX" != "" ; then
-	RUBY_CONFIG_OPTIONS="$RUBY_CONFIG_OPTIONS --prefix=\$(RUBY_PREFIX)"
-fi
-if test "$RUBY_SO_DIR" != "" ; then
-	RUBY_CONFIG_OPTIONS="$RUBY_CONFIG_OPTIONS --so-dir=\$(RUBY_SO_DIR)"
-fi
+AS_IF([test "x$RUBY_PREFIX" != "x"],
+	[RUBY_CONFIG_OPTIONS="$RUBY_CONFIG_OPTIONS --prefix=\$(RUBY_PREFIX)"])
+AS_IF([test "x$RUBY_SO_DIR" != "x"],
+	[RUBY_CONFIG_OPTIONS="$RUBY_CONFIG_OPTIONS --so-dir=\$(RUBY_SO_DIR)"])
 AC_SUBST(RUBY_CONFIG_OPTIONS)
 
 # scxi
@@ -189,62 +201,60 @@ AC_ARG_ENABLE([docbook],
 	[AS_HELP_STRING([--disable-docbook], [Disable docbook])],
 	[ENABLE_DOCBOOK=$enableval],[ENABLE_DOCBOOK="yes"])
 
-if test "$ENABLE_DOCBOOK" = "yes"; then
+AS_IF([test "$ENABLE_DOCBOOK" = "yes"],
+	[
 	AC_PATH_PROG(XMLTO, xmlto, no)
-	if test "$XMLTO" = "no" ; then
-  		AC_MSG_WARN([xmlto not found, will not be able to rebuild documentation])
-	fi
-else
-	XMLTO="no"
-fi
+	AS_IF([test "$XMLTO" = "no"],
+		[AC_MSG_WARN([xmlto not found, will not be able to rebuild documentation])])
+	],
+	[XMLTO="no"])
 
-if test "$XMLTO" != "no"; then
+AS_IF([test "$XMLTO" != "no"],
+	[
 	AC_ARG_WITH([pdf-backend],
 		[AS_HELP_STRING([--with-pdf-backend=[[yes|no|dblatex|fop|default]]],
 			[Enable or disable PDF generation with backend])],
 		[WITH_PDF_BACKEND=$withval],[WITH_PDF_BACKEND="yes"])
-	case "$WITH_PDF_BACKEND" in
-	no)
-		PDF_BACKEND="no"
-		;;
-	yes)
+	AS_CASE([$WITH_PDF_BACKEND],
+		[no],
+		[PDF_BACKEND="no"],
+		[yes],
+		[
 		# Prefer dblatex, then default backend.
 		# Could use [dblatex fop] to prefer dblatex or fop.
 		AC_CHECK_PROGS([PDF_BACKEND], [dblatex], [default])
 		# The default backend is broken, so avoid it for now.
-		if test "$PDF_BACKEND" = "default"; then
+		AS_IF([test "$PDF_BACKEND" = "default"],
+			[
 			AC_MSG_WARN([Default PDF backend is broken, disabling PDF generation])
 			AC_MSG_WARN([(dblatex is recommended for PDF generation)])
 			PDF_BACKEND="no"
-		fi
-		if test "$PDF_BACKEND" != "no"; then
-			AC_MSG_NOTICE([Will use $PDF_BACKEND backend for PDF generation])
-		fi
-		;;
-	default)
+			])
+		AS_IF([test "$PDF_BACKEND" != "no"],
+			[AC_MSG_NOTICE([Will use $PDF_BACKEND backend for PDF generation])])
+		],
+		[default],
+		[
 		# Use xmlto's default backend.
 		PDF_BACKEND="default"
-		;;
-	dblatex|fop)
+		],
+		[dblatex|fop],
+		[
 		AC_CHECK_PROG([PDF_BACKEND], [$WITH_PDF_BACKEND],
 			[$WITH_PDF_BACKEND], [no])
-		if test "$PDF_BACKEND" = "no"; then
-			AC_MSG_WARN([$WITH_PDF_BACKEND not found, disabling PDF generation])
-		fi
-		;;
-	*)
+		AS_IF([test "$PDF_BACKEND" = "no"],
+			[AC_MSG_WARN([$WITH_PDF_BACKEND not found, disabling PDF generation])])
+		],
+		[
 		AC_MSG_WARN([Bad --with-pdf-backend option, disabling PDF generation])
 		PDF_BACKEND="no"
-		;;
-	esac
-else
-	PDF_BACKEND="no"
-fi
-case $PDF_BACKEND in
-fop|default)
-	AC_MSG_WARN([$PDF_BACKEND PDF backend might not work.  --without-pdf-backend disables PDF generation.])
-	;;
-esac
+		])
+	],
+	[PDF_BACKEND="no"])
+
+AS_CASE([$PDF_BACKEND],
+	[fop|default],
+	[AC_MSG_WARN([$PDF_BACKEND PDF backend might not work.  --without-pdf-backend disables PDF generation.])])
 AM_CONDITIONAL(HAVE_XMLTO, [test "$XMLTO" != "no"])
 AM_CONDITIONAL(BUILD_PDF, [test "$PDF_BACKEND" != "no"])
 AM_CONDITIONAL(BUILD_PDF_USING_DBLATEX, [test "$PDF_BACKEND" = "dblatex"])
@@ -263,28 +273,26 @@ AC_ARG_WITH([udev-hotplug],
 	[AS_HELP_STRING([--with-udev-hotplug=[[/lib]]], [enable udev hotplug])],
 	[ENABLE_UDEVHOTPLUG=$withval], [ENABLE_UDEVHOTPLUG="no"])
 AM_CONDITIONAL(INSTALL_UDEVHOTPLUG, [test "$ENABLE_UDEVHOTPLUG" != "no"])
-if test "$ENABLE_UDEVHOTPLUG" != "no"; then
-	if  test "$ENABLE_UDEVHOTPLUG" = "yes"; then
-		AC_MSG_ERROR([udev-hotplug needs a path as an argument (usually: --enable-udev-hotplug=/lib).])
-	fi
-	if test "$ENABLE_UDEVHOTPLUG" != "/lib"; then
-		AC_MSG_WARN([Installing the udev scripts in the non-standard location: $ENABLE_UDEVHOTPLUG (should be --enable-udev-hotplug=/lib)])
-	fi
+AS_IF([test "$ENABLE_UDEVHOTPLUG" != "no"],
+	[
+	AS_IF([test "$ENABLE_UDEVHOTPLUG" = "yes"],
+		[AC_MSG_ERROR([udev-hotplug needs a path as an argument (usually: --enable-udev-hotplug=/lib).])])
+	AS_IF([test "$ENABLE_UDEVHOTPLUG" != "/lib"],
+		[AC_MSG_WARN([Installing the udev scripts in the non-standard location: $ENABLE_UDEVHOTPLUG (should be --enable-udev-hotplug=/lib)])])
 	udevrulesdir="$ENABLE_UDEVHOTPLUG/udev/rules.d/"
 	udevscriptsdir="$ENABLE_UDEVHOTPLUG/udev"
 	AC_SUBST(udevrulesdir)
 	AC_SUBST(udevscriptsdir)
-	if test "$ENABLE_FIRMWARE" = "yes"; then
-	udevfirmwaredir="$ENABLE_UDEVHOTPLUG/firmware"
-	AC_SUBST(udevfirmwaredir)
-	fi
-else
-	ENABLE_UDEVHOTPLUG="no"
-fi
+	AS_IF([test "$ENABLE_FIRMWARE" = "yes"],
+		[
+		udevfirmwaredir="$ENABLE_UDEVHOTPLUG/firmware"
+		AC_SUBST(udevfirmwaredir)
+		])
+	],
+	[ENABLE_UDEVHOTPLUG="no"])
 
-if test "$ENABLE_UDEVHOTPLUG" = "no" ; then
-		AC_MSG_WARN([No hotplug mechanism will be installed. Consult ./configure --help if you want hotplug.])
-fi
+AS_IF([test "$ENABLE_UDEVHOTPLUG" = "no"],
+	[AC_MSG_WARN([No hotplug mechanism will be installed. Consult ./configure --help if you want hotplug.])])
 
 AC_CONFIG_FILES(
 Makefile
