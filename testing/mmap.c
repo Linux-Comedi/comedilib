@@ -86,7 +86,7 @@ int test_mmap(void)
 	buf=malloc(sample_size * N_SAMPLES);
 
 	map = mmap(NULL, map_len,PROT_READ, MAP_SHARED, comedi_fileno(device),0);
-	if(!map){
+	if(map == MAP_FAILED){
 		printf("E: mmap() failed\n");
 		return 0;
 	}
