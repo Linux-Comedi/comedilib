@@ -1,4 +1,4 @@
 <!ENTITY comedi '<ulink url="https://www.comedi.org"><acronym>Comedi</acronym></ulink>'>
 <!ENTITY comedilib_version '0.13.0'>
-<!ENTITY linux_version '5.8'>
+<!ENTITY linux_version '5.12'>
 <!ENTITY comedi_date '2022-12-01'>

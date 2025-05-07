@@ -220,14 +220,15 @@ Devices: [ADLink] PCI-7230 (adl_pci7230), PCI-7233 (adl_pci7233),
   PCI-7234 (adl_pci7234), PCI-7432 (adl_pci7432), PCI-7433 (adl_pci7433),
   PCI-7434 (adl_pci7434)
 Author: H Hartley Sweeten <hsweeten@visionengravers.com>
-Updated: Thu, 02 Aug 2012 14:27:46 -0700
-Status: untested
+Updated: Fri, 20 Nov 2020 14:49:36 +0000
+Status: works (tested on PCI-7230)
 
 One or two subdevices are setup by this driver depending on
 the number of digital inputs and/or outputs provided by the
 board. Each subdevice has a maximum of 32 channels.
 
-	PCI-7230 - 2 subdevices: 0 - 16 input, 1 - 16 output
+	PCI-7230 - 4 subdevices: 0 - 16 input, 1 - 16 output,
+	                         2 - IRQ_IDI0, 3 - IRQ_IDI1
 	PCI-7233 - 1 subdevice: 0 - 32 input
 	PCI-7234 - 1 subdevice: 0 - 32 output
 	PCI-7432 - 2 subdevices: 0 - 32 input, 1 - 32 output
@@ -238,8 +239,9 @@ The PCI-7230, PCI-7432 and PCI-7433 boards also support external
 interrupt signals on digital input channels 0 and 1. The PCI-7233
 has dual-interrupt sources for change-of-state (COS) on any 16
 digital input channels of LSB and for COS on any 16 digital input
-lines of MSB. Interrupts are not currently supported by this
-driver.
+lines of MSB.
+
+Currently, this driver only supports interrupts for PCI-7230.
 
 Configuration Options: not applicable, uses comedi PCI auto config
 
@@ -1351,8 +1353,8 @@ Only supports DIO, AO and simple AI in it's present form.
 No interrupts, multi channel or FIFO AI,
 although the card looks like it could support this.
 
-http://www.mccdaq.com/PDFs/Manuals/pcim-das1602-16.pdf
-http://www.mccdaq.com/PDFs/Manuals/pcie-das1602-16.pdf
+https://www.mccdaq.com/PDFs/Manuals/pcim-das1602-16.pdf
+https://www.mccdaq.com/PDFs/Manuals/pcie-das1602-16.pdf
 
 
 
@@ -1534,7 +1536,7 @@ Much of the functionality of this driver was determined from reading
 the source code for the Windows driver.
 
 The FPGA on the board requires firmware, which is available from
-http://www.comedi.org in the comedi_nonfree_firmware tarball.
+https://www.comedi.org in the comedi_nonfree_firmware tarball.
 
 Configuration options: not applicable, uses PCI auto config
 
@@ -2102,7 +2104,7 @@ automatically.
 The DSP on the board requires initialization code, which can be
 loaded by placing it in /lib/firmware/comedi.  The initialization
 code should be somewhere on the media you got with your card.  One
-version is available from http://www.comedi.org in the
+version is available from https://www.comedi.org in the
 comedi_nonfree_firmware tarball.  The file is called "jr3pci.idm".
 
 
@@ -2136,7 +2138,7 @@ Configuration Options: not applicable, uses PCI auto config
 
 The firmware required by these boards is available in the
 comedi_nonfree_firmware tarball available from
-http://www.comedi.org.
+https://www.comedi.org.
 
 
 
@@ -2424,8 +2426,8 @@ Valid ranges:
 
 IRQ is assigned but not used.
 
-Manuals:	Register level:	http://www.ni.com/pdf/manuals/340698.pdf
-		User Manual:	http://www.ni.com/pdf/manuals/320676d.pdf
+Manuals:	Register level:	https://www.ni.com/pdf/manuals/340698.pdf
+		User Manual:	https://www.ni.com/pdf/manuals/320676d.pdf
 
 
 
@@ -2462,7 +2464,7 @@ will depend on how you have configured the jumpers on your board
 Kernel-level ISA plug-and-play support for the lab-pc-1200 boards
 has not yet been added to the driver, mainly due to the fact that
 I don't know the device id numbers. If you have one of these boards,
-please file a bug report at http://comedi.org/ so I can get the
+please file a bug report at https://comedi.org/ so I can get the
 necessary information from you.
 
 The 1200 series boards have onboard calibration dacs for correcting
@@ -2563,7 +2565,7 @@ This driver could be easily modified to support AT-MIO32HS and AT-MIO96.
 The PCI-6534 requires a firmware upload after power-up to work, the
 firmware data and instructions for loading it with comedi_config
 it are contained in the comedi_nonfree_firmware tarball available from
-http://www.comedi.org
+https://www.comedi.org
 
 
 
@@ -3104,7 +3106,7 @@ both CR_RANGE and CR_AREF if you want edge-down polarity.
 
 In the 48-channel version:
 
-On subdev 0, the first 24 channels channels are edge-detect channels.
+On subdev 0, the first 24 channels are edge-detect channels.
 
 In the 96-channel board you have the following channels that can do edge
 detection:
