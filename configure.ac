@@ -171,6 +171,7 @@ AS_IF([test "x$ENABLE_RUBY" != "xyes"],
 	[test `$SWIG -help 2>&1 | $EGREP -c '\-ruby *- Generate'` = 0],
 	[USE_RUBY="no (swig does not support -ruby option)"],
 	[
+	AC_ARG_VAR([RUBY], [the Ruby interpreter])
 	AX_RUBY_EXT
 	AS_IF([test "x$RUBY" = "x"],
 		[
