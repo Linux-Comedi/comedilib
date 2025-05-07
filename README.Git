@@ -7,9 +7,9 @@ in this directory.
 
 Requirements:
 
-  automake >= 1.6
-  autoconf >= 2.54
-  libtool >= 1.5
+  automake >= 1.14
+  autoconf >= 2.69
+  libtool >= 1.5 (?)
   flex >= 2.4.1
   bison >= 1.875
 
