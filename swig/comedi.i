@@ -31,7 +31,6 @@
 *
 ***********************************************************/
 %module comedi
-#define SWIG_USE_OLD_TYPEMAPS
 %{
 #include "comedilib.h"
 #include "comedi.h"
@@ -113,7 +112,11 @@ unsigned int NI_CtrOut(int channel);
 
 #ifdef SWIGRUBY
 %typemap(argout) comedi_cmd *INOUT(VALUE info) {
-    $result = output_helper($result, $arg);
+%#if SWIG_VERSION >= 0x040300
+    $result = SWIG_Ruby_AppendOutput($result, $arg, $isvoid);
+%#else
+    $result = SWIG_Ruby_AppendOutput($result, $arg);
+%#endif
 };
 #endif
 

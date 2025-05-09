@@ -90,6 +90,10 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign] [1.14])
 
 AC_CONFIG_HEADERS([config.h])
 
+AC_CONFIG_LINKS([swig/ruby/setup.rb:swig/ruby/setup.rb
+		 swig/ruby/ext/MANIFEST:swig/ruby/ext/MANIFEST
+		 swig/ruby/ext/extconf.rb:swig/ruby/ext/extconf.rb])
+
 ACLOCAL="$ACLOCAL -I m4"
 
 AM_MAINTAINER_MODE([enable])
