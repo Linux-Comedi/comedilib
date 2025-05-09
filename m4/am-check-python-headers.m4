@@ -23,7 +23,7 @@ AC_MSG_CHECKING([whether python headers are sufficient])
 AC_SUBST(PYTHON_INCLUDES)
 save_CPPFLAGS="$CPPFLAGS"
 CPPFLAGS="$CPPFLAGS $PYTHON_INCLUDES"
-AC_TRY_CPP([#include <Python.h>],dnl
+AC_PREPROC_IFELSE([AC_LANG_SOURCE([[#include <Python.h>]])],dnl
 [AC_MSG_RESULT(yes)
 $1],dnl
 [AC_MSG_RESULT(no)
