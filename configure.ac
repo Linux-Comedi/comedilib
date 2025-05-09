@@ -162,9 +162,9 @@ AC_SUBST(PYTHON_QUIET)
 
 # ruby
 AC_ARG_ENABLE([ruby-binding],
-	[AS_HELP_STRING([--enable-ruby-binding],
-		[Enable building of Ruby binding])],
-	[ENABLE_RUBY=$enableval], [ENABLE_RUBY="no"])
+	[AS_HELP_STRING([--disable-ruby-binding],
+		[Disable building of Ruby binding])],
+	[ENABLE_RUBY=$enableval], [ENABLE_RUBY="yes"])
 AS_IF([test "x$ENABLE_RUBY" != "xyes"],
 	[USE_RUBY="no (disabled)"],
 	[test "x$USE_SWIG" != "xyes"],
