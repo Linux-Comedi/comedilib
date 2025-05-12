@@ -1,5 +1,4 @@
-EXTRA_DIST = demo/cmd demo/common.rb demo/inp demo/outp lib/comedi.rb \
-	     ext/extconf.rb ext/MANIFEST setup.rb
+EXTRA_DIST = lib/comedi.rb ext/extconf.rb ext/MANIFEST setup.rb
 
 ext/comedi_ruby_wrap.c: $(srcdir)/../comedi.i
 	$(SWIG) -ruby -o ext/comedi_ruby_wrap.c -I"$(top_srcdir)/include" "$(srcdir)/../comedi.i"

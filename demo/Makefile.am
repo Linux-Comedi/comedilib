@@ -11,7 +11,8 @@ noinst_HEADERS = examples.h
 
 EXTRA_DIST = \
 	python/README python/cmd.py python/info.py python/insn.py \
-	python/mmap.py perl/info.perl perl/inp.pl
+	python/mmap.py perl/info.perl perl/inp.pl ruby/cmd ruby/common.rb \
+	ruby/inp ruby/outp
 
 antialias_SOURCES = antialias.c common.c
 antialias_CFLAGS = $(COMEDILIB_CFLAGS)
