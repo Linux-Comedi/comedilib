@@ -119,6 +119,10 @@ unsigned int NI_CtrOut(int channel);
 %#endif
 };
 
+// Rename classes
+%rename("%(title)s", %$isclass) "";
+%rename(Comedi_sv_t, %$isclass) comedi_sv_struct;
+
 // Ignore invalid names for constants
 %ignore _NI_NAMES_MAX_PLUS_1;
 #endif
