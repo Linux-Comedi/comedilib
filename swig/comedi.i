@@ -118,6 +118,9 @@ unsigned int NI_CtrOut(int channel);
     $result = SWIG_Ruby_AppendOutput($result, $arg);
 %#endif
 };
+
+// Ignore invalid names for constants
+%ignore _NI_NAMES_MAX_PLUS_1;
 #endif
 
 %include "comedi.h"
