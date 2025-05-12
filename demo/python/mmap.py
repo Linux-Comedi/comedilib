@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 ## A test-application to demonstrate using the Comedilib API
 ##  and streaming acquisition in particular, from Python. 
 
@@ -179,12 +179,12 @@ while flag:
 ## 	chunk_limit = (nbytes / size) * size # count for "size" sized chunks
 ## 	remainder = nbytes%size # bytes left after chunk_limit chunks done
 ## 	for i in range(0,chunk_limit,size):
-## 		DATA.fromstring(map.read(size)) # read chunks
+## 		DATA.frombytes(map.read(size)) # read chunks
 ## 	for i in range(0,remainder,2):
-## 		DATA.fromstring(map.read(2)) # read remaining bytes
+## 		DATA.frombytes(map.read(2)) # read remaining bytes
 	map.seek(back%size)
 	for i in range(back,front,2):
-		DATA.fromstring(map.read(2))
+		DATA.frombytes(map.read(2))
 		if map.tell() == size:
 			map.seek(0)
 	DATA.tofile(of) # append data to log file

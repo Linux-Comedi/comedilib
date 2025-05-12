@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 ## an adaptation of the info.c program bundled with the comedilib package
 ## the info.c file is found in the package demo directory
 ## Copyright (C) May 2003  Luc Lefebvre <luc.lefebvre@mcgill.ca>

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 ## It emulates the program "cmd" which is distributed with
 ## the comedilib software
 ## Copyright (C) May 2003  Luc Lefebvre <luc.lefebvre@mcgill.ca>
