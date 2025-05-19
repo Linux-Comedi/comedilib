@@ -31,7 +31,7 @@
     
     <para>
       This example requires a card that has analog or digital input. This
-      progam opens the device, gets the data, and prints it out:
+      program opens the device, gets the data, and prints it out:
       <programlisting>
 	<xi:include href="../demo/tut1.c" parse="text"/>
       </programlisting>
