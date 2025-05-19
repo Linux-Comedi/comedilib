@@ -33,7 +33,7 @@
       This example requires a card that has analog or digital input. This
       program opens the device, gets the data, and prints it out:
       <programlisting>
-	<xi:include href="../demo/tut1.c" parse="text"/>
+<xi:include href="../demo/tut1.c" parse="text"/>
       </programlisting>
     </para>
     <para>
@@ -107,7 +107,7 @@
     </para>
     
     <programlisting>
-      <xi:include href="../demo/tut2.c" parse="text"/>
+<xi:include href="../demo/tut2.c" parse="text"/>
     </programlisting>
     <para>
       The source code file for the above program can be found in
@@ -223,7 +223,7 @@
       which receives the buffer contents.
     </para>
     <programlisting>
-      <xi:include href="../demo/tut3.c" parse="text"/>
+<xi:include href="../demo/tut3.c" parse="text"/>
     </programlisting>
     <para>
       The source code file for the above program can be found in Comedilib,
