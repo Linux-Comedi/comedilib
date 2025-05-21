@@ -20,3 +20,15 @@ Optional:
   ruby
   xmlto (for building documentation)
   dblatex (for building PDF documentation)
+
+To add the documentation that would normally be shipped in the source
+distribution, run these commands after running the ./autogen.sh script
+in this directory, and after installing the prerequisites for building
+documentation:
+
+  ./configure --enable-docbook --with-pdf-backend=dblatex
+  make -C doc
+  make distclean   # if building comedilib outside the source directory
+
+The `make distclean` step is needed if planning to build comedilib with
+separate source and build directories.
