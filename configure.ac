@@ -93,7 +93,9 @@ AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_LINKS([swig/ruby/setup.rb:swig/ruby/setup.rb
 		 swig/ruby/ext/MANIFEST:swig/ruby/ext/MANIFEST
 		 swig/ruby/ext/extconf.rb:swig/ruby/ext/extconf.rb
-		 swig/ruby/lib/comedi.rb:swig/ruby/lib/comedi.rb])
+		 swig/ruby/lib/comedi.rb:swig/ruby/lib/comedi.rb
+		 doc/acq-seq.gif:doc/acq-seq.gif
+		 doc/comedilib.css:doc/comedilib.css])
 
 ACLOCAL="$ACLOCAL -I m4"
 
