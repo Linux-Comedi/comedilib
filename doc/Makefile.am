@@ -99,7 +99,7 @@ uninstall_html:
 	then \
 	    d="$(srcdir)/$(out_html)" ; \
 	fi ; \
-	if test -d "$$d/$(out_html)" ; \
+	if test -d "$$d" ; \
 	then \
 		echo "Uninstalling html from \"$$d\"..." ; \
 		for each in "$$d"/*.html "$$d"/*.gif "$$d/"*.css ; \
