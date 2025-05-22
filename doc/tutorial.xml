@@ -231,7 +231,7 @@
     </para>
   </section>
   
-  <section>
+  <section id="examples">
     <title>Further examples</title>
     <para>
       See the <filename>demo</filename> subdirectory of Comedilib
