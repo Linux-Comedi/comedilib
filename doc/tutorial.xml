@@ -32,18 +32,14 @@
     <para>
       This example requires a card that has analog or digital input. This
       program opens the device, gets the data, and prints it out:
-      <programlisting>
-<xi:include href="../demo/tut1.c" parse="text"/>
-      </programlisting>
+      <programlisting><xi:include href="../demo/tut1.c" parse="text"/></programlisting>
     </para>
     <para>
       The source code file for the above program can be found in Comedilib,
       at <filename>demo/tut1.c</filename>.  You can compile the program using
     </para>
     
-    <screen>
-      cc tut1.c -lcomedi -lm -o tut1
-    </screen>
+    <screen>cc tut1.c -lcomedi -lm -o tut1</screen>
     <para>
       The
       <function>
@@ -106,9 +102,7 @@
       we've added code to convert the integer data value to physical units.
     </para>
     
-    <programlisting>
-<xi:include href="../demo/tut2.c" parse="text"/>
-    </programlisting>
+    <programlisting><xi:include href="../demo/tut2.c" parse="text"/></programlisting>
     <para>
       The source code file for the above program can be found in
       the Comedilib source at <filename>demo/tut2.c</filename> and if
@@ -222,16 +216,12 @@
       program is the loop using the standard C <function>read</function> command
       which receives the buffer contents.
     </para>
-    <programlisting>
-<xi:include href="../demo/tut3.c" parse="text"/>
-    </programlisting>
+    <programlisting><xi:include href="../demo/tut3.c" parse="text"/></programlisting>
     <para>
       The source code file for the above program can be found in Comedilib,
       at <filename>demo/tut3.c</filename>.  You can compile the program using
     </para>
-    <screen>
-      cc tut3.c -lcomedi -lm -o tut3
-    </screen>
+    <screen>cc tut3.c -lcomedi -lm -o tut3</screen>
     <para>
       For advanced programmers the
       function <function><link linkend="func-ref-comedi-get-buffer-contents">comedi_get_buffer_contents</link></function>

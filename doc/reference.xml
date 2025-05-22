@@ -45,11 +45,9 @@ CR_PACK
 and the <parameter>chanspec</parameter> member of the
 <type><link linkend="ref-type-comedi-insn">comedi_insn</link></type> structure.
 </para>
-<programlisting>
-<![CDATA[
+<programlisting><![CDATA[
 #define CR_PACK(chan,rng,aref)      ( (((aref)&0x3)<<24) | (((rng)&0xff)<<16) | (chan) )
-]]>
-</programlisting>
+]]></programlisting>
 <para>
 The <parameter>chan</parameter> argument is the channel you wish to
 use, with the channel numbering starting at zero.
@@ -121,12 +119,10 @@ is similar to
 but can be used to combine one or more flag bits (bitwise-ORed together in
 the <parameter class="function">flags</parameter> parameter) with the other
 parameters.
-<programlisting>
-<![CDATA[
+<programlisting><![CDATA[
 #define CR_PACK_FLAGS(chan, range, aref, flags) \
         (CR_PACK(chan, range, aref) | ((flags) & CR_FLAGS_MASK))
-]]>
-</programlisting>
+]]></programlisting>
 Depending on context, the
 <parameter class="function">chan</parameter> parameter might not be a channel;
 it could be a trigger source, clock source, gate source etc.  (in which case,

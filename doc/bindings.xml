@@ -26,14 +26,14 @@
         no exceptions are generated on errors (excepted type-checking
         performed by SWIG). For example, to open a &comedi; device you can write in
         Python:
-        <programlisting>
+<programlisting>
 import comedi
 device = comedi.comedi_open("/dev/comedi0")
 if device is None:
     errno = comedi.comedi_errno()
     print "Error (%d) %s" % (errno, comedi.comedi_strerror(errno))
     return
-        </programlisting>
+</programlisting>
         </para>
         <para>
         There are a few things to be aware of. The SWIG bindings automatically take care
@@ -45,13 +45,13 @@ if device is None:
         <programlisting><![CDATA[
 lsampl_t data;
 rc = comedi_data_read(device, subdevice, channel, range, aref, &data);
-        ]]></programlisting>
+]]></programlisting>
 
         As <parameter class="function">lsampl_t</parameter> is a 32-bit
         <parameter class="function">unsigned int</parameter>, in Python, the function is used like this:
-        <programlisting>
+<programlisting>
 rc, data = comedi.comedi_data_read(device, subdevice, channel, range, aref)
-        </programlisting>
+</programlisting>
         </para>
         <para>
         SWIG takes care of converting simple types between Python and C, but does not
@@ -60,7 +60,7 @@ rc, data = comedi.comedi_data_read(device, subdevice, channel, range, aref)
         are available in Python as functions with similar names, but lowercase: <function>comedi.cr_pack</function>,
         <function>comedi.cr_range</function>, etc.
         So to create and modify a command, one can do in Python:
-        <programlisting>
+<programlisting>
 cmd = comedi.comedi_cmd_struct()
 comedi.comedi_get_cmd_generic_timed(device, subdevice, cmd, nchans, period_ns)
 cmd.stop_src = comedi.TRIG_COUNT
@@ -70,7 +70,7 @@ clist = comedi.chanlist(nchans)
 for i, channel in range(nchans):
     clist[i] = comedi.cr_pack(channel, range, comedi.AREF_GROUND)
 cmd.chanlist = clist
-        </programlisting>
+</programlisting>
         </para>
         <para>
         One unfortunate consequence is that the objects to represent arrays are as low-level
@@ -78,7 +78,7 @@ cmd.chanlist = clist
         no iterator. In addition, they have to be <function>cast</function> from the Python object to the
         C object. So to create an instruction to call the internal trigger, you would
         write in Python:
-        <programlisting>
+<programlisting>
 insn = comedi.comedi_insn_struct()
 insn.subdev = subdevice
 insn.insn = comedi.INSN_INTTRIG
@@ -87,7 +87,7 @@ data = comedi.lsampl_array(insn.n)
 data[0] = num
 insn.data = data.cast()
 rc = comedi.comedi_do_insn(device, insn)
-        </programlisting>
+</programlisting>
         </para>
         <para>
         When you need to convert from a raw SWIG object to a proxy
@@ -103,11 +103,11 @@ rc = comedi.comedi_do_insn(device, insn)
         You can get a <parameter class="function">File</parameter> object via
         <function>os.fdopen</function>. For example, to read an array of input data
         from a &comedi; device into a numpy array, one could do:
-        <programlisting>
+<programlisting>
 fileno = comedi.comedi_fileno(device)
 file = os.fdopen(fileno, 'r+')
 buf = numpy.fromfile(file, dtype=numpy.uint32, count=(nscans * nchans))
-        </programlisting>
+</programlisting>
         </para>
 	</section>
 </section>
