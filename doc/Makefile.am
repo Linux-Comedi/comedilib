@@ -172,7 +172,7 @@ install_pdf:
 	fi
 
 uninstall_pdf:
-	d="$(builddir)/$(out_pdf)" ; \
+	@d="$(builddir)/$(out_pdf)" ; \
 	if test ! -d "$$d" ; \
 	then \
 	    d="$(srcdir)/$(out_pdf)" ; \
