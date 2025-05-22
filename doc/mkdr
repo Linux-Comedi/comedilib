@@ -23,8 +23,22 @@ print
   </title>
 ';
 
-while(<>){
-	push @lines,$_;
+sub pushlines {
+	my $fh = shift;
+	while (<$fh>) {
+		push @lines,$_;
+	}
+}
+
+if (@ARGV) {
+	my $fh;
+	while (my $fname = shift) {
+		open($fh, '<', $fname) or die $!;
+		pushlines($fh);
+	}
+	close($fh);
+} else {
+	pushlines(STDIN);
 }
 
 $status="unknown";
