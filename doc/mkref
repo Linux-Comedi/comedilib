@@ -7,7 +7,7 @@ $header="#include &lt;comedilib.h&gt;";
 $end = "";
 $refentry_end = "";
 
-$s = <>;
+$s = <<>> or die;
 chomp $s;
 
 print
