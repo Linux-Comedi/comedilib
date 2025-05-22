@@ -1,14 +1,14 @@
 
 XML = calibration_funcref.xml command_funcref.xml dio_funcref.xml \
 	deprecated_funcref.xml error_funcref.xml extensions_funcref.xml \
-	drivers.xml drivers-linux.xml funcref.xml $(srcdir)/glossary.xml \
-	$(srcdir)/install.xml $(srcdir)/intro.xml $(srcdir)/other.xml \
-	$(srcdir)/reference.xml $(srcdir)/tutorial.xml \
-	$(srcdir)/driverwriting.xml $(srcdir)/comedilib.xml \
-	$(srcdir)/bindings.xml $(srcdir)/comedilib.ent
+	drivers.xml drivers-linux.xml funcref.xml glossary.xml \
+	install.xml intro.xml other.xml \
+	reference.xml tutorial.xml \
+	driverwriting.xml comedilib.xml \
+	bindings.xml comedilib.ent
 
-TUTORIALS = $(srcdir)/../demo/tut1.c $(srcdir)/../demo/tut2.c \
-	    $(srcdir)/../demo/tut3.c
+TUTORIALS = ../demo/tut1.c ../demo/tut2.c \
+	    ../demo/tut3.c
 
 EXTRA_DIST = $(XML) calibration_funcref.txt command_funcref.txt dio_funcref.txt \
 	deprecated_funcref.txt error_funcref.txt extensions_funcref.txt \
@@ -64,7 +64,7 @@ uninstall-local: uninstall_html uninstall_pdf uninstall_man
 
 #named this doc_html to avoid phony html target that is automatically generated
 #(at least by automake1.8)
-doc_html: $(XML) $(TUTORIALS) $(srcdir)/comedilib_html_config.xsl
+doc_html: $(XML) $(TUTORIALS) comedilib_html_config.xsl
 	{ $(XMLTO) -o $(out_html) --searchpath "$(abs_srcdir):$(abs_builddir)" -m comedilib_html_config.xsl --skip-validation html "$(srcdir)/comedilib.xml" && \
 		$(RM) $(out_html)/comedilib.proc && \
 		$(LN_S) -f ../comedilib.css $(out_html)/ && \
@@ -187,39 +187,39 @@ uninstall_pdf:
 		done ; \
 	fi
 
-$(out_pdf)/comedilib.pdf: $(XML) $(TUTORIALS) $(srcdir)/comedilib_dblatex_config.xsl
-	$(XMLTO) -o $(out_pdf) --searchpath "$(abs_srcdir):$(abs_builddir)" --skip-validation $(XMLTO_PDF_OPTS) pdf $(srcdir)/comedilib.xml
+$(out_pdf)/comedilib.pdf: $(XML) $(TUTORIALS) comedilib_dblatex_config.xsl
+	$(XMLTO) -o $(out_pdf) --searchpath "$(abs_srcdir):$(abs_builddir)" --skip-validation $(XMLTO_PDF_OPTS) pdf "$(srcdir)/comedilib.xml"
 
-funcref.xml: $(srcdir)/funcref.txt $(srcdir)/mkref
-	$(srcdir)/mkref $(srcdir)/funcref.txt > funcref.xml
+funcref.xml: funcref.txt mkref
+	$(srcdir)/mkref $(srcdir)/funcref.txt > $@~ && mv -f $@~ $@
 
-calibration_funcref.xml: $(srcdir)/calibration_funcref.txt $(srcdir)/mkref
-	$(srcdir)/mkref $(srcdir)/calibration_funcref.txt > calibration_funcref.xml
+calibration_funcref.xml: calibration_funcref.txt mkref
+	$(srcdir)/mkref $(srcdir)/calibration_funcref.txt > $@~ && mv -f $@~ $@
 
-command_funcref.xml: $(srcdir)/command_funcref.txt $(srcdir)/mkref
-	$(srcdir)/mkref $(srcdir)/command_funcref.txt > command_funcref.xml
+command_funcref.xml: command_funcref.txt mkref
+	$(srcdir)/mkref $(srcdir)/command_funcref.txt > $@~ && mv -f $@~ $@
 
-dio_funcref.xml: $(srcdir)/dio_funcref.txt $(srcdir)/mkref
-	$(srcdir)/mkref $(srcdir)/dio_funcref.txt > dio_funcref.xml
+dio_funcref.xml: dio_funcref.txt mkref
+	$(srcdir)/mkref $(srcdir)/dio_funcref.txt > $@~ && mv -f $@~ $@
 
-deprecated_funcref.xml: $(srcdir)/deprecated_funcref.txt $(srcdir)/mkref
-	$(srcdir)/mkref $(srcdir)/deprecated_funcref.txt > deprecated_funcref.xml
+deprecated_funcref.xml: deprecated_funcref.txt mkref
+	$(srcdir)/mkref $(srcdir)/deprecated_funcref.txt > $@~ && mv -f $@~ $@
 
-error_funcref.xml: $(srcdir)/error_funcref.txt $(srcdir)/mkref
-	$(srcdir)/mkref $(srcdir)/error_funcref.txt > error_funcref.xml
+error_funcref.xml: error_funcref.txt mkref
+	$(srcdir)/mkref $(srcdir)/error_funcref.txt > $@~ && mv -f $@~ $@
 
-extensions_funcref.xml: $(srcdir)/extensions_funcref.txt $(srcdir)/mkref
-	$(srcdir)/mkref $(srcdir)/extensions_funcref.txt > extensions_funcref.xml
+extensions_funcref.xml: extensions_funcref.txt mkref
+	$(srcdir)/mkref $(srcdir)/extensions_funcref.txt > $@~ && mv -f $@~ $@
 
 # Note: if drivers.txt is updated from the out-of-tree comedi.org driver
 # sources, please update the 'comedi_date' entity in 'comedilib.ent'.
-drivers.xml: $(srcdir)/drivers.txt $(srcdir)/mkdr
-	$(srcdir)/mkdr "ll-drivers-comedi" "Drivers from comedi.org" $(srcdir)/drivers.txt > drivers.xml
+drivers.xml: drivers.txt mkdr
+	$(srcdir)/mkdr "ll-drivers-comedi" "Drivers from comedi.org" $(srcdir)/drivers.txt > $@~ && mv -f $@~ $@
 
 # Note: if drivers-linux.txt is updated from Linux kernel sources, please
 # update the 'linux_version' entity in 'comedilib.ent'.
-drivers-linux.xml: $(srcdir)/drivers-linux.txt $(srcdir)/mkdr
-	$(srcdir)/mkdr "ll-drivers-linux" "Drivers from Linux kernel sources" $(srcdir)/drivers-linux.txt > drivers-linux.xml
+drivers-linux.xml: drivers-linux.txt mkdr
+	$(srcdir)/mkdr "ll-drivers-linux" "Drivers from Linux kernel sources" $(srcdir)/drivers-linux.txt > $@~ && mv -f $@~ $@
 
 maintainer-clean-local:
 	$(RM) -r $(out_html) $(out_man) $(out_pdf)
