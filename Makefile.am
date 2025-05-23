@@ -13,7 +13,9 @@ EXTRA_DIST = README.md INSTALL.md comedilib.spec autogen.sh perl
 ACLOCAL_AMFLAGS = -I m4
 
 ## ruby binding is excluded from distcheck because setup.rb doesn't support uninstall
-DISTCHECK_CONFIGURE_FLAGS = RUBY_PREFIX='$${prefix}' --disable-ruby-binding
+## Enable building documentation for distcheck
+DISTCHECK_CONFIGURE_FLAGS = RUBY_PREFIX='$${prefix}' --disable-ruby-binding \
+			    --enable-docbook --with-pdf-backend=dblatex
 
 ## create the calibrations directory during installation
 install-data-local:
