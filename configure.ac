@@ -314,6 +314,7 @@ etc/hotplug/usb/usbduxfast/Makefile
 etc/hotplug/usb/usbduxsigma/Makefile
 etc/udev/Makefile
 doc/Makefile
+doc/comedilib_fop.xconf
 demo/Makefile
 include/Makefile
 include/comedilib_version.h

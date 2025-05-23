@@ -14,7 +14,7 @@ EXTRA_DIST = $(XML) calibration_funcref.txt command_funcref.txt dio_funcref.txt 
 	deprecated_funcref.txt error_funcref.txt extensions_funcref.txt \
 	funcref.txt mkref drivers.txt drivers-linux.txt mkdr FAQ \
 	acq-seq.gif $(dist_html) $(dist_pdf) $(dist_man) comedilib_html_config.xsl \
-	comedilib_dblatex_config.xsl \
+	comedilib_dblatex_config.xsl comedilib_fop.xconf.in \
 	comedilib.css
 
 BUILT_SOURCES = calibration_funcref.xml command_funcref.xml dio_funcref.xml \
@@ -50,7 +50,7 @@ if BUILD_PDF_USING_DBLATEX
 XMLTO_PDF_OPTS = --with-dblatex -p "-p $(abs_srcdir)/comedilib_dblatex_config.xsl -x --path -x $(abs_srcdir):$(abs_builddir)"
 else
 if BUILD_PDF_USING_FOP
-XMLTO_PDF_OPTS = --with-fop
+XMLTO_PDF_OPTS = --with-fop -p "-c $(abs_builddir)/comedilib_fop.xconf" --stringparam keep.relative.image.uris="1"
 else
 XMLTO_PDF_OPTS =
 endif
