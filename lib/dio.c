@@ -265,8 +265,20 @@ int _comedi_dio_bitfield2(comedi_t *it, unsigned int subdev, unsigned int mask, 
 
 		return 0;
 	}else{
+		unsigned end_i;
 		unsigned i;
-		for(i = 0, m = 1; i < 32; ++i, m <<= 1)
+		/*
+		 * If base_channel is out of range, then do 1 channel to catch
+		 * errors, otherwise avoid base_channel + i going out of range
+		 * for i less than 32.
+		 */
+		if (s->n_chan > base_channel) {
+			end_i = s->n_chan - base_channel;
+			if (end_i > 32) end_i = 32;
+		} else {
+			end_i = 1;
+		}
+		for(i = 0, m = 1; i < end_i; ++i, m <<= 1)
 		{
 			if(mask & m)
 			{
