@@ -32,3 +32,8 @@ documentation:
 
 The `make distclean` step is needed if planning to build comedilib with
 separate source and build directories.
+
+If the requirement for building the documentation are too harsh and you
+do not care about building and installing the documentation, then this
+can be disabled completely by configuring with the `--disable-doc`
+option.

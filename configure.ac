@@ -201,10 +201,21 @@ AC_ARG_ENABLE([scxi],
 	[ENABLE_SCXI=$enableval], [ENABLE_SCXI="no"])
 AM_CONDITIONAL(BUILD_SCXI, [test "$ENABLE_SCXI" = "yes"])
 
-# docbook
-AC_ARG_ENABLE([docbook],
-	[AS_HELP_STRING([--disable-docbook], [Disable building documentation (including API man pages)])],
-	[ENABLE_DOCBOOK=$enableval],[ENABLE_DOCBOOK="yes"])
+# doc
+AC_ARG_ENABLE([doc],
+	[AS_HELP_STRING([--disable-doc], [Disable installation (and building) of documentation (including API man pages)])],
+	[ENABLE_DOC=$enableval],[ENABLE_DOC="yes"])
+AM_CONDITIONAL(DO_DOC, [test "$ENABLE_DOC" != "no"])
+
+AS_IF([test "$ENABLE_DOC" = "yes"],
+	[
+	# docbook
+	AC_ARG_ENABLE([docbook],
+		[AS_HELP_STRING([--disable-docbook], [Disable building documentation (including API man pages)])],
+		[ENABLE_DOCBOOK=$enableval],[ENABLE_DOCBOOK="yes"])
+
+	],
+	[ENABLE_DOCBOOK="no"])
 
 AS_IF([test "$ENABLE_DOCBOOK" = "yes"],
 	[
