@@ -12,14 +12,14 @@ Requirements:
   libtool >= 1.5 (?)
   flex >= 2.4.1
   bison >= 1.875
+  xmlto (for building HTML documentation and man pages)
+  dblatex (for building PDF documentation)
 
 Optional:
 
   swig (for python and ruby bindings)
   python
   ruby
-  xmlto (for building documentation)
-  dblatex (for building PDF documentation)
 
 To add the documentation that would normally be shipped in the source
 distribution, run these commands after running the ./autogen.sh script

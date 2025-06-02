@@ -203,8 +203,8 @@ AM_CONDITIONAL(BUILD_SCXI, [test "$ENABLE_SCXI" = "yes"])
 
 # docbook
 AC_ARG_ENABLE([docbook],
-	[AS_HELP_STRING([--enable-docbook], [Enable building documentation (including API man pages)])],
-	[ENABLE_DOCBOOK=$enableval],[ENABLE_DOCBOOK="no"])
+	[AS_HELP_STRING([--disable-docbook], [Disable building documentation (including API man pages)])],
+	[ENABLE_DOCBOOK=$enableval],[ENABLE_DOCBOOK="yes"])
 
 AS_IF([test "$ENABLE_DOCBOOK" = "yes"],
 	[
