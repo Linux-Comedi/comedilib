@@ -1,84 +1,145 @@
-Name: comedilib
-Summary: Data Acquisition library for the Comedi DAQ driver.
-Version: @VERSION@
-Release: 1%{?dist}
-License: LGPL
-Group: System Environment/Kernel
-URL: http://www.comedi.org/
-Source: http://www.comedi.org/comedi/download/comedilib-@VERSION@.tar.gz
-BuildRoot: /var/tmp/%{name}-buildroot
-BuildRequires: python-devel swig
-Provides: comedilib
+Name:           comedilib
+Version:        @VERSION@
+Release:        1
+Summary:        Data Acquisition library for the Comedi driver
+License:        LGPLv2
+URL:            https://www.comedi.org/
+Source:         https://www.comedi.org/download/%{name}-%{version}.tar.gz
+BuildRequires:  gcc automake
+BuildRequires:  python2-devel
+BuildRequires:  docbook-utils
+BuildRequires:  swig
+BuildRequires:  flex
+BuildRequires:  xmlto
+Requires:       flex
 
 %description
-Comedilib is the library for the Comedi data acquisition driver
-for Linux.  It allows Linux processes to acquire data from
-supported DAQ cards, such as those from National Instruments.
+Comedilib is a user-space library that provides a developer-friendly
+interface to Comedi devices. Included in the Comedilib distribution
+is documentation, configuration and calibration utilities,
+and demonstration programs.
 
 %package devel
-Summary: Libraries/include files for Comedi
-Group: Development/Libraries
-Requires:       %{name} = %{version}-%{release}
+Summary:        Libraries/include files for Comedi
+Requires:       %{name}%{?_isa} = %{version}-%{release}
 
 %description devel
 Comedilib is a library for using Comedi, a driver interface for data
 acquisition hardware.
 
 %prep
-%setup -q
+%autosetup
 
 %build
-%configure
-make %{?_smp_mflags}
+# Ruby bindings don't build
+export PYTHON=/usr/bin/python2
+%configure --disable-dependency-tracking --disable-static --disable-ruby-binding
+#sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
+#sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
+sed -i -e 's|-flto=auto||' -e 's|-ffat-lto-objects||' libtool `find . -name Makefile`
+%make_build
 
 %install
-[ -n "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf $RPM_BUILD_ROOT
-%makeinstall
+%make_install
+chmod -x ${RPM_BUILD_ROOT}%{python2_sitearch}/comedi.py
+rm -f $RPM_BUILD_ROOT%{_libdir}/*.la
+rm -rf $RPM_BUILD_ROOT%{python2_sitearch}/_comedi.la
 
-# Move files
-mv $RPM_BUILD_ROOT%{_datadir}/doc/comedilib $RPM_BUILD_ROOT%{_datadir}/doc/comedilib-devel
-
-rm -rf $RPM_BUILD_ROOT%{_sysconfdir}/pcmcia
-rm -rf $RPM_BUILD_ROOT%{_libdir}/libcomedi.la
-
-%post
-/sbin/ldconfig
-
-%postun
-/sbin/ldconfig
-
-%clean
-[ -n "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf $RPM_BUILD_ROOT
+# adding to installed docs in order to avoid using %%doc magic
+for f in AUTHORS COPYING README ; do
+    cp -p $f ${RPM_BUILD_ROOT}%{_docdir}/%{name}/${f}
+done
 
 %files
-%defattr(-,root,root,-)
-%doc AUTHORS COPYING README ChangeLog NEWS
-%{_libdir}/libcomedi.so
-%{_libdir}/libcomedi.so.*
-%{_sbindir}/comedi_*
 %{_bindir}/comedi_*
+%{_sbindir}/comedi_*
+%{_sysconfdir}/pcmcia/comedi
+%config(noreplace)%{_sysconfdir}/pcmcia/comedi.*
+%{_libdir}/libcomedi.so.*
+%{python2_sitearch}/*
 %{_mandir}/man1/*
 %{_mandir}/man7/*
 %{_mandir}/man8/*
+%dir %{_docdir}/%{name}
+%{_docdir}/%{name}/AUTHORS
+%{_docdir}/%{name}/COPYING
+%{_docdir}/%{name}/README
+%{_docdir}/%{name}/*.conf
 
 %files devel
-%defattr(-,root,root,-)
-%{_libdir}/libcomedi.a
-%{_libdir}/pkgconfig/comedilib.pc
-
-%{_includedir}/comedi*.h
-%{_includedir}/comedi*.hpp
+%{_libdir}/libcomedi.so
+%{_libdir}/pkgconfig/*
+%{_includedir}/comedi*
 %{_mandir}/man3/*
-%{_datadir}/doc/comedilib-devel/*
+%{_docdir}/%{name}/html/
 
 %changelog
-
-* Wed Mar 28 2018 Steffen Vogel <post@steffenvogel.de>
-- fixed spec file for Fedora 27
-
+* Sun Sep 25 2022 Wei-Lun Chao <bluebat@member.fsf.org> - 0.12.0
+* Rebuilt for Fedora
+* Wed Jul 24 2019 Fedora Release Engineering <releng@fedoraproject.org> - 0.11.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
+* Tue Jul 09 2019 Filipe Rosset <rosset.filipe@gmail.com> - 0.11.0-1
+- Update to 0.11 fixes rhbz#1554434 and rhbz#1674753
+* Thu Jan 31 2019 Fedora Release Engineering <releng@fedoraproject.org> - 0.8.1-25
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
+* Thu Jul 12 2018 Fedora Release Engineering <releng@fedoraproject.org> - 0.8.1-24
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
+* Wed Feb 14 2018 Iryna Shcherbina <ishcherb@redhat.com> - 0.8.1-23
+- Update Python 2 dependency declarations to new packaging standards
+  (See https://fedoraproject.org/wiki/FinalizingFedoraSwitchtoPython3)
+* Wed Feb 07 2018 Fedora Release Engineering <releng@fedoraproject.org> - 0.8.1-22
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
+* Wed Aug 02 2017 Fedora Release Engineering <releng@fedoraproject.org> - 0.8.1-21
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Binutils_Mass_Rebuild
+* Wed Jul 26 2017 Fedora Release Engineering <releng@fedoraproject.org> - 0.8.1-20
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Mass_Rebuild
+* Fri Feb 10 2017 Fedora Release Engineering <releng@fedoraproject.org> - 0.8.1-19
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
+* Tue Jul 19 2016 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.8.1-18
+- https://fedoraproject.org/wiki/Changes/Automatic_Provides_for_Python_RPM_Packages
+* Wed Feb 03 2016 Fedora Release Engineering <releng@fedoraproject.org> - 0.8.1-17
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
+* Wed Jun 17 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.8.1-16
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
+* Sat Aug 16 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.8.1-15
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.8.1-14
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+* Sat Dec 14 2013 Michael Schwendt <mschwendt@fedoraproject.org> - 0.8.1-13
+- Fix duplicate documentation (#1001241) by not using %%doc magic
+- Remove INSTALL instructions file
+- Move _comedi.so Python module into base package
+- chmod -x comedi.py Python module
+- Don't exclude .pyc/.pyo files
+- Remove %%defattr
+- Add %%?_isa to base package dep
+* Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.8.1-12
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
+* Wed Feb 13 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.8.1-11
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
+* Wed Jul 18 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.8.1-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+* Thu Jan 12 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.8.1-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
+* Tue Feb 08 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.8.1-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
+* Wed Jul 21 2010 David Malcolm <dmalcolm@redhat.com> - 0.8.1-7
+- Rebuilt for https://fedoraproject.org/wiki/Features/Python_2.7/MassRebuild
+* Fri May 21 2010 Tom "spot" Callaway <tcallawa@redhat.com> - 0.8.1-6
+- disable static libs
+- fix python macros
+* Fri Jul 24 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.8.1-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
+* Tue Feb 24 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.8.1-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_11_Mass_Rebuild
+* Wed Jan  7 2009 Marek Mahut <mmahut@fedoraproject.org> - 0.8.1-3
+- RHBZ#473642 Unowned directories
+* Sat Nov 29 2008 Ignacio Vazquez-Abrams <ivazqueznet+rpm@gmail.com> - 0.8.1-2
+- Rebuild for Python 2.6
+* Wed Apr 23 2008 Marek Mahut <mmahut@fedoraproject.org> - 0.8.1-1
+- Spec file rewrite
+- Upstream release
 * Mon Jun 03 2002 David Schleef <ds@schleef.org>
 - update for new build system
-
 * Thu Feb 21 2002 Tim Ousley <tim.ousley@ni.com>
 - initial build of comedilib RPM
-
