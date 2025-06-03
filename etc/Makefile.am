@@ -1,5 +1,5 @@
 
-SUBDIRS = pcmcia hotplug udev
+SUBDIRS = pcmcia udev
 
 doc_DATA = das1600.conf dt282x.conf modules.conf
 

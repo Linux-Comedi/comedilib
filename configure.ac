@@ -280,37 +280,6 @@ AM_CONDITIONAL(BUILD_PDF_USING_FOP, [test "$PDF_BACKEND" = "fop"])
 pcmciadir="\${sysconfdir}/pcmcia"
 AC_SUBST(pcmciadir)
 
-# firmware
-AC_ARG_ENABLE([firmware],
-	[AS_HELP_STRING([--disable-firmware], [Disable installation of firmware files])],
-	[ENABLE_FIRMWARE=$enableval],[ENABLE_FIRMWARE="yes"])
-
-# new udev hotplug
-AC_ARG_WITH([udev-hotplug],
-	[AS_HELP_STRING([--with-udev-hotplug=[[/lib]]], [enable udev hotplug])],
-	[ENABLE_UDEVHOTPLUG=$withval], [ENABLE_UDEVHOTPLUG="no"])
-AM_CONDITIONAL(INSTALL_UDEVHOTPLUG, [test "$ENABLE_UDEVHOTPLUG" != "no"])
-AS_IF([test "$ENABLE_UDEVHOTPLUG" != "no"],
-	[
-	AS_IF([test "$ENABLE_UDEVHOTPLUG" = "yes"],
-		[AC_MSG_ERROR([udev-hotplug needs a path as an argument (usually: --enable-udev-hotplug=/lib).])])
-	AS_IF([test "$ENABLE_UDEVHOTPLUG" != "/lib"],
-		[AC_MSG_WARN([Installing the udev scripts in the non-standard location: $ENABLE_UDEVHOTPLUG (should be --enable-udev-hotplug=/lib)])])
-	udevrulesdir="$ENABLE_UDEVHOTPLUG/udev/rules.d/"
-	udevscriptsdir="$ENABLE_UDEVHOTPLUG/udev"
-	AC_SUBST(udevrulesdir)
-	AC_SUBST(udevscriptsdir)
-	AS_IF([test "$ENABLE_FIRMWARE" = "yes"],
-		[
-		udevfirmwaredir="$ENABLE_UDEVHOTPLUG/firmware"
-		AC_SUBST(udevfirmwaredir)
-		])
-	],
-	[ENABLE_UDEVHOTPLUG="no"])
-
-AS_IF([test "$ENABLE_UDEVHOTPLUG" = "no"],
-	[AC_MSG_WARN([No hotplug mechanism will be installed. Consult ./configure --help if you want hotplug.])])
-
 AC_CONFIG_FILES(
 Makefile
 comedi_config/Makefile
@@ -319,11 +288,6 @@ c++/Makefile
 c++/include/Makefile
 etc/Makefile
 etc/pcmcia/Makefile
-etc/hotplug/Makefile
-etc/hotplug/usb/Makefile
-etc/hotplug/usb/usbdux/Makefile
-etc/hotplug/usb/usbduxfast/Makefile
-etc/hotplug/usb/usbduxsigma/Makefile
 etc/udev/Makefile
 doc/Makefile
 doc/comedilib_fop.xconf
