@@ -99,7 +99,7 @@ AC_CONFIG_LINKS([swig/ruby/setup.rb:swig/ruby/setup.rb
 
 ACLOCAL="$ACLOCAL -I m4"
 
-AM_MAINTAINER_MODE([enable])
+AM_MAINTAINER_MODE([disable])
 
 AM_PROG_AR
 AC_PROG_CC
