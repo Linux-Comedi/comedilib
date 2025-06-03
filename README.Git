@@ -36,6 +36,17 @@ documentation:
   make -C doc
   make distclean   # if building comedilib outside the source directory
 
+**Note**: There may be an error of the form "attempt to perform an
+operation not allowed by the security policy `PDF`" from the `convert`
+utility during building of the comedilib.pdf file when it is attempting
+to convert the "acq-seq.gif" file to "fig0.pdf".  To correct this, it is
+necessary to change ImageMagick's "policy.xml" file in
+"/etc/ImageMagick-*/policy.xml".  Look for the policy line related to
+PDF generation.  It may look like `<policy domain="coder" rights="none"
+pattern="PDF" />`.  Either comment the line out with `<!--` and `-->`
+brackets, or change it to `<policy domain="coder" rights="read | write"
+pattern="PDF" />`.
+
 The `make distclean` step is needed if planning to build comedilib with
 separate source and build directories.
 
