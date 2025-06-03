@@ -21,6 +21,11 @@ Optional:
   python
   ruby
 
+When building Comedilib from Git, it is recommended to run configure
+with the `--enable-maintainer-mode` option to enable rules to rebuild
+the configure script and Makefiles when configure.ac or the
+Makefile.am files have been changed.
+
 To add the documentation that would normally be shipped in the source
 distribution, run these commands after running the ./autogen.sh script
 in this directory, and after installing the prerequisites for building
