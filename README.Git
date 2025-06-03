@@ -14,6 +14,7 @@ Requirements:
   bison >= 1.875
   xmlto (for building HTML documentation and man pages)
   dblatex (for building PDF documentation)
+  convert (from ImageMagick, for building PDF documentation)
 
 Optional:
 
