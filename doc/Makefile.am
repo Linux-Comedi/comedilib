@@ -6,8 +6,9 @@ BUILT_XML = calibration_funcref.xml command_funcref.xml deprecated_funcref.xml \
 	dio_funcref.xml drivers.xml drivers-linux.xml error_funcref.xml \
 	extensions_funcref.xml funcref.xml
 
-XML_IN = bindings.xml comedilib.ent comedilib.xml driverwriting.xml \
-	glossary.xml install.xml intro.xml other.xml reference.xml tutorial.xml
+XML_IN = $(BUILT_XML) bindings.xml comedilib.ent comedilib.xml \
+	driverwriting.xml glossary.xml install.xml intro.xml other.xml \
+	reference.xml tutorial.xml
 
 TUTORIAL_IN = ../demo/tut1.c ../demo/tut2.c ../demo/tut3.c
 
@@ -223,7 +224,7 @@ EXTRA_DIST = $(BUILT_XML) $(HTML_OUT) $(MAN_OUT) $(PDF_OUT) $(XML_IN) FAQ \
 	comedilib_dblatex_config.xsl comedilib_fop.xconf.in \
 	comedilib_html_config.xsl deprecated_funcref.txt dio_funcref.txt \
 	drivers-linux.txt drivers.txt error_funcref.txt extensions_funcref.txt \
-	funcref.txt mkdr mkref stamp-html stamp-man stamp-xml
+	funcref.txt mkdr mkref stamp-html stamp-man
 
 all_html = html-local
 all_man = man
@@ -248,12 +249,9 @@ install-data-local: $(install_html) $(install_pdf)
 
 uninstall-local: uninstall-html uninstall-pdf
 
-stamp-xml: $(BUILT_XML)
-	touch $@
-
 html-local: $(HTML_OUT)
 
-stamp-html: stamp-xml $(XML_IN) $(TUTORIAL_IN) comedilib_html_config.xsl
+stamp-html: $(XML_IN) $(TUTORIAL_IN) comedilib_html_config.xsl
 if HAVE_XMLTO
 	$(XMLTO) -o $(out_html) --searchpath "$(abs_srcdir):$(abs_builddir)" \
 		-m comedilib_html_config.xsl --skip-validation html \
@@ -316,7 +314,7 @@ uninstall-html:
 	  rm -rf "$(DESTDIR)$(htmldir)/html/$$f"; \
 	done
 
-stamp-man: stamp-xml $(XML_IN)
+stamp-man: $(XML_IN)
 if HAVE_XMLTO
 	$(XMLTO) -o $(out_man) --searchpath "$(abs_srcdir):$(abs_builddir)" \
 		--skip-validation man "$(srcdir)/comedilib.xml"
@@ -355,7 +353,7 @@ uninstall-pdf:
 	  rm -f "$(DESTDIR)$(pdfdir)/$$f"; \
 	done
 
-$(out_pdf)/comedilib.pdf: stamp-xml $(XML_IN) $(TUTORIAL_IN) comedilib_dblatex_config.xsl
+$(out_pdf)/comedilib.pdf: $(XML_IN) $(TUTORIAL_IN) comedilib_dblatex_config.xsl
 if HAVE_XMLTO
 if BUILD_PDF
 	$(XMLTO) -o $(out_pdf) --searchpath "$(abs_srcdir):$(abs_builddir)" --skip-validation $(XMLTO_PDF_OPTS) pdf "$(srcdir)/comedilib.xml"
@@ -394,7 +392,7 @@ drivers-linux.xml: drivers-linux.txt mkdr
 	$(srcdir)/mkdr "ll-drivers-linux" "Drivers from Linux kernel sources" $(srcdir)/drivers-linux.txt > $@~ && mv -f $@~ $@
 
 maintainer-clean-local:
-	$(RM) -r $(BUILT_XML) $(out_html) $(out_man) $(out_pdf) stamp-html stamp-man stamp-xml
+	$(RM) -r $(BUILT_XML) $(out_html) $(out_man) $(out_pdf) stamp-html stamp-man
 
 locales = de
 
