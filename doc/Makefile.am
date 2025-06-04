@@ -394,7 +394,7 @@ drivers-linux.xml: drivers-linux.txt mkdr
 	$(srcdir)/mkdr "ll-drivers-linux" "Drivers from Linux kernel sources" $(srcdir)/drivers-linux.txt > $@~ && mv -f $@~ $@
 
 maintainer-clean-local:
-	$(RM) -r $(out_html) $(out_man) $(out_pdf) stamp-html stamp-man stamp-xml
+	$(RM) -r $(BUILT_XML) $(out_html) $(out_man) $(out_pdf) stamp-html stamp-man stamp-xml
 
 locales = de
 
