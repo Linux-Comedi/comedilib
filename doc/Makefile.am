@@ -2,12 +2,12 @@ out_html = html
 out_man = man
 out_pdf = pdf
 
-BUILT_XML = bindings.xml calibration_funcref.xml command_funcref.xml \
-	deprecated_funcref.xml dio_funcref.xml drivers.xml drivers-linux.xml \
-	error_funcref.xml extensions_funcref.xml funcref.xml
+BUILT_XML = calibration_funcref.xml command_funcref.xml deprecated_funcref.xml \
+	dio_funcref.xml drivers.xml drivers-linux.xml error_funcref.xml \
+	extensions_funcref.xml funcref.xml
 
-XML_IN = comedilib.ent comedilib.xml driverwriting.xml glossary.xml \
-	install.xml intro.xml other.xml reference.xml tutorial.xml
+XML_IN = bindings.xml comedilib.ent comedilib.xml driverwriting.xml \
+	glossary.xml install.xml intro.xml other.xml reference.xml tutorial.xml
 
 TUTORIAL_IN = ../demo/tut1.c ../demo/tut2.c ../demo/tut3.c
 
