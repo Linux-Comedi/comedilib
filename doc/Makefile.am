@@ -271,6 +271,7 @@ if HAVE_XMLTO
 		-m comedilib_html_config.xsl --skip-validation html \
 		"$(srcdir)/comedilib.xml"
 endif
+	-rm -f $(out_html)/comedilib.proc
 	touch $@
 
 $(HTML_HTML_OUT): stamp-html
