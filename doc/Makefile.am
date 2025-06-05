@@ -231,6 +231,15 @@ EXTRA_DIST = $(BUILT_DIST) $(STATIC_XML_IN) FAQ acq-seq.gif \
 
 MAINTAINERCLEANFILES = $(BUILT_DIST)
 
+TEMP_FILES = calibration_funcref.xml~ command_funcref.xml~ \
+	deprecated_funcref.xml~ dio_funcref.xml~ drivers.xml~ \
+	drivers-linux.xml~ error_funcref.xml~ extensions_funcref.xml~ \
+	funcref.xml~
+
+JUNK_FILES = $(out_html)/comedilib.proc
+
+MOSTLYCLEANFILES = $(TEMP_FILES) $(JUNK_FILES)
+
 all_html = html-local
 all_man = man
 all_pdf = pdf-local
