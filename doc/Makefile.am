@@ -6,9 +6,10 @@ BUILT_XML = calibration_funcref.xml command_funcref.xml deprecated_funcref.xml \
 	dio_funcref.xml drivers.xml drivers-linux.xml error_funcref.xml \
 	extensions_funcref.xml funcref.xml
 
-XML_IN = $(BUILT_XML) bindings.xml comedilib.ent comedilib.xml \
-	driverwriting.xml glossary.xml install.xml intro.xml other.xml \
-	reference.xml tutorial.xml
+STATIC_XML_IN = bindings.xml comedilib.ent comedilib.xml driverwriting.xml \
+	glossary.xml install.xml intro.xml other.xml reference.xml tutorial.xml
+
+XML_IN = $(STATIC_XML_IN) $(BUILT_XML)
 
 TUTORIAL_IN = ../demo/tut1.c ../demo/tut2.c ../demo/tut3.c
 
@@ -219,12 +220,16 @@ HTML_OUT = $(HTML_HTML_OUT) $(HTML_RESOURCE_OUT)
 
 man_MANS = $(MAN_OUT)
 
-EXTRA_DIST = $(BUILT_XML) $(HTML_OUT) $(MAN_OUT) $(PDF_OUT) $(XML_IN) FAQ \
-	acq-seq.gif calibration_funcref.txt command_funcref.txt comedilib.css \
+BUILT_DIST = $(BUILT_XML) $(HTML_OUT) $(MAN_OUT) $(PDF_OUT) stamp-html stamp-man
+
+EXTRA_DIST = $(BUILT_DIST) $(STATIC_XML_IN) FAQ acq-seq.gif \
+	calibration_funcref.txt command_funcref.txt comedilib.css \
 	comedilib_dblatex_config.xsl comedilib_fop.xconf.in \
 	comedilib_html_config.xsl deprecated_funcref.txt dio_funcref.txt \
 	drivers-linux.txt drivers.txt error_funcref.txt extensions_funcref.txt \
-	funcref.txt mkdr mkref stamp-html stamp-man
+	funcref.txt mkdr mkref
+
+MAINTAINERCLEANFILES = $(BUILT_DIST)
 
 all_html = html-local
 all_man = man
@@ -390,9 +395,6 @@ drivers.xml: drivers.txt mkdr
 # update the 'linux_version' entity in 'comedilib.ent'.
 drivers-linux.xml: drivers-linux.txt mkdr
 	$(srcdir)/mkdr "ll-drivers-linux" "Drivers from Linux kernel sources" $(srcdir)/drivers-linux.txt > $@~ && mv -f $@~ $@
-
-maintainer-clean-local:
-	$(RM) -r $(BUILT_XML) $(out_html) $(out_man) $(out_pdf) stamp-html stamp-man
 
 locales = de
 
