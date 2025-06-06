@@ -6,7 +6,11 @@ ext/comedi_ruby_wrap.c: $(srcdir)/../comedi.i
 if HAVE_RUBY
 all-local: ext/comedi.so
 install-data-local:
-	$(RUBY) setup.rb install --prefix="$(DESTDIR)"
+	if test -n "$(DESTDIR)"; then \
+		$(RUBY) setup.rb install --prefix="$(DESTDIR)" ; \
+	else \
+		$(RUBY) setup.rb install ; \
+	fi
 else
 all-local:
 install-data-local:
