@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 	lsampl_t *buffer = NULL;
 	int err;
 	int n, m;
-	int total=0;
+	//int total=0;
 	unsigned int *chanlist;
 	int ret;
 
@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
 			printf("m=%d\n",m);
 			n -= m;
 		}
-		total += BUF_LEN;
+		//total += BUF_LEN;
 		//printf("%d\n",total);
 	}
 
