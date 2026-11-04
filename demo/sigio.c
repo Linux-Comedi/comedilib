@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
 
 void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 {
-	int total=0;
+	//int total=0;
 	int ret;
 	int go;
 
@@ -187,7 +187,7 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 		}else{
 			//int i;
 
-			total+=ret;
+			//total+=ret;
 			//printf("read %d %d\n",ret,total);
 			//printf("count = %d\n",count);
 			//print_time();
