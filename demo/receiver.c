@@ -77,7 +77,7 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 {
 	unsigned int *chanlist;
 	int n_chans;
-	int total=0;
+	//int total=0;
 	int ret;
 	int go;
 	struct timeval timeout;
@@ -159,7 +159,7 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 			}else{
 				int i;
 
-				total+=ret;
+				//total+=ret;
 				for(i=0;i<ret/sizeof(sampl_t);i++){
 					fprintf(stderr,"%d",buf[i]>0xa000);
 					c++;
