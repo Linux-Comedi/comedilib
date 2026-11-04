@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 
 void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 {
-	int total=0;
+	//int total=0;
 	int ret;
 	int go;
 	fd_set rdset;
@@ -146,7 +146,7 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 				go = 0;
 			}else{
 				int i;
-				total+=ret;
+				//total+=ret;
 				//printf("read %d %d\n",ret,total);
 				for(i=0;i<ret/sizeof(sampl_t);i++){
 					printf("%d\n",buf[i]);
