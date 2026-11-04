@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
 	comedi_cmd cmd;
 	int err;
 	int n,m;
-	int total=0;
+	//int total=0;
 	comedi_t *dev;
 	unsigned int chanlist[16];
 	unsigned int maxdata;
@@ -222,7 +222,7 @@ int main(int argc, char *argv[])
 				printf("m=%d\n",m);
 			n-=m;
 		}
-		total+=BUF_LEN;
+		//total+=BUF_LEN;
 		//printf("%d\n",total);
 	}
 
