@@ -21,9 +21,7 @@ int test_read_select(void)
 	char buf[BUFSZ];
 	unsigned int chanlist[1];
 	int go;
-	int total=0;
 	int ret;
-	int chunks=0;
 	int length=100000;
 	fd_set rdset;
 	struct timeval timeout;
@@ -77,9 +75,6 @@ int test_read_select(void)
 				}
 			}else if(ret==0){
 				go = 0;
-			}else{
-				total += ret;
-				chunks++;
 			}
 		}
 	}

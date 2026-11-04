@@ -41,7 +41,6 @@ static int get_chunks_per_length(int length)
 	char buf[BUFSZ];
 	unsigned int chanlist[1];
 	int go;
-	int total=0;
 	int ret;
 	int chunks=0;
 
@@ -73,7 +72,6 @@ static int get_chunks_per_length(int length)
 		}else if(ret==0){
 			go = 0;
 		}else{
-			total += ret;
 			chunks++;
 		}
 	}
