@@ -225,7 +225,7 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 		}else if(FD_ISSET(comedi_fileno(dev),&rdset)){
 			ret=read(comedi_fileno(dev),buf,BUFSZ);
 			if(ret<0){
-				if(errno==EAGAIN){
+				if(errno!=EAGAIN){
 					go = 0;
 					perror("read");
 				}
