@@ -140,7 +140,7 @@ void do_cmd(comedi_t *dev,comedi_cmd *cmd)
 			ret=read(comedi_fileno(dev),buf,sizeof(buf));
 			printf("read returned %d\n",ret);
 			if(ret<0){
-				if(errno==EAGAIN){
+				if(errno!=EAGAIN){
 					go = 0;
 					perror("read");
 				}
